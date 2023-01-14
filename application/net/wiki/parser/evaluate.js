@@ -632,6 +632,240 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	var PATTERN_expr_number = /([+\-]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+\-]\d+)?|\.|(?:pi|e|NAN)(?!\s*[+\-\d\w]|$))/i;
+	function generate_PATTERN_expr_operations(operations, operand_count) {
+		return new RegExp((operand_count === 1 ? /(operations)\s*number/
+		// assert: operand_count === 2
+		: /number\s*(operations)\s*number/).source.replace('operations',
+				operations).replace(/number/g, PATTERN_expr_number.source),
+				'ig');
+	}
+
+	var PATTERN_expr_e_notation = generate_PATTERN_expr_operations('[eE]', 2);
+	var PATTERN_expr_floor = generate_PATTERN_expr_operations('floor', 1);
+	var PATTERN_expr_power = generate_PATTERN_expr_operations(/\^/.source, 2);
+	var PATTERN_expr_乘除 = generate_PATTERN_expr_operations('[*/]|div|mod|fmod',
+			2);
+	var PATTERN_expr_加減 = generate_PATTERN_expr_operations('[+\-]', 2);
+	var PATTERN_expr_round = generate_PATTERN_expr_operations('round', 2);
+
+	var
+	// 其他的一元運算
+	PATTERN_expr_unary_operations = generate_PATTERN_expr_operations(
+	// [+\-]+|exp|ln|abs|sqrt|trunc|floor|ceil|sin|cos|tan|asin|acos|atan|not
+	/[+\-]+|exp|ln|abs|sqrt|trunc|ceil|sin|cos|tan|asin|acos|atan|not/.source,
+			1),
+	// 其他的二元運算
+	PATTERN_expr_binary_operations = generate_PATTERN_expr_operations(
+	// [+\-*/^<>=eE]|[<>!]=|<>|and|or|div|mod|fmod|round
+	/[<>=]|[<>!]=|<>/.source, 2),
+	// 用括號框起來起來的數字。
+	PATTERN_expr_bracketed_number = new RegExp(/\(\s*number\s*\)/.source
+			.replace(/number/g, PATTERN_expr_number.source), 'g');
+
+	var PATTERN_expr_and = generate_PATTERN_expr_operations('and', 2);
+	var PATTERN_expr_or = generate_PATTERN_expr_operations('or', 2);
+
+	// [[mw:Help:Extension:ParserFunctions##expr]], [[mw:Help:Help:Calculation]]
+	function eval_expr(expression) {
+		// console.trace(expression);
+		var TRUE = 1, FALSE = 0;
+		function to_Number(number) {
+			if (number === '.')
+				return 0;
+			number = number.toLowerCase();
+			if (number === 'pi')
+				return Math.PI;
+			if (number === 'e')
+				return Math.E;
+			if (number === 'nan')
+				return 'NAN';
+			return +number;
+		}
+
+		function _handle_binary_operations(all, _1, op, _2) {
+			op = op.toLowerCase();
+			if (op === 'e') {
+				var number = +all;
+				// console.trace([ all, number, _1, op, _2 ]);
+				if (!isNaN(number))
+					return number;
+				// e.g., '{{#expr:6e(5-2)e-2}}'
+				number = _2.match(/^([\d+\-.]+)(e[\d+\-]+)$/);
+				if (number)
+					return _1 * Math.pow(10, number[1]) + number[2];
+				return _1 * Math.pow(10, _2);
+			}
+			_1 = to_Number(_1);
+			_2 = to_Number(_2);
+			// console.trace([ _1, op, _2 ]);
+			switch (op) {
+			case '+':
+				return _1 + _2;
+			case '-':
+				return _1 - _2;
+			case '*':
+				return _1 * _2;
+			case '/':
+			case 'div':
+				return _1 / _2;
+			case 'mod':
+				// 將兩數截斷為整數後的除法餘數。
+				return Math.floor(_1) % Math.floor(_2);
+			case 'fmod':
+				return (_1 % _2).to_fixed();
+			case '^':
+				var power = Math.pow(_1, _2);
+				return isNaN(power) ? 'NAN' : power;
+
+			case 'round':
+				var power = Math.pow(10, Math.trunc(_2));
+				var is_negative = _1 < 0;
+				if (is_negative)
+					_1 = -_1;
+				// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+				// giving a different result in the case of negative numbers
+				// with a fractional part of exactly 0.5.
+				_1 = Math.round((_1 * power).to_fixed()) / power;
+				if (is_negative)
+					_1 = -_1;
+				return _1;
+
+			case '>':
+				return _1 > _2 ? TRUE : FALSE;
+			case '<':
+				return _1 < _2 ? TRUE : FALSE;
+			case '>=':
+				return _1 >= _2 ? TRUE : FALSE;
+			case '<=':
+				return _1 <= _2 ? TRUE : FALSE;
+			case '=':
+				return _1 === _2 ? TRUE : FALSE;
+			case '<>':
+			case '!=':
+				return _1 !== _2 ? TRUE : FALSE;
+			case 'and':
+				return _1 && _2 ? TRUE : FALSE;
+			case 'or':
+				return _1 || _2 ? TRUE : FALSE;
+			}
+
+			throw new Error('二元運算符未定義，這不該發生，請聯絡函式庫作者: '
+					+ [ all, _1, op, _2, expression ]);
+		}
+
+		function handle_binary_operations(all, _1, op, _2) {
+			var result = _handle_binary_operations(all, _1, op, _2);
+			// preserve plus sign
+			// e.g., '{{#expr:2+3*4}}'
+			return /^\s*\+/.test(_1)
+					&& (typeof result === 'number' ? result >= 0 : !/^\s*\+/
+							.test(result)) ? '+' + result : result;
+		}
+
+		function handle_unary_operations(all, op, number) {
+			op = op.toLowerCase();
+			number = to_Number(number);
+			// console.trace([ op, number ]);
+			if (/^[+\-]+$/.test(op)) {
+				return (op.length - op.replace(/-/g, '').length) % 2 === 0
+				// preserve plus sign
+				// e.g., '{{#expr:(abs-2)+3}}'
+				? '+' + number
+				// e.g., "{{#expr:+-+-++-5}}"
+				: -number;
+			}
+
+			switch (op) {
+			case 'exp':
+				return Math.exp(number);
+			case 'ln':
+				return Math.log(number);
+			case 'abs':
+				return Math.abs(number);
+			case 'sqrt':
+				return Math.sqrt(number);
+			case 'trunc':
+				return Math.trunc(number);
+			case 'floor':
+				return Math.floor(number);
+			case 'ceil':
+				return Math.ceil(number);
+			case 'sin':
+				return Math.sin(number);
+			case 'cos':
+				return Math.cos(number);
+			case 'tan':
+				return Math.tan(number);
+			case 'asin':
+				return Math.asin(number);
+			case 'acos':
+				return Math.acos(number);
+			case 'atan':
+				return Math.atan(number);
+			case 'not':
+				return number ? FALSE : TRUE;
+			}
+
+			throw new Error('一元運算符未定義，這不該發生，請聯絡函式庫作者: '
+					+ [ all, op, number, expression ]);
+		}
+
+		while (true) {
+			var new_expression = expression;
+			new_expression = new_expression.replace(
+					PATTERN_expr_bracketed_number, '$1');
+
+			new_expression = new_expression.replace(PATTERN_expr_e_notation,
+					handle_binary_operations);
+
+			new_expression = new_expression.replace(PATTERN_expr_floor,
+					handle_unary_operations);
+
+			// @see https://en.wikipedia.org/wiki/Order_of_operations
+			new_expression = new_expression.replace(PATTERN_expr_power,
+					handle_binary_operations);
+
+			new_expression = new_expression.replace(PATTERN_expr_乘除,
+					handle_binary_operations);
+
+			new_expression = new_expression.replace(PATTERN_expr_加減,
+					handle_binary_operations);
+
+			new_expression = new_expression.replace(PATTERN_expr_round,
+					handle_binary_operations);
+
+			new_expression = new_expression.replace(
+					PATTERN_expr_binary_operations, handle_binary_operations);
+
+			new_expression = new_expression.replace(PATTERN_expr_and,
+					handle_binary_operations);
+
+			new_expression = new_expression.replace(PATTERN_expr_or,
+					handle_binary_operations);
+
+			new_expression = new_expression.replace(
+					PATTERN_expr_unary_operations, handle_unary_operations);
+
+			if (new_expression === expression)
+				break;
+
+			// console.trace([ expression, new_expression ]);
+			expression = new_expression;
+		}
+
+		expression = expression.trim();
+		// console.trace([ expression, !isNaN(expression) ]);
+		if (!isNaN(expression))
+			return expression ? String(+expression) : '';
+
+		// e.g., for {{#expr:pi}}
+		var number = to_Number(expression);
+		return isNaN(number) ? expression : String(number);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	var KEY_on_page_title_option = 'on_page_title';
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
@@ -1302,33 +1536,13 @@ function module_code(library_namespace) {
 
 		case '#expr':
 			var expression = get_parameter_String(1, true);
-			function eval_expr(expression) {
-				expression = expression.replace(
-				//
-				/(\d+(?:\.\d+)?)\s*([+\-*/])\s*(\d+(?:\.\d+)?)/g,
-				//
-				function(all, _1, op, _2) {
-					_1 = +_1;
-					_2 = +_2;
-					switch (op) {
-					case '+':
-						return _1 + _2;
-					case '-':
-						return _1 - _2;
-					case '*':
-						return _1 * _2;
-					case '/':
-						return _1 / _2;
-					}
-				}).replace(/\(\s*(\d+(?:\.\d+)?)\s*\)/g, '$1').trim();
-				if (/^\d+(?:\.\d+)?$/.test(expression))
-					return +expression;
-				return NYI();
-			}
 			if (library_namespace.is_thenable(expression)) {
+				return NYI();
 				return expression.then(eval_expr);
 			}
 			return eval_expr(expression);
+
+			// case '#ifexpr':
 
 			// ----------------------------------------------------------------
 
