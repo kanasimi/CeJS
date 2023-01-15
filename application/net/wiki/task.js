@@ -554,15 +554,14 @@ function module_code(library_namespace) {
 			// wiki.page().edit(,()=>wiki.page().edit(,))
 			delete this.last_page;
 
-			if (false && this.actions[0] && this.actions[0][0] === 'edit') {
-				// page-edit 組合式操作。設定等待先前的取得頁面操作中。
-				this.actions[0].waiting_for_previous_combination_operation = true;
-			}
-
 			// console.trace(next[1]);
 
 			// next[3] : options
 			if (next[3]) {
+				if (next[3].page_to_edit === wiki_API.VALUE_set_page_to_edit) {
+					// page-edit 組合式操作。設定等待先前的取得頁面操作中。
+					next[3].waiting_for_previous_combination_operation = true;
+				}
 				// 設定個僅 debug 用、無功能的註記。
 				next[3].actions_when_fetching_page = [ next ]
 						.append(this.actions);
@@ -1191,12 +1190,13 @@ function module_code(library_namespace) {
 			if (!next[2].page_to_edit
 					|| next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit) {
 				if (this.actions.promise_relying
-						&& next.waiting_for_previous_combination_operation) {
+				// Should be set by case 'page':
+				&& next[2].waiting_for_previous_combination_operation) {
 					// e.g., `await wiki.edit_page(wiki.to_talk_page(page_data)`
 					// @ routine/20191129.check_language_conversion.js
 					if (library_namespace.is_debug(0)) {
 						library_namespace
-								.warn('wiki_API.prototype.next: 可能是 .page() 之後，.edit() 受到 this.actions.promise_relying 觸發，造成雙重執行？直接跳出，嘗試等待其他執行緒回來執行。');
+								.error('wiki_API.prototype.next: 可能是 .page() 之後，.edit() 受到 this.actions.promise_relying 觸發，造成雙重執行？直接跳出，嘗試等待其他執行緒回來執行。');
 					}
 					this.actions.unshift(next);
 					break;
@@ -1225,6 +1225,9 @@ function module_code(library_namespace) {
 						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first! 另請注意: 您不能在 callback 中呼叫 .edit() 之類的 wiki 函數！請在 callback 執行完畢後再執行新的 wiki 函數！例如放在 setTimeout() 中。');
 				if (typeof console === 'object' && console.trace) {
 					console.trace(this);
+					console
+							.trace(next[2]
+									&& next[2].actions_when_fetching_page);
 					console
 							.trace([
 									this.running,
@@ -1284,6 +1287,7 @@ function module_code(library_namespace) {
 				}
 				// 因為已經更動過內容，為了預防 this.last_page 取得已修改過的錯誤資料，因此將之刪除。但留下標題資訊。
 				delete next[2].page_to_edit.revisions;
+				// next[2].page_to_edit.revisions_removed_since_modified = true;
 				// 預防連續編輯採用相同編輯選項。 var edit_options;
 				// wiki.page(A).edit(,edit_options);
 				// wiki.page(B).edit(,edit_options);
@@ -2210,7 +2214,9 @@ function module_code(library_namespace) {
 					}
 				}
 			}
-			this.next(callback_result_relying_on_this);
+			// 避免偶爾會一直 call this.next()，造成
+			// RangeError: Maximum call stack size exceeded
+			setTimeout(this.next.bind(this, callback_result_relying_on_this), 0);
 			break;
 
 		case 'run_async':

@@ -1411,8 +1411,8 @@ function module_code(library_namespace) {
 				// console.trace([ this.running, this.actions.length, args ]);
 				if (method === 'edit'
 						&& (!args[2] || !('page_to_edit' in args[2]))) {
-					//console.trace('No options.page_to_edit set!');
-					//console.log(this.actions);
+					// console.trace('No options.page_to_edit set!');
+					// console.log(this.actions);
 					if (!args[2])
 						args[2] = Object.create(null);
 					// 自動配給一個。
@@ -1426,7 +1426,7 @@ function module_code(library_namespace) {
 					this.actions[this.actions.length - 1][3] = {
 						page_to_edit : true
 					};
-				} 
+				}
 
 				if (method === 'page' && typeof args[1] === 'string' && args[3]
 						&& args[3].page_title_to_edit
@@ -1442,7 +1442,9 @@ function module_code(library_namespace) {
 
 				// TODO: 不應該僅以this.running判定，
 				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
-				if (!this.running && !this.actions[
+				if (!this.running && !this.actions.promise_relying
+				//
+				&& !this.actions[
 				// callback_result_relying_on_this 執行中應該只能 push 進
 				// session.actions，不可執行 session.next()!
 				wiki_API.KEY_waiting_callback_result_relying_on_this]
@@ -1459,7 +1461,7 @@ function module_code(library_namespace) {
 						//
 						'wiki_API_prototype_methods: Calling wiki_API.prototype.next() '
 						//
-						+ [ this.running, this.actions.length ]);
+						+ [ method, this.actions.length ]);
 					}
 					this.next();
 				} else {
