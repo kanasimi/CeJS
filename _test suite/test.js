@@ -4528,7 +4528,7 @@ function test_wiki() {
 		assert(['123.456', CeL.wiki.expand_transclusion('{{#expr:000123.4560}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #197');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:.}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #198');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:.*.+not.}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #199');
-		//assert(['123.456', CeL.wiki.expand_transclusion('{{#expr:123.456.789}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #200');
+		assert(['123.456', CeL.wiki.expand_transclusion('{{#expr:123.456.789}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #200');
 		//assert(['-0', CeL.wiki.expand_transclusion('{{#expr: -0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #201');
 		assert(['', CeL.wiki.expand_transclusion('').toString()], 'wiki.expand_transclusion: {{#expr:}} #20');
 

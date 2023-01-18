@@ -269,6 +269,7 @@ function module_code(library_namespace) {
 	 */
 	function normalize_title_parameter(title, options) {
 		options = library_namespace.setup_options(options);
+		var session = wiki_API.session_of_options(options);
 		if (false && library_namespace.is_Set(title)) {
 			title = Array.from(title);
 		}
@@ -276,7 +277,8 @@ function module_code(library_namespace) {
 				&& title.length === 2
 				// 即便設定 options.multi，也不該有 /^https?:\/\/.+\.php/i 的標題。
 				&& !/^https?:\/\/.+\.php$/.test(title[0])
-				|| !is_api_and_title(title, true) ? [ , title ]
+				|| !is_api_and_title(title, true) ? [
+				session && session.API_URL || undefined, title ]
 		// title.clone(): 不改變原 title。
 		: Array.isArray(title) ? title.clone() : [];
 
@@ -2200,7 +2202,7 @@ function module_code(library_namespace) {
 			return get_page_title(page_data[1], options);
 		}
 
-		if (library_namespace.is_Object(page_data)) {
+		if (wiki_API.is_page_data(page_data)) {
 			var title = page_data.title;
 			// 檢測一般頁面
 			if (title) {
@@ -2427,7 +2429,7 @@ function module_code(library_namespace) {
 			}
 
 			// @see get_page_content.revision
-			content = library_namespace.is_Object(page_data)
+			content = wiki_API.is_page_data(page_data)
 			//
 			&& page_data.revisions;
 			if (!Array.isArray(content) || !content[0]) {
@@ -2470,10 +2472,13 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String|Number} pageid
 	 */
-	get_page_content.is_page_data = function(page_data) {
-		return library_namespace.is_Object(page_data)
+	get_page_content.is_page_data = function(page_data, strict) {
+		// 可能是 {wiki_API.Page}
+		return typeof page_data === 'object' && (page_data.pageid >= 0
+		//
+		|| page_data.title
 		// 可能是 missing:""，此時仍算 page data。
-		&& (page_data.title || ('pageid' in page_data));
+		&& ('missing' in page_data || 'invalid' in page_data));
 	};
 
 	/**
@@ -2490,7 +2495,7 @@ function module_code(library_namespace) {
 
 	// return {Object}main revision (.revisions[0])
 	get_page_content.revision = function(page_data, revision_index) {
-		return library_namespace.is_Object(page_data)
+		return wiki_API.is_page_data(page_data)
 		// treat as page data. Try to get page contents:
 		// revision_content(page.revisions[0])
 		&& page_data.revisions
@@ -2526,8 +2531,7 @@ function module_code(library_namespace) {
 	// 更正確地說，revision[0]（通常是最後一個 revision）的 timestamp。
 	get_page_content.edit_time = function(page_data, revision_index,
 			return_value) {
-		var timestamp = library_namespace.is_Object(page_data)
-				&& page_data.revisions;
+		var timestamp = wiki_API.is_page_data(page_data) && page_data.revisions;
 		if (timestamp
 				&& (timestamp = timestamp[revision_index || 0] || timestamp[0])
 				&& (timestamp = timestamp.timestamp)) {

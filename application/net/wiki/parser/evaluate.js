@@ -632,7 +632,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	var PATTERN_expr_number = /([+\-]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+\-]\d+)?|\.|(?:pi|e|NAN)(?!\s*[+\-\d\w]|$))/i;
+	var PATTERN_expr_number = /([+\-]?(?:[\d.]+)(?:e[+\-]\d+)?|\.|(?:pi|e|NAN)(?!\s*[+\-\d\w]|$))/i;
 	function generate_PATTERN_expr_operations(operations, operand_count) {
 		return new RegExp((operand_count === 1 ? /(operations)\s*number/
 		// assert: operand_count === 2
@@ -644,6 +644,7 @@ function module_code(library_namespace) {
 	var PATTERN_expr_e_notation = generate_PATTERN_expr_operations('[eE]', 2);
 	var PATTERN_expr_floor = generate_PATTERN_expr_operations('floor', 1);
 	var PATTERN_expr_power = generate_PATTERN_expr_operations(/\^/.source, 2);
+	// 乘 除 模除/餘數
 	var PATTERN_expr_乘除 = generate_PATTERN_expr_operations('[*/]|div|mod|fmod',
 			2);
 	var PATTERN_expr_加減 = generate_PATTERN_expr_operations('[+\-]', 2);
@@ -680,6 +681,8 @@ function module_code(library_namespace) {
 				return Math.E;
 			if (number === 'nan')
 				return 'NAN';
+			// '123.456.789e33' → '123.456e33'
+			number = number.replace(/^([^.]*\.[^.]*)\.[\d.]*/, '$1');
 			return +number;
 		}
 

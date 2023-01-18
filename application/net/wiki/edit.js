@@ -429,14 +429,6 @@ function module_code(library_namespace) {
 			library_namespace.debug('依 options.write_to 寫入至 '
 					+ wiki_API.title_link_of(title), 1, 'wiki_API_edit');
 		}
-		// 暫時debug [[Template:Bulletin]]
-		if (title === 'Template:Bulletin') {
-			Error.stackTraceLimit = Infinity;
-			console.trace('Edit Template:Bulletin!');
-			console.trace(options);
-			Error.stackTraceLimit = 10;
-			// throw new Error('Edit Template:Bulletin!');
-		}
 
 		// 造出可 modify 的 options。
 		if (options) {
@@ -451,7 +443,7 @@ function module_code(library_namespace) {
 				text : text
 			}, options);
 		}
-		if (library_namespace.is_Object(title)) {
+		if (wiki_API.is_page_data(title)) {
 			// 將 {Object}page_data 最新版本的 timestamp 標記註記到 options 去。
 			wiki_API_edit.set_stamp(options, title);
 			if (title.pageid)

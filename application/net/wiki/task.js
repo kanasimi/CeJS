@@ -197,12 +197,20 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (page_title && !options.page_title_to_edit) {
-			options.page_title_to_edit = page_title;
+		if (page_title) {
+			if (!options.page_title_to_edit) {
+				options.page_title_to_edit = page_title;
+			} else if (page_title !== options.page_title_to_edit) {
+				library_namespace.info('set_page_to_edit: '
+						+ '跳過改變頁面 .page_title_to_edit 的標題: '
+						+ wiki_API.title_link_of(options.page_title_to_edit)
+						+ '→' + wiki_API.title_link_of(page_title));
+			}
 		}
 		if (options.page_title_to_edit
 				&& options.page_title_to_edit !== (page_data.original_title || page_data.title)) {
-			library_namespace.info('set_page_to_edit: ' + '所取得頁面的標題改變: '
+			library_namespace.info('set_page_to_edit: '
+					+ '所取得頁面 .page_to_edit 的標題改變: '
 					+ wiki_API.title_link_of(options.page_title_to_edit) + '→'
 					+ wiki_API.title_link_of(page_data.title));
 			console.trace(options);
@@ -1161,7 +1169,8 @@ function module_code(library_namespace) {
 			// `next[2].page_to_edit`: 手動指定要編輯的頁面。
 			if ((!next[2].page_to_edit || next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit)
 					&& !next[2].last_page_error
-					&& (this.last_page || this.last_page_error)) {
+					&& (this.last_page || this.last_page_error)
+					&& (!next[2].page_title_to_edit || next[2].page_title_to_edit === this.last_page_title)) {
 				// console.trace([ next, this.last_page ]);
 				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 				if (false) {
@@ -1171,9 +1180,11 @@ function module_code(library_namespace) {
 							+ ')');
 					// console.trace(next[2]);
 				}
-				next[2].page_to_edit = this.last_page;
+				set_page_to_edit(next[2], this.last_page, this.last_page_error,
+						this.last_page_title);
+				// next[2].page_to_edit = this.last_page;
 				next[2].last_page_options = this.last_page_options;
-				next[2].last_page_error = this.last_page_error;
+				// next[2].last_page_error = this.last_page_error;
 			}
 			// console.trace(next[2]);
 			// console.trace(next);
@@ -1236,7 +1247,14 @@ function module_code(library_namespace) {
 									this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this],
 									next ]);
 				}
-				throw new Error('No page in the queue.');
+				// throw new Error('No page in the queue.');
+				if (library_namespace.is_debug(0)) {
+					library_namespace
+							.error('wiki_API.prototype.next: 直接跳出，嘗試等待其他執行緒回來執行。');
+				}
+				this.actions.unshift(next);
+				break;
+
 				// next[3] : callback
 				this.next(next[3], undefined, 'no page');
 				break;
@@ -1481,7 +1499,7 @@ function module_code(library_namespace) {
 				//
 				+ wiki_API.title_link_of(next[2].page_to_edit)
 				// 'nochange', no change
-				+ ': The same contents.', 1, 'wiki_API.prototype.next');
+				+ ': The same content.', 1, 'wiki_API.prototype.next');
 				check_next(typeof next[3] === 'function'
 				// next[3] : callback
 				&& next[3].call(this, next[2].page_to_edit.title, 'nochange'));

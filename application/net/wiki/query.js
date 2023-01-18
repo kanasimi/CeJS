@@ -860,7 +860,7 @@ function module_code(library_namespace) {
 				pageid.toString = join_pages;
 
 			} else {
-				if (library_namespace.is_Object(page_data)) {
+				if (wiki_API.is_page_data(page_data)) {
 					library_namespace.warn('wiki_API_query.title_param: '
 							+ '看似有些非正規之頁面資料。');
 					library_namespace.info('wiki_API_query.title_param: '
@@ -884,7 +884,7 @@ function module_code(library_namespace) {
 						'wiki_API_query.title_param');
 			}
 
-		} else if (library_namespace.is_Object(page_data)) {
+		} else if (wiki_API.is_page_data(page_data)) {
 			if (page_data.pageid > 0)
 				// 有正規之 pageid 則使用之，以加速 search。
 				pageid = page_data.pageid;
@@ -932,7 +932,7 @@ function module_code(library_namespace) {
 				wiki_API_query.id_of_page(page, title_only);
 			});
 		}
-		if (library_namespace.is_Object(page_data)) {
+		if (wiki_API.is_page_data(page_data)) {
 			// 有 pageid 則使用之，以加速。
 			return !title_only && page_data.pageid || page_data.title;
 		}

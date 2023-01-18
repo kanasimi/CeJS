@@ -1390,6 +1390,9 @@ function module_code(library_namespace) {
 			// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規化標題。
 			prop : '',
 			redirects : 1,
+			// 處理繁簡轉換的情況: 有可能目標頁面存在，只是繁簡不一樣。
+			// TODO: 地區詞處理。
+			converttitles : 1,
 			// Only works if the wiki's content language supports variant
 			// conversion. en, crh, gan, iu, kk, ku, shi, sr, tg, uz and zh.
 			// converttitles : 1,
@@ -1534,12 +1537,14 @@ function module_code(library_namespace) {
 				return;
 			}
 			data = data.parse;
-			data = data.text['*']
-			// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
-			.replace(/<!--[\s\S]*?-->/g, '')
-			// 去掉前後包覆。 e.g., <p> or <pre>
-			.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
 			try {
+				// 罕見情況下，有可能 data === dundefined
+				data = data.text['*']
+				// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
+				.replace(/<!--[\s\S]*?-->/g, '')
+				// 去掉前後包覆。 e.g., <p> or <pre>
+				.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
+
 				// recover special characters
 				data = unescape(data);
 				if (is_JSON) {

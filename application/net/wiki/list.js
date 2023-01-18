@@ -1257,6 +1257,7 @@ function module_code(library_namespace) {
 			if (typeof options.callback === 'function') {
 				// options.callback() 為取得每一階段清單時所會被執行的函數。
 				// 注意: arguments 與 get_list() 之 callback 連動。
+				// page_list
 				options.callback(pages, target, options);
 			}
 			// 設定了 options.for_each 時，callback() 不會傳入 list！
@@ -1465,6 +1466,21 @@ function module_code(library_namespace) {
 					}
 					this.next();
 				} else {
+					if (false) {
+						console.trace('wiki_API_prototype_methods: 直接跳出: '
+						//
+						+ [ this.running,
+						//
+						this.actions.promise_relying, this.actions[
+						//
+						wiki_API.KEY_waiting_callback_result_relying_on_this],
+						//
+						method, this.actions.length,
+						//
+						this.actions.slice(0, 9).map(function(action) {
+							return action.slice(0, 1);
+						}) ]);
+					}
 					if (this.actions.length > 1) {
 						library_namespace.debug(method + ': 正在執行中 ('
 						//
