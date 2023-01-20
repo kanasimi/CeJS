@@ -573,6 +573,7 @@ function module_code(library_namespace) {
 				}
 				library_namespace.log_temporary('fetch_and_resolve_template: '
 						+ wiki_API.title_link_of(page_title));
+				Error.stackTraceLimit = Infinity;
 				session.register_redirects(page_title,
 				//
 				function(page_data, error) {
@@ -591,6 +592,7 @@ function module_code(library_namespace) {
 					// namespace : 'Template',
 					no_message : true
 				});
+				Error.stackTraceLimit = 10;
 			});
 		}
 
@@ -610,10 +612,11 @@ function module_code(library_namespace) {
 			return return_evaluated();
 
 		promise = promise.then(return_evaluated);
-		if (is_running_at_start) {
+		// using session.check_and_run_next(run_next_status, promise)
+		if (false && is_running_at_start) {
 			// e.g.,
 			// node 20201008.fix_anchor.js use_language=zh archives
-			if (library_namespace.is_debug(3)) {
+			if (library_namespace.is_debug(0)) {
 				Error.stackTraceLimit = Infinity;
 				console.trace(session.actions);
 				console.trace([ is_running_at_start,

@@ -85,6 +85,103 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 	// instance 實例相關函數。
 
+	// 在實例函數中，會依賴外部 promise 之後才繼續執行處設置監測點，以檢測是否需要手動執行 session.next()。
+	// e.g.,
+	// node 20201008.fix_anchor.js use_language=zh archives
+	function set_up_if_needed_run_next(run_next_status) {
+		run_next_status = Object.assign(run_next_status || Object.create(null),
+		// this: wiki session
+		{
+			// actions : this.actions.slice(),
+			// actions_length : this.actions.length,
+			// waiting_callback_result_relying_on_this : this.actions[
+			//
+			// wiki_API.KEY_waiting_callback_result_relying_on_this],
+			last_action : this && this.running && this.actions.length > 0
+					&& this.actions.at(-1)
+		});
+
+		return run_next_status;
+	}
+
+	// 檢查上次 session.set_up_if_needed_run_next() 之後是否有新添加的 actions。
+	function check_if_needed_run_next(run_next_status) {
+		if (!run_next_status)
+			return;
+
+		if (run_next_status.needed_run_next)
+			return true;
+
+		var last_action = run_next_status.last_action;
+		// console.trace(run_next_status);
+		// this: wiki session
+		var index_of_old_tail = last_action && this.actions.length > 0
+				&& this.actions.lastIndexOf(last_action) || undefined;
+		// console.trace([ index_of_old_tail, this.actions.length ]);
+		// 若有新添加的 actions，由於這些 actions 全被 push 進 queue，不會被執行到，
+		// 因此必須手動執行 this.next()。
+		if (index_of_old_tail >= 0 ? this.actions.length - index_of_old_tail > 1
+				: this.actions.length > 0) {
+			// console.trace(this.actions);
+			run_next_status.needed_run_next = true;
+			return true;
+		}
+	}
+
+	/**
+	 * session.check_if_needed_run_next(run_next_status) 可以執行多次。
+	 * session.check_and_run_next() 只能在 promise 之後馬上執行一次。
+	 * 
+	 * e.g., Inside session instance functions:<code>
+
+	var run_next_status = session && session.set_up_if_needed_run_next();
+
+	// 某些可能會用到 session.* 並且回傳 {Promise} 的動作。
+	//...
+
+	promise = promise.then(successive_function_after_promise);
+	if (session)
+		session.check_and_run_next(run_next_status, promise);
+	// 直接跳出。之後會等 promise 出結果才繼續執行。
+	return;
+	</code>
+	 */
+	function check_and_run_next(run_next_status, promise, no_check) {
+		if (!run_next_status)
+			return;
+
+		if (!no_check)
+			this.check_if_needed_run_next(run_next_status);
+
+		if (!run_next_status.needed_run_next) {
+			return;
+		}
+
+		if (!promise)
+			promise = run_next_status.promise || Promise.resolve();
+
+		library_namespace.debug(
+				'新增了不會被執行到的 actions。手動執行 session.next(promise)。', 2,
+				'check_and_run_next');
+		// console.trace(promise);
+
+		// 重設 run_next_status 以供重複利用.
+		delete run_next_status.needed_run_next;
+		run_next_status = this.set_up_if_needed_run_next(run_next_status);
+
+		this.next(promise);
+
+		return run_next_status;
+	}
+
+	Object.assign(wiki_API.prototype, {
+		set_up_if_needed_run_next : set_up_if_needed_run_next,
+		check_if_needed_run_next : check_if_needed_run_next,
+		check_and_run_next : check_and_run_next
+	});
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * Register promise relying on wiki session actions. 設定依賴於本 wiki_API action
 	 * 的 promise。
@@ -187,6 +284,8 @@ function module_code(library_namespace) {
 				status_handler);
 	};
 
+	// ------------------------------------------------------------------------
+
 	/** 代表欲自動設定 options.page_to_edit */
 	wiki_API.VALUE_set_page_to_edit = true;
 
@@ -268,18 +367,26 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
+		// 標註當前執行的執行緒正在 running。
+		this.running = true;
+
 		var _this = this;
 
+		// 所有呼叫 instance 功能的 callback 全部推至 this.actions queue，
+		// 之後當前執行緒會繼續執行。藉以維持單一執行緒。
 		if (callback_result_relying_on_this) {
 			var process_callback = function process_callback(callback) {
+				// assert: this.running === true
 				if (typeof callback !== 'function') {
 					_this.set_promise_relying(callback);
 					return;
 				}
 
-				// run this.next() after callback() finished.
+				// 標註正在執行 callback()。
+				// Will run this.next() after callback() finished.
 				_this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this] = true;
 
+				// assert: this.running === true
 				try {
 					callback = callback
 					// _this.next(callback, ...callback_arguments);
@@ -290,6 +397,7 @@ function module_code(library_namespace) {
 					else
 						library_namespace.error(e);
 				}
+				// assert: this.running === true
 
 				delete _this.actions[wiki_API.KEY_waiting_callback_result_relying_on_this];
 
@@ -671,6 +779,7 @@ function module_code(library_namespace) {
 				next[4] = next[3];
 				next[3] = null;
 			}
+
 			wiki_API.tracking_revisions(next[1], next[2], function(revision,
 					error) {
 				_this.next(next[3], revision, error);
@@ -2238,6 +2347,7 @@ function module_code(library_namespace) {
 			break;
 
 		case 'run_async':
+			var run_next_status = this.set_up_if_needed_run_next();
 			var is_function = false;
 			// next[1] : callback
 			if (typeof next[1] === 'function') {
@@ -2248,7 +2358,10 @@ function module_code(library_namespace) {
 
 			if (library_namespace.is_thenable(next[1])) {
 				var callback = this.next.bind(this);
-				next[1].then(callback, callback);
+				var promise = next[1].then(callback, callback);
+				this.check_and_run_next(run_next_status, promise);
+				// 直接跳出。之後會等 promise 出結果才繼續執行。
+
 			} else if (is_function) {
 				// ** MUST call `this.next();` in the callback function!
 			} else {

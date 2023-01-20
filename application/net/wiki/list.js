@@ -1443,17 +1443,25 @@ function module_code(library_namespace) {
 
 				// TODO: 不應該僅以this.running判定，
 				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
-				if (!this.running && !this.actions.promise_relying
-				//
-				&& !this.actions[
-				// callback_result_relying_on_this 執行中應該只能 push 進
-				// session.actions，不可執行 session.next()!
-				wiki_API.KEY_waiting_callback_result_relying_on_this]
-
-				// 當只剩下剛剛.push()進的operation時，表示已經不會再執行，則還是實行this.next()。
-				// TODO: 若是其他執行序會操作this.actions、主動執行this.next()，
-				// 或.next()正執行之其他操作會執行this.next()，可能造成重複執行的結果！
-				// 2016/11/16 14:45:19 但這方法似乎會提早執行...
+				if (!this.running
+				/**
+				 * (!this.running && this.actions.promise_relying) 代表
+				 * promise_relying 中 call 了 wiki 的函數，這時應該執行，否則會斷掉。
+				 */
+				// && !this.actions.promise_relying
+				/**
+				 * callback_result_relying_on_this 執行中應該只能 push 進
+				 * session.actions，不可執行 session.next()!
+				 */
+				// && !this.actions[
+				// wiki_API.KEY_waiting_callback_result_relying_on_this]
+				/**
+				 * 當只剩下剛剛.push()進的operation時，表示已經不會再執行，則還是實行this.next()。 TODO:
+				 * 若是其他執行序會操作this.actions、主動執行this.next()，
+				 * 或.next()正執行之其他操作會執行this.next()，可能造成重複執行的結果！
+				 * 
+				 * 2016/11/16 14:45:19 但這方法似乎會提早執行...
+				 */
 				// || this.actions.length === 1
 				) {
 					// this.thread_count = (this.thread_count || 0) + 1;
@@ -1462,7 +1470,9 @@ function module_code(library_namespace) {
 						//
 						'wiki_API_prototype_methods: Calling wiki_API.prototype.next() '
 						//
-						+ [ method, this.actions.length ]);
+						+ [ this.actions.promise_relying, method,
+						//
+						this.actions.length ]);
 					}
 					this.next();
 				} else {

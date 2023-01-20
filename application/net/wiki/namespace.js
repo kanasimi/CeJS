@@ -2474,11 +2474,19 @@ function module_code(library_namespace) {
 	 */
 	get_page_content.is_page_data = function(page_data, strict) {
 		// 可能是 {wiki_API.Page}
-		return typeof page_data === 'object' && (page_data.pageid >= 0
+		if (typeof page_data !== 'object')
+			return false;
+
+		if (!strict) {
+			// 亦可能僅有 { title: "..." }
+			return page_data.pageid >= 0 || page_data.title;
+		}
+
+		return typeof page_data.title === 'string'
 		//
-		|| page_data.title
+		&& !Number.isNaN(page_data.ns) && page_data.pageid >= 0
 		// 可能是 missing:""，此時仍算 page data。
-		&& ('missing' in page_data || 'invalid' in page_data));
+		|| ('missing' in page_data || 'invalid' in page_data);
 	};
 
 	/**

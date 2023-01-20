@@ -1055,6 +1055,8 @@ function module_code(library_namespace) {
 			return library_namespace.fit_filter(to_search, value);
 		}
 
+		var session = wiki_API.session_of_options(options);
+		var run_next_status = session && session.set_up_if_needed_run_next();
 		var newer_revision, revision_count = 0;
 		function search_revisions(page_data, error) {
 			if (error) {
@@ -1076,7 +1078,7 @@ function module_code(library_namespace) {
 						return;
 					}
 					if (library_namespace.is_thenable(result)) {
-						result.then(function(result) {
+						result = result.then(function(result) {
 							if (!result) {
 								// 最新版本就已經不符合需求。
 								callback(null, page_data);
@@ -1084,6 +1086,9 @@ function module_code(library_namespace) {
 							}
 							search_next_revision();
 						});
+						if (session)
+							session.check_and_run_next(run_next_status, result);
+						// 直接跳出。之後會等 promise 出結果才繼續執行。
 						return;
 					}
 				}
@@ -1135,7 +1140,11 @@ function module_code(library_namespace) {
 									.revision_post_processor(newer_revision);
 						}
 						if (library_namespace.is_thenable(result)) {
-							result.then(finish_search_revision);
+							result = result.then(finish_search_revision);
+							if (session)
+								session.check_and_run_next(run_next_status,
+										result);
+							// 直接跳出。之後會等 promise 出結果才繼續執行。
 						} else {
 							finish_search_revision();
 						}
@@ -1143,6 +1152,7 @@ function module_code(library_namespace) {
 						// var session = wiki_API.session_of_options(options);
 						// console.trace(session);
 						// console.trace(session && session.actions);
+
 						return;
 					}
 
@@ -1162,7 +1172,10 @@ function module_code(library_namespace) {
 
 					// console.trace(library_namespace.is_thenable(result));
 					if (library_namespace.is_thenable(result)) {
-						result.then(search_next_diff);
+						result = result.then(search_next_diff);
+						if (session)
+							session.check_and_run_next(run_next_status, result);
+						// 直接跳出。之後會等 promise 出結果才繼續執行。
 					} else {
 						search_next_diff();
 					}
@@ -1216,7 +1229,10 @@ function module_code(library_namespace) {
 				var result = !options.search_deleted
 						&& do_search(newer_revision);
 				if (library_namespace.is_thenable(result)) {
-					result.then(do_callback);
+					result = result.then(do_callback);
+					if (session)
+						session.check_and_run_next(run_next_status, result);
+					// 直接跳出。之後會等 promise 出結果才繼續執行。
 				} else {
 					do_callback(result);
 				}
@@ -1771,7 +1787,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var namespace = wiki_API.namespace(options.namespace);
+		var namespace = (session || wiki_API).namespace(options.namespace);
 		if (namespace !== undefined) {
 			// 不指定 namespace，或者指定 namespace 為 ((undefined)): 取得所有的 namespace。
 			if (use_SQL) {
@@ -1911,6 +1927,8 @@ function module_code(library_namespace) {
 			+ JSON.stringify(recent_options), 1, 'add_listener');
 		}
 		// console.trace(recent_options);
+
+		var run_next_status = session && session.set_up_if_needed_run_next();
 
 		// 取得頁面資料。
 		function receive() {
@@ -2183,10 +2201,14 @@ function module_code(library_namespace) {
 					if (library_namespace.is_thenable(result)) {
 						if (run_next) {
 							// 先執行完本頁面再執行下一個頁面。
-							result.then(run_next, function(error) {
+							result = result.then(run_next, function(error) {
 								library_namespace.error(error);
 								run_next();
 							});
+							if (session)
+								session.check_and_run_next(run_next_status,
+										result);
+							// 直接跳出。之後會等 promise 出結果才繼續執行。
 						} else {
 							waiting_queue.push(result);
 						}
