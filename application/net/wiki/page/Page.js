@@ -77,6 +77,11 @@ function module_code(library_namespace) {
 	function Page(page_title, options, session) {
 		this[KEY_SESSION] = session;
 
+		if (wiki_API.is_page_data(page_title)) {
+			Object.assign(this, page_title);
+			return;
+		}
+
 		// page_data 之 structure 按照 wiki API 本身之 return
 		// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
 		Object.assign(this, {
@@ -86,16 +91,124 @@ function module_code(library_namespace) {
 		});
 	}
 
+	function set_options_session(options) {
+		var session = this[KEY_SESSION];
+		options = wiki_API.add_session_to_options(session, options);
+		return options;
+	}
+
+	// ------------------------------------------------------------------------
+
+	function Page__content(options) {
+		options = set_options_session.call(this, options);
+		if (this.revisions) {
+			return wiki_API.content_of(this, options);
+		}
+
+		var promise = new Promise(function executor(resolve, reject) {
+			wiki_API.page(wiki_API.is_page_data(this) ? this : this.title,
+			//
+			function(page_data, error) {
+				if (error) {
+					reject(error);
+					return;
+				}
+				if (!page_data.revisions) {
+					reject(new Error('No .revisions get!'));
+					return;
+				}
+				Object.assign(this, page_data);
+				// console.trace(this);
+				return resolve(wiki_API.content_of(this, options));
+			}.bind(this), options);
+		}.bind(this));
+		return promise;
+	}
+
+	// ------------------------------------------------------------------------
+
+	function Page__check_stop(options) {
+		// Copy from wiki_API.prototype.next.edit
+		var promise = new Promise(function executor(resolve, reject) {
+			var session = this[KEY_SESSION];
+			options.token = session.token;
+			wiki_API.check_stop(function(stopped) {
+				session.stopped = stopped;
+				resolve(stopped);
+			}, options);
+		}.bind(this));
+
+		return promise;
+	}
+
+	function Page__edit(content, options) {
+		options = set_options_session.call(this, options);
+		var session = this[KEY_SESSION];
+
+		// Copy from wiki_API.prototype.next.edit
+		var promise = new Promise(function executor(resolve, reject) {
+			if (session.stopped && !options.skip_stopped) {
+				library_namespace.warn('Page__edit: 已停止作業，放棄編輯'
+						+ wiki_API.title_link_of(this) + '！');
+				reject(new Error('放棄編輯'));
+				return;
+			}
+
+			if (this.is_Flow) {
+				reject(new Error(new Error('NYI: flow page')));
+			}
+
+			if (options.skip_nochange
+			// 採用 skip_nochange 可以跳過實際 edit 的動作。
+			&& content === wiki_API.content_of(this)) {
+				library_namespace.debug('Skip '
+				//
+				+ wiki_API.title_link_of(this)
+				// 'nochange', no change
+				+ ': The same content.', 1, 'Page__edit');
+				resolve('The same content');
+				return;
+			}
+
+			// console.trace([ this, wiki_API.is_page_data(this), session.token
+			// ]);
+			wiki_API.edit([ session.API_URL,
+			//
+			wiki_API.is_page_data(this) ? this : this.title ], content,
+			//
+			session.token, options, function wiki_API_Page_edit_callback(title,
+					error, result) {
+				if (error) {
+					reject(error);
+					return;
+				}
+				resolve(result);
+			});
+		}.bind(this));
+
+		if (!('stopped' in session)) {
+			promise = Page__check_stop.call(this, options).then(promise);
+		}
+
+		if (typeof content === 'function')
+			return this.content().then(promise);
+
+		return promise;
+	}
+
 	// ------------------------------------------------------------------------
 
 	function Page__list(options) {
+		options = set_options_session.call(this, options);
 		// options.type, options[KEY_SESSION] are setted in Page__list_async()
 		var promise = new Promise(function executor(resolve, reject) {
-			wiki_API.list(this.title, function(list) {
-				if (list.error)
-					reject(list.error);
+			wiki_API.list(wiki_API.is_page_data(this) ? this : this.title,
+			//
+			function(pages, target, options) {
+				if (pages.error)
+					reject(pages.error);
 				else
-					resolve(list);
+					resolve(pages);
 			}, options);
 		}.bind(this));
 		return promise;
@@ -110,8 +223,7 @@ function module_code(library_namespace) {
 	};
 
 	function Page__list_async(method, options) {
-		var session = this[KEY_SESSION];
-		options = wiki_API.add_session_to_options(session, options);
+		options = set_options_session.call(this, options);
 		options.type = method;
 		if (!Symbol_asyncIterator || options && options.get_list) {
 			return Page__list.call(this, options);
@@ -163,7 +275,9 @@ function module_code(library_namespace) {
 					resolve(get_next_object());
 				}
 			};
-			wiki_API.list(this.title, function(list) {
+			wiki_API.list(wiki_API.is_page_data(this) ? this : this.title,
+			//
+			function(list) {
 				// generator.page_count = list.length;
 				generator.done = true;
 				var resolve = generator.resolve;
@@ -184,9 +298,10 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	Object.assign(wiki_API.prototype, {
-		Page : function new_Page(page_title, options) {
+		new_Page : function new_Page(page_title, options) {
 			return new Page(page_title, options,/* session */this);
-		}
+		},
+		Page : Page
 	});
 
 	wiki_API.list.type_list.forEach(function(method) {
@@ -194,6 +309,11 @@ function module_code(library_namespace) {
 		Page.prototype[method] = function Page__list_frontend(options) {
 			return Page__list_async.call(this, method, options);
 		};
+	});
+
+	Object.assign(Page.prototype, {
+		content : Page__content,
+		edit : Page__edit
 	});
 
 	return Page;

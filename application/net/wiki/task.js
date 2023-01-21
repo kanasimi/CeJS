@@ -677,6 +677,11 @@ function module_code(library_namespace) {
 				if (next[3].page_to_edit === wiki_API.VALUE_set_page_to_edit) {
 					// page-edit 組合式操作。設定等待先前的取得頁面操作中。
 					next[3].waiting_for_previous_combination_operation = true;
+					if (!next[3].page_title_to_edit) {
+						// e.g., log_options @ wiki_API.prototype.work
+						// Only section : 'new'
+						next[3].page_title_to_edit = next[1];
+					}
 				}
 				// 設定個僅 debug 用、無功能的註記。
 				next[3].actions_when_fetching_page = [ next ]
@@ -1300,6 +1305,14 @@ function module_code(library_namespace) {
 
 			// TODO: {String|RegExp|Array}filter
 
+			// @see check_and_delete_revisions
+			if ((!next[2].page_to_edit || next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit)
+					&& next[2].section === 'new') {
+				next[2].page_to_edit = next[2].page_title_to_edit
+						|| this.last_page || next[2].task_page_data
+						|| next[2].page_to_edit;
+			}
+
 			if (false && next[2].page_to_edit !== this.last_page) {
 				console.trace('session.edit:'
 						+ (next[2].page_to_edit && next[2].page_to_edit.title));
@@ -1308,7 +1321,8 @@ function module_code(library_namespace) {
 			}
 
 			if (!next[2].page_to_edit
-					|| next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit) {
+			//
+			|| next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit) {
 				if (this.actions.promise_relying
 				// Should be set by case 'page':
 				&& next[2].waiting_for_previous_combination_operation) {
@@ -1372,7 +1386,7 @@ function module_code(library_namespace) {
 
 			if (typeof next[1] !== 'string'
 			// @see check_and_delete_revisions
-			&& next[2] && next[2].section !== 'new'
+			// && next[2].section !== 'new'
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
 				console.trace(this);
