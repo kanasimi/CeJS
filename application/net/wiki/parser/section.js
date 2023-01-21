@@ -544,8 +544,10 @@ function module_code(library_namespace) {
 		// 有多個完全相同的 anchor 時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
 		anchor = section_link_escape(id
-		// 處理連續多個空白字元。長度相同的情況下，盡可能保留原貌。
-		.replace(/([ _]){2,}/g, '$1').replace(/&/g, '&amp;'), true);
+		// 網頁錨點中所有的空白字元都會被轉成 "_"。
+		.replace(/ /g, '_')
+		// 處理連續多個空白字元。<s>長度相同的情況下，盡可能保留原貌。</s>
+		.replace(/_{2,}/g, '_').replace(/&/g, '&amp;'), true);
 
 		// var session = wiki_API.session_of_options(options);
 		// TODO: for zhwiki, the anchor should NOT includes "-{", "}-"
