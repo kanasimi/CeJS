@@ -2473,8 +2473,8 @@ function module_code(library_namespace) {
 	 * @returns {String|Number} pageid
 	 */
 	get_page_content.is_page_data = function(page_data, strict) {
-		// 可能是 {wiki_API.Page}
-		if (typeof page_data !== 'object')
+		// 可能是 {wiki_API.Page}, null
+		if (!page_data || typeof page_data !== 'object')
 			return false;
 
 		if (!strict) {
