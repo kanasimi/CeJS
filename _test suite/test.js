@@ -4746,6 +4746,11 @@ function test_wiki() {
 		assert(['id abc,id 123', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');
 		wikitext = '{{Episode table|anchor=Minisodes|episodes={{Episode list|EpisodeNumber=2|ProdCode=22}}{{Episode list|EpisodeNumber=3|ProdCode=33}}}}';
 		assert(['Minisodesep2,pc22,Minisodesep3,pc33', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #2');
+		// 包括 "\xa0" (&nbsp), "\u206F" 在目錄的網頁錨點中都會被轉為空白字元 "_"。
+		wikitext = '===LINT 54 ===';
+		assert(['LINT 54', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #3');
+		wikitext = '=== LINT 54 ===';
+		assert(['LINT 54', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #4');
 
 		wikitext = '{{color|red|text}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		// Create template_token.expand()

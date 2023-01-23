@@ -426,7 +426,7 @@ function module_code(library_namespace) {
 					.toString(16).toUpperCase();
 				}
 				return '&#' + character.charCodeAt(0) + ';';
-			}).replace(/[ \n]{2,}/g, ' ');
+			}).replace(/[\s\n]+/g, ' ');
 		} else {
 			// 只處理特殊字元而不是採用encodeURIComponent()，這樣能夠保存中文字，使其不被編碼。
 			text = encodeURIComponent(text);
@@ -539,7 +539,7 @@ function module_code(library_namespace) {
 		var id = parsed_title.toString().trim().replace(
 				PATTERN_element_placeholder, '')
 		//
-		.replace(/[ \n]{2,}/g, ' '),
+		.replace(/[\s\n]+/g, ' '),
 		// anchor 網頁錨點: 可以直接拿來做 wikilink anchor 的章節標題。
 		// 有多個完全相同的 anchor 時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
@@ -1620,10 +1620,14 @@ function module_code(library_namespace) {
 			anchor =
 			// '&#39;' → "'"
 			library_namespace.HTML_to_Unicode(anchor.toString())
-			// 警告: 實際上的網頁錨點應該要 .replace(/ /g, '_')
-			// 但由於 wiki 頁面中使用[[#P Q]]與[[#P_Q]]效果相同，
-			// 都會產生<a href="#P_Q">，因此採用"P Q"。
-			.replace(/[_\xa0]/g, ' ');
+			/**
+			 * 包括 "\xa0" (&nbsp), "\u206F" 在目錄的網頁錨點中都會被轉為空白字元 "_"。
+			 * 
+			 * 警告: 實際上的網頁錨點應該要 .replace(/ /g, '_')。<br />
+			 * 但由於 wiki 頁面中使用 [[#P Q]] 與[[#P_Q]]效果相同，都會產生<a href="#P_Q">，<br />
+			 * 因此採用"P Q"。
+			 */
+			.replace(/[_\s]/g, ' ');
 			if (!preserve_spaces) {
 				// " a " → "a"
 				anchor = anchor.trim();
