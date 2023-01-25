@@ -1315,9 +1315,9 @@ function module_code(library_namespace) {
 
 			// @see check_and_delete_revisions
 			if ((!next[2].page_to_edit || next[2].page_to_edit === wiki_API.VALUE_set_page_to_edit)
-					&& next[2].section === 'new') {
+					&& (typeof next[1] === 'string' || next[2].section === 'new')) {
 				next[2].page_to_edit = next[2].page_title_to_edit
-						|| this.last_page || next[2].task_page_data
+						|| this.last_page
 						// e.g., wiki_API.VALUE_set_page_to_edit
 						|| next[2].page_to_edit;
 			}
@@ -2365,11 +2365,16 @@ function module_code(library_namespace) {
 					}
 				}
 			}
-			// 避免偶爾會一直 call this.next()，造成
-			// RangeError: Maximum call stack size exceeded
-			setTimeout(function() {
-				_this.next(callback_result_relying_on_this);
-			}, 0);
+
+			if (false) {
+				this.next(callback_result_relying_on_this);
+			} else {
+				// 避免偶爾會一直 call this.next()，造成
+				// RangeError: Maximum call stack size exceeded
+				setTimeout(function() {
+					_this.next(callback_result_relying_on_this);
+				}, 0);
+			}
 			break;
 
 		case 'run_async':
@@ -3503,8 +3508,9 @@ function module_code(library_namespace) {
 							// console.trace([ log_options, messages ]);
 
 							log_options.page_to_edit
-							//
+							// reset .page_to_edit
 							= wiki_API.VALUE_set_page_to_edit;
+							delete log_options.page_title_to_edit;
 
 							// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
 							// TODO: bug: 當分批時，只會寫入最後一次。

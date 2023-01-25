@@ -428,10 +428,6 @@ function module_code(library_namespace) {
 					options.template_token_called.parameters, options);
 
 		var session = wiki_API.session_of_options(options);
-		var is_running_at_start = session
-				// @see function wiki_API_prototype_method()
-				&& (session.running || session.actions[wiki_API.KEY_waiting_callback_result_relying_on_this])
-				&& session.actions.length;
 		// console.trace(parsed);
 		// Error.stackTraceLimit = Infinity;
 		// console.trace(parsed.toString());
@@ -612,24 +608,6 @@ function module_code(library_namespace) {
 			return return_evaluated();
 
 		promise = promise.then(return_evaluated);
-		// using session.check_and_run_next(run_next_status, promise)
-		if (false && is_running_at_start) {
-			// e.g.,
-			// node 20201008.fix_anchor.js use_language=zh archives
-			if (library_namespace.is_debug(0)) {
-				Error.stackTraceLimit = Infinity;
-				console.trace(session.actions);
-				console.trace([ is_running_at_start,
-				//
-				session.running, session.actions.length,
-				//
-				session.actions[
-				//
-				wiki_API.KEY_waiting_callback_result_relying_on_this] ]);
-				Error.stackTraceLimit = 10;
-			}
-			session.next(promise);
-		}
 		return promise;
 	}
 
