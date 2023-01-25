@@ -438,11 +438,17 @@ function module_code(library_namespace) {
 	// @inner
 	// return [[維基連結]]
 	// TODO: using external link to display "�"
-	function section_link_toString(page_title, style) {
+	function section_link_toString(page_title, style, underlined_anchor) {
 		var anchor = (this[1] || '').replace(/�/g, '?'),
 		// 目前 MediaWiki 之 link anchor, display_text 尚無法接受
 		// REPLACEMENT CHARACTER U+FFFD "�" 這個字元。
 		display_text = (this[2] || '').replace(/�/g, '?');
+
+		if (underlined_anchor) {
+			// 在 transclusion 的時候，空白不會被自動轉為 "_"。
+			// 這裡的 \s 應該只剩下空白字元 " "。
+			anchor = anchor.replace(/\s/g, '_');
+		}
 
 		display_text = display_text ?
 		//
