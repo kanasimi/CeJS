@@ -2334,10 +2334,11 @@ function module_code(library_namespace) {
 			title = ':' + title;
 		}
 		// TODO: for template transclusion, use {{title}}
-		return '[['
-				+ title
-				+ (display_text && display_text !== title ? '|' + display_text
-						: '') + ']]';
+		return '[[' + title + (display_text && display_text !== title ? '|'
+		// library_namespace.Unicode_to_HTML()
+		+ display_text.replace(/[\[\]]/g, function(char) {
+			return '&#' + char.charCodeAt(0) + ';';
+		}) : '') + ']]';
 	}
 
 	function revision_content(revision, allow_non_string) {
@@ -3005,7 +3006,7 @@ function module_code(library_namespace) {
 						session.actions.length);
 				configuration_adapter.call(session, configuration);
 				session.actions.append(old_actions);
-				// console.trace(session.actions);
+				// console.trace([ session.running, session.actions ]);
 				// configuration === wiki_session.latest_task_configuration
 			}
 			// Object.seal(configuration);

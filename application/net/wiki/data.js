@@ -1341,6 +1341,7 @@ function module_code(library_namespace) {
 
 		if (!key || library_namespace.is_empty_object(key)) {
 			library_namespace.error('wikidata_entity: 未設定欲取得之特定實體 id。');
+			console.trace(key);
 			callback(undefined, 'no_key');
 			return;
 		}

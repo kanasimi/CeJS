@@ -167,10 +167,12 @@ function module_code(library_namespace) {
 		this.actions = [];
 		// @see wiki_API.prototype.next
 		if (login_options.is_running) {
+			// Is calling from wiki_API.login()
 			// login 前便執行其他作業，可能導致 Session=deleted。 e.g., running
 			// login_options.configuration_adapter() @ 20201008.fix_anchor.js
 			if (typeof login_options.is_running === 'string')
 				this.actions.unshift([ login_options.is_running ]);
+			// 執行權交給 wiki_API.login()。
 			this.running = true;
 		}
 
@@ -287,8 +289,13 @@ function module_code(library_namespace) {
 
 	function initialize_wiki_API(options) {
 		var session = this;
+		// console.trace(session.actions);
+		// console.trace(session.running);
+
 		// if (session.API_URL)
 		session.siteinfo(load_template_functions);
+		// console.trace(session.actions);
+		// console.trace(session.running);
 
 		function load_template_functions() {
 			// console.trace(session);
@@ -323,6 +330,7 @@ function module_code(library_namespace) {
 					1, 'initialization_complete');
 			session.actions.append(session.run_after_initializing);
 			delete session.run_after_initializing;
+			// console.trace(session.actions);
 		}
 	}
 	initialize_wiki_API.is_initializing_process = true;

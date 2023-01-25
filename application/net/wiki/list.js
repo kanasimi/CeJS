@@ -1401,6 +1401,18 @@ function module_code(library_namespace) {
 				if (library_namespace.is_debug() && !this.running) {
 					// console.trace(method + ': ' + this.running);
 				}
+
+				if (this.run_after_initializing) {
+					try {
+						library_namespace.debug(
+								'It is now initializing. 添加初始程序: ' + args, 1,
+								'wiki_API_prototype_methods');
+					} catch (e) {
+					}
+				}
+
+				// ----------------------------------------
+
 				try {
 					library_namespace.debug('add action: '
 							+ args.map(JSON.stringify).join('<br />\n'), 3,
@@ -1408,25 +1420,48 @@ function module_code(library_namespace) {
 				} catch (e) {
 					// TODO: handle exception
 				}
+
+				var previous_action = this.actions.at(-1);
 				this.actions.push(args);
 				// console.trace([ this.running, this.actions.length, args ]);
+
+				// ----------------------------------------
+				// 對於各種連續操作的處理。
+
+				// 做個預先處理，以保證 previous_action[3] 是options。
+				if (method === 'page'
+				// @see wiki_API.prototype.next.page
+				&& library_namespace.is_Object(args[2]) && !args[3]) {
+					// 直接輸入 options，未輸入 callback。
+					args.splice(2, 0, null);
+				}
+
 				if (method === 'edit'
 						&& (!args[2] || !('page_to_edit' in args[2]))) {
 					// console.trace('No options.page_to_edit set!');
 					// console.log(this.actions);
-					if (!args[2])
-						args[2] = Object.create(null);
+					if (!args[2]) {
+						args[2] = previous_action[0] === 'page'
+								&& previous_action[3] || Object.create(null);
+					}
 					// 自動配給一個。
 					// @see set_page_to_edit(options, page_data)
-					args[2].page_to_edit = true;
+					args[2].page_to_edit = wiki_API.VALUE_set_page_to_edit;
 				}
-				if (method === 'edit' && this.actions.at(-1)
+				if (method === 'edit' && previous_action
 				// next[3] : options
-				&& !this.actions.at(-1)[3]) {
-					// 自動配給一個。
-					this.actions[this.actions.length - 1][3] = {
-						page_to_edit : true
-					};
+				&& previous_action[0] === 'page') {
+					// console.trace([ previous_action, args ]);
+					if (!previous_action[3]) {
+						// 自動配給一個。
+						previous_action[3] = args[2];
+					} else if (previous_action[3] !== args[2]) {
+						// e.g., 20171025.fix_LintErrors.js
+						library_namespace.warn('wiki_API_prototype_methods: '
+								+ '合併 .edit() 的選項至 .page() 的選項。');
+						previous_action[3] = Object.assign(args[2],
+								previous_action[3], args[2]);
+					}
 				}
 
 				if (method === 'page' && typeof args[1] === 'string' && args[3]
@@ -1440,6 +1475,8 @@ function module_code(library_namespace) {
 					Error.stackTraceLimit = 10;
 					console.log(args[3]);
 				}
+
+				// ----------------------------------------
 
 				// TODO: 不應該僅以this.running判定，
 				// 因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
@@ -1472,9 +1509,23 @@ function module_code(library_namespace) {
 						//
 						+ [ this.actions.promise_relying, method,
 						//
-						this.actions.length ]);
+						this.actions.length,
+						//
+						'\t' + this.actions.slice(0, 9).map(function(action) {
+							return action.slice(0, 1);
+						}) ]);
 					}
-					this.next();
+					// 註冊本執行緒為主要執行緒。
+					this.running = true;
+					// 不直接執行以保證 .page() 之後 .edit() 時，this.actions.at(-1) 還存在，未被
+					// .shift() 處理掉。
+					if (true) {
+						setTimeout(this.next.bind(this), 0);
+					} else {
+						// NG:
+						// this.next();
+					}
+
 				} else {
 					if (false) {
 						console.trace('wiki_API_prototype_methods: 直接跳出: '
@@ -1487,7 +1538,7 @@ function module_code(library_namespace) {
 						//
 						method, this.actions.length,
 						//
-						this.actions.slice(0, 9).map(function(action) {
+						'\t' + this.actions.slice(0, 9).map(function(action) {
 							return action.slice(0, 1);
 						}) ]);
 					}

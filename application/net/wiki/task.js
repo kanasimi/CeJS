@@ -307,11 +307,15 @@ function module_code(library_namespace) {
 			}
 		}
 		if (options.page_title_to_edit
-				&& options.page_title_to_edit !== (page_data.original_title || page_data.title)) {
+				&& wiki_API.title_link_of(options.page_title_to_edit) !== wiki_API
+						.title_link_of(page_data.original_title
+								|| page_data.title)) {
 			library_namespace.info('set_page_to_edit: '
 					+ '所取得頁面 .page_to_edit 的標題改變: '
-					+ wiki_API.title_link_of(options.page_title_to_edit) + '→'
-					+ wiki_API.title_link_of(page_data.title));
+					+ wiki_API.title_link_of(options.page_title_to_edit)
+					+ '→'
+					+ wiki_API.title_link_of(page_data.original_title
+							|| page_data.title));
 			console.trace(options);
 		}
 
@@ -587,24 +591,25 @@ function module_code(library_namespace) {
 		case 'page':
 			// console.trace(next);
 			// this.page(page data, callback, options);
-			if (library_namespace.is_Object(next[2]) && !next[3]) {
+
+			// Done @ wiki_API_prototype_methods()
+			// @ CeL.application.net.wiki.list
+			if (false && library_namespace.is_Object(next[2]) && !next[3]) {
 				// 直接輸入 options，未輸入 callback。
 				next.splice(2, 0, null);
 			}
 
-			var revisions_parameters = next[1] && next[1].revisions_parameters
-					|| Object.create(null);
+			/** {Object}取得 next[1] 這個頁面的時候使用的 revisions parameters。 */
+			var revisions_parameters = wiki_API.is_page_data(next[1])
+					&& next[1].revisions_parameters || Object.create(null);
 			// → 此法會採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (wiki_API.is_page_data(next[1])
 
-			// 檢查是否非 cached 的內容。
-			&& (!next[3] || (!next[3].rvprop
-			//
-			|| next[3].rvprop === revisions_parameters.rvprop))
-
 			&& (!next[3]
+			// 檢查是否非 cached 的內容。
+			|| next[3].rvprop === revisions_parameters.rvprop
 			// 重複編輯同一個頁面？
-			|| next[3].page_to_edit !== wiki_API.VALUE_set_page_to_edit)
+			&& next[3].page_to_edit !== wiki_API.VALUE_set_page_to_edit)
 
 			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
 			&& (wiki_API.content_of.has_content(next[1],
@@ -669,6 +674,9 @@ function module_code(library_namespace) {
 			// 例如在 .edit() 的callback中再呼叫 .edit():
 			// wiki.page().edit(,()=>wiki.page().edit(,))
 			delete this.last_page;
+			delete this.last_page_title;
+			delete this.last_page_options;
+			delete this.last_page_error;
 
 			// console.trace(next[1]);
 
@@ -1287,7 +1295,7 @@ function module_code(library_namespace) {
 					&& (!next[2].page_title_to_edit || next[2].page_title_to_edit === this.last_page_title)) {
 				// console.trace([ next, this.last_page ]);
 				// e.g., page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
-				if (false) {
+				if (false && !next[2].page_to_edit) {
 					console.trace('Set .page_to_edit:'
 							+ wiki_API.title_link_of(this.last_page) + ' ('
 							+ wiki_API.title_link_of(next[2].page_to_edit)
@@ -1310,6 +1318,7 @@ function module_code(library_namespace) {
 					&& next[2].section === 'new') {
 				next[2].page_to_edit = next[2].page_title_to_edit
 						|| this.last_page || next[2].task_page_data
+						// e.g., wiki_API.VALUE_set_page_to_edit
 						|| next[2].page_to_edit;
 			}
 
@@ -1375,6 +1384,7 @@ function module_code(library_namespace) {
 					library_namespace
 							.error('wiki_API.prototype.next: 直接跳出，嘗試等待其他執行緒回來執行。');
 				}
+				// TODO: 可嘗試重新取得頁面。
 				this.actions.unshift(next);
 				break;
 
@@ -2357,7 +2367,9 @@ function module_code(library_namespace) {
 			}
 			// 避免偶爾會一直 call this.next()，造成
 			// RangeError: Maximum call stack size exceeded
-			setTimeout(this.next.bind(this, callback_result_relying_on_this), 0);
+			setTimeout(function() {
+				_this.next(callback_result_relying_on_this);
+			}, 0);
 			break;
 
 		case 'run_async':
@@ -3871,8 +3883,24 @@ function module_code(library_namespace) {
 	//
 	// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=clientlogin
 	wiki_API.login = function(user_name, password, login_options) {
+		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
+		// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
+		// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
+		function login_callback() {
+			library_namespace.debug('已登入 [' + session.token.lgname
+					+ ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
+			// console.trace(session);
+			if (typeof callback === 'function') {
+				session.run(callback.bind(session,
+				// instead of session.token.lgname
+				session.token.login_user_name, error));
+			}
+		}
+
 		var error;
 		function _next() {
+			// assert: session.running === true
+
 			// popup 'login'.
 			// assert: session.actions[0] === ['login']
 			if (session.actions[0] && session.actions[0][0] === 'login')
@@ -3882,29 +3910,24 @@ function module_code(library_namespace) {
 				console.trace([ session.login_user_info,
 						session.token.login_user_name ]);
 			}
+
+			// 為了使 session.run() 執行。
+			session.running = false;
 			if (!error && (!session.login_user_info
 			// get the user right to check 'apihighlimits'
 			|| session.login_user_info.name !== session.token.login_user_name)) {
-				session.running = false;
 				session.userinfo('rights|blockinfo|centralids', function(
 						userinfo, error) {
 					// console.trace(userinfo);
 					session.login_user_info = userinfo;
-					_next();
+					login_callback();
 				});
-				return;
+			} else {
+				session.run(login_callback);
+				// console.trace(session.actions);
+				// console.trace(session.running);
 			}
-
-			callback
-			// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
-			// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
-			// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
-			&& session.run(callback.bind(session,
-			// instead of session.token.lgname
-			session.token.login_user_name, error));
-			library_namespace.debug('已登入 [' + session.token.lgname
-					+ ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
-			session.next();
+			// 執行權交接給 session.*()。
 		}
 
 		function _done(data, _error) {

@@ -287,6 +287,7 @@ function module_code(library_namespace) {
 				if (typeof action[1] === 'string'
 				// https://www.mediawiki.org/w/api.php?action=help&modules=query
 				&& !/^[a-z]+=/.test(action[1]) && !options.post_data_only) {
+					// 未明確指定
 					library_namespace.warn([ 'wiki_API_query: ', {
 						// gettext_config:{"id":"did-not-set-$1"}
 						T : [ 'Did not set %1!', 'action' ]
@@ -726,6 +727,7 @@ function module_code(library_namespace) {
 			// callback(response);
 			// options.action = action;
 			check_session_badtoken(response, callback, options);
+			// console.trace(session && session.running);
 		}
 
 		get_URL(action, XMLHttp_handler, null, POST_data, get_URL_options);
