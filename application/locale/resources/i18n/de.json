@@ -3,6 +3,7 @@
 		"authors": [
 			"Brettchenweber",
 			"DraconicDark",
+			"Giftpflanze",
 			"Justman10000",
 			"ThisCarthing",
 			"ZiqiLiang"
@@ -181,6 +182,7 @@
 	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title": "Der lokale Titel in der interlingualen Vorlage ist derselbe wie der fremdsprachige Titel",
 	"local-page-title-contains-the-local-title-in-the-interlanguage-template": "Lokaler Seitentitel enthält den lokalen Titel in der Interlanguage-Vorlage",
 	"user": "Benutzer",
+	"fixing-broken-anchor": "Korrigiere defekten Abschnittslink",
 	"count-of-languages": "Anzahl der Sprachen",
 	"series-has-ended": "Serie ist beendet."
 }
