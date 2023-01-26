@@ -174,6 +174,7 @@
 	"\u8de8\u8a9e\u8a00\u6a21\u677f\u7684\u672c\u5730\u6a19\u984c\u8207\u5916\u8a9e\u6a19\u984c\u76f8\u540c": "Der lokale Titel in der interlingualen Vorlage ist derselbe wie der fremdsprachige Titel",
 	"Local page title contains the local title in the interlanguage template": "Lokaler Seitentitel enth\u00e4lt den lokalen Titel in der Interlanguage-Vorlage",
 	"user": "Benutzer",
+	"\u4fee\u6b63\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede": "Korrigiere defekten Abschnittslink",
 	"\u8a9e\u8a00\u6578": "Anzahl der Sprachen",
 	"\u4f5c\u54c1\u5df2\u5b8c\u7d50\u3002": "Serie ist beendet."
 },

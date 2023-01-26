@@ -445,8 +445,8 @@ function module_code(library_namespace) {
 		display_text = (this[2] || '').replace(/�/g, '?');
 
 		if (underlined_anchor) {
-			// 在 transclusion 的時候，空白不會被自動轉為 "_"。
-			// 這裡的 \s 應該只剩下空白字元 " "。
+			// 2023/1/26 在頁面被 transclusion 的時候，空白不會被自動轉為 "_"。
+			// assert: 這裡的 \s 應該只剩下空白字元 " "。
 			anchor = anchor.replace(/\s/g, '_');
 		}
 
