@@ -3900,6 +3900,10 @@ function module_code(library_namespace) {
 		try {
 			backtrack(from_index, to_index, all_list);
 		} catch (e) {
+			if (options.no_throw_when_stack_size_is_exceeded) {
+				all_list.error = e;
+				return all_list;
+			}
 			throw new RangeError(
 					'Maximum call stack size exceeded @ backtrack()');
 		}

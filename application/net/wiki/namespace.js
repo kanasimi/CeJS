@@ -3263,6 +3263,12 @@ function module_code(library_namespace) {
 			namespace : 'Template'
 		}, options);
 
+		if (!template_name_to_test || template_token) {
+			// e.g., async function for_each_discussion_page(page_data) @
+			// 20210429.Auto-archiver.js:130
+			return;
+		}
+
 		var session = wiki_API.session_of_options(options)
 				|| wiki_API.is_wiki_API(this) && this;
 
