@@ -472,8 +472,8 @@ function module_code(library_namespace) {
 				} catch (e) {
 					if (false) {
 						console.trace('archive_file_execute: '
-								// gettext_config:{"id":"callback-execution-error"}
-								+ 'Callback execution error!');
+						// gettext_config:{"id":"callback-execution-error"}
+						+ 'Callback execution error!');
 					}
 					library_namespace.error([ 'archive_file_execute: ', {
 						// gettext_config:{"id":"callback-execution-error"}
@@ -502,8 +502,13 @@ function module_code(library_namespace) {
 			} ]);
 			if (library_namespace.platform.nodejs) {
 				console.error(e);
-				if (e.output)
-					console.error(e.output.toString());
+				if (e.output) {
+					var message = e.output.toString(), MAX_MESSAGE_LENGTH = 800;
+					if (message.length > MAX_MESSAGE_LENGTH) {
+						message = message.slice(0, MAX_MESSAGE_LENGTH) + '...';
+					}
+					console.error(message);
+				}
 			} else {
 				library_namespace.error(e);
 			}
