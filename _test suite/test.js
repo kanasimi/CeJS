@@ -4075,7 +4075,8 @@ function test_wiki() {
 		assert(['\n==t==\nw\n', parsed[1][1].toString()], 'wiki.parse: HTML tag pre #4');
 		wikitext = '<pre> <!-- a --></pre class>'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #5');
-		assert([' <!-- a -->', parsed[1][0]], 'wiki.parse: HTML tag pre #5-1');
+		assert([' <!-- a -->', parsed[1].toString()], 'wiki.parse: HTML tag pre #5-1');
+		assert(parsed[1].every(function (token) { return typeof token === 'string'; }), 'wiki.parse: HTML tag pre #5-2');
 		wikitext = '<pre><nowiki>-{zh-cn:这;zh-tw:這}-</nowiki></pre>'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #6');
 		var wanted_token = null; parsed.each('convert', function (token) { wanted_token = token; return parsed.each.exit; });
@@ -4104,7 +4105,7 @@ function test_wiki() {
 		assert(['\n==t==\nw\n', parsed[1][1].toString()], 'wiki.parse: nowiki #4');
 		wikitext = '1<nowiki><!--</nowiki>2-->'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #5');
-		assert(['<nowiki><!--</nowiki>', parsed[1].toString()], 'wiki.parse: nowiki #5-1');
+		assert(['<nowiki><!--</nowiki>', parsed[1].toString()], 'wiki.parse: nowiki #5-1: <nowiki> 可以打斷其他的語法，包括 "<!--"。');
 		wikitext = '<nowiki>...<!-- -->...</nowiki>'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #6');
 		assert(['...<!-- -->...', parsed[1].toString()], 'wiki.parse: nowiki #6-1: <nowiki> 中的註解不應被削掉');
@@ -4138,6 +4139,77 @@ function test_wiki() {
 		// | <!--{{age in years and days|X, 1998|Jan 4, 2023}}-</nowiki>-> 24 years
 		wikitext = '<nowiki/></nowiki>'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #15');
+		// [[w:n:Special:Permalink/223680]]
+		wikitext = 'a<!-- <ref></ref <ref></ref> -->b'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #16');
+		assert(['comment', parsed[1].type], 'wiki.parse: nowiki #16-1');
+		wikitext = 'a<!-- <nowiki></nowiki <nowiki></ref> -->b</nowiki>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #17');
+		assert(['comment', parsed[1].type], 'wiki.parse: nowiki #17-1');
+		assert(['b</nowiki>', parsed[2]], 'wiki.parse: nowiki #17-2');
+		wikitext = '<nowiki><!-- aa --></nowiki>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #18');
+		assert(['<!-- aa -->', parsed[1][0]], 'wiki.parse: nowiki #18-1');
+		wikitext = 'a<!-- <nowiki><!-- aa --></nowiki> -->b'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #19');
+		assert(['comment', parsed[1].type], 'wiki.parse: nowiki #19-1');
+		assert(['</nowiki> -->b', parsed[2]], 'wiki.parse: nowiki #19-2');
+		wikitext = '<nowiki> <ref></ref <ref></ref> </nowiki>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #20');
+		assert([' <ref></ref <ref></ref> ', parsed[1][0]], 'wiki.parse: nowiki #20-1');
+		wikitext = '0<b>b</b 5>4'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #21');
+		assert(["tag", parsed[1].type], 'wiki.parse: nowiki #21-1');
+		assert(["b", parsed[1][1][0]], 'wiki.parse: nowiki #21-2');
+		assert(["4", parsed[2]], 'wiki.parse: nowiki #21-3');
+		wikitext = '0<b>b</b -->4'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #22');
+		assert(["tag", parsed[1].type], 'wiki.parse: nowiki #22-1');
+		assert(["b", parsed[1][1][0]], 'wiki.parse: nowiki #22-2');
+		assert(["4", parsed[2]], 'wiki.parse: nowiki #22-3');
+		wikitext = 'a<!-- <b>b</b <b>b</b -->b'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #23');
+		assert([' <b>b</b <b>b</b ', parsed[1][0]], 'wiki.parse: nowiki #23-1');
+		wikitext = '1<ref><!--</ref>2-->'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #24');
+		assert(['<!--', parsed[1][1][0]], 'wiki.parse: nowiki #24-1');
+		assert(['2-->', parsed[2]], 'wiki.parse: nowiki #24-2');
+		wikitext = '1<nowiki><!--</nowiki>2-->'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #25');
+		assert(['<!--', parsed[1][1][0]], 'wiki.parse: nowiki #25-1');
+		assert(['2-->', parsed[2]], 'wiki.parse: nowiki #25-2');
+		wikitext = '3<nowiki><!-- <!-- --></nowiki> -->'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #26');
+		assert(['<!-- <!-- -->', parsed[1][1][0]], 'wiki.parse: nowiki #26-1');
+		assert([' -->', parsed[2]], 'wiki.parse: nowiki #26-2');
+		wikitext = '4<!--<nowiki><!-- <!-- --></nowiki> -->'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #27');
+		assert(['<nowiki><!-- <!-- ', parsed[1][0]], 'wiki.parse: nowiki #27-1');
+		assert(['</nowiki> -->', parsed[2]], 'wiki.parse: nowiki #27-2');
+		wikitext = '4<!--<nowiki><!-- <!-- --></nowiki> -->'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #28');
+		assert(['<nowiki><!-- <!-- ', parsed[1][0]], 'wiki.parse: nowiki #28-1');
+		assert(['</nowiki> -->', parsed[2]], 'wiki.parse: nowiki #28-2');
+		wikitext = '1<nowiki><!-- a -->'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #29');
+		assert(['1<nowiki>', parsed[0]], 'wiki.parse: nowiki #29-1');
+		assert([' a ', parsed[1][0]], 'wiki.parse: nowiki #29-2');
+		wikitext = '1<nowiki><!-- a '; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #30');
+		assert(['1<nowiki>', parsed[0]], 'wiki.parse: nowiki #30-1');
+		assert([' a ', parsed[1][0]], 'wiki.parse: nowiki #30-2');
+		wikitext = '<ref name="n"/><!-- <ref></ref -->a'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #31');
+		assert(['comment', parsed[1].type], 'wiki.parse: nowiki #31-1');
+		assert(['a', parsed[2]], 'wiki.parse: nowiki #31-2');
+		wikitext = '<ref name="n"/><!-- </ref -->a'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #32');
+		assert(['comment', parsed[1].type], 'wiki.parse: nowiki #32-1');
+		assert(['a', parsed[2]], 'wiki.parse: nowiki #32-2');
+		wikitext = '<nowiki /><!-- <nowiki>b</nowiki -->a'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #33');
+		assert(['comment', parsed[1].type], 'wiki.parse: nowiki #33-1');
+		assert(['a', parsed[2]], 'wiki.parse: nowiki #33-2');
 
 		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: self-closed HTML tags: br #1');
@@ -4945,7 +5017,8 @@ function test_wiki() {
 			promise = promise.then(function () {
 				return CeL.wiki.expand_transclusion('{{ {{ifIP|name=user_name|IPvandal|Userblock}}|user_name|hidename=}}', options);
 			}).then(function (parsed) {
-				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]] '''·'''  [[Special:Contributions/user_name|貢獻]] '''·'''  [//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name <span style=\"color:#002bb8\">封禁日誌</span>] '''·''' [[Special:CentralAuth/user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
+				//console.trace(parsed.toString());
+				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]] '''·'''  [[Special:Contributions/user_name|貢獻]] '''·'''  [//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁日誌] '''·''' [[Special:CentralAuth/user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
 			});
 
 			promise = promise.then(function () {

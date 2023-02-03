@@ -1899,12 +1899,6 @@ function module_code(library_namespace) {
 		var extensiontag_hash = session
 				&& session.configurations.extensiontag_hash
 				|| wiki_extensiontags;
-		var PATTERN_extensiontags = session
-				&& session.configurations.PATTERN_extensiontags
-				|| PATTERN_wiki_extensiontags;
-		var PATTERN_non_extensiontags = session
-				&& session.configurations.PATTERN_non_extensiontags
-				|| PATTERN_non_wiki_extensiontags;
 
 		// or use ((PATTERN_transclusion))
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
@@ -2604,6 +2598,17 @@ function module_code(library_namespace) {
 			}
 
 			var previous = '', following = '';
+			if (attributes && attributes.endsWith('/') && matched) {
+				// e.g., '<ref name="a"/><!-- </ref -->a'
+				matched = '<' + tag + attributes + '>';
+				// assert: matched === all.slice(0, matched.length);
+				following = all.slice(matched.length);
+				// Using tag_single, function parse_single_tag()
+				matched = matched.replace(PATTERN_WIKI_TAG_VOID,
+						parse_single_tag);
+				return matched + following;
+			}
+
 			if ((tag.toLowerCase() in {
 				tr : true,
 				th : true,
@@ -3415,33 +3420,48 @@ function module_code(library_namespace) {
 		// table "|-" 未起新行等。
 
 		// ----------------------------------------------------
-		// 因為<nowiki>可以打斷其他的語法，包括"<!--"，因此必須要首先處理。
 
-		wikitext = wikitext.replace_till_stable(PATTERN_extensiontags,
-				parse_HTML_tag);
+		// 置於 <nowiki> 中，如 "<nowiki><!-- --></nowiki>"
+		// 則雖無功用，但會當作一般文字顯示，而非註解。
 
-		// ----------------------------------------------------
-		// comments: <!-- ... -->
+		var PATTERN_extensiontags = session
+				&& session.configurations.PATTERN_extensiontags
+				|| PATTERN_wiki_extensiontags;
+		// Add comments: <!-- ... -->
+		// <nowiki> 與 <!-- --> 基本上是哪個先出現就以哪個為準。優先度相同。
+		// <nowiki> 可以打斷其他的語法，包括 "<!--"。
+		PATTERN_extensiontags = new RegExp(PATTERN_extensiontags.source
+				+ /|<\!--([\s\S]*?)-->/.source, PATTERN_extensiontags.flags);
 
-		// <nowiki> 之優先度高於 "<!-- -->"。
-		// 置於 <nowiki> 中，如 "<nowiki><!-- --></nowiki>" 則雖無功用，但會當作一般文字顯示，而非註解。
+		function parse_comments_or_extensiontags(all, tag, attributes, inner,
+				ending, end_tag, parameters, offset, original_string) {
+			if (tag) {
+				// assert: is extensiontag
+				return parse_HTML_tag(all, tag, attributes, inner, ending,
+						end_tag, offset, original_string);
+			}
 
-		// "<\": for Eclipse JSDoc.
+			// console.trace([ all, parameters, arguments ]);
+
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			// e.g., "<!-- <nowiki>...</nowiki> ... -->"
+			parameters = parse_wikitext(parameters, options, queue);
+			// 不再作 parse。
+			parameters = parameters.toString();
+			queue.push(_set_wiki_type(parameters, 'comment'));
+			return include_mark + (queue.length - 1) + end_mark;
+		}
+
+		// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!-- -->wiki>"
+		// 之類），又無需向前回溯；只需在第一次檢測，不會有遺珠之憾。
 		if (initialized_fix) {
-			wikitext = wikitext.replace(/<\!--([\s\S]*?)-->/g,
-			// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!-- -->wiki>"
-			// 之類），又無需向前回溯；只需在第一次檢測，不會有遺珠之憾。
-			function(all, parameters) {
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				// e.g., "<!-- <nowiki>...</nowiki> ... -->"
-				parameters = parse_wikitext(parameters, options, queue);
-				// 不再作 parse。
-				parameters = parameters.toString();
-				queue.push(_set_wiki_type(parameters, 'comment'));
-				return include_mark + (queue.length - 1) + end_mark;
-			})
+			// .replace_till_stable(): e.g., '<ref name="a"/><!-- </ref -->a'
+			wikitext = wikitext.replace_till_stable(PATTERN_extensiontags,
+					parse_comments_or_extensiontags);
 			// 缺 end mark: "...<!--..."
-			.replace(/<\!--([\s\S]*)$/, function(all, parameters) {
+			// "<\": for Eclipse JSDoc.
+			wikitext = wikitext.replace(/<\!--([\s\S]*)$/, function(all,
+					parameters) {
 				if (initialized_fix[1]) {
 					parameters = parameters.slice(0,
 					//
@@ -3569,6 +3589,10 @@ function module_code(library_namespace) {
 		// <del>不採用 global variable，預防 multitasking 並行處理。</del>
 		// reset PATTERN index
 		// PATTERN_WIKI_TAG.lastIndex = 0;
+
+		var PATTERN_non_extensiontags = session
+				&& session.configurations.PATTERN_non_extensiontags
+				|| PATTERN_non_wiki_extensiontags;
 
 		// console.log(PATTERN_TAG);
 		// console.trace(PATTERN_non_extensiontags);
