@@ -1856,7 +1856,7 @@ var last_selected, select_panels = {
 	configuration : '設定',
 	// 整批轉換
 	// gettext_config:{"id":"batch"}
-	batch_processing : '批次轉換',
+	batch_processing : '批量轉換',
 	// gettext_config:{"id":"tagging"}
 	tag_text : '標注文本',
 	// gettext_config:{"id":"development"}
@@ -2440,7 +2440,7 @@ function click_title_as_era() {
 
 // ---------------------------------------------------------------------//
 
-function 批次轉換() {
+function 批量轉換() {
 	var date, count = 0, data = CeL.set_text('batch_source').trim().split('\n'),
 	//
 	prefix = CeL.set_text('batch_prefix'),

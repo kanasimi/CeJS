@@ -2701,7 +2701,7 @@ function module_code(library_namespace) {
 	});
 
 	/**
-	 * robot 作業操作之輔助套裝函數。此函數可一次取得50至300個頁面內容再批次處理。<br />
+	 * robot 作業操作之輔助套裝函數。此函數可一次取得50至300個頁面內容再批量處理。<br />
 	 * 不會推入 this.actions queue，即時執行。因此需要先 get list！
 	 * 
 	 * 注意: arguments 與 get_list() 之 callback 連動。

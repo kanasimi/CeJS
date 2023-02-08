@@ -165,7 +165,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"batch": {
-		"message": "批次轉換",
+		"message": "批量轉換",
 		"notes": "Panel name when doing batch converting.",
 		"scope": "data.date.era: note_botton_layer",
 		"original_message_language_code": "cmn-Hant-TW",
