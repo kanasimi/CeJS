@@ -1856,7 +1856,7 @@ var last_selected, select_panels = {
 	configuration : '設定',
 	// 整批轉換
 	// gettext_config:{"id":"batch"}
-	batch_processing : '批量轉換',
+	batch_processing : '批次轉換',
 	// gettext_config:{"id":"tagging"}
 	tag_text : '標注文本',
 	// gettext_config:{"id":"development"}

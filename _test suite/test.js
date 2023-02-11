@@ -1039,6 +1039,9 @@ function test_locale() {
 					CeL.gettext.in_domain('TW',
 						// gettext_config:{"id":"loading"}
 						'Loading...')], '不改變預設 domain，直接取得特定 domain 的轉換過的文字。');
+				assert(['The bot operation is completed 2.3% in total',
+					// gettext_config:{"id":"the-bot-operation-is-completed-$1$-in-total"}
+					CeL.gettext('本次機械人作業已完成%1%', 2.3)]);
 			}, true);
 		}, true);
 	});
