@@ -191,6 +191,7 @@
 	"gregorian-reform": "グレゴリオ改暦",
 	"famous-places": "有名な都市：",
 	"loading-$1$": "読み込み中 %1%…",
+	"the-bot-operation-is-completed-$1$-in-total": "今回のBot作業のうち%1%が完了しました",
 	"finished": "完成",
 	"no-changes": "全て変更なし。",
 	"no-page-modified": "全記事変更なし",
