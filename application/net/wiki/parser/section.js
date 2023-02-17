@@ -544,7 +544,9 @@ function module_code(library_namespace) {
 		// 注意: 當這空白字字出現在功能性token中時，可能會出錯。
 		var id = parsed_title.toString().trim().replace(
 				PATTERN_element_placeholder, '')
-		//
+		// 去頭去尾僅針對 "\x20"，不包括 &nbsp; === &#160 (\xa0)，所以不能用 .trim()。
+		.replace(/^ +/, '').replace(/ +$/, '')
+		// 多個空白字元轉為單一空白字元。
 		.replace(/[\s\n]+/g, ' '),
 		// anchor 網頁錨點: 可以直接拿來做 wikilink anchor 的章節標題。
 		// 有多個完全相同的 anchor 時，後面的會加上"_2", "_3",...。

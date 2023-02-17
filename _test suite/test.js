@@ -4322,6 +4322,15 @@ function test_wiki() {
 		wikitext = '== t&nbsp;[[file:a.jpg|20px]]==\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'CeL.wiki.parse.anchor: #3');
 		assert(["t ", CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor: #3-1');
+		wikitext = '==[[file:a.jpg|20px]] a==\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'CeL.wiki.parse.anchor: #4');
+		assert(["a", CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor: #4-1');
+		wikitext = '==a [[file:a.jpg|20px]]==\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'CeL.wiki.parse.anchor: #5');
+		assert(["a", CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor: #5-1');
+		wikitext = '==[[file:a.jpg|20px]] [[a]]==\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'CeL.wiki.parse.anchor: #6');
+		assert(["a", CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor: #6-1');
 
 		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
@@ -5020,8 +5029,8 @@ function test_wiki() {
 			promise = promise.then(function () {
 				return CeL.wiki.expand_transclusion('{{ {{ifIP|name=user_name|IPvandal|Userblock}}|user_name|hidename=}}', options);
 			}).then(function (parsed) {
-				//console.trace(parsed.toString());
-				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]] '''·'''  [[Special:Contributions/user_name|貢獻]] '''·'''  [//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁日誌] '''·''' [[Special:CentralAuth/user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
+				//console.trace(JSON.stringify(parsed.toString()));
+				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]] <b>·</b>  [[Special:Contributions/user_name|貢獻]] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁日誌] <b>·</b> [[Special:CentralAuth/user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
 			});
 
 			promise = promise.then(function () {
