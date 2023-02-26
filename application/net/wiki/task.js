@@ -3369,7 +3369,7 @@ function module_code(library_namespace) {
 								+ '%)';
 						// do NOT use:
 						// gettext_config:{"id":"the-bot-operation-is-completed-$1$-in-total"}
-						false && gettext('本次機械人作業已完成%1%', '...%');
+						false && gettext('The bot operation is completed %1% in total', '...%');
 
 					} else {
 						count_summary += initial_target_length;

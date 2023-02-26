@@ -97,7 +97,7 @@
 	"collapse": "samenvouwen",
 	"Duplicate task name %1! Will overwrite old task with new task: %2\u2192%3": "Dubbele taaknaam %1! De oude taak wordt overschreven door de nieuwe: %2\u2192%3",
 	"%1 {{PLURAL:%1|page|pages}} modified": "%1 {{PLURAL:%1|pagina|pagina's}} bewerkt",
-	"\u79fb\u9664%1\u500b\u975e\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}": "%1 nog bestaande {{PLURAL:%1|anker|ankers}} verwijderen",
+	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "%1 nog bestaande {{PLURAL:%1|anker|ankers}} verwijderen",
 	"\u8a9e\u8a00\u6578": "Aantal talen",
 	"\u5e73\u5747": "Gemiddelde",
 	"\u5408\u8a08": "Som",
