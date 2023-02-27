@@ -1069,7 +1069,7 @@
 	"cancel-download": "取消下载",
 	"continue": "继续",
 	"input-series-name-or-id-first": "请先输入作品名称或🆔。",
-	"downloading-«$2»-from-$1.-please-wait-until-the-download-is-complete-or-cancel-the-download-before-downloading-$3": "正在从%1下载《%​​2》这个作品。将等到这个作品下载完毕，或者取消下载后，再下载 %3。",
+	"downloading-«$2»-from-$1.-please-wait-until-the-download-is-complete-or-cancel-the-download-before-downloading-$3": "正在从%1下载《%2》这个作品。将等到这个作品下载完毕，或者取消下载后，再下载 %3。",
 	"redownloading": "重新下载",
 	"clearing-downloaded-record": "清除本下载纪录",
 	"(there-are-$1-errors-in-total)": "（总共有%1个{{PLURAL:%1|错误}}）",

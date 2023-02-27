@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Brettchenweber",
+			"Crazy1880",
 			"DraconicDark",
 			"Giftpflanze",
 			"Justman10000",
@@ -9,8 +10,13 @@
 			"ZiqiLiang"
 		]
 	},
+	"españa": "Spanien",
+	"french-republican-calendar": "Französischer republikanischer Kalender",
 	"untranslated-message-count": "1000+",
+	"clear-log": "Protokoll löschen",
+	"show-hidden-log": "Protokoll anzeigen / ausblenden",
 	"load-failed": "Laden fehlgeschlagen",
+	"log-console": "Log-Konsole",
 	"coordinates": "Koordinaten:&#32;",
 	"customize-output-format": "Ausgabeformat anpassen",
 	"latitude": "Breitengrad:&#32;",
@@ -24,6 +30,7 @@
 	"remove-the-column": "Spalte entfernen",
 	"group": "Gruppe",
 	"$1-$2-$3": "%1/%2/%3",
+	"calendar-date": "Kalenderdatum",
 	"remove-all": "ALLE entfernen",
 	"add-the-column": "Spalte hinzufügen",
 	"taiwan-earthquakes": "Erdbeben in Taiwan",
