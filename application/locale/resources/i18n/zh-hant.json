@@ -927,6 +927,7 @@
 	"duplicate-task-name-$1!-will-overwrite-old-task-with-new-task-$2→$3": "任務名稱重複%1！將以新的覆蓋舊的：%2→%3",
 	"get-$1-task(s)-from-$2": "從%2取得%1項{{PLURAL:%1|任務}}",
 	"the-requested-robot-task-begins": "開始執行請求的機器人任務。",
+	"the-section-does-not-set-the-task-configuration-$1": "本章節未設定任務內容: %1",
 	"already-reminded-that-the-operation-is-in-progress-$1": "已提醒正在作業中：%1",
 	"add-warning-messages": "添加警告訊息。",
 	"no-title-found-for-$1": "未發現標題 %1。",

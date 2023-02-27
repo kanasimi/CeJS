@@ -918,6 +918,7 @@
 	"Duplicate task name %1! Will overwrite old task with new task: %2\u2192%3": "\u4efb\u52d9\u540d\u7a31\u91cd\u8907%1\uff01\u5c07\u4ee5\u65b0\u7684\u8986\u84cb\u820a\u7684\uff1a%2\u2192%3",
 	"Get %1 {{PLURAL:%1|task|tasks}} from %2.": "\u5f9e%2\u53d6\u5f97%1\u9805{{PLURAL:%1|\u4efb\u52d9}}",
 	"The requested robot task begins.": "\u958b\u59cb\u57f7\u884c\u8acb\u6c42\u7684\u6a5f\u5668\u4eba\u4efb\u52d9\u3002",
+	"\u672c\u7ae0\u7bc0\u672a\u8a2d\u5b9a\u4efb\u52d9\u5167\u5bb9: %1": "\u672c\u7ae0\u7bc0\u672a\u8a2d\u5b9a\u4efb\u52d9\u5167\u5bb9: %1",
 	"Already reminded that the operation is in progress: %1": "\u5df2\u63d0\u9192\u6b63\u5728\u4f5c\u696d\u4e2d\uff1a%1",
 	"Add warning messages.": "\u6dfb\u52a0\u8b66\u544a\u8a0a\u606f\u3002",
 	"No title found for %1.": "\u672a\u767c\u73fe\u6a19\u984c %1\u3002",

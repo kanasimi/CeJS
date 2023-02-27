@@ -1,8 +1,13 @@
 /*	Localized messages of CeL.
 	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2023.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
+	"Espa\u00f1a": "Spanien",
+	"Calendrier r\u00e9publicain": "Franz\u00f6sischer republikanischer Kalender",
 	"untranslated message count": "1000+",
+	"\u6e05\u9664\u8a0a\u606f": "Protokoll l\u00f6schen",
+	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Protokoll anzeigen / ausblenden",
 	"Load failed": "Laden fehlgeschlagen",
+	"\u8a0a\u606f\u63d0\u793a\u8207\u7d00\u9304\u6b04": "Log-Konsole",
 	"\u5730\u7406\u5ea7\u6a19\uff1a": "Koordinaten: ",
 	"\u81ea\u8a02\u8f38\u51fa\u683c\u5f0f": "Ausgabeformat anpassen",
 	"\u7def\u5ea6\uff1a": "Breitengrad: ",
@@ -16,6 +21,7 @@
 	"\u9664\u53bb\u6b64\u6b04": "Spalte entfernen",
 	"\u5206\u985e": "Gruppe",
 	"%1/%2/%3": "%1/%2/%3",
+	"\u5e74\u8b5c": "Kalenderdatum",
 	"\u5168\u4e0d\u9078": "ALLE entfernen",
 	"\u589e\u52a0\u6b64\u6b04": "Spalte hinzuf\u00fcgen",
 	"\u81fa\u7063\u5730\u9707": "Erdbeben in Taiwan",

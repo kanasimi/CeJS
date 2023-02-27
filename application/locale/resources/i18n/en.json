@@ -916,6 +916,7 @@
 	"duplicate-task-name-$1!-will-overwrite-old-task-with-new-task-$2→$3": "Duplicate task name %1! Will overwrite old task with new task: %2→%3",
 	"get-$1-task(s)-from-$2": "Get %1 {{PLURAL:%1|task|tasks}} from %2.",
 	"the-requested-robot-task-begins": "The requested robot task begins.",
+	"the-section-does-not-set-the-task-configuration-$1": "The section does not set the task configuration: %1",
 	"already-reminded-that-the-operation-is-in-progress-$1": "Already reminded that the operation is in progress: %1",
 	"add-warning-messages": "Add warning messages.",
 	"no-title-found-for-$1": "No title found for %1.",
