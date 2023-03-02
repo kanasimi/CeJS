@@ -921,6 +921,7 @@
 	"duplicate-task-name-$1!-will-overwrite-old-task-with-new-task-$2→$3": "Nòm ëd travaj %1 an dobion! Ël vej travaj a sarà rampiassà dal neuv: %2→%3",
 	"get-$1-task(s)-from-$2": "Oten-e %1 {{PLURAL:%1|travaj}} da %2.",
 	"the-requested-robot-task-begins": "Ël travaj ëd robò ciamà a ancamin-a.",
+	"the-section-does-not-set-the-task-configuration-$1": "La session a definiss nen la configurassion dël travaj: %1",
 	"already-reminded-that-the-operation-is-in-progress-$1": "Già arcordà che l'operassion a l'é an cors: %1",
 	"add-warning-messages": "Gionté ij mëssagi d'avertiment.",
 	"no-title-found-for-$1": "Gnun tìtol trovà për %1.",

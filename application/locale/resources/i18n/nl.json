@@ -102,6 +102,7 @@
 	"expand": "uitvouwen",
 	"collapse": "samenvouwen",
 	"duplicate-task-name-$1!-will-overwrite-old-task-with-new-task-$2→$3": "Dubbele taaknaam %1! De oude taak wordt overschreven door de nieuwe: %2→%3",
+	"the-section-does-not-set-the-task-configuration-$1": "De sectie stelt de taakconfiguratie niet in: %1",
 	"$1-pages-modified": "%1 {{PLURAL:%1|pagina|pagina's}} bewerkt",
 	"remove-$1-non-defunct-anchors": "%1 nog bestaande {{PLURAL:%1|anker|ankers}} verwijderen",
 	"count-of-languages": "Aantal talen",
