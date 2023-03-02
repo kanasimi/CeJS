@@ -96,6 +96,7 @@
 	"expand": "uitvouwen",
 	"collapse": "samenvouwen",
 	"Duplicate task name %1! Will overwrite old task with new task: %2\u2192%3": "Dubbele taaknaam %1! De oude taak wordt overschreven door de nieuwe: %2\u2192%3",
+	"\u672c\u7ae0\u7bc0\u672a\u8a2d\u5b9a\u4efb\u52d9\u5167\u5bb9: %1": "De sectie stelt de taakconfiguratie niet in: %1",
 	"%1 {{PLURAL:%1|page|pages}} modified": "%1 {{PLURAL:%1|pagina|pagina's}} bewerkt",
 	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "%1 nog bestaande {{PLURAL:%1|anker|ankers}} verwijderen",
 	"\u8a9e\u8a00\u6578": "Aantal talen",

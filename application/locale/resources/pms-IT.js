@@ -918,6 +918,7 @@
 	"Duplicate task name %1! Will overwrite old task with new task: %2\u2192%3": "N\u00f2m \u00ebd travaj %1 an dobion! \u00cbl vej travaj a sar\u00e0 rampiass\u00e0 dal neuv: %2\u2192%3",
 	"Get %1 {{PLURAL:%1|task|tasks}} from %2.": "Oten-e %1 {{PLURAL:%1|travaj}} da %2.",
 	"The requested robot task begins.": "\u00cbl travaj \u00ebd rob\u00f2 ciam\u00e0 a ancamin-a.",
+	"\u672c\u7ae0\u7bc0\u672a\u8a2d\u5b9a\u4efb\u52d9\u5167\u5bb9: %1": "La session a definiss nen la configurassion d\u00ebl travaj: %1",
 	"Already reminded that the operation is in progress: %1": "Gi\u00e0 arcord\u00e0 che l'operassion a l'\u00e9 an cors: %1",
 	"Add warning messages.": "Giont\u00e9 ij m\u00ebssagi d'avertiment.",
 	"No title found for %1.": "Gnun t\u00ectol trov\u00e0 p\u00ebr %1.",

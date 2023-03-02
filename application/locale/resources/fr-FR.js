@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -918,6 +918,7 @@
 	"Duplicate task name %1! Will overwrite old task with new task: %2\u2192%3": "Nom de t\u00e2che \u00ab\u202f%1\u202f\u00bb en doublon\u202f! L\u2019ancienne t\u00e2che sera remplac\u00e9e par la nouvelle\u202f: \u00ab\u202f%2\u202f\u00bb\u2192\u00ab\u202f%3\u202f\u00bb",
 	"Get %1 {{PLURAL:%1|task|tasks}} from %2.": "Obtient %1 t\u00e2che{{PLURAL:%1||s}} depuis %2.",
 	"The requested robot task begins.": "La t\u00e2che de robot demand\u00e9e d\u00e9marre.",
+	"\u672c\u7ae0\u7bc0\u672a\u8a2d\u5b9a\u4efb\u52d9\u5167\u5bb9: %1": "La section ne d\u00e9finit pas la configuration de la t\u00e2che\u202f: %1",
 	"Already reminded that the operation is in progress: %1": "A d\u00e9j\u00e0 rappel\u00e9 que l\u2019op\u00e9ration est en cours\u202f: %1",
 	"Add warning messages.": "Ajouter les messages d\u2019avertissement.",
 	"No title found for %1.": "Aucun titre trouv\u00e9 pour %1.",
