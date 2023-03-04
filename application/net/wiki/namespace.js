@@ -2959,9 +2959,12 @@ function module_code(library_namespace) {
 				// 有時必須初始設定，還是得執行 configuration_adapter。
 				// return;
 			} else {
-				library_namespace
-						.info('adapt_task_configurations: Get configurations from '
-								+ wiki_API.title_link_of(page_data));
+				library_namespace.info([ 'adapt_task_configurations: ', {
+					// gettext_config:{"id":"get-configurations-from-page-$1"}
+					T : [ 'Get configurations from page %1',
+					//
+					wiki_API.title_link_of(page_data) ]
+				} ]);
 			}
 
 			if (!options.once) {

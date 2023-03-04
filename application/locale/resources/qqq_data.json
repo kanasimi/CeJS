@@ -2790,19 +2790,25 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L331}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1271}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L327}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L332}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L336}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L681}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L906}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L945}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L951}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L958}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"get-configurations-from-page-$1": {
+		"message": "Get configurations from page %1",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2964}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"continue-key": {
 		"message": "Continue key",
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3070}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3073}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3562}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3565}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
