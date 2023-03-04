@@ -349,7 +349,8 @@ function module_code(library_namespace) {
 		// @see createProductionCodeCell() @ [[Module:Episode list]]
 		var anchor = trim_param(parameters.ProdCode);
 		if (anchor) {
-			wikitext.push('<td id="' + 'pc' + anchor + '"></td>');
+			wikitext.push('<td id="' + 'pc' + wiki_API.plain_text(anchor)
+					+ '"></td>');
 		}
 
 		// console.trace(wikitext);
@@ -365,6 +366,7 @@ function module_code(library_namespace) {
 
 	function parse_template_Episode_table(token, index, parent, options) {
 		// token.expand = expand_template_Episode_table;
+
 		var parameters = token.parameters;
 		var episodes = parameters.episodes;
 		var anchor_prefix = trim_param(parameters.anchor);
@@ -380,6 +382,37 @@ function module_code(library_namespace) {
 				}
 			}, options);
 		}
+	}
+
+	function expand_template_Episode_table__part(options) {
+		var parameters = this.parameters;
+		// console.trace(parameters);
+
+		// [[Module:Episode table]]
+		var id = trim_param(parameters.id);
+
+		if (!id) {
+			// partTypes
+			[ 'Act', 'Chapter', 'Part', 'Volume', 'Week' ].forEach(function(
+					prefix) {
+				var value = parameters[prefix.toLowerCase()];
+				if (value)
+					id = prefix + ' ' + value;
+			});
+
+			if (parameters.subtitle) {
+				id = (id ? id + ': ' : '') + parameters.subtitle;
+			}
+			// console.trace(id);
+		}
+
+		if (id) {
+			return '<td id="' + wiki_API.plain_text(id) + '"></td>';
+		}
+	}
+
+	function parse_template_Episode_table__part(token, index, parent, options) {
+		token.expand = expand_template_Episode_table__part;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -529,6 +562,7 @@ function module_code(library_namespace) {
 		// Sfn : parse_template_Sfn,
 		SfnRef : parse_template_SfnRef,
 		'Episode table' : parse_template_Episode_table,
+		'Episode table/part' : parse_template_Episode_table__part,
 		'Episode list' : parse_template_Episode_list,
 		'Episode list/sublist' : parse_template_Episode_list,
 
