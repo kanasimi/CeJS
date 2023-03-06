@@ -59,6 +59,7 @@
 	"sunset": "zonsondergang",
 	"language": "Taal",
 	"no-reason-provided": "Geen reden opgegeven",
+	"get-configurations-from-page-$1": "Configuraties ophalen van pagina %1",
 	"reduce-the-maximum-number-of-pages-per-fetch-to-a-maximum-of-$1-pages": "Beperk het maximumaantal pagina's per keer tot %1 pagina's.",
 	"unknown-api-response-$1": "Onbekend api-antwoord: %1",
 	"no-change": "geen wijzigingen",

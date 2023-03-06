@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Re demz",
 			"YuriNikolai"
 		]
 	},
@@ -344,6 +345,7 @@
 	"parse-{$2}-$1-if-it-is-a-object": "Analisar {%2} [%1] se for um objeto.",
 	"reset-style-{$2}-$1": "Redefinir estilo {%2} [%1].",
 	"unknown-style-$1": "Estilo desconhecido: [%1].",
+	"the-section-does-not-set-the-task-configuration-$1": "A seção não define a configuração da tarefa: %1",
 	"move-$1": "Movendo %1:",
 	"remove-empty-directory-$1": "Removendo o diretório vazio: %1",
 	"$1-$2-compressing": "%1/%2 comprimindo",

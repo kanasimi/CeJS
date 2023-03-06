@@ -7,7 +7,8 @@
 			"MirukuPC",
 			"Mugenpman",
 			"Omotecho",
-			"Yamagata Yusuke"
+			"Yamagata Yusuke",
+			"もなー(偽物)"
 		]
 	},
 	"españa": "スペイン",
@@ -269,6 +270,7 @@
 	"no-reason-provided": "説明がありません",
 	"no-content": "本文なし",
 	"$1-is-not-exist-in-$2": "%1は%2に存在しません。",
+	"get-configurations-from-page-$1": "ページ %1 から設定を取得",
 	"continue-key": "後続の索引",
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": "%1 のAPIモジュールに関する情報をキャッシュする：モジュールパスは %2",
 	"found-$2-query-modules-$1": "クエリ・モジュールが %2 種類あります：%1",
@@ -516,6 +518,7 @@
 	"conversion-pairs-of-$1": "%1の変換ペア。",
 	"revision-id": "版の識別子",
 	"the-requested-robot-task-begins": "Bot依頼の作業を始めます。",
+	"the-section-does-not-set-the-task-configuration-$1": "セクション \"%1\" はタスク構成を設定していません。",
 	"add-warning-messages": "警告メッセージを追加する。",
 	"no-title-found-for-$1": "タイトルが見つかりません：%1。",
 	"will-not-automatically-notify-the-task-begins": "タスク開始の自動通知はしません！",
