@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "\u897f\u73ed\u7259",
 	"Calendrier r\u00e9publicain": "\u6cd5\u570b\u5171\u548c\u66c6",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "\u6e05\u9664\u8a0a\u606f",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "\u986f\u793a/\u96b1\u85cf\u8a0a\u606f",
 	"Load failed": "\u8f09\u5165\u5931\u6557",
@@ -322,6 +322,7 @@
 	"%1 {{PLURAL:%1|result|results}}": "%1 \u7b46{{PLURAL:%1|\u7d50\u679c}}",
 	"%1 is not exist in %2.": "%2 \u4e2d\u7121 %1\u3002",
 	"Invalid title: %1": "\u6a19\u984c\u7121\u6548\uff1a%1",
+	"Get configurations from page %1": "\u5f9e\u9801\u9762%1\u53d6\u5f97\u8a2d\u5b9a",
 	"Continue key": "\u5f8c\u7e8c\u7d22\u5f15",
 	"Cache information about the API modules of %1: module path=%2": "\u5feb\u53d6 %1 \u7684 API \u6a21\u7d44\u8cc7\u8a0a\uff1a\u6a21\u7d44\u8def\u5f91\u70ba %2",
 	"Found %2 query {{PLURAL:%2|module|modules}}: %1": "\u5171\u6709%2\u7a2e\u67e5\u8a62{{PLURAL:%2|\u6a21\u7d44}}\uff1a%1",

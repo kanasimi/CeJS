@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -322,6 +322,7 @@
 	"%1 {{PLURAL:%1|result|results}}": "%1 r\u00e9sultat{{PLURAL:%1||s}}",
 	"%1 is not exist in %2.": "%1 n\u2019existe pas dans %2.",
 	"Invalid title: %1": "Titre non valide\u202f: %1",
+	"Get configurations from page %1": "Obtenir les configurations de la page %1",
 	"Continue key": "Cl\u00e9 de continuation",
 	"Cache information about the API modules of %1: module path=%2": "Mise en cache les informations  concernant les modules API de %1\u202f: chemin du module=%2",
 	"Found %2 query {{PLURAL:%2|module|modules}}: %1": "%2\u00a0module{{PLURAL:%2||s}} de requ\u00eate trouv\u00e9{{PLURAL:%2||s}}\u202f: %1",

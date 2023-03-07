@@ -53,6 +53,7 @@
 	"sunset": "zonsondergang",
 	"Language": "Taal",
 	"No reason provided": "Geen reden opgegeven",
+	"Get configurations from page %1": "Configuraties ophalen van pagina %1",
 	"\u8abf\u964d\u53d6\u5f97\u9801\u9762\u7684\u4e0a\u9650\uff0c\u6539\u6210\u6bcf\u6b21\u6700\u591a %1 \u500b\u9801\u9762\u3002": "Beperk het maximumaantal pagina's per keer tot %1 pagina's.",
 	"Unknown API response: %1": "Onbekend api-antwoord: %1",
 	"no change": "geen wijzigingen",

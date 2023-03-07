@@ -341,6 +341,7 @@
 	"Parse {%2} [%1] if it is a object.": "Analisar {%2} [%1] se for um objeto.",
 	"Reset style {%2} [%1].": "Redefinir estilo {%2} [%1].",
 	"Unknown style: [%1].": "Estilo desconhecido: [%1].",
+	"\u672c\u7ae0\u7bc0\u672a\u8a2d\u5b9a\u4efb\u52d9\u5167\u5bb9: %1": "A se\u00e7\u00e3o n\u00e3o define a configura\u00e7\u00e3o da tarefa: %1",
 	"Move %1:": "Movendo %1:",
 	"Remove empty directory: %1": "Removendo o diret\u00f3rio vazio: %1",
 	"%1/%2 compressing": "%1/%2 comprimindo",
