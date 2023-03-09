@@ -118,6 +118,7 @@
 	"convert-number-$1-to-$2-format": "Converter o número: [%1] para formato %2.",
 	"unable-to-convert-number-$1": "Incapaz de converter o número [%1]!",
 	"retry-$1-$2-$3": "Tente novamente %1/%2: %3",
+	"get-configurations-from-page-$1": "Obtenha configurações da página %1",
 	"invalid-url-$1": "URL inválida: %1",
 	"finished-$1": "concluído: %1",
 	"cannot-detect-work-id-from-url-$1": "id do projeto não foi encontrado pela URL: %1",
