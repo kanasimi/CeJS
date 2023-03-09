@@ -5056,7 +5056,21 @@ function test_wiki() {
 				assert(['4', CeL.wiki.expand_transclusion('{{<!-- -->#<!-- -->in<!-- -->{{#if:1|voke}}<!-- -->:IP<!-- -->Address|is<!-- -->{{#if:1|Ip}}|8.8.8.8}}', options).toString()], 'CeL.wiki.expand_transclusion() {{#invoke}} #3');
 			});
 
-			return promise.then(function (parsed) {
+			promise = promise.then(function () {
+				return CeL.wiki.parse.anchor('=={{USA}} USA==', { session: zhwiki, on_page_title: '美国驻华大使列表', try_to_expand_templates: true });
+			}).then(function (anchor_list) {
+				assert([' 美國 USA', anchor_list.join()], 'CeL.wiki.parse.anchor() {try_to_expand_templates: true} #1');
+			}).then(function () {
+				return CeL.wiki.parse.anchor('=={{USA}} USA==', { session: zhwiki, on_page_title: '美国驻华大使列表', try_to_expand_templates: true });
+			}).then(function (anchor_list) {
+				// 第二次取值也必須正確。
+				assert([' 美國 USA', anchor_list.join()], 'CeL.wiki.parse.anchor() {try_to_expand_templates: true} #2');
+			});
+
+			promise.then(function () { }, function (error) {
+				assert([, error], test_name + ': Throw out exceptions in the middle');
+			});
+			return promise.then(function () {
 				_finish_test(test_name);
 			});
 		});

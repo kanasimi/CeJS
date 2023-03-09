@@ -114,6 +114,7 @@
 	"\u8f49\u63db\u6578\u5b57\uff1a[%1]\u6210 %2 \u683c\u5f0f\u3002": "Converter o n\u00famero: [%1] para formato %2.",
 	"\u7121\u6cd5\u8f49\u63db\u6578\u5b57 [%1]\uff01": "Incapaz de converter o n\u00famero [%1]!",
 	"Retry %1/%2: %3": "Tente novamente %1/%2: %3",
+	"Get configurations from page %1": "Obtenha configura\u00e7\u00f5es da p\u00e1gina %1",
 	"\u7db2\u5740\u7121\u6548\uff1a%1": "URL inv\u00e1lida: %1",
 	"finished: %1": "conclu\u00eddo: %1",
 	"\u7121\u6cd5\u5f9e\u7db2\u5740\u64f7\u53d6\u4f5c\u54c1 id\uff1a%1": "id do projeto n\u00e3o foi encontrado pela URL: %1",

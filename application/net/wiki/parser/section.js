@@ -384,7 +384,11 @@ function module_code(library_namespace) {
 
 		options.modify = true;
 
+		// console.trace(options);
 		// console.trace(tokens);
+		if (options.try_to_expand_templates) {
+			// 警告: 必須自行 wiki_API.expand_transclusion(). @see get_all_anchors()
+		}
 		return preprocess_section_link_token(tokens, options);
 	}
 
@@ -538,8 +542,10 @@ function module_code(library_namespace) {
 		// console.trace(wiki_API.parse(section_title, null, []));
 		// TODO: "==''==text==''==\n"
 		var parsed_title = pre_parse_section_title(section_title, options);
+		// console.trace([ section_title, parsed_title, options ]);
 		// pass session.
 		parsed_title = preprocess_section_link_tokens(parsed_title, options);
+		// console.trace([ section_title, parsed_title ]);
 
 		// 注意: 當這空白字字出現在功能性token中時，可能會出錯。
 		var id = parsed_title.toString().trim().replace(
@@ -1672,7 +1678,11 @@ function module_code(library_namespace) {
 		var anchor_hash = Object.create(null);
 		function register_anchor(anchor, token, preserve_spaces) {
 			anchor = normalize_anchor(anchor, preserve_spaces);
-			if (typeof anchor === 'string' && anchor.length > 1024) {
+			if (!anchor) {
+				return;
+			}
+			anchor = anchor.toString();
+			if (anchor.length > 1024) {
 				if (false) {
 					Error.stackTraceLimit = Infinity;
 					console.trace([ anchor, token.toString() ]);
@@ -1683,13 +1693,17 @@ function module_code(library_namespace) {
 				// 經過測試只會取前1024字元。 [[w:zh:Special:Diff/51003951]]
 				anchor = anchor.slice(0, 1024);
 			}
+			// 以首個出現的為準。
+			if (anchor in anchor_hash) {
+				return;
+			}
 			if (false && /^===/.test(anchor)) {
 				console.trace([ anchor, token ]);
 			}
-			// 以首個出現的為準。
-			if (anchor && !(anchor in anchor_hash)) {
-				anchor_hash[anchor] = token;
+			if (anchor.includes('{{')) {
+				// console.trace([ anchor, token, options ]);
 			}
+			anchor_hash[anchor] = token;
 		}
 
 		// options: pass session. for options.language
@@ -1749,7 +1763,10 @@ function module_code(library_namespace) {
 			// TODO: 忽略包含不合理元素的編輯，例如 url。
 			// .imprecise_tokens 是在 .parse() 時即已設定。
 
-			if (section_title_link.imprecise_tokens
+			if ((section_title_link.imprecise_tokens
+			// 就算沒有 .imprecise_tokens，也可能只是之前 fetch 過了。
+			// e.g., "=={{USA}} USA=="
+			|| section_title_link.id.includes('{{'))
 			// 嘗試展開模板。
 			&& options.try_to_expand_templates) {
 				var promise = wiki_API.expand_transclusion(section_title_token
@@ -1788,6 +1805,9 @@ function module_code(library_namespace) {
 
 			function for_converted_section_title() {
 				if (!section_title_link.imprecise_tokens) {
+					if (section_title_link.id.includes('{{')) {
+						// console.trace(section_title_link);
+					}
 					// console.trace(section_title_link);
 					// `section_title_token.title` will not transfer "[", "]"
 					register_anchor(
@@ -1824,6 +1844,7 @@ function module_code(library_namespace) {
 		var _options = Object.assign(Object.clone(options), {
 			print_anchors : false
 		});
+		// console.trace(options);
 
 		// console.trace(promise);
 		if (!promise) {
