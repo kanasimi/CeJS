@@ -911,7 +911,8 @@ function module_code(library_namespace) {
 
 	<p<!-- -->re>...</pre>
 
-	parse {{Template:Single chart}}
+	parse:
+	{{Template:Single chart}}
 
 	</code>
 	 * 

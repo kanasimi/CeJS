@@ -270,7 +270,21 @@ function module_code(library_namespace) {
 		else
 			level++;
 
+		// 避免不解析模板。
+		// e.g., "=={{USA}} USA=="
+		delete options.target_array;
+
 		parsed = wiki_API.parser(wikitext, options).parse();
+		if (parsed.length === 1 && typeof parsed[0] === 'string'
+				&& parsed[0].includes('{{')) {
+			library_namespace.warn('simplify_transclusion: Cannot parse '
+					+ JSON.stringify(wikitext));
+			// console.trace(wikitext);
+			// console.trace(options);
+			console.trace(Object.keys(options));
+			// console.trace(parsed);
+			// console.trace(wiki_API.parse(wikitext));
+		}
 
 		if (options.template_token_called !== template_token_called) {
 			options = Object.clone(options);

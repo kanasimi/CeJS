@@ -70,11 +70,12 @@ function module_code(library_namespace) {
 			return token;
 		}
 
+		// console.trace(token);
 		// 前置作業: 處理模板之類特殊節點。
 		if (typeof options.preprocess_section_link_token === 'function') {
 			token = options.preprocess_section_link_token(token, options);
 		}
-		// console.log(token);
+		// console.trace(token);
 
 		token = wiki_API.repeatedly_expand_template_token(token, options);
 		// console.trace(token);
@@ -301,7 +302,10 @@ function module_code(library_namespace) {
 			return token;
 		}
 
-		if (token.type === 'switch') {
+		if (token.type in {
+			'switch' : true,
+			parameter : true
+		}) {
 			options.root_token_list.imprecise_tokens.push(token);
 			return '';
 		}
@@ -387,7 +391,8 @@ function module_code(library_namespace) {
 		// console.trace(options);
 		// console.trace(tokens);
 		if (options.try_to_expand_templates) {
-			// 警告: 必須自行 wiki_API.expand_transclusion(). @see get_all_anchors()
+			// 警告: 必須自行 wiki_API.expand_transclusion().
+			// example: @see get_all_anchors()
 		}
 		return preprocess_section_link_token(tokens, options);
 	}
@@ -651,6 +656,7 @@ function module_code(library_namespace) {
 		// id is not with "&amp;".
 		anchor, display_text ];
 		// console.log(link);
+		// console.trace(parsed_title);
 		if (parsed_title.imprecise_tokens
 		// section_title_token.link.imprecise_tokens
 		&& parsed_title.imprecise_tokens.length > 0) {
@@ -1764,9 +1770,11 @@ function module_code(library_namespace) {
 			// .imprecise_tokens 是在 .parse() 時即已設定。
 
 			if ((section_title_link.imprecise_tokens
-			// 就算沒有 .imprecise_tokens，也可能只是之前 fetch 過了。
+			// 就算沒有 .imprecise_tokens，也可能只是之前 fetch 過了，但有無法解析的 wikitext。
+			// @see function simplify_transclusion()
 			// e.g., "=={{USA}} USA=="
-			|| section_title_link.id.includes('{{'))
+			// || section_title_link.id.includes('{{')
+			)
 			// 嘗試展開模板。
 			&& options.try_to_expand_templates) {
 				var promise = wiki_API.expand_transclusion(section_title_token
