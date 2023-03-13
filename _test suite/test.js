@@ -5029,8 +5029,9 @@ function test_wiki() {
 			promise = promise.then(function () {
 				return CeL.wiki.expand_transclusion('{{ {{ifIP|name=user_name|IPvandal|Userblock}}|user_name|hidename=}}', options);
 			}).then(function (parsed) {
+				// [[Special:ExpandTemplates]]
 				//console.trace(JSON.stringify(parsed.toString()));
-				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]] <b>·</b>  [[Special:Contributions/user_name|貢獻]] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:Log&page=User:user_name 日誌]<small>［[//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:AbuseLog&wpSearchUser=user_name 過濾器]］</small> <b>·</b> [[Special:CentralAuth/user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
+				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\" style=\"color:#002bb8\">[[User:user_name|user_name]]<span style=\"color:black\">（</span>[[User talk:user_name|討論]] <b>·</b>  [[Special:Contributions/user_name|貢獻]] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:Log&page=User:user_name 日誌]<small>［[//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:AbuseLog&wpSearchUser=user_name 過濾器]］</small> <b>·</b> [[Sulutil:user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]<span style=\"color:black\">）</span></span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }}');
 			});
 
 			promise = promise.then(function () {
