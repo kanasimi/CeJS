@@ -1096,8 +1096,11 @@ function module_code(library_namespace) {
 		// console.log(namespace);
 		if (typeof namespace === 'string') {
 			var list = [];
+			namespace = namespace
+			// e.g., 'main{{!}}template' → 'main|template'
+			.replace(/{{\s*!\s*}}/g, '|')
 			// e.g., 'User_talk' → 'User talk'
-			namespace = namespace.replace(/[\s_]+/g, ' ');
+			.replace(/[\s_]+/g, ' ');
 			(is_page_title ? [ namespace.toLowerCase() ]
 			//
 			: namespace.toLowerCase()
