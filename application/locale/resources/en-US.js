@@ -323,6 +323,7 @@
 	"%1 is not exist in %2.": "%1 is not exist in %2.",
 	"Invalid title: %1": "Invalid title: %1",
 	"Get configurations from page %1": "Get configurations from page %1",
+	"Load %2 %1 messages for %3.": "Load %2 %1 messages for %3.",
 	"Continue key": "Continue key",
 	"Cache information about the API modules of %1: module path=%2": "Cache information about the API modules of %1: module path=%2",
 	"Found %2 query {{PLURAL:%2|module|modules}}: %1": "Found %2 query {{PLURAL:%2|module|modules}}: %1",

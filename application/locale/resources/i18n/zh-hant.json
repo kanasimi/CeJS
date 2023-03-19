@@ -332,6 +332,7 @@
 	"$1-is-not-exist-in-$2": "%2 中無 %1。",
 	"invalid-title-$1": "標題無效：%1",
 	"get-configurations-from-page-$1": "從頁面%1取得設定",
+	"load-$2-$1-messages-for-$3": "載入 %2條 %3 使用的%1訊息。",
 	"continue-key": "後續索引",
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": "快取 %1 的 API 模組資訊：模組路徑為 %2",
 	"found-$2-query-modules-$1": "共有%2種查詢{{PLURAL:%2|模組}}：%1",

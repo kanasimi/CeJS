@@ -2995,10 +2995,14 @@ function module_code(library_namespace) {
 				/** {Object}L10n messages. 符合當地語言的訊息內容。 */
 				gettext.set_text(configuration.L10n, language);
 				// console.trace(configuration.L10n);
-				library_namespace.info('adapt_task_configurations: Load '
-						+ Object.keys(configuration.L10n).length + ' '
-						+ language + ' messages for '
-						+ wiki_API.site_name(session) + '.');
+				library_namespace.info([ 'adapt_task_configurations: ', {
+					// gettext_config:{"id":"load-$2-$1-messages-for-$3"}
+					T : [ 'Load %2 %1 messages for %3.',
+					//
+					wiki_API.site_name(session), language,
+					//
+					Object.keys(configuration.L10n).length ]
+				} ]);
 				// Release memory. 釋放被占用的記憶體。
 				// delete configuration.L10n;
 			}

@@ -323,6 +323,7 @@
 	"%1 is not exist in %2.": "%2 \u4e2d\u7121 %1\u3002",
 	"Invalid title: %1": "\u6a19\u984c\u7121\u6548\uff1a%1",
 	"Get configurations from page %1": "\u5f9e\u9801\u9762%1\u53d6\u5f97\u8a2d\u5b9a",
+	"Load %2 %1 messages for %3.": "\u8f09\u5165 %2\u689d %3 \u4f7f\u7528\u7684%1\u8a0a\u606f\u3002",
 	"Continue key": "\u5f8c\u7e8c\u7d22\u5f15",
 	"Cache information about the API modules of %1: module path=%2": "\u5feb\u53d6 %1 \u7684 API \u6a21\u7d44\u8cc7\u8a0a\uff1a\u6a21\u7d44\u8def\u5f91\u70ba %2",
 	"Found %2 query {{PLURAL:%2|module|modules}}: %1": "\u5171\u6709%2\u7a2e\u67e5\u8a62{{PLURAL:%2|\u6a21\u7d44}}\uff1a%1",
