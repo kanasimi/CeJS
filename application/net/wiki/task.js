@@ -3367,9 +3367,10 @@ function module_code(library_namespace) {
 						//
 						+ (100 * work_continue / initial_target_length | 0)
 								+ '%)';
+						false && gettext(
 						// do NOT use:
 						// gettext_config:{"id":"the-bot-operation-is-completed-$1$-in-total"}
-						false && gettext('The bot operation is completed %1% in total', '...%');
+						'The bot operation is completed %1% in total', '...%');
 
 					} else {
 						count_summary += initial_target_length;
@@ -3871,19 +3872,30 @@ function module_code(library_namespace) {
 				.extract_login_user_name(login_options.user_name);
 		user_name === CeL.wiki.normalize_title(wiki.token.login_user_name);
 	}
-	// "owner_name@user_name" → "user_name"
-	// Should use session.login_user_info.name
-	wiki_API.extract_login_user_name = function(lgname) {
+
+	function extract_login_user_name(lgname, options) {
+		if (typeof lgname !== 'string')
+			return lgname;
+
 		// https://www.mediawiki.org/w/api.php?action=help&modules=login
 		// 'Main account name@bot name'
-		var matched = lgname.match(/^([^@\n]+)@/);
-		// 機器人名稱： user name or pure bot name
-		return wiki_API.normalize_title(matched
-		// e.g., "alias_bot_name@main_bot_name" → "main_bot_name"
-		? matched[1].trim() : lgname);
+		var matched = lgname.match(/^([^@\n]+)@([^@\n]+)$/);
 
-		return wiki_API.normalize_title(lgname.replace(/@[^@]+$/, '').trim());
-	};
+		if (matched) {
+			// get user name or pure bot name 機器人名稱
+			matched = options && options.get_bot_name ? matched[2]
+			// e.g., "alias_bot_name@main_bot_name" → "main_bot_name"
+			: matched[1];
+		} else {
+			matched = lgname;
+		}
+
+		return wiki_API.normalize_title(matched.trim());
+	}
+
+	// "owner_name@user_name" → "user_name"
+	// Should use session.login_user_info.name
+	wiki_API.extract_login_user_name = extract_login_user_name;
 
 	// 登入認證用。
 	// https://www.mediawiki.org/wiki/API:Login
