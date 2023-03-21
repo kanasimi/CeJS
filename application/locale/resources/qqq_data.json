@@ -7994,6 +7994,13 @@
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L529}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
+	"archive-$1-chars": {
+		"message": "Archive %1 {{PLURAL:%1|char|chars}}.",
+		"original_message_language_code": "en-US",
+		"parameters": "%1: Characters archived this time 本次歸檔的字元數",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160323.archive_bot_logs.js#L322}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": {
 		"message": "Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.",
 		"original_message_language_code": "en-US",

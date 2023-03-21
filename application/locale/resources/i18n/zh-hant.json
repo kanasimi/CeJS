@@ -961,6 +961,7 @@
 	"problematic-articles": "有問題的條目",
 	"too-many-entries-with-maintenance-templates-in-the-record-$1-entries": "紀錄含有太多維護模板之條目：%1{{PLURAL:%1|條}}",
 	"minimum-number-of-templates-to-report-$1": "列入報表的最低模板數：%1",
+	"archive-$1-chars": "歸檔%1字元。",
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": "這裡列出了需人工修正的跨語言連結。本列表將由機器人自動更新。",
 	"edit-mark": "編",
 	"a-total-of-$1-occurrences": "共發生了%1次",

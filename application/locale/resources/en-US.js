@@ -952,6 +952,7 @@
 	"Problematic articles": "Problematic articles",
 	"Too many entries with maintenance templates in the record: %1 {{PLURAL:%1|entrie|entries}}": "Too many entries with maintenance templates in the record: %1 {{PLURAL:%1|entrie|entries}}",
 	"Minimum number of templates to report: %1": "Minimum number of templates to report: %1",
+	"Archive %1 {{PLURAL:%1|char|chars}}.": "Archive %1 {{PLURAL:%1|char|chars}}.",
 	"Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.": "Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.",
 	"edit-mark": "E",
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.",
