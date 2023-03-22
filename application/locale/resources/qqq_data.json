@@ -7994,11 +7994,17 @@
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L529}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
+	"archiving-operation": {
+		"message": "Archiving operation",
+		"original_message_language_code": "en-US",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160323.archive_bot_logs.js#L284}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L273}}",
+		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
+	},
 	"archive-$1-chars": {
 		"message": "Archive %1 {{PLURAL:%1|char|chars}}.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Characters archived this time 本次歸檔的字元數",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160323.archive_bot_logs.js#L322}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160323.archive_bot_logs.js#L325}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": {
@@ -8392,12 +8398,6 @@
 		"parameters": "%1: original anchor, %2: target anchor",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1437}}",
-		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
-	},
-	"archiving-operation": {
-		"message": "Archiving operation",
-		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L273}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"append-$1-topics": {
