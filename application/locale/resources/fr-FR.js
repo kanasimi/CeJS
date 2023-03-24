@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -953,6 +953,7 @@
 	"Too many entries with maintenance templates in the record: %1 {{PLURAL:%1|entrie|entries}}": "Trop d\u2019entr\u00e9es avec des mod\u00e8les de maintenance dans l\u2019enregistrement\u202f: %1 entr\u00e9e{{PLURAL:%1||s}}",
 	"Minimum number of templates to report: %1": "Nombre minimum de mod\u00e8les \u00e0 signaler\u202f: %1",
 	"Archiving operation": "Archivage de l\u2018op\u00e9ration",
+	"Archive %1 {{PLURAL:%1|char|chars}}.": "Archiver %1 caract\u00e8re{{PLURAL:%1||s}}.",
 	"Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.": "Voici une liste de liens interlangues qui doivent \u00eatre corrig\u00e9s manuellement. Cette liste sera mise \u00e0 jour automatiquement par le robot.",
 	"edit-mark": "M",
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "... %1 occurence{{PLURAL:%1||s}} en tout.",

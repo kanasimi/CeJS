@@ -953,7 +953,7 @@
 	"Too many entries with maintenance templates in the record: %1 {{PLURAL:%1|entrie|entries}}": "\u7d00\u9304\u542b\u6709\u592a\u591a\u7dad\u8b77\u6a21\u677f\u4e4b\u689d\u76ee\uff1a%1{{PLURAL:%1|\u689d}}",
 	"Minimum number of templates to report: %1": "\u5217\u5165\u5831\u8868\u7684\u6700\u4f4e\u6a21\u677f\u6578\uff1a%1",
 	"Archiving operation": "\u6b78\u6a94\u5c01\u5b58\u4f5c\u696d",
-	"Archive %1 {{PLURAL:%1|char|chars}}.": "\u6b78\u6a94%1\u5b57\u5143\u3002",
+	"Archive %1 {{PLURAL:%1|char|chars}}.": "\u6b78\u6a94 %1 {{PLURAL:%1|\u500b\u5b57\u5143}}\u3002",
 	"Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.": "\u9019\u88e1\u5217\u51fa\u4e86\u9700\u4eba\u5de5\u4fee\u6b63\u7684\u8de8\u8a9e\u8a00\u9023\u7d50\u3002\u672c\u5217\u8868\u5c07\u7531\u6a5f\u5668\u4eba\u81ea\u52d5\u66f4\u65b0\u3002",
 	"edit-mark": "\u7de8",
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "\u5171\u767c\u751f\u4e86%1\u6b21",
