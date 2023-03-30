@@ -1189,6 +1189,7 @@
 	"favorite-series-list-is-empty": "La lista ëd serie preferìe a l'é veuida",
 	"edit-favorite-series-list": "Modifiché la lista dle serie preferìe",
 	"delete-all-$1-annotations-$2-repetitions-and-$3-blank-lines": "Dëscancelé tute le %1 {{PLURAL:%1|notassion}}, %2 {{PLURAL:%2|arpetission}} e %3 {{PLURAL:%3|linia veuida|linie veuide}}.",
+	"there-are-$1-duplicate-titles-or-ids-in-the-list": "A-i é %1 tìtoj o identificativ dobion ant la lista.",
 	"warning-unable-to-access-the-storage-directory-$1": "Avertiment: Impossìbil acede al dossié d'anmagasinament [%1]!",
 	"the-downloaded-file-will-be-placed-in-the-default-directory": "L'archivi dëscarià a sarà butà ant ël dossié sòlit.",
 	"to-use-the-graphical-interface-please-execute-`$1`": "Për dovré l'antërfassa gràfica, ch'a fasa marcé `%1`.",
