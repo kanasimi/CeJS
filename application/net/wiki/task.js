@@ -1335,11 +1335,14 @@ function module_code(library_namespace) {
 				if (this.actions.promise_relying
 				// Should be set by case 'page':
 				&& next[2].waiting_for_previous_combination_operation) {
-					// e.g., `await wiki.edit_page(wiki.to_talk_page(page_data)`
+					// e.g., 編輯條目討論頁上的提示模板
+					// @ `await wiki.edit_page(wiki.to_talk_page(page_data)`
 					// @ routine/20191129.check_language_conversion.js
-					if (library_namespace.is_debug(0)) {
+					if (library_namespace.is_debug(1)) {
 						library_namespace
 								.error('wiki_API.prototype.next: 可能是 .page() 之後，.edit() 受到 this.actions.promise_relying 觸發，造成雙重執行？直接跳出，嘗試等待其他執行緒回來執行。');
+						console.trace(next[2] && next[2].page_title_to_edit
+								|| next);
 					}
 					this.actions.unshift(next);
 					break;
@@ -1635,8 +1638,17 @@ function module_code(library_namespace) {
 				+ ': The same content.', 1, 'wiki_API.prototype.next');
 				check_next(typeof next[3] === 'function'
 				// next[3] : callback
-				&& next[3].call(this, next[2].page_to_edit.title, 'nochange'));
+				&& next[3].call(this, next[2].page_to_edit
+				//
+				&& next[2].page_to_edit.title || next[2], 'nochange'));
 				break;
+			}
+
+			if (false && next[2] && next[2].skip_nochange
+					&& next[2].page_to_edit
+					&& !library_namespace.is_thenable(next[1])
+					&& next[2].page_to_edit !== wiki_API.VALUE_set_page_to_edit) {
+				console.trace(next);
 			}
 
 			next[2].rollback_action = function rollback_action() {
@@ -3182,6 +3194,7 @@ function module_code(library_namespace) {
 								//
 								String(error) ]
 							} ]);
+							// console.error(error);
 						}
 					}
 
@@ -3278,7 +3291,9 @@ function module_code(library_namespace) {
 						// `error_to_return` will record the first error.
 
 						error_to_return = error_to_return || error;
-						if (typeof error === 'object') {
+						if (error === 'nochange' || error === 'skip') {
+							// @see function do_batch_work_summary
+						} else if (typeof error === 'object') {
 							console.error(error);
 						} else {
 							library_namespace.error([ 'wiki_API.work: ', {
@@ -3286,6 +3301,7 @@ function module_code(library_namespace) {
 								// gettext_config:{"id":"page-edit-function-error-$1"}
 								'Page edit function error: %1', String(error) ]
 							} ]);
+							// console.error(error);
 						}
 					}
 
