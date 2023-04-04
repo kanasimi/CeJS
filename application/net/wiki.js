@@ -325,9 +325,9 @@ function module_code(library_namespace) {
 		}
 
 		function initialization_complete() {
-			library_namespace.debug(wiki_API.site_name(session)
-					+ ': 初始化程序登錄完畢。添加之前登錄的 ' + session.actions.length + ' 個程序',
-					1, 'initialization_complete');
+			library_namespace.debug(wiki_API.site_name(session) + ': '
+					+ '初始化程序登錄完畢。' + '添加之前登錄的 ' + session.actions.length
+					+ ' 個程序到佇列中。', 1, 'initialization_complete');
 			session.actions.append(session.run_after_initializing);
 			delete session.run_after_initializing;
 			// console.trace(session.actions);
