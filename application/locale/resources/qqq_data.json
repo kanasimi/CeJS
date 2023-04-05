@@ -8342,7 +8342,7 @@
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": {
-		"message": "The anchor (%2) has been [[Special:Diff/%1|deleted by other users]] before.",
+		"message": "The anchor (%2) is no longer available because it was [[Special:Diff/%1|deleted by a user]] before.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: revid, %2: anchor name",
 		"notes": "{{tl|Broken anchors}}の内で表示。",

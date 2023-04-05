@@ -1004,7 +1004,7 @@
 	"Fixing broken anchor": "\u4fee\u6b63\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede",
 	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "\u79fb\u9664%1\u500b\u975e\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}",
 	"Anchor %1 links to a specific web page: %2.": "\u7db2\u9801\u9328\u9ede %1 \u9023\u7d50\u5230\u5c08\u5c6c\u9801\u9762\uff1a%2\u3002",
-	"The anchor (%2) has been [[Special:Diff/%1|deleted by other users]] before.": "\u6b64\u7db2\u9801\u9328\u9ede\uff08%2\uff09\u4e4b\u524d[[Special:Diff/%1|\u66fe\u88ab\u5176\u4ed6\u7528\u6236\u522a\u9664\u904e]]\u3002",
+	"The anchor (%2) is no longer available because it was [[Special:Diff/%1|deleted by a user]] before.": "\u6b64\u7db2\u9801\u9328\u9ede\uff08%2\uff09\u4e4b\u524d[[Special:Diff/%1|\u66fe\u88ab\u5176\u4ed6\u7528\u6236\u522a\u9664\u904e]]\u3002",
 	"Reminder of an inactive anchor": "\u63d0\u9192\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede",
 	"Update links to archived section %1: %2": "\u66f4\u65b0\u6307\u5411\u5b58\u6a94\u7684\u9023\u7d50%1\uff1a%2",
 	"Incorrect capitalization/spaced section title": "\u5927\u5c0f\u5beb\u6216\u7a7a\u767d\u76f8\u7570\u7684\u7db2\u9801\u9328\u9ede",

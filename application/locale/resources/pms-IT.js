@@ -1004,7 +1004,7 @@
 	"Fixing broken anchor": "Coression \u00ebd l'ancra rota",
 	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "Ch'as visa \u00ebd gav\u00e9 %1 {{PLURAL:%1|ancra nen m\u00f2rta|ancre nen m\u00f2rte}}",
 	"Anchor %1 links to a specific web page: %2.": "L\u2019ancra %1 a l'\u00e9 lij\u00e0 a na p\u00e0gina spess\u00ecfica an sl'aragn\u00e0\u202f: %2.",
-	"The anchor (%2) has been [[Special:Diff/%1|deleted by other users]] before.": "L'\u00e0ncora (%2) a l'\u00e9 st\u00e0ita [[Special:Diff/%1|gav\u00e0 da d'\u00e0utri utent]] gi\u00e0 prima.",
+	"The anchor (%2) is no longer available because it was [[Special:Diff/%1|deleted by a user]] before.": "L'\u00e0ncora (%2) a l'\u00e9 st\u00e0ita [[Special:Diff/%1|gav\u00e0 da d'\u00e0utri utent]] gi\u00e0 prima.",
 	"Reminder of an inactive anchor": "Arciam \u00ebd n'\u00e0ncora inativa",
 	"Update links to archived section %1: %2": "Afiorn\u00e9 le liure a la session archivi\u00e0 %1: %2",
 	"Incorrect capitalization/spaced section title": "Maj\u00f9scole o spassiadura nen bon ant \u00ebl t\u00ectol \u00ebd session",

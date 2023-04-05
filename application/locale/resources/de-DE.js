@@ -185,7 +185,7 @@
 	"Fixing broken anchor": "Korrigiere defekten Abschnittslink",
 	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "Entferne %1 {{PLURAL:%1|defekten|defekte}} Abschnittstitel",
 	"Anchor %1 links to a specific web page: %2.": "Abschnittstitel %1 verlinkt auf Webseite %2.",
-	"The anchor (%2) has been [[Special:Diff/%1|deleted by other users]] before.": "Der Abschnittstitel %2 wurde schon einmal [[Spezial:Diff/%1|von einem anderen Benutzer]] gel\u00f6scht.",
+	"The anchor (%2) is no longer available because it was [[Special:Diff/%1|deleted by a user]] before.": "Der Abschnittstitel %2 wurde schon einmal [[Spezial:Diff/%1|von einem anderen Benutzer]] gel\u00f6scht.",
 	"Reminder of an inactive anchor": "Erinnerung an einen inaktiven Abschnittstitel",
 	"Update links to archived section %1: %2": "Aktualisiere Links auf archivierten Abschnitt %1: %2",
 	"Incorrect capitalization/spaced section title": "Falsche Gro\u00df- und Kleinschreibung oder Zusammen- und Getrenntschreibung in der Abschnitts\u00fcberschrift",

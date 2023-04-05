@@ -1002,7 +1002,7 @@
 	"fixing-broken-anchor": "Fixing broken anchor",
 	"remove-$1-non-defunct-anchors": "Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "Anchor %1 links to a specific web page: %2.",
-	"the-anchor-($2)-has-been-deleted-by-other-users-before": "The anchor (%2) has been [[Special:Diff/%1|deleted by other users]] before.",
+	"the-anchor-($2)-has-been-deleted-by-other-users-before": "The anchor (%2) is no longer available because it was [[Special:Diff/%1|deleted by a user]] before.",
 	"reminder-of-an-inactive-anchor": "Reminder of an inactive anchor",
 	"update-links-to-archived-section-$1-$2": "Update links to archived section %1: %2",
 	"incorrect-capitalization-spaced-section-title": "Incorrect capitalization/spaced section title",
