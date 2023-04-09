@@ -519,7 +519,8 @@ function module_code(library_namespace) {
 		} else if (!(KEY_generator_title in action[1])) {
 			// Should be a generator title
 			library_namespace
-					.error('get_list: You should use generator_parameters() to create a  generator title!');
+					.error('get_list: You should use generator_parameters() to create a generator title!');
+			console.trace([ type, action ]);
 		}
 		action[1] = library_namespace.Search_parameters(action[1]);
 		// console.trace(action);
@@ -1005,7 +1006,11 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballusers
 		allusers : 'au',
 
+		// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballcategories
 		allcategories : 'ac',
+
+		// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballredirects
+		allredirects : 'ar',
 
 		/**
 		 * 為頁面標題執行前綴搜索。ページ名の先頭一致検索を行います。<br />
@@ -1268,7 +1273,9 @@ function module_code(library_namespace) {
 					// console.trace([ pages.title, pages[0],
 					// wiki_API.title_link_of(pages[0]) ]);
 					var message = '[' + options.type + '] ';
-					if (Array.isArray(target)) {
+					if (!target) {
+						// e.g., allcategories
+					} else if (Array.isArray(target)) {
 						message += target.length + ' targets:';
 					} else if (target[wiki_API.KEY_generator_title]) {
 						message += 'of [' + target.generator + '] '
