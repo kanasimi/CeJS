@@ -1584,7 +1584,8 @@ function module_code(library_namespace) {
 		// to this minute offset. UTC+8: 8 * 60 = +480
 		// or using options.minute_offset?
 		if (!isNaN(options.offset)) {
-			date_value = new Date(date_value.getTime() + ONE_MINUTE_LENGTH_VALUE
+			date_value = new Date(date_value.getTime()
+					+ ONE_MINUTE_LENGTH_VALUE
 					* (options.offset - String_to_Date.default_offset));
 		}
 
