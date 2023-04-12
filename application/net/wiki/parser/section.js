@@ -789,7 +789,7 @@ function module_code(library_namespace) {
 		if (wiki_API.is_page_data(first_section)) {
 			if (!title)
 				title = wiki_API.title_of(first_section);
-			parsed = page_parser(first_section).parse();
+			parsed = wiki_API.parser(first_section).parse();
 			parsed.each_section(function(section, index) {
 				if (!section.section_title) {
 					first_section = section;
