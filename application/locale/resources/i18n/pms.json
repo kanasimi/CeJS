@@ -1234,6 +1234,8 @@
 	"there-are-no-website-returns-yet": "A-i é ancor nen ëd rispòsta dal sit an sl'aragnà...",
 	"cancel-search": "Anulé l'arserca",
 	"abandon-the-website-that-has-not-yet-completed-the-search": "Bandoné ël sit ëd l'aragnà ch'a l'ha ancor nen livrà l'arserca",
+	"this-website-is-forced-to-wait-too-long-and-is-not-searched-for-anti-blocking": "Ës sit ëd l'aragnà a l'é forsà a speté tròp temp e a sarà nen armus-cià contra ël blocagi.",
+	"completed-$1": "Completà %1",
 	"warning-unable-to-access-the-storage-directory-$1": "Avertiment: Impossìbil acede al dossié d'anmagasinament [%1]!",
 	"the-downloaded-file-will-be-placed-in-the-default-directory": "L'archivi dëscarià a sarà butà ant ël dossié sòlit.",
 	"to-use-the-graphical-interface-please-execute-`$1`": "Për dovré l'antërfassa gràfica, ch'a fasa marcé `%1`.",
