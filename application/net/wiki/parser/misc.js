@@ -1435,7 +1435,7 @@ function module_code(library_namespace) {
 		if (wiki_API.is_page_data(wikitext)) {
 			variable_name = wikitext.title;
 			configuration_page_title = variable_name;
-			parsed = wiki_API.parser(wikitext).parse();
+			parsed = wiki_API.parser(wikitext, options).parse();
 			// console.trace(parsed);
 			// wikitext = wiki_API.content_of(wikitext);
 		} else {
