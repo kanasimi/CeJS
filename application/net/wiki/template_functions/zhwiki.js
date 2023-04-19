@@ -129,6 +129,87 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * [[Template:Interlanguage link]] 跨語言模板 多語言模板。會為 token 增加下列屬性: <code>
+
+	</code>
+	 */
+	var interlanguage_link_template_attributes = {
+		// local_title: local title 中文條目名
+		"local_page_title" : '',
+		// 只會提供第一個。
+		"foreign_language_code" : '',
+		// 只會提供第一個。
+		"foreign_page_title" : '',
+		"foreign_page_mapper" : {
+			// foreign_language: foreign language code 外文語言代號
+			// foreign_title: foreign title 外文條目名
+			foreign_language_code : 'foreign_page_title'
+		},
+
+		// label: label text displayed 顯示名
+		"display_text" : '',
+		// Keep foreign language links when displayed
+		"preserve_foreign_links" : true,
+		"wikidata_entity_id" : '' || 1,
+
+		// 屬性的index，改變屬性值時使用。
+		"attribute_index" : {
+			"local_page_title" : 1,
+			// 只會提供第一個。
+			"foreign_language_code" : 1,
+			// 只會提供第一個。
+			"foreign_page_title" : 1,
+			"display_text" : 1,
+			"preserve_foreign_links" : 1,
+			"wikidata_entity_id" : 1
+		}
+	};
+
+	function setup_interlanguage_link_template_parameters(template_pattern) {
+		var parsed_token = wiki_API.parse(template_pattern);
+		var attribute_index = Object.create(null);
+		var configuration = {
+			attribute_index : attribute_index
+		};
+		var parameters = parsed_token.parameters;
+
+		for ( var parameter in parameters) {
+			var attribute_name = parameters[parameter];
+			if (attribute_name in interlanguage_link_template_attributes)
+				attribute_index[attribute_name] = parameter;
+		}
+
+		var functions_of_site = wiki_API.template_functions.functions_of_site[module_site_name];
+		if (functions_of_site[parsed_token.name]) {
+			library_namespace
+					.error('setup_interlanguage_link_template_parameters: '
+							+ '已設定' + parsed_token.name
+							+ '之模板特設功能，無法設定跨語言模板功能。');
+			return;
+		}
+		functions_of_site[parsed_token.name] = parse_interlanguage_link_template
+				.bind(configuration);
+	}
+
+	function parse_interlanguage_link_template(token, index, parent, options) {
+		var configuration = this;
+		var attribute_index = configuration.attribute_index;
+		var foreign_page_mapper = Object.create(null);
+
+		for ( var attribute_name in attribute_index) {
+			if (attribute_index[attribute_name] in token.parameters)
+				token[attribute_name] = token.parameters[attribute_index[attribute_name]];
+		}
+
+		if ('foreign_language_code' in token)
+			foreign_page_mapper[token.foreign_language_code] = token.foreign_page_title;
+
+		token.attribute_index = attribute_index;
+		token.foreign_page_mapper = foreign_page_mapper;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// {{Lang|ja|參數值}} → -{參數值}-
 	function expand_template_Lang(options) {
 		var parameters = this.parameters;
@@ -289,10 +370,15 @@ function module_code(library_namespace) {
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
 		不存檔 : parse_template_不存檔,
 
+		// [[Template:Interlanguage link]] 跨語言模板 多語言模板。
+
 		Lang : parse_template_Lang,
 		NoteTA : parse_template_NoteTA,
 		簡繁轉換 : parse_template_簡繁轉換
 	};
+
+	[ '{{Interlanguage link multi|local_page_title|foreign_language_code|foreign_page_title|lt=display_text|WD=wikidata_entity_id}}' ]
+			.forEach(setup_interlanguage_link_template_parameters);
 
 	// --------------------------------------------------------------------------------------------
 
