@@ -555,8 +555,10 @@ function module_code(library_namespace) {
 			}
 
 			var page_list = [],
-			//
+			// index_of_title[title] = index in page_list
 			index_of_title = page_list.index_of_title = Object.create(null),
+			// 標題→頁面資訊映射。 title_data_map[title] = page_data
+			title_data_map = page_list.title_data_map = Object.create(null),
 			// library_namespace.storage.write_file()
 			page_cache_prefix = library_namespace.write_file
 			//
@@ -757,6 +759,9 @@ function module_code(library_namespace) {
 					}
 				}
 				index_of_title[page_data.title] = page_list.length;
+				title_data_map[page_data.original_title
+				//
+				|| page_data.title] = page_data;
 				page_list.push(page_data);
 			}
 
@@ -893,7 +898,9 @@ function module_code(library_namespace) {
 				}
 
 				// copy attributes form original page_list
-				[ 'OK_length', 'truncated', 'normalized', 'index_of_title',
+				[ 'OK_length', 'truncated', 'normalized',
+				//
+				'index_of_title', 'title_data_map',
 				//
 				'redirects', 'redirect_from', 'converted', 'convert_from' ]
 				// 需要注意page_list可能帶有一些已經設定的屬性值，因此不能夠簡單的直接指派到另外一個值。
@@ -4223,8 +4230,7 @@ function module_code(library_namespace) {
 			wiki_API_download.call(session, wiki_API.generator_parameters(
 					'categorymembers', {
 						title : categories_to_process.title,
-						namespace : session.namespace('File'),
-						limit : 'max'
+						namespace : 'File'
 					}), options, wiki_API_download.bind(session, titles,
 					options, callback));
 			return;
