@@ -723,7 +723,7 @@ function module_code(library_namespace) {
 						type : list_type
 					}, _this, operation);
 					wiki_API.list(title, function(pages) {
-						if (!options.for_each || options.get_list) {
+						if (!options.for_each_page || options.get_list) {
 							library_namespace.log(list_type
 							// allpages 不具有 title。
 							+ (title ? ' '

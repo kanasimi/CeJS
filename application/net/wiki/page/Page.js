@@ -266,7 +266,7 @@ function module_code(library_namespace) {
 				}
 			};
 
-			options.for_each = function(item) {
+			options.for_each_page = function(item) {
 				generator.queue.push(item);
 				var resolve = generator.resolve;
 				if (resolve) {

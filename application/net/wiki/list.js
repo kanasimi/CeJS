@@ -56,6 +56,32 @@ function module_code(library_namespace) {
 
 	var KEY_generator_title = typeof Symbol === 'function' ? Symbol('generator title')
 			: 'generator title';
+	/**
+	 * 生成用於 wiki query 的生成器參數 parameters。
+	 * 
+	 * <code>
+
+	對 generator=prop模塊，須指定 "titles" / "pageids" parameter。
+	https://en.wikipedia.org/wiki/Special:ApiSandbox#action=query&format=json&prop=categories&titles=ABC%7CABC's%7CABC's%20Coverage%20of%20the%20NBA%20on%20ESPN&generator=links&formatversion=2&cllimit=2&gpllimit=3
+
+	對 generator=all*，"generator" parameter 基本上取代 "titles" / "pageids" parameter，並且優先度更高。
+	https://en.wikipedia.org/wiki/Special:ApiSandbox#action=query&format=json&prop=links%7Ccategories&generator=allpages&formatversion=2&pllimit=2&cllimit=2&gapfrom=ABC&gaplimit=3
+	https://en.wikipedia.org/wiki/Special:ApiSandbox#action=query&format=json&prop=links%7Ccategories&titles=ABC%7CABC's%7CABC's%20Coverage%20of%20the%20NBA%20on%20ESPN&formatversion=2&pllimit=2&cllimit=2
+
+	對 generator=其他links模塊&prop=prop模塊，可能必須指定 generator titles / pageids。
+	https://en.wikipedia.org/wiki/Special:ApiSandbox#action=query&format=json&prop=links%7Ccategories&generator=categorymembers&formatversion=2&pllimit=2&cllimit=2&gcmtitle=Category%3ACountries&gcmlimit=3
+
+	</code>
+	 * 
+	 * @param {String}generator
+	 *            生成器參數。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * @return {Object}正規化後，用於 wiki query 的生成器參數。
+	 * 
+	 * @see https://www.mediawiki.org/wiki/API:Query#Example_6:_Generators
+	 *      https://www.mediawiki.org/w/api.php?action=help&modules=query
+	 */
 	function generator_parameters(generator, options) {
 		if (typeof options === 'string') {
 			options = {
@@ -64,14 +90,18 @@ function module_code(library_namespace) {
 		}
 
 		var parameters = {
-			generator : generator
+			generator : generator,
+			limit : 'max'
 		};
 		var prefix = get_list.type[generator];
 		if (Array.isArray(prefix))
 			prefix = prefix[0];
 
+		var session = wiki_API.session_of_options(options);
 		for ( var parameter in options) {
 			var value = options[parameter];
+			if (parameter === 'namespace')
+				value = (session || wiki_API).namespace(value);
 			if (parameter.startsWith('g' + prefix)) {
 				parameters[parameter] = value;
 				continue;
@@ -85,8 +115,9 @@ function module_code(library_namespace) {
 				parameters[parameter] = value;
 		}
 
-		// using (KEY_generator_title in parameters) to test if parameters is a
+		// Using (KEY_generator_title in parameters) to test if parameters is a
 		// generator title.
+		// Warning: The value may be undefined for generator=all*.
 		parameters[KEY_generator_title] = parameters['g' + prefix + 'title'];
 
 		return parameters;
@@ -228,7 +259,7 @@ function module_code(library_namespace) {
 	// allow async functions
 	// https://github.com/tc39/ecmascript-asyncawait/issues/78
 	var get_list_async_code = '(async function() {'
-			+ ' try { if (wiki_API_list.exit === await options.for_each(item)) options.abort_operation = true; }'
+			+ ' try { if (wiki_API_list.exit === await options.for_each_page(item)) options.abort_operation = true; }'
 			+ ' catch(e) { library_namespace.error(e); }' + ' })();';
 
 	/**
@@ -248,12 +279,13 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback(pages, error)<br />
 	 *            注意: arguments 與 get_list() 之 callback 連動。
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項. options.page_filter(): A function to
+	 *            附加參數/設定選擇性/特殊功能與選項。 options.page_filter(): A function to
 	 *            filter result pages. Return `true` if you want to keep the
 	 *            element. filter result pages.
 	 */
 	function get_list(type, title, callback, options) {
 		// console.trace(title);
+		// console.trace(options.for_each_page);
 		library_namespace.debug(type
 				+ (title ? ' ' + wiki_API.title_link_of(title) : '')
 				+ ', callback: ' + callback, 3, 'get_list');
@@ -305,6 +337,11 @@ function module_code(library_namespace) {
 						.warn('get_list: options.namespace 並非為正規 namespace！將被忽略！');
 				delete options.namespace;
 			}
+		}
+		if (typeof options.for_each_slice === 'function'
+				&& !options.for_each_page) {
+			// 設定 options.for_each_page 以簡化檢測特定操作的流程。
+			options.for_each_page = options.for_each_slice;
 		}
 
 		if (is_api_and_title(title, true)) {
@@ -516,7 +553,8 @@ function module_code(library_namespace) {
 				action[1] = title_preprocessor(action[1], options);
 				library_namespace.debug('→ [' + action[1] + ']', 3, 'get_list');
 			}
-		} else if (!(KEY_generator_title in action[1])) {
+		} else if (!(KEY_generator_title in action[1])
+				&& !type.startsWith('all')) {
 			// Should be a generator title
 			library_namespace
 					.error('get_list: You should use generator_parameters() to create a generator title!');
@@ -716,24 +754,29 @@ function module_code(library_namespace) {
 			}
 
 			function run_for_each(error) {
+				// console.trace(error);
+				// console.trace([ options.abort_operation,
+				// options.for_each_page ]);
 				if (options.abort_operation
-						|| typeof options.for_each !== 'function') {
+						|| typeof options.for_each_page !== 'function') {
 					callback(pages, error);
 					return;
 				}
 
-				// run for each item
+				// console.trace(pages);
+
 				var promises = [];
-				pages.some(function(item) {
+				// run for each item
+				function set_promises(item) {
 					try {
 						if (false && library_namespace
-								.is_async_function(options.for_each)) {
+								.is_async_function(options.for_each_page)) {
 							eval(get_list_async_code);
 							// console.log(options);
 							return options.abort_operation;
 						}
 
-						var result = options.for_each(item);
+						var result = options.for_each_page(item);
 						if (result === wiki_API_list.exit) {
 							options.abort_operation = true;
 							return true;
@@ -746,7 +789,14 @@ function module_code(library_namespace) {
 						library_namespace.error(e);
 						error = error || e;
 					}
-				});
+				}
+
+				if (options.for_each_slice) {
+					set_promises(pages);
+				}
+				if (options.for_each_page !== options.for_each_slice) {
+					pages.some(set_promises);
+				}
 
 				// 注意: arguments 與 get_list() 之 callback 連動。
 				// 2016/6/22 change API 應用程式介面變更 of callback():
@@ -761,9 +811,11 @@ function module_code(library_namespace) {
 						error = error || e;
 					});
 					Promise.allSettled(promises).then(function(result) {
+						// console.trace(error);
 						callback(pages, error);
 					});
 				} else {
+					// console.trace(error);
 					callback(pages, error);
 				}
 			}
@@ -1006,10 +1058,12 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballusers
 		allusers : 'au',
 
-		// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballcategories
+		// TODO:
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballcategories
 		allcategories : 'ac',
 
-		// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballredirects
+		// TODO:
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballredirects
 		allredirects : 'ar',
 
 		/**
@@ -1265,10 +1319,10 @@ function module_code(library_namespace) {
 				// page_list
 				options.callback(pages, target, options);
 			}
-			// 設定了 options.for_each 時，callback() 不會傳入 list！
-			// 用意在省記憶體。options.for_each() 執行過就不用再記錄了。
+			// 設定了 options.for_each_page 時，callback() 不會傳入 list！
+			// 用意在省記憶體。options.for_each_page() 執行過就不用再記錄了。
 			if (Array.isArray(options[KEY_page_list])) {
-				if (!options.for_each || options.get_list) {
+				if (!options.for_each_page || options.get_list) {
 					options[KEY_page_list].append(pages);
 					// console.trace([ pages.title, pages[0],
 					// wiki_API.title_link_of(pages[0]) ]);
@@ -1322,7 +1376,7 @@ function module_code(library_namespace) {
 				}
 			} else if (!options[KEY_page_list]
 					|| options[KEY_page_list].length === 0) {
-				if (!options.for_each || options.get_list) {
+				if (!options.for_each_page || options.get_list) {
 				} else {
 					// Only preserve length property.
 					var length = pages.length;
@@ -1359,14 +1413,14 @@ function module_code(library_namespace) {
 						'wiki_API_list');
 				// reset .next_mark
 				// session.next_mark = Object.create(null);
-				// console.trace(options.for_each);
+				// console.trace(options.for_each_page);
 
 				// 警告: options[KEY_page_list] 與 target 並非完全一對一對應!
-				if (!options.for_each) {
+				if (!options.for_each_page) {
 					callback(options[KEY_page_list], target, options);
 				} else {
-					// `options.for_each` 可能還在執行中，例如正在取得頁面內容；
-					// 等到 `options.for_each` 完成之後才執行 callback。
+					// `options.for_each_page` 可能還在執行中，例如正在取得頁面內容；
+					// 等到 `options.for_each_page` 完成之後才執行 callback。
 					session.run(callback, options[KEY_page_list], target,
 							options);
 				}
@@ -1376,7 +1430,7 @@ function module_code(library_namespace) {
 		options);
 	}
 
-	// `options.for_each` 設定直接跳出。 `CeL.wiki.list.exit`
+	// `options.for_each_page` 設定直接跳出。 `CeL.wiki.list.exit`
 	wiki_API_list.exit = [ 'wiki_API_list.exit: abort the operation' ];
 
 	wiki_API_list.default_type = 'embeddedin';
@@ -2517,7 +2571,7 @@ function module_code(library_namespace) {
 	 *            callback(root_page_data, redirect_list, error) { redirect_list = [
 	 *            page_data, page_data, ... ]; }
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項. 此 options 可能會被變更！<br />
+	 *            附加參數/設定選擇性/特殊功能與選項。 此 options 可能會被變更！<br />
 	 *            {Boolean}options.no_trace: 若頁面還重定向/重新導向到其他頁面則不溯源。溯源時 title 將以
 	 *            root 替代。<br />
 	 *            {Boolean}options.include_root 回傳 list 包含 title，而不只是所有 redirect
