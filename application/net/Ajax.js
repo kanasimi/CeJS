@@ -2502,7 +2502,10 @@ function module_code(library_namespace) {
 			} else if (typeof _post_data === 'string') {
 				library_namespace.debug('set post data: length '
 						+ _post_data.length, 3, 'get_URL_node');
-				library_namespace.debug('set post data: ' + _post_data, 6,
+				library_namespace.debug('set post data: '
+						+ (_post_data.length <= 800
+								|| library_namespace.is_debug(6) ? _post_data
+								: _post_data.slice(0, 800) + '...'), 3,
 						'get_URL_node');
 				request.write(_post_data);
 			} else {
