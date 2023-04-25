@@ -767,16 +767,23 @@ function module_code(library_namespace) {
 
 				var promises = [];
 				// run for each item
-				function set_promises(item) {
+				function set_promises(item, operator) {
+					if (typeof operator !== 'string'
+							|| typeof options[operator] !== 'function') {
+						operator = 'for_each_page';
+					}
+					// assert: typeof options[operator] === 'function'
+
 					try {
 						if (false && library_namespace
 								.is_async_function(options.for_each_page)) {
-							eval(get_list_async_code);
+							// eval(get_list_async_code);
 							// console.log(options);
 							return options.abort_operation;
 						}
 
-						var result = options.for_each_page(item);
+						var result = options[operator](item);
+						// console.trace(result);
 						if (result === wiki_API_list.exit) {
 							options.abort_operation = true;
 							return true;
@@ -788,15 +795,20 @@ function module_code(library_namespace) {
 					} catch (e) {
 						library_namespace.error(e);
 						error = error || e;
+						return true;
 					}
 				}
 
+				// console.trace(options.for_each_slice);
 				if (options.for_each_slice) {
-					set_promises(pages);
+					set_promises(pages, 'for_each_slice');
 				}
-				if (options.for_each_page !== options.for_each_slice) {
+				if (options.for_each_page !== options.for_each_slice
+						&& !options.abort_operation) {
 					pages.some(set_promises);
 				}
+
+				// console.trace(promises);
 
 				// 注意: arguments 與 get_list() 之 callback 連動。
 				// 2016/6/22 change API 應用程式介面變更 of callback():
@@ -805,19 +817,43 @@ function module_code(library_namespace) {
 				// (pages, titles, title) → (pages, error)
 				// 按照需求程度編配/編排 arguments。
 				// 因為 callback 所欲知最重要的資訊是 pages，因此將 pages 置於第一 argument。
-				if (promises.length > 0) {
-					Promise.all(promises)['catch'](function(e) {
-						// `error` will record the first error.
-						error = error || e;
-					});
-					Promise.allSettled(promises).then(function(result) {
-						// console.trace(error);
-						callback(pages, error);
-					});
-				} else {
+				if (promises.length === 0) {
 					// console.trace(error);
 					callback(pages, error);
+					return;
 				}
+
+				// library_namespace.set_debug(3);
+				var _promise = Promise.all(promises).then(function(results) {
+					// console.trace(results);
+					if (results.some(function(result) {
+						return result === wiki_API_list.exit;
+					})) {
+						options.abort_operation = true;
+					}
+				}, function(e) {
+					// `error` will record the first error.
+					error = error || e;
+				}).then(function() {
+					// console.trace(promises);
+					return Promise.allSettled(promises);
+				}).then(function(results) {
+					// console.trace(results);
+					if (results.some(function(result) {
+						return result.value === wiki_API_list.exit;
+					})) {
+						options.abort_operation = true;
+					}
+
+					// console.trace(promises);
+					// console.trace(session.running);
+					// console.trace(session);
+					// console.trace(error);
+					callback(pages, error);
+				});
+				session.next(_promise);
+
+				// console.trace(session);
 			}
 
 			/**
@@ -1877,7 +1913,8 @@ function module_code(library_namespace) {
 							return false;
 						}
 						// 警告: 只要頁面存在於多個查詢到的分類中，就會多次執行。
-						if (options.for_each_page) {
+						if (options.for_each_page
+								&& options.for_each_page !== options.for_each_slice) {
 							options.for_each_page(page_data);
 						}
 					} catch (e) {

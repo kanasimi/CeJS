@@ -685,18 +685,28 @@ function module_code(library_namespace) {
 					POST_data = library_namespace.is_Object(POST_data)
 							&& Object.clone(POST_data) || POST_data;
 				}
-				// delete response['continue']['continue'];
 				// response['continue'].rawcontinue = 1;
 				for ( var continue_key in response['continue']) {
 					var value = response['continue'][continue_key];
+					if (action.search_params[continue_key] === value) {
+						continue;
+					}
+					library_namespace.debug(continue_key + ': '
+							+ action.search_params[continue_key] + '→' + value,
+							1, 'wiki_API_query');
 					action.search_params[continue_key] = value;
+					if (POST_data && POST_data[continue_key])
+						delete POST_data[continue_key];
 					if (action.href.length > 2000) {
+						// 太長時搬到 POST_data。
 						delete action.search_params[continue_key];
 						if (!POST_data)
 							POST_data = Object.create(null);
 						POST_data[continue_key] = value;
 					}
 				}
+				// console.trace(response);
+
 				// reget next data
 				get_URL(action, XMLHttp_handler, null, POST_data,
 						get_URL_options);

@@ -318,7 +318,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// console.trace(title);
+		// console.trace(title, arguments);
 		action = normalize_title_parameter(title, options);
 		// console.trace(action);
 		if (!action) {
@@ -408,7 +408,9 @@ function module_code(library_namespace) {
 			// e.g., rvdir=newer
 			// Get first revisions
 			rvdir : true,
+
 			rvcontinue : true,
+
 			converttitles : true,
 			// e.g., prop=info|revisions
 			// e.g., prop=pageprops|revisions
@@ -418,6 +420,11 @@ function module_code(library_namespace) {
 			if (parameter in options) {
 				action[1][parameter] = options[parameter];
 			}
+		}
+
+		// options.handle_continue_response = true;
+		if (false && library_namespace.is_Object(options.page_options_continue)) {
+			Object.assign(action[1], options.page_options_continue);
 		}
 
 		set_parameters(action, options);
@@ -579,7 +586,6 @@ function module_code(library_namespace) {
 				}
 				if (false && data.truncated)
 					page_list.truncated = true;
-
 			}
 
 			// ------------------------
@@ -1214,24 +1220,43 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				// console.trace(page_data.response);
-				// console.trace(page_data.response['continue']);
-				var rvcontinue = page_data.response['continue'];
-				if (rvcontinue) {
-					options.rvcontinue = rvcontinue.rvcontinue;
+				if (false) {
+					// console.trace(page_data.response);
+					var page_options_continue = page_data.response['continue'];
+					// console.trace(page_options_continue);
+					if (page_options_continue) {
+						options.page_options_continue = page_options_continue;
 
-					// console.trace(options);
-					library_namespace.debug('tracking_revisions: search next '
-							+ options.rvlimit
-							+ (options.limit > 0 ? '/' + options.limit : '')
-							+ ' revisions...', 2);
-					get_pages();
-					return;
+						// console.trace(options);
+						library_namespace.debug(
+								'tracking_revisions: search next '
+										+ options.rvlimit
+										+ (options.limit > 0 ? '/'
+												+ options.limit : '')
+										+ ' revisions...', 2);
+						get_pages();
+						return;
+					}
+				} else {
+					var rvcontinue = page_data.response['continue'];
+					if (rvcontinue) {
+						options.rvcontinue = rvcontinue.rvcontinue;
+
+						// console.trace(options);
+						library_namespace.debug(
+								'tracking_revisions: search next '
+										+ options.rvlimit
+										+ (options.limit > 0 ? '/'
+												+ options.limit : '')
+										+ ' revisions...', 2);
+						get_pages();
+						return;
+					}
 				}
 
 				// assert: 'batchcomplete' in page_data.response
 
-				// if no .rvcontinue, append a null revision,
+				// if no response['continue'], append a null revision,
 				// and do not search continued revisions.
 				var result = !options.search_deleted
 						&& do_search(newer_revision);
