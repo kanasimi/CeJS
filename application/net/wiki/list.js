@@ -2555,13 +2555,17 @@ function module_code(library_namespace) {
 	wiki_API.redirects_root = function redirects_root(title, callback, options) {
 		// .original_title , .convert_from
 		options = Object.assign({
+			// multi : Array.isArray(title),
 			redirects : 1,
+			rdprop : 'pageid|title|fragment',
 			prop : 'info'
 		}, options);
 
 		// 用 .page() 可省略 .converttitles
 		// .redirects() 本身不會作繁簡轉換。
 		// redirect_to: 追尋至重定向終點
+
+		// TODO: For: Array.isArray(title) && title.length > 500
 
 		wiki_API.page(title, function(page_data, error) {
 			// console.trace(title);
@@ -2573,11 +2577,42 @@ function module_code(library_namespace) {
 
 			// 若是 convert 過則採用新的 title。
 			if (Array.isArray(page_data)) {
-				title = page_data.map(function(_page_data) {
-					return _page_data.title;
+				// aassert: Array.isArray(title)
+				// && title.length === page_data.length
+
+				// console.trace(page_data.redirects.map);
+
+				// 依照原順序排列。
+				title = title.map(function(_title) {
+					var redirects_data = page_data.redirects
+							&& page_data.redirects.map[_title];
+					if (redirects_data) {
+						// console.trace(redirects_data);
+						// {"from":"","to":"","tofragment":""}
+						return redirects_data.tofragment ? redirects_data.to
+								+ '#' + redirects_data.tofragment
+								: redirects_data.to;
+					}
+
+					// console.trace(page_data);
+					redirects_data = page_data.title_data_map[_title];
+					if (!redirects_data) {
+						// e.g., "en:ABC"
+						// console.log(page_data);
+						// console.trace(_title);
+						if (!/^:?[^:]+:/.test(_title)) {
+							// e.g., [[commons:title]]
+							library_namespace.warn('redirects_root: '
+									+ '沒有這個頁面的重定向資料: ' + _title);
+						}
+						return _title;
+						// Will be thrown in the next statement.
+					}
+					return redirects_data.title;
 				});
+				title.original_result = page_data;
 			} else {
-				title = page_data && page_data.title || title
+				title = page_data && page_data.title || title;
 			}
 
 			// console.error(error);

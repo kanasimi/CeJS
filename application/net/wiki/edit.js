@@ -72,7 +72,7 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/Help:Links
 	 *      https://zh.wikipedia.org/wiki/User:Cewbot/Stop
 	 */
-	wiki_API.check_stop = function(callback, options) {
+	wiki_API.check_stop = function check_stop(callback, options) {
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
 			if (typeof options === 'string') {
@@ -252,6 +252,7 @@ function module_code(library_namespace) {
 		};
 		if (wiki_API.need_get_API_parameters(action, options,
 				wiki_API[action.action], arguments)) {
+			// console.trace('Waiting for get API parameters');
 			return;
 		}
 
@@ -262,6 +263,7 @@ function module_code(library_namespace) {
 				console.trace(text);
 			text = text.then(function(text) {
 				// console.trace(text);
+				// console.trace('' + callback);
 				wiki_API_edit(title, text, token, options, callback,
 				//
 				timestamp);
@@ -400,22 +402,26 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// assert: typeof text === 'string'
-
-		if (options.discard_changes) {
-			// 手動放棄修改。
-			text = [ wiki_API_edit.cancel, text || options.discard_changes ];
-		}
-
 		var not_passed = !is_undo
 				&& wiki_API_edit.check_data(text, title, options,
 						'wiki_API_edit');
+
+		if (options.discard_changes) {
+			// console.trace('手動放棄修改。');
+			if (!not_passed) {
+				text = [ wiki_API_edit.cancel, text || options.discard_changes ];
+				not_passed = true;
+			}
+		}
+
 		if (not_passed) {
 			library_namespace.debug('直接執行 callback。', 2, 'wiki_API_edit');
 			// console.trace([not_passed, text]);
 			callback(title, options.error_with_symbol ? text : not_passed);
 			return;
 		}
+
+		// assert: typeof text === 'string'
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(title)) {

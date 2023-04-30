@@ -594,6 +594,11 @@ function module_code(library_namespace) {
 			// 2020/10/9: for [[A]]￫[[B]]￫[[A]], we will get
 			// {"batchcomplete":"","query":{"redirects":[{"from":"A","to":"B"},{"from":"B","to":"A"}]}}
 
+			// 找尋順序應為：
+			// query.normalized[原標題]=正規化後的標題/頁面名稱
+			// data.query.converted[正規化後的標題||原標題]=繁簡轉換後的標題
+			// data.query.redirects[繁簡轉換後的標題||正規化後的標題||原標題]=重定向後的標題=必然存在的正規標題
+
 			var redirect_from;
 			if (data.query.redirects) {
 				page_list.redirects = data.query.redirects;
@@ -601,8 +606,10 @@ function module_code(library_namespace) {
 					page_list.redirect_from
 					// 記錄經過重導向的標題。
 					= redirect_from = Object.create(null);
+					page_list.redirects.map = Object.create(null);
 					data.query.redirects.forEach(function(item) {
 						redirect_from[item.to] = item.from;
+						page_list.redirects.map[item.from] = item;
 					});
 
 					if (!data.query.pages) {
@@ -640,8 +647,17 @@ function module_code(library_namespace) {
 					page_list.convert_from = convert_from
 					// 記錄經過轉換的標題。
 					= Object.create(null);
+					page_list.converted.map = Object.create(null);
 					data.query.converted.forEach(function(item) {
 						convert_from[item.to] = item.from;
+						page_list.converted.map[item.from] = item;
+						if (page_list.redirects
+						//
+						&& page_list.redirects.map[item.to]) {
+							page_list.redirects.map[item.from]
+							//
+							= page_list.redirects.map[item.to];
+						}
 					});
 				}
 			}
@@ -651,8 +667,17 @@ function module_code(library_namespace) {
 				page_list.convert_from = convert_from
 				// 記錄經過轉換的標題。
 				|| (convert_from = Object.create(null));
+				page_list.normalized.map = Object.create(null);
 				data.query.normalized.forEach(function(item) {
 					convert_from[item.to] = item.from;
+					page_list.normalized.map[item.from] = item;
+					if (page_list.redirects
+					//
+					&& page_list.redirects.map[item.to]) {
+						page_list.redirects.map[item.from]
+						//
+						= page_list.redirects.map[item.to];
+					}
 				});
 			}
 
@@ -725,6 +750,8 @@ function module_code(library_namespace) {
 					});
 				}
 
+				title_data_map[page_data.title] = page_data;
+
 				if (redirect_from && redirect_from[page_data.title]
 				//
 				&& !page_data.redirect_loop) {
@@ -765,10 +792,61 @@ function module_code(library_namespace) {
 					}
 				}
 				index_of_title[page_data.title] = page_list.length;
-				title_data_map[page_data.original_title
-				//
-				|| page_data.title] = page_data;
+				// 注意: 這可能註冊多種不同的標題。
+				title_data_map[page_data.original_title] = page_data;
 				page_list.push(page_data);
+			}
+
+			if (page_list.redirects) {
+				page_list.redirects.forEach(function(data) {
+					var to = data.to;
+					while (to in page_list.redirects.map) {
+						// e.g., 美國法典第10卷: [美國法典第十編]→[美國法典第10編] @ [[Template:US
+						// military navbox']] @
+						// 20230418.Fix_redirected_wikilinks_of_templates.js
+						library_namespace.log('wiki_API_page: '
+						//
+						+ data.from + ': [' + to + ']→['
+						//
+						+ page_list.redirects.map[to].to + ']');
+						to = page_list.redirects.map[to].to;
+					}
+					if (!title_data_map[to]) {
+						// console.trace(page_list);
+						throw new Error('No redirects title data: ['
+						//
+						+ to + ']←[' + data.from + ']');
+					}
+					// 注意: 這可能註冊多種不同的標題。
+					title_data_map[data.from] = title_data_map[to];
+				});
+			}
+			if (page_list.converted) {
+				page_list.converted.forEach(function(data) {
+					if (!title_data_map[data.to]) {
+						throw new Error('No converted title data: ['
+						//
+						+ data.to + ']←[' + data.from + ']');
+					}
+					// 注意: 這可能註冊多種不同的標題。
+					title_data_map[data.from] = title_data_map[data.to];
+				});
+			}
+			if (page_list.normalized) {
+				page_list.normalized.forEach(function(data) {
+					if (!title_data_map[data.to]) {
+						if (/^[^:]+:/.test(data.to)) {
+							// e.g. [[commons:title]]
+							return;
+						}
+						console.trace(pages);
+						throw new Error('No normalized title data: ['
+						//
+						+ data.to + ']←[' + data.from + ']');
+					}
+					// 注意: 這可能註冊多種不同的標題。
+					title_data_map[data.from] = title_data_map[data.to];
+				});
 			}
 
 			if (data.warnings && data.warnings.query
