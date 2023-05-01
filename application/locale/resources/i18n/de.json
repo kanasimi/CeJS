@@ -6,6 +6,7 @@
 			"DraconicDark",
 			"Giftpflanze",
 			"Justman10000",
+			"Lukasaiko",
 			"ThisCarthing",
 			"ZiqiLiang"
 		]
@@ -24,6 +25,8 @@
 	"output-format": "Ausgabeformat",
 	"prefix": "Präfix",
 	"timezone": "Zeitzone:&#32;",
+	"date-of-calendar-era": "Datum der Kalenderepoche",
+	"date-of-common-era": "Datum einer gewöhnlichen Ära",
 	"loading": "Laden...",
 	"myanmar": "Myanmar",
 	"vietnam": "Vietnam",
