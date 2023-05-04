@@ -3379,8 +3379,10 @@ function module_code(library_namespace) {
 		if (parameters.path)
 			return parameters.path;
 
-		if (!library_namespace.is_Object(parameters))
+		if (!library_namespace.is_Object(parameters)
+				&& !library_namespace.is_Search_parameters(parameters)) {
 			return;
+		}
 
 		var path = parameters.action;
 		if (!path)
@@ -3390,10 +3392,26 @@ function module_code(library_namespace) {
 			(wiki_API.page.query_modules
 			// for action=query&prop=... , &list=... , &meta=...
 			|| [ 'prop', 'meta', 'list' ]).some(function(submodule) {
-				if (parameters[submodule]) {
-					path += API_path_separator + parameters[submodule];
-					return true;
-				}
+				var submodule_list = parameters[submodule];
+				if (!submodule_list)
+					return;
+
+				submodule_list = submodule_list.split(/[,;|]/)
+				// e.g., prop: 'revisions|links'
+				.map(function(submodule) {
+					return submodule
+					//
+					&& (path + API_path_separator + String(submodule).trim());
+				}).filter(function(submodule) {
+					return !!submodule;
+				});
+
+				if (submodule_list.length === 0)
+					return;
+
+				// console.trace(submodule_list);
+				path = submodule_list;
+				return true;
 			});
 		}
 		// console.trace(path);
@@ -3454,9 +3472,10 @@ function module_code(library_namespace) {
 			}
 		}
 		if (session.API_parameters[path]) {
-			library_namespace.debug('Needless to get ' + path, 3,
-					'need_get_API_parameters');
-			// console.trace(path);
+			library_namespace.debug('Needless to get parameters of path: '
+					+ path, 3, 'need_get_API_parameters');
+			if (library_namespace.is_debug(6))
+				console.trace(path);
 			return false;
 		}
 
@@ -3587,15 +3606,21 @@ function module_code(library_namespace) {
 	// 應盡量少用混雜的方法，如此可能有安全疑慮(security problem)。
 	// @see ibrary_namespace.import_options()
 	function extract_parameters(from_parameters, action,/* use GET */
-	return_new_action) {
-		if (is_api_and_title(action))
+	use_original_action) {
+		if (action && (is_api_and_title(action)
+		//
+		|| library_namespace.is_Search_parameters(action[1]))) {
 			action = action[1];
+		}
 		var session = wiki_API.session_of_options(action)
 				|| wiki_API.session_of_options(from_parameters);
 		var path = extract_path_from_parameters(action)
 				|| extract_path_from_parameters(from_parameters);
+		// console.trace(path);
 
-		if (return_new_action) {
+		if (use_original_action) {
+			// TODO: fix below: 可能已不再適用
+
 			// 必須採用:
 			// action = wiki_API.extract_parameters(options, action, true);
 			// 或者:
@@ -3608,28 +3633,22 @@ function module_code(library_namespace) {
 			action = library_namespace.Search_parameters(action);
 		}
 
-		var extract_to = return_new_action ? action
+		var extract_to = use_original_action ? action
 		// use POST
 		// : Object.create(null)
 		: new library_namespace.Search_parameters();
 
-		var limited_parameters;
-		if (session && path) {
-			limited_parameters = session.API_parameters[path];
-			if (!limited_parameters)
-				library_namespace.error('No API parameters for: ' + path);
-			// console.trace(limited_parameters);
-		} else {
-			library_namespace.warn('No session or no path settled!');
-			console.trace([ session, path, from_parameters ]);
-		}
 		var parameters = action.parameters || Object.keys(from_parameters);
 		// console.trace(parameters);
-		// console.trace(limited_parameters);
-		var prefix = limited_parameters
-				&& limited_parameters[KEY_API_parameters_prefix];
-		// exclude {key: false}
-		parameters.forEach(function(key) {
+
+		if (!session || !path) {
+			library_namespace.warn('No session or no path settled!');
+			if (session) {
+				console.trace([ session, path, action, from_parameters ]);
+			}
+		}
+
+		function for_each_parameter(key) {
 			// if (typeof key !== 'string') return;
 
 			// !key || key === KEY_SESSION will be deleted later
@@ -3731,7 +3750,22 @@ function module_code(library_namespace) {
 				}
 			}
 			extract_to[key] = value;
-		});
+		}
+
+		var limited_parameters, prefix, path_list = Array.isArray(path) ? path
+				: [ path ];
+		for (var index = 0; index < path_list.length; index++) {
+			path = path_list[index];
+			limited_parameters = path && session
+					&& session.API_parameters[path];
+			if (session && !limited_parameters && path)
+				library_namespace.error('No API parameters for: ' + path);
+			// console.trace(limited_parameters);
+			prefix = limited_parameters
+					&& limited_parameters[KEY_API_parameters_prefix];
+			// exclude {key: false}
+			parameters.forEach(for_each_parameter);
+		}
 
 		delete extract_to[''];
 		delete extract_to[KEY_SESSION];

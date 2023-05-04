@@ -398,9 +398,25 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (typeof options.prop === 'string')
+			options.prop = options.prop.split(/[,;|]/);
+
 		// Which properties to get for the queried pages
 		// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
 		if (Array.isArray(options.prop)) {
+			options.prop = options.prop.map(function(submodule) {
+				return submodule && String(submodule).trim();
+			}).filter(function(submodule) {
+				return !!submodule;
+			});
+			var _arguments = arguments;
+			if (options.prop.some(function(submodule) {
+				return wiki_API.need_get_API_parameters('query+' + submodule,
+						options, wiki_API_page, _arguments);
+			})) {
+				return;
+			}
+
 			options.prop = options.prop.join('|');
 		}
 
@@ -427,9 +443,13 @@ function module_code(library_namespace) {
 			Object.assign(action[1], options.page_options_continue);
 		}
 
+		// console.trace(action);
 		set_parameters(action, options);
+		// console.trace(action);
 
 		action[1].action = 'query';
+		action[1] = wiki_API.extract_parameters(options, action[1], true);
+		// console.trace([ options, action ]);
 
 		// TODO:
 		// wiki_API.extract_parameters(options, action, true);
