@@ -203,6 +203,7 @@ function module_code(library_namespace) {
 					'set_promise_relying');
 			if (library_namespace.is_debug(3)) {
 				console.trace([ this.running, promise, this.actions ]);
+				// console.trace(promise);
 			}
 			this.actions.promise_relying = library_namespace
 					.is_thenable(this.actions.promise_relying) ? this.actions.promise_relying
@@ -591,6 +592,9 @@ function module_code(library_namespace) {
 		case 'page':
 			// console.trace(next);
 			// this.page(page data, callback, options);
+			if (next[1] === null) {
+				// console.trace(this.actions);
+			}
 
 			// Done @ wiki_API_prototype_methods()
 			// @ CeL.application.net.wiki.list
@@ -623,7 +627,8 @@ function module_code(library_namespace) {
 				library_namespace.debug('採用所輸入之 '
 						+ wiki_API.title_link_of(next[1])
 						+ ' 作為 this.last_page。', 2, 'wiki_API.prototype.next');
-				// console.trace(next);
+				// console.trace(next, this.last_page_error);
+				// console.trace(this.actions);
 				this.last_page = next[1];
 				// console.trace(next[1]);
 				set_page_to_edit(next[3], next[1], this.last_page,
@@ -1670,8 +1675,8 @@ function module_code(library_namespace) {
 			//
 			function wiki_API_next_edit_callback(title, error, result) {
 				// 刪掉自己加的東西。
-				// e.g., 重複利用當過 .edit() 的 options，必須先 `delete
-				// options.rollback_action`。
+				// e.g., 重複利用當過 .edit() 的 options，必須先
+				// `delete options.rollback_action`。
 				delete next[2].rollback_action;
 				// next[2].page_to_edit = wiki_API.VALUE_set_page_to_edit;
 				// delete next[2].page_to_edit;
@@ -3127,6 +3132,7 @@ function module_code(library_namespace) {
 				library_namespace.warn('wiki_API.work: 取得 ' + pages.length
 						+ '/' + this_slice_size + ' 個頁面，應有 '
 						+ (this_slice_size - pages.length) + ' 個不存在或重複頁面。');
+				// console.trace(pages);
 			}
 
 			// --------------------------------------------
@@ -3134,9 +3140,10 @@ function module_code(library_namespace) {
 			var page_index = 0;
 			// for each page: 主要機制是一頁頁處理。
 			function process_next_task_page() {
-				if (false)
+				if (false) {
 					console.trace('process_next_task_page: ' + page_index + '/'
 							+ pages.length);
+				}
 				if (messages.quit_operation) {
 					// 警告: 直接清空 .actions 不安全！
 					// session.actions.clear();
@@ -3198,6 +3205,7 @@ function module_code(library_namespace) {
 						}
 					}
 
+					// console.trace(session.actions);
 					var result;
 					try {
 						result = each.call(config, page_data, messages, config);
@@ -3205,6 +3213,8 @@ function module_code(library_namespace) {
 						handle_page_error(error);
 					}
 
+					// console.trace([ error_to_return, result ]);
+					// console.trace(session.actions);
 					if (library_namespace.is_thenable(result)) {
 						result = result.then(function() {
 							session.run(process_next_task_page);
@@ -3754,6 +3764,7 @@ function module_code(library_namespace) {
 			// assert: target is {String}title or {Object}page_data
 			library_namespace.debug('取得單一頁面之 (page contents 頁面內容)。', 2,
 					'wiki_API.work');
+			this_slice_size = 1;
 			this.page(target, main_work, page_options);
 		}
 	};
