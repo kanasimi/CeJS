@@ -737,7 +737,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!data || !data.query) {
-				if (('batchcomplete' in data) && Array.isArray(title)
+				if (data && ('batchcomplete' in data) && Array.isArray(title)
 						&& title.length === 0) {
 					library_namespace.debug('No page input for ' + type, 3,
 							'get_list');
