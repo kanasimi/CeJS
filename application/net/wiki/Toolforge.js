@@ -716,7 +716,7 @@ function module_code(library_namespace) {
 	 * @param {Function}callback
 	 *            回調函數。 callback({Array}page title 頁面標題 list)
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項.
+	 *            附加參數/設定選擇性/特殊功能與選項。
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Recentchanges_table
 	 *      https://www.mediawiki.org/wiki/Actor_migration

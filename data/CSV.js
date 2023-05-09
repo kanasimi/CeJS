@@ -52,7 +52,7 @@ function module_code(library_namespace) {
 	 */
 	var default_config = {
 		/**
-		 * {Boolean} is there a title line?
+		 * {Boolean} is there a title line? (TODO: Should use has_header)
 		 */
 		has_title : false,
 		/**

@@ -176,6 +176,7 @@ function module_code(library_namespace) {
 			this.running = true;
 		}
 
+		// 權杖
 		this.token = {
 			// lgusername
 			lgname : user_name,

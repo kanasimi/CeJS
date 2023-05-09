@@ -213,7 +213,7 @@ function module_code(library_namespace) {
 	 *            directory name
 	 * 
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項. e.g., { recursive : true }
+	 *            附加參數/設定選擇性/特殊功能與選項。 e.g., { recursive : true }
 	 * 
 	 * @returns error count
 	 */

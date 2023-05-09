@@ -1908,6 +1908,7 @@ function module_code(library_namespace) {
 					//
 					response.statusCode, URL_to_fetch ]
 				} ]);
+				// console.trace(response);
 			}
 
 			// node.js會自動把headers轉成小寫。
@@ -2061,8 +2062,8 @@ function module_code(library_namespace) {
 
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			response.on('end', function() {
-				library_namespace.debug('end(): ' + URL_to_fetch, 2,
-						'get_URL_node');
+				library_namespace.debug('end(): [' + response.statusCode + '] '
+						+ URL_to_fetch, 2, 'get_URL_node');
 
 				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				// unregister();
@@ -2223,6 +2224,8 @@ function module_code(library_namespace) {
 				// ------------------------------
 
 				if ((response.statusCode / 100 | 0) !== 2) {
+					// console.trace(data);
+
 					// ssert: options.error_retry >= 1 ? 最後一次 error
 					// : BAD STATUS and get something in `this.response`
 					_onfail(ERROR_BAD_STSTUS);
@@ -2502,11 +2505,14 @@ function module_code(library_namespace) {
 			} else if (typeof _post_data === 'string') {
 				library_namespace.debug('set post data: length '
 						+ _post_data.length, 3, 'get_URL_node');
-				library_namespace.debug('set post data: '
-						+ (_post_data.length <= 800
-								|| library_namespace.is_debug(6) ? _post_data
-								: _post_data.slice(0, 800) + '...'), 3,
-						'get_URL_node');
+				if (_post_data) {
+					library_namespace.debug('set post data: '
+							+ (_post_data.length <= 800
+							//
+							|| library_namespace.is_debug(6) ? _post_data
+									: _post_data.slice(0, 800) + '...'), 3,
+							'get_URL_node');
+				}
 				request.write(_post_data);
 			} else {
 				library_namespace.error({
