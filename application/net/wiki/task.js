@@ -2764,7 +2764,7 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.debug('wiki_API.work: 開始執行作業: 先作環境建構與初始設定。');
-		if (config.summary) {
+		if (config.summary && !config.no_message) {
 			// '開始處理 ' + config.summary + ' 作業'
 			library_namespace.sinfo([ 'wiki_API.work: Start the operation [',
 					'fg=yellow', String(config.summary), '-fg', ']' ]);

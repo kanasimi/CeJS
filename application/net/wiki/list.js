@@ -636,12 +636,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// console.log(action);
+		// console.trace(action);
 		var post_data;
 		if (!options.no_post_data) {
 			post_data = action[1];
 			action[1] = undefined;
 		}
+		// console.trace([ action, post_data ]);
 		wiki_API.query(action,
 		// treat as {Function}callback or {Object}wiki_API.work config.
 		function(data, error) {
@@ -1333,6 +1334,7 @@ function module_code(library_namespace) {
 
 		// 對於太大的 {Array}target，會在 get_list() 中自行處理。
 
+		// console.trace(target);
 		session[options.type](target,
 		// 注意: arguments 與 get_list() 之 callback 連動。
 		function wiki_API_list_callback(pages, error) {
