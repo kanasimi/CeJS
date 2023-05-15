@@ -76,7 +76,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"coordinates": {
-		"message": "地理座標:&#32;",
+		"message": "地理座標：",
 		"notes": "Option label to caculate date-time.",
 		"scope": "data.date.era: 設定/地理座標",
 		"original_message_language_code": "cmn-Hant-TW",
@@ -102,7 +102,7 @@
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"latitude": {
-		"message": "緯度:&#32;",
+		"message": "緯度：",
 		"notes": "Option label to caculate date-time.",
 		"scope": "data.date.era: 設定/地理座標",
 		"original_message_language_code": "cmn-Hant-TW",
