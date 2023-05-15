@@ -638,7 +638,10 @@ function log_message_changed(message_id) {
 			[language_code + '\t', stringified__from_localized_message],
 			['→\t', to_localized_message]
 		]));
-		if (typeof from_localized_message !== 'function') {
+		//console.trace(qqq_data);
+		if (typeof from_localized_message !== 'function'
+			// 必須訊息的語言也相同。
+			&& (!qqq_data.original_message_language_code || qqq_data.original_message_language_code === language_code)) {
 			message_changed.set(from_localized_message, to_localized_message);
 			if (from_localized_message === qqq_data.message)
 				qqq_data.message = to_localized_message;
@@ -753,6 +756,7 @@ function create__qqq_data_Map() {
 			// matched: [ all, header punctuation mark, text_id / message, tail punctuation mark ]
 			const matched = message.match(CeL.gettext.PATTERN_message_with_tail_punctuation_mark);
 			if (!matched || qqq_data.message !== matched[2]) {
+				//console.trace(message_to_localized_mapping[qqq_data.original_message_language_code][message], qqq_data);
 				// (references: ${qqq_data.references})
 				CeL.info(`${create__qqq_data_Map.name}: Original language message 原文訊息 changed in translatewiki:`);
 				CeL.log(CeL.display_align([

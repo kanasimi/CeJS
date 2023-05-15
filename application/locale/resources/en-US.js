@@ -1039,6 +1039,8 @@
 	"Fine-tuned": "Fine-tuned",
 	"Required by %1": "Required by %1",
 	"Adding sitelinks when synchronizing common pages: %1 \u2192 %2": "Adding sitelinks when synchronizing common pages: %1 \u2192 %2",
+	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u7ae0\u7bc0\uff1a%1": "Redirect to section: $1",
+	"\u9023\u7d50\u5230\u672a\u5d4c\u5165\u6a21\u677f\u7684\u9801\u9762\uff1a%1": "Links to page without embedded the template: $1",
 	"Very Sorry. Undo the robot's wrong edits. (%1)": "Very Sorry. Undo the robot's wrong edits. (%1)",
 	"debug level": "debug level",
 	"%2: The target directory [%1] does not exist?": "%2: The target directory [%1] does not exist?",
