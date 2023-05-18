@@ -169,6 +169,90 @@ function module_code(library_namespace) {
 		wiki_API_page.apply(this, arguments);
 	}
 
+	// ----------------------------------------------------
+
+	function set_invalid_page(query_result_buffer, query_result, value) {
+		if (!(query_result_buffer.next_invalid_page < 0)) {
+			// invalid page id starts from -1
+			query_result_buffer.next_invalid_page = -1;
+		}
+
+		while (query_result_buffer.next_invalid_page in query_result.pages)
+			query_result_buffer.next_invalid_page--;
+		// assert: 之前已經有無效頁面存在，因此 .next_invalid_page < -1
+
+		// console.trace(query_result_buffer.next_invalid_page, value);
+		query_result.pages[query_result_buffer.next_invalid_page--] = value;
+	}
+
+	// merge_query_results()
+	function combine_query_results(query_result_buffer) {
+		var query_result;
+		// assert: Array.isArray(query_result_buffer)
+		while (query_result_buffer.length > 0) {
+			var this_query_result = query_result_buffer.shift();
+			if (!query_result) {
+				query_result = this_query_result;
+				continue;
+			}
+
+			// assert: {Object}query_result
+			for ( var property_name in this_query_result) {
+				var value = this_query_result[property_name];
+				if (!(property_name in query_result)) {
+					query_result[property_name] = value;
+					continue;
+				}
+
+				if (typeof value !== 'object') {
+					query_result.error = new Error(
+							'combine_query_results: 獲得了 {' + typeof value
+									+ '}，非 {Object} 的資料!');
+					return query_result;
+				}
+
+				if (Array.isArray(value)) {
+					if (!query_result[property_name]) {
+						query_result.error = new Error(
+								'combine_query_results: 資料型態從' + typeof value
+										+ '}轉成了 Array!');
+						return query_result;
+					}
+					query_result[property_name].append(value);
+					continue;
+				}
+
+				for ( var key in value) {
+					// Object.assign(query_result[property_name], value);
+					if (key in query_result[property_name]) {
+						// console.trace(query_result);
+						// console.trace(this_query_result);
+						if (property_name === 'pages' && key < 0) {
+							// 無效的頁面可以直接換個id填入。
+							set_invalid_page(query_result_buffer, query_result,
+									value[key]);
+							continue;
+						}
+
+						if (JSON.stringify(query_result[property_name][key]) !== JSON
+								.stringify(value[key])) {
+							library_namespace.warn('combine_query_results: '
+									+ '以新的資料覆蓋舊的 query.' + property_name + '['
+									+ key + ']');
+							console.trace(query_result[property_name][key],
+									'→', value[key]);
+						}
+					}
+					query_result[property_name][key] = value[key];
+				}
+			}
+		}
+
+		return query_result;
+	}
+
+	// ----------------------------------------------------
+
 	/**
 	 * 讀取頁面內容，取得頁面源碼。可一次處理多個標題。
 	 * 
@@ -499,7 +583,13 @@ function module_code(library_namespace) {
 					//
 					'wiki_API_page: ' + data.warnings.query['*']);
 				}
-				if (error.code === 'toomanyvalues' && error.limit > 0) {
+				if (error.code === 'toomanyvalues' && error.limit > 0
+				// 嘗試自動將所要求的 query 切成小片。
+				// TODO: 此功能應放置於 wiki_API.query() 中。
+				// TODO: 將 title 切成 slice，重新 request。
+				&& options.try_cut_slice && Array.isArray(title)
+				// 2: 避免 is_api_and_title(title)
+				&& title.length > 2) {
 					var session = wiki_API.session_of_options(options);
 					if (session && !(session.slow_query_limit < error.limit)) {
 						library_namespace.warn([ 'wiki_API_page: ', {
@@ -513,18 +603,11 @@ function module_code(library_namespace) {
 						session.slow_query_limit = error.limit;
 					}
 
-					// 嘗試自動將所要求的 query 切成小片。
-					// TODO: 此功能應放置於 wiki_API.query() 中。
-					if (options.try_cut_slice && Array.isArray(title)
-					// 2: 避免 is_api_and_title(title)
-					&& title.length > 2) {
-						// TODO: 將 title 切成 slice，重新 request。
-						options.multi = true;
-						options.slice_size = error.limit;
-						// console.trace(title);
-						wiki_API_page(title, callback, options);
-						return;
-					}
+					options.multi = true;
+					options.slice_size = error.limit;
+					// console.trace(title);
+					wiki_API_page(title, callback, options);
+					return;
 				}
 				callback(data, error);
 				return;
@@ -561,7 +644,18 @@ function module_code(library_namespace) {
 
 			if (!data || !data.query
 			// assert: data.cached_response && data.query.pages
-			|| !data.query.pages && !data.query.redirects) {
+			|| !data.query.pages && data.query.redirects
+			/**
+			 * <code>
+			// e.g.,
+			{
+			  batchcomplete: '',
+			  warnings: { info: { '*': 'Unrecognized value for parameter "inprop": info' } },
+			  query: { interwiki: [ [Object], [Object], [Object] ] }
+			}
+			</code>
+			 */
+			&& !data.query.interwiki) {
 				// e.g., 'wiki_API_page: Unknown response:
 				// [{"batchcomplete":""}]'
 				library_namespace.warn([ 'wiki_API_page: ', {
@@ -572,6 +666,7 @@ function module_code(library_namespace) {
 					//
 					? JSON.stringify(data) : data) ]
 				} ]);
+				// console.trace(data);
 				// library_namespace.set_debug(6);
 				if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
@@ -580,6 +675,37 @@ function module_code(library_namespace) {
 				callback(undefined, 'Unknown response');
 				return;
 			}
+
+			if (options.titles_left) {
+				// console.trace(data);
+
+				// e.g., Template:Eulipotyphla @
+				// 20230418.Fix_redirected_wikilinks_of_templates.js
+
+				if (!options.query_result_buffer)
+					options.query_result_buffer = [];
+				options.query_result_buffer.push(data.query);
+				if (false) {
+					console.trace('get next page slices ('
+					//
+					+ options.slice_size + '): ' + options.titles_left);
+				}
+				wiki_API_page(null, callback, options);
+				return;
+			}
+
+			if (Array.isArray(options.query_result_buffer)) {
+				options.query_result_buffer.push(data.query);
+				data.query
+				//
+				= combine_query_results(options.query_result_buffer);
+				if (data.query.error) {
+					callback(undefined, data.query.error);
+					return;
+				}
+			}
+
+			// --------------------------------------------
 
 			var page_list = [],
 			// index_of_title[title] = index in page_list
@@ -681,6 +807,7 @@ function module_code(library_namespace) {
 					});
 				}
 			}
+
 			if (data.query.normalized) {
 				page_list.normalized = data.query.normalized;
 				// console.log(data.query.normalized);
@@ -701,6 +828,12 @@ function module_code(library_namespace) {
 				});
 			}
 
+			if (data.query.interwiki) {
+				page_list.interwiki = data.query.interwiki;
+				if (!data.query.pages)
+					data.query.pages = Object.create(null);
+			}
+
 			// ------------------------
 
 			var pages = data.query.pages;
@@ -710,6 +843,7 @@ function module_code(library_namespace) {
 			&& get_content;
 
 			for ( var pageid in pages) {
+				// 對於 invalid title，pageid 會從 -1 開始排，-2, -3, ...。
 				var page_data = pages[pageid];
 				if (!wiki_API.content_of.has_content(page_data)) {
 
@@ -813,7 +947,10 @@ function module_code(library_namespace) {
 				}
 				index_of_title[page_data.title] = page_list.length;
 				// 注意: 這可能註冊多種不同的標題。
-				title_data_map[page_data.original_title] = page_data;
+				if (page_data.original_title) {
+					// 對於 invalid title，.original_title 可能是 undefined。
+					title_data_map[page_data.original_title] = page_data;
+				}
 				page_list.push(page_data);
 			}
 
@@ -855,11 +992,13 @@ function module_code(library_namespace) {
 			if (page_list.normalized) {
 				page_list.normalized.forEach(function(data) {
 					if (!title_data_map[data.to]) {
-						if (/^[^:]+:/.test(data.to)) {
+						// e.g., '#...' → ''
+						if (!data.to || /^[^:]+:/.test(data.to)) {
 							// e.g. [[commons:title]]
 							return;
 						}
 						console.trace(pages);
+						// console.trace(page_list);
 						throw new Error('No normalized title data: ['
 						//
 						+ data.to + ']←[' + data.from + ']');
@@ -1074,34 +1213,11 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (options.titles_left) {
-				if (options.titles_buffer) {
-					options.titles_buffer.append(page_list);
-					page_list.truncate();
-					library_namespace.error(
-					//
-					'wiki_API_page: Lost properties: '
-					//
-					+ Object.keys(page_list).join(', '));
-				} else {
-					options.titles_buffer = page_list;
-				}
-				if (false) {
-					console.trace('get next page slices ('
-					//
-					+ options.slice_size + '): ' + options.titles_left);
-				}
-				wiki_API_page(null, callback, options);
-				return;
-			}
-
 			// 一般正常回傳。
 
 			if (false && page_list && page_list.title) {
 				console.trace('Get page and callback: ' + page_list.title);
 			}
-			if (options.titles_buffer)
-				page_list = options.titles_buffer.append(page_list);
 			page_list.revisions_parameters = action[1];
 			// console.trace(page_list);
 			// console.trace(options);
