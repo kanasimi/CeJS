@@ -307,6 +307,10 @@ function module_code(library_namespace) {
 						+ '→' + wiki_API.title_link_of(page_title));
 			}
 		}
+		if (options.multi === true && Array.isArray(page_data)
+				&& page_data.length === 1) {
+			page_data = page_data[0];
+		}
 		if (options.page_title_to_edit
 				&& wiki_API.title_link_of(options.page_title_to_edit) !== wiki_API
 						.title_link_of(page_data.original_title
@@ -317,6 +321,9 @@ function module_code(library_namespace) {
 					+ '→'
 					+ wiki_API.title_link_of(page_data.original_title
 							|| page_data.title));
+			if (!page_data.title) {
+				console.trace(page_title, page_data);
+			}
 			console.trace(options);
 		}
 
@@ -2539,6 +2546,16 @@ function module_code(library_namespace) {
 			message = (use_ordered_list ? '# ' : '* ') + (title || '')
 					+ message;
 			this.push(message);
+			if (this.regular_message_count >= 1)
+				this.regular_message_count++;
+			else
+				this.regular_message_count = 1;
+			if (use_ordered_list) {
+				if (this.ordered_list_count >= 1)
+					this.ordered_list_count++;
+				else
+					this.ordered_list_count = 1;
+			}
 		}
 	}
 
@@ -2547,6 +2564,8 @@ function module_code(library_namespace) {
 		this.start = this.last = new Date;
 		// clear
 		this.clear();
+		// 重設正規訊息計數。
+		this.regular_message_count = this.ordered_list_count = 0;
 	}
 
 	/**
@@ -2887,6 +2906,7 @@ function module_code(library_namespace) {
 		messages.reset = config.no_message ? library_namespace.null_function
 				: reset_messages;
 		messages.reset();
+		// messages.regular_message_count = messages.ordered_list_count = 0;
 
 		callback = each[2];
 		// each 現在轉作為對每一頁面執行之工作。
