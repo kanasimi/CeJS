@@ -151,15 +151,19 @@ function module_code(library_namespace) {
 	function setup_query_modules(title, callback, options) {
 		var session = wiki_API.session_of_options(options);
 		// console.trace(session.API_parameters.query);
-		wiki_API_page.query_modules = Object.keys(session.API_parameters.query)
-		// Should be [ 'prop', 'list', 'meta' ]
-		.filter(function(key) {
-			var parameters = session.API_parameters.query[key];
-			return parameters.limit && parameters.submodules;
+		wiki_API_page.query_modules = [];
+		session.API_parameters.query.parameter_Map
+		// Should be [ 'prop', 'list', 'meta', ... ]
+		.forEach(function(parameters, key) {
+			if (parameters.limit && parameters.submodules)
+				wiki_API_page.query_modules.push(key);
 		});
-		library_namespace.info([ 'setup_query_modules: ', {
+		library_namespace.info([
+		//
+		'setup_query_modules: ' + wiki_API.site_name(session) + ': ', {
+			T : [
 			// gettext_config:{"id":"found-$2-query-modules-$1"}
-			T : [ 'Found %2 query {{PLURAL:%2|module|modules}}: %1',
+			'Found %2 query {{PLURAL:%2|module|modules}}: %1',
 			// gettext_config:{"id":"Comma-separator"}
 			wiki_API_page.query_modules.join(gettext('Comma-separator')),
 			//

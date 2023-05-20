@@ -267,7 +267,7 @@ function module_code(library_namespace) {
 		// https://stackoverflow.com/questions/39007637/javascript-set-vs-array-performance
 		// https://jsbench.me/3pkjlwzhbr/1
 
-		// .API_parameters[modules.path] = parameter_hash
+		// .API_parameters[modules.path].parameter_Map = parameter Map
 		// @see get_API_parameters()
 		this.API_parameters = Object.create(null);
 		// wiki_session.redirects_data[redirect_from] = {String}redirect_to

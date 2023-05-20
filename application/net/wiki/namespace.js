@@ -88,6 +88,7 @@ function module_code(library_namespace) {
 	}
 
 	// https://meta.wikimedia.org/wiki/Help:Page_name#Special_characters
+	// @see $wgLegalTitleChars
 	var PATTERN_invalid_page_name_characters = /[{}\[\]\|<>\t\n#�]/,
 	// https://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_(technical_restrictions)#Forbidden_characters
 	PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\t\n#�])+)/,
@@ -3317,6 +3318,7 @@ function module_code(library_namespace) {
 
 	wiki_API.has_storage = typeof localStorage === 'object'
 			&& library_namespace.is_type(localStorage, 'Storage');
+	// Must be {String} for localStorage
 	// retrieve_date
 	var KEY_storage_date = 'storage date';
 
@@ -3466,6 +3468,8 @@ function module_code(library_namespace) {
 			// debugger;
 			session.API_parameters = session.get_storage(KEY_API_parameters)
 					|| session.API_parameters;
+			// rebuild .parameter_Map
+			build_parameter_Map(modules);
 			if (false && !session.API_parameters[KEY_storage_date]) {
 				throw new Error('storage error!');
 				session.API_parameters[KEY_storage_date] = new Date;
@@ -3530,13 +3534,27 @@ function module_code(library_namespace) {
 		});
 
 		// 檢測有沒有此項參數 @ function wiki_API_page()
-		if (!session || session.API_parameters['query+revisions'].slots) {
+		if (!session
+				|| session.API_parameters['query+revisions'].parameter_Map.slots) {
 			// ...
 		}
 	}
 
-	// Must be {String} for localStorage
-	var KEY_API_parameters_prefix = '\0API parameters prefix';
+	// @inner
+	function build_parameter_Map(modules) {
+		// session.API_parameters[modules.path].parameter_Map
+		var parameter_Map = modules.parameter_Map = new Map;
+		modules.parameters.forEach(function(parameter_data) {
+			// assert: library_namespace.is_Object(parameter_data)
+			var key = parameter_data.name;
+			if (parameter_Map.get(key)) {
+				library_namespace.warn('已設定過 ' + modules.path + '+' + key
+						+ ' 的參數資料');
+			}
+			parameter_Map.set(key, parameter_data);
+		});
+	}
+
 	function get_API_parameters(path, options, callback) {
 		path = extract_path_from_parameters(path);
 		// Error.stackTraceLimit = Infinity;
@@ -3564,27 +3582,14 @@ function module_code(library_namespace) {
 			// console.trace([ path, modules.path ]);
 			var session = wiki_API.session_of_options(options);
 			if (session) {
-				var prefix = modules.prefix || '';
-				var parameters = session.API_parameters[modules.path]
-						|| (session.API_parameters[modules.path] = Object
-								.create(null));
-				// console.trace([ parameters, modules ]);
+				session.API_parameters[modules.path] = modules;
 
-				// For path='query', modules.prefix=''.
-				if ('prefix' in modules)
-					parameters[KEY_API_parameters_prefix] = modules.prefix;
-				modules.parameters.forEach(function(parameter_data) {
-					// assert: library_namespace.is_Object(parameter_data)
-					var key = parameter_data.name;
-					if (parameters[key])
-						Object.assign(parameters[key], parameter_data);
-					else
-						parameters[key] = parameter_data;
-				});
 				session.set_storage(KEY_API_parameters,
 				// session.get_storage(KEY_API_parameters) @
 				// need_get_API_parameters()
 				session.API_parameters);
+				// modules.parameter_Map should disappeared @ localStorage
+				build_parameter_Map(modules);
 				library_namespace.info([ 'get_API_parameters: ', {
 					T : [
 					// gettext_config:{"id":"cache-information-about-the-api-modules-of-$1-module-path=$2"}
@@ -3592,7 +3597,7 @@ function module_code(library_namespace) {
 					//
 					, wiki_API.site_name(session), path ]
 				} ]);
-				// console.trace(Object.keys(parameters));
+				// console.trace(Object.keys(modules.parameter_Map));
 				// console.trace(session.API_parameters);
 			}
 			if (callback)
@@ -3652,8 +3657,6 @@ function module_code(library_namespace) {
 			// if (typeof key !== 'string') return;
 
 			// !key || key === KEY_SESSION will be deleted later
-			if (key === KEY_API_parameters_prefix)
-				return;
 
 			/** Normalized key, used in `limited_parameters`. */
 			var _key = key;
@@ -3668,7 +3671,7 @@ function module_code(library_namespace) {
 					}
 				}
 				// assert: _key = 已去除 prefix 之 key。
-				if (!(_key in limited_parameters)) {
+				if (!limited_parameters.get(_key)) {
 					return;
 				}
 			}
@@ -3696,8 +3699,20 @@ function module_code(library_namespace) {
 				}
 			}
 
-			var information = limited_parameters && limited_parameters[_key];
+			var information = limited_parameters
+					&& limited_parameters.get(_key);
 			if (information) {
+				// console.trace(key, information, value);
+				// console.trace(action);
+
+				if (_key in action && action[_key] === value) {
+					// e.g., 設定 query_props : 'pageprops', @
+					// 20160517.解消済み仮リンクをリンクに置き換える.js
+					// 由於 props : 'pageprops' 應該是給 action=query 用的，
+					// ppprops 不該採用同樣的值。
+					return;
+				}
+
 				// 基本的檢測。
 				if ('deprecated' in information) {
 					library_namespace.warn(
@@ -3758,11 +3773,15 @@ function module_code(library_namespace) {
 			path = path_list[index];
 			limited_parameters = path && session
 					&& session.API_parameters[path];
+			if (limited_parameters) {
+				prefix = limited_parameters.prefix;
+				limited_parameters = limited_parameters.parameter_Map;
+				// assert: !!limited_parameters === true
+			}
 			if (session && !limited_parameters && path)
 				library_namespace.error('No API parameters for: ' + path);
 			// console.trace(limited_parameters);
-			prefix = limited_parameters
-					&& limited_parameters[KEY_API_parameters_prefix];
+
 			// exclude {key: false}
 			parameters.forEach(for_each_parameter);
 		}
