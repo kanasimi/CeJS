@@ -1382,7 +1382,11 @@ function module_code(library_namespace) {
 					// gettext_config:{"id":"$1-results"}
 					+ gettext('%1 {{PLURAL:%1|result|results}}',
 					//
-					options[KEY_page_list].length) + ': +' + pages.length;
+					options[KEY_page_list].length)
+					//
+					+ (options.page_filter ? ' (filtered)' : '')
+					//
+					+ ': +' + pages.length;
 					if (pages.title && pages.length > 0) {
 						message += ' ' + wiki_API.title_link_of(
 						//
@@ -1558,6 +1562,7 @@ function module_code(library_namespace) {
 						// e.g., 20171025.fix_LintErrors.js
 						library_namespace.warn('wiki_API_prototype_methods: '
 								+ '合併 .page() 的選項至 .edit() 的選項。');
+						// console.trace(args[2], previous_action);
 						previous_action[3] = Object.assign(args[2],
 								previous_action[3], args[2]);
 						// console.trace(previous_action);
@@ -2557,6 +2562,13 @@ function module_code(library_namespace) {
 	wiki_API.redirects_root = function redirects_root(title, callback, options) {
 		// .original_title , .convert_from
 		options = Object.assign({
+			// wiki_API_page: [toomanyvalues] Too many values supplied for
+			// parameter "titles". The limit is 500.
+			// 警告: 最好自行排除重複標題，並以
+			// `CeL.wiki.PATTERN_invalid_page_name_characters.test(page_title)`
+			// 篩選。
+			try_cut_slice : true,
+
 			// multi : Array.isArray(title),
 			redirects : 1,
 			rdprop : 'pageid|title|fragment',
@@ -2567,8 +2579,7 @@ function module_code(library_namespace) {
 		// .redirects() 本身不會作繁簡轉換。
 		// redirect_to: 追尋至重定向終點
 
-		// TODO: For: Array.isArray(title) && title.length > 500
-
+		// console.trace(title);
 		wiki_API.page(title, function(page_data, error) {
 			// console.trace(title);
 			// console.trace(page_data);
@@ -2578,8 +2589,8 @@ function module_code(library_namespace) {
 			// wiki_API.parse.redirect(wiki_API.content_of(page_data)) ||
 
 			// 若是 convert 過則採用新的 title。
-			if (Array.isArray(page_data)) {
-				// aassert: Array.isArray(title)
+			if (Array.isArray(title)) {
+				// aassert: Array.isArray(page_data)
 				// && title.length === page_data.length
 
 				// console.trace(page_data.redirects.map);
@@ -2612,6 +2623,7 @@ function module_code(library_namespace) {
 					}
 					return redirects_data.title;
 				});
+				// title.raw_result
 				title.original_result = page_data;
 			} else {
 				title = page_data && page_data.title || title;
