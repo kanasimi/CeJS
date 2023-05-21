@@ -74,7 +74,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.check_stop = function check_stop(callback, options) {
 		// 前置處理。
-		if (!library_namespace.is_Object(options))
+		if (!library_namespace.is_Object(options)) {
 			if (typeof options === 'string') {
 				options = {
 					title : options
@@ -82,6 +82,7 @@ function module_code(library_namespace) {
 			} else {
 				options = Object.create(null);
 			}
+		}
 
 		/**
 		 * 緊急停止作業將檢測之頁面標題。 check title:<br />
@@ -134,15 +135,17 @@ function module_code(library_namespace) {
 			} else {
 				// 指定 pattern
 				PATTERN = options.pattern
-				// options.section: 指定的緊急停止章節標題, section title to check.
+				// options.check_section: 指定的緊急停止章節標題, section title to check.
 				/** {String}緊急停止作業將檢測之章節標題。 */
-				|| options.section
+				|| options.check_section
 				/**
 				 * for == 停止作業: 20150503 機器人作業 == <code>
 				 * (new RegExp('\n==(.*?)' + '20150503' + '\\s*==\n')).test('\n== 停止作業:20150503 ==\n') === true
 				 * </code>
 				 */
-				&& new RegExp('\n==(.*?)' + options.section + '(.*?)==\n');
+				&& new RegExp('\n==(.*?)'
+				//
+				+ options.check_section + '(.*?)==\n');
 			}
 
 			if (content) {
@@ -196,7 +199,7 @@ function module_code(library_namespace) {
 	function add_section_to_summary(summary, section_title) {
 		if (!section_title)
 			return summary || '';
-		// 所有"/*錨點*/"註解都會 .trim() 後轉成網頁錨點連結。
+		// 所有"/*錨點*/"註解都會 .trim() 後轉成網頁錨點連結。且 "/*...*/" 之前亦可加入文字。
 		return '/* ' + section_title + ' */ ' + (summary || '');
 	}
 
