@@ -3691,10 +3691,10 @@ function module_code(library_namespace) {
 		if (!config.no_edit) {
 			var check_options = config.check_options;
 			if (!check_options && typeof config.log_to === 'string'
-			// 若 log_to 以數字作結，自動將其當作 section。
+			// 若 log_to 以數字作結，自動將其當作 check section。
 			&& (check_options = config.log_to.match(/\d+$/))) {
 				check_options = {
-					section : check_options[0]
+					check_section : check_options[0]
 				};
 			}
 
