@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "2",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -1039,6 +1039,8 @@
 	"Fine-tuned": "R\u00e9gl\u00e9 finement",
 	"Required by %1": "Demand\u00e9 par %1",
 	"Adding sitelinks when synchronizing common pages: %1 \u2192 %2": "Ajout des liens de site de lors de la synchronisation des pages communes\u202f: %1 \u2192 %2",
+	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u7ae0\u7bc0\uff1a%1": "Le lien redirige vers la section\u202f: $1",
+	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u672a\u5d4c\u5165\u6a21\u677f\u7684\u9801\u9762\uff1a%1": "Le lien redirige vers une pages qui n\u2019est pas int\u00e9gr\u00e9e dans ce mod\u00e8le\u202f: $1",
 	"Very Sorry. Undo the robot's wrong edits. (%1)": "Nous somme d\u00e9sol\u00e9s. Les modifications incorrectes effectu\u00e9es par le robot doivent \u00eatre d\u00e9faites. (%1)",
 	"debug level": "niveau de d\u00e9bogage",
 	"%2: The target directory [%1] does not exist?": "%2\u202f: le r\u00e9pertoire cible [%1] n\u2019existe pas\u202f?",

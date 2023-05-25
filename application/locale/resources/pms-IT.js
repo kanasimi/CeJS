@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
-	"untranslated message count": "2",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Polid\u00e9 l'argistr",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Smon-e / st\u00ebrm\u00e9 l'argistr",
 	"Load failed": "Cariament fal\u00ec",
@@ -1039,6 +1039,8 @@
 	"Fine-tuned": "Regol\u00e0 p\u00ebr da bin",
 	"Required by %1": "Ciam\u00e0 da %1",
 	"Adding sitelinks when synchronizing common pages: %1 \u2192 %2": "Gionta dle liure d\u00ebl sit durant la sincronisassion \u00ebd le p\u00e0gine comun-e: %1 \u2192 %2",
+	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u7ae0\u7bc0\uff1a%1": "Ridirige vers la session: $1",
+	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u672a\u5d4c\u5165\u6a21\u677f\u7684\u9801\u9762\uff1a%1": "Liura a le p\u00e0gine sensa l\u00eb stamp ant\u00ebgr\u00e0: $1",
 	"Very Sorry. Undo the robot's wrong edits. (%1)": "An d\u00ebspias motobin. Le mod\u00ecfiche l\u00f2fie f\u00e0ite dal rob\u00f2 a devo esse tir\u00e0 andar\u00e9. (%1)",
 	"debug level": "livel \u00ebd disanfestassion",
 	"%2: The target directory [%1] does not exist?": "%2: \u00cbl dossi\u00e9 b\u00ebrsaj [%1] a esist nen?",
