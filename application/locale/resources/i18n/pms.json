@@ -1042,6 +1042,8 @@
 	"fine-tuned": "Regolà për da bin",
 	"required-by-$1": "Ciamà da %1",
 	"adding-sitelinks-when-synchronizing-common-pages-$1-→-$2": "Gionta dle liure dël sit durant la sincronisassion ëd le pàgine comun-e: %1 → %2",
+	"redirect-to-section-$1": "Ridirige vers la session: $1",
+	"links-to-page-without-embedded-the-template-$1": "Liura a le pàgine sensa lë stamp antëgrà: $1",
 	"very-sorry.-undo-the-robot-s-wrong-edits.-($1)": "An dëspias motobin. Le modìfiche lòfie fàite dal robò a devo esse tirà andaré. (%1)",
 	"debug-level": "livel ëd disanfestassion",
 	"$2-the-target-directory-$1-does-not-exist": "%2: Ël dossié bërsaj [%1] a esist nen?",
