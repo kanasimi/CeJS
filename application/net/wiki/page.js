@@ -1045,6 +1045,7 @@ function module_code(library_namespace) {
 					//
 					+ '，將回傳此頁面內容，而非 Array。', 2, 'wiki_API_page');
 					page_list = page_list[0];
+					// 警告: `page_list`可能是 undefined。
 					if (is_api_and_title(title, true)) {
 						title = title[1];
 					}
@@ -1161,7 +1162,9 @@ function module_code(library_namespace) {
 				page_list = ordered_list;
 			}
 
-			if (options.save_response) {
+			// 警告: `page_list`可能是 undefined。
+
+			if (page_list && options.save_response) {
 				// 附帶原始回傳查詢資料。
 				// save_data, query_data
 				// assert: !('response' in page_list)
@@ -1219,10 +1222,13 @@ function module_code(library_namespace) {
 
 			// 一般正常回傳。
 
-			if (false && page_list && page_list.title) {
-				console.trace('Get page and callback: ' + page_list.title);
+			if (page_list) {
+				if (false && page_list.title) {
+					console.trace('Get page and callback: ' + page_list.title);
+				}
+
+				page_list.revisions_parameters = action[1];
 			}
-			page_list.revisions_parameters = action[1];
 			// console.trace(page_list);
 			// console.trace(options);
 
