@@ -351,7 +351,7 @@ function module_code(library_namespace) {
 			}
 		});
 
-		function for_each_template(token) {
+		function for_each_template_token(token) {
 			if (token.conversion_list) {
 				// assert: is {{NoteTA}}
 				// conversion_list.push({item:item});
@@ -421,7 +421,7 @@ function module_code(library_namespace) {
 			conversion_list.push(item_to_conversion(item));
 		}
 
-		parsed.each('template', for_each_template);
+		parsed.each('template', for_each_template_token);
 
 		if (conversion_list.transclusions) {
 			library_namespace.info('parse_conversions: '

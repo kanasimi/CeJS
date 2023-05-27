@@ -133,6 +133,7 @@ function module_code(library_namespace) {
 			}
 			if (old_sort_key.length > sort_key
 					|| !old_sort_key.startsWith(sort_key)) {
+				// <syntaxhighlight lang="wikitext" inline>...</syntaxhighlight>
 				library_namespace.debug('The sort key of <code><nowiki>'
 						+ category_token + '</nowiki></code> will be set to '
 						+ JSON.stringify(sort_key) + '!', 1,
@@ -592,9 +593,12 @@ function module_code(library_namespace) {
 
 			var flag = this.flag;
 			if (!force_show && (flag in {
-				// add rule for convert code (but no display in placed code)
+				// hidden: add rule for convert code
+				// (but no display in placed code)
 				H : true,
+				// title
 				T : true,
+				// delete 去掉此 rule
 				'-' : true
 			})) {
 				return '';

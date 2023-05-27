@@ -892,7 +892,8 @@ function module_code(library_namespace) {
 					page_data = pageid;
 					pageid = undefined;
 				}
-				library_namespace.debug((pageid || page_data).toString(), 2,
+				library_namespace.debug('[' + (pageid || page_data).length
+						+ '] ' + (pageid || page_data).toString(), 2,
 						'wiki_API_query.title_param');
 			}
 

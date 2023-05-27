@@ -3703,7 +3703,7 @@ function module_code(library_namespace) {
 					&& limited_parameters.get(_key);
 			if (information) {
 				// console.trace(key, information, value);
-				// console.trace(action);
+				// console.trace(action, from_parameters);
 
 				if (_key in action && action[_key] === value) {
 					// e.g., 設定 query_props : 'pageprops', @

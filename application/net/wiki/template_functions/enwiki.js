@@ -50,28 +50,14 @@ function module_code(library_namespace) {
 	var module_site_name = this.id.match(/[^.]+$/)[0];
 
 	function empty_string(/* options */) {
-		// var token = this;
+		// var template_token = this;
 		return '';
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// token.expand() 可將模板轉換成一般 wiki 語法。
+	// template_token.expand() 可將模板轉換成一般 wiki 語法。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 	// 用於 function preprocess_section_link_token()。
-
-	// --------------------------------------------------------------------------------------------
-
-	function parse_template_Pin_message(token, index, parent, options) {
-		var parameters = token.parameters, message_expire_date;
-		if (parameters[1]) {
-			options = library_namespace.new_options(options);
-			options.get_timevalue = true;
-			message_expire_date = wiki_API.parse.date(parameters[1], {
-				get_timevalue : true,
-			});
-		}
-		token.message_expire_date = message_expire_date || Infinity;
-	}
 
 	// --------------------------------------------------------------------------------------------
 
@@ -84,8 +70,8 @@ function module_code(library_namespace) {
 		+ '</div>';
 	}
 
-	function parse_template_Football_box(token, index, parent, options) {
-		token.expand = expand_template_Football_box;
+	function parse_template_Football_box(template_token, index, parent, options) {
+		template_token.expand = expand_template_Football_box;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -93,8 +79,6 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
-		'Pin message' : parse_template_Pin_message,
-
 		// 一些會添加 anchors 的特殊模板。
 		'Football box' : parse_template_Football_box
 	};

@@ -53,7 +53,7 @@ function module_code(library_namespace) {
 	var to_exit = wiki_API.parser.parser_prototype.each.exit;
 
 	function empty_string(/* options */) {
-		// var token = this;
+		// var template_token = this;
 		return '';
 	}
 
@@ -67,7 +67,7 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// token.expand() 可將模板轉換成一般 wiki 語法。
+	// template_token.expand() 可將模板轉換成一般 wiki 語法。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 	// 用於 function preprocess_section_link_token()。
 
@@ -77,24 +77,24 @@ function module_code(library_namespace) {
 		return '';
 	}
 
-	function parse_template_Void(token, index, parent, options) {
-		token.expand = expand_template_Void;
+	function parse_template_Void(template_token, index, parent, options) {
+		template_token.expand = expand_template_Void;
 	}
 
 	// --------------------------------------------------------------------------------------------
 
 	// Not completed! Only for get_all_anchors()
 	// @ zh.moegirl [[FLOWERS(Innocent Grey)]]
-	function parse_template_Center(token) {
-		token.expand = expand_template_get_parameter_1;
+	function parse_template_Center(template_token) {
+		template_token.expand = expand_template_get_parameter_1;
 	}
 
 	// --------------------------------------------------------------------------------------------
 
 	// Not completed! Only for get_all_anchors()
 	// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
-	function parse_template_Font(token) {
-		token.expand = expand_template_get_parameter_1;
+	function parse_template_Font(template_token) {
+		template_token.expand = expand_template_get_parameter_1;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ function module_code(library_namespace) {
 				+ (parameters[2] || parameters[1] || '') + '</span>';
 	}
 
-	function parse_template_Color(token) {
-		token.expand = expand_template_Color;
+	function parse_template_Color(template_token) {
+		template_token.expand = expand_template_Color;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -117,8 +117,8 @@ function module_code(library_namespace) {
 		return '[[File:At_sign.svg|' + (parameters[1] || 15) + 'px|link=]]';
 	}
 
-	function parse_template_At(token) {
-		token.expand = expand_template_At;
+	function parse_template_At(template_token) {
+		template_token.expand = expand_template_At;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -129,8 +129,8 @@ function module_code(library_namespace) {
 				+ (parameters[2] || parameters[1]) + ']]';
 	}
 
-	function parse_template_User_link(token) {
-		token.expand = expand_template_User_link;
+	function parse_template_User_link(template_token) {
+		template_token.expand = expand_template_User_link;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -165,8 +165,8 @@ function module_code(library_namespace) {
 				+ '">' + (parameters[3] || parameters[2]) + '</span>]]';
 	}
 
-	function parse_template_Colored_link(token) {
-		token.expand = expand_template_Colored_link;
+	function parse_template_Colored_link(template_token) {
+		template_token.expand = expand_template_Colored_link;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -204,8 +204,8 @@ function module_code(library_namespace) {
 		return wikitext.join('');
 	}
 
-	function parse_template_Anchor(token, index, parent, options) {
-		token.expand = expand_template_Anchor;
+	function parse_template_Anchor(template_token, index, parent, options) {
+		template_token.expand = expand_template_Anchor;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -220,8 +220,9 @@ function module_code(library_namespace) {
 		;
 	}
 
-	function parse_template_Visible_anchor(token, index, parent, options) {
-		token.expand = expand_template_Visible_anchor;
+	function parse_template_Visible_anchor(template_token, index, parent,
+			options) {
+		template_token.expand = expand_template_Visible_anchor;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -240,8 +241,8 @@ function module_code(library_namespace) {
 		return wikitext;
 	}
 
-	function parse_template_Term(token, index, parent, options) {
-		token.expand = expand_template_Term;
+	function parse_template_Term(template_token, index, parent, options) {
+		template_token.expand = expand_template_Term;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -257,8 +258,8 @@ function module_code(library_namespace) {
 		return wikitext;
 	}
 
-	function parse_template_Wikicite(token, index, parent, options) {
-		token.expand = expand_template_Wikicite;
+	function parse_template_Wikicite(template_token, index, parent, options) {
+		template_token.expand = expand_template_Wikicite;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -276,8 +277,8 @@ function module_code(library_namespace) {
 		return anchor;
 	}
 
-	function parse_template_SfnRef(token, index, parent, options) {
-		token.expand = expand_template_SfnRef;
+	function parse_template_SfnRef(template_token, index, parent, options) {
+		template_token.expand = expand_template_SfnRef;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -319,8 +320,8 @@ function module_code(library_namespace) {
 		return wikitext.join('');
 	}
 
-	function parse_template_Sfn(token, index, parent, options) {
-		token.expand = expand_template_Sfn;
+	function parse_template_Sfn(template_token, index, parent, options) {
+		template_token.expand = expand_template_Sfn;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -357,17 +358,18 @@ function module_code(library_namespace) {
 		return wikitext.join('');
 	}
 
-	function parse_template_Episode_list(token, index, parent, options) {
-		token.expand = expand_template_Episode_list;
+	function parse_template_Episode_list(template_token, index, parent, options) {
+		template_token.expand = expand_template_Episode_list;
 	}
 
 	function expand_template_Episode_table(options) {
 	}
 
-	function parse_template_Episode_table(token, index, parent, options) {
-		// token.expand = expand_template_Episode_table;
+	function parse_template_Episode_table(template_token, index, parent,
+			options) {
+		// template_token.expand = expand_template_Episode_table;
 
-		var parameters = token.parameters;
+		var parameters = template_token.parameters;
 		var episodes = parameters.episodes;
 		var anchor_prefix = trim_param(parameters.anchor);
 		// console.trace(anchor_prefix);
@@ -375,10 +377,10 @@ function module_code(library_namespace) {
 			var session = wiki_API.session_of_options(options) || wiki_API;
 			wiki_API.parser.parser_prototype.each.call(episodes,
 			//
-			'transclusion', function(token) {
-				if (session.is_template(token, [ 'Episode list',
+			'transclusion', function(template_token) {
+				if (session.is_template(template_token, [ 'Episode list',
 						'Episode list/sublist' ])) {
-					token.anchor_prefix = anchor_prefix;
+					template_token.anchor_prefix = anchor_prefix;
 				}
 			}, options);
 		}
@@ -411,18 +413,24 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function parse_template_Episode_table__part(token, index, parent, options) {
-		token.expand = expand_template_Episode_table__part;
+	function parse_template_Episode_table__part(template_token, index, parent,
+			options) {
+		template_token.expand = expand_template_Episode_table__part;
 	}
 
 	// --------------------------------------------------------------------------------------------
 
-	function parse_template_Pin_message(token, index, parent, options) {
-		var parameters = token.parameters;
-		var expire_date = parameters[1]
-				&& wiki_API.parse.date(parameters[1], options);
-		// console.trace([ expire_date, parameters ]);
-		token.message_expire_date = expire_date || Infinity;
+	function parse_template_Pin_message(template_token, index, parent, options) {
+		var parameters = template_token.parameters, message_expire_date;
+		if (parameters[1]) {
+			options = library_namespace.new_options(options);
+			options.get_timevalue = true;
+			message_expire_date = wiki_API.parse.date(parameters[1], {
+				get_timevalue : true,
+			});
+		}
+		// console.trace([ message_expire_date, parameters ]);
+		template_token.message_expire_date = message_expire_date || Infinity;
 	}
 
 	// --------------------------------------------------------------------------------------------

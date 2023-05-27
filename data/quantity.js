@@ -107,9 +107,9 @@ function module_code(library_namespace) {
 	// exponent_to_prefix.pair_Map.get(6) === 'M'
 	exponent_to_prefix = new library_namespace.data.Convert_Pairs(
 	// https://en.wikipedia.org/wiki/Metric_prefix
-	'24=Y,21=Z,18=E,15=P,12=T,9=G,6=M,3=k,2=h,1=da,'
+	'30=Q,27=R,24=Y,21=Z,18=E,15=P,12=T,9=G,6=M,3=k,2=h,1=da,'
 	//
-	+ '-1=d,-2=c,-3=m,-6=µ,-9=n,-12=p,-15=f,-18=a,-21=z,-24=y', {
+	+ '-1=d,-2=c,-3=m,-6=µ,-9=n,-12=p,-15=f,-18=a,-21=z,-24=y,-27=r,-30=q', {
 		key_is_number : true
 	}),
 	// 數量級
@@ -124,13 +124,13 @@ function module_code(library_namespace) {
 	// prefix name. prefix_name.pair_Map.get('M') === 'mega'.
 	prefix_name = new library_namespace.data.Convert_Pairs(
 	//
-	'Y=yotta,Z=zetta,E=exa,P=peta,T=tera,'
+	'Q=quetta,R=ronna,Y=yotta,Z=zetta,E=exa,P=peta,'
 	//
-	+ 'G=giga,M=mega,k=kilo,h=hecto,da=deca,'
+	+ 'T=tera,G=giga,M=mega,k=kilo,h=hecto,da=deca,'
 	//
-	+ 'd=deci,c=centi,m=milli,µ=micro,n=nano,'
+	+ 'd=deci,c=centi,m=milli,µ=micro,n=nano,p=pico,'
 	//
-	+ 'p=pico,f=femto,a=atto,z=zepto,y=yocto');
+	+ 'f=femto,a=atto,z=zepto,y=yocto,r=ronto,q=quecto');
 
 	// ---------------------------------------------------------------------//
 	// 初始調整並規範基本常數。
