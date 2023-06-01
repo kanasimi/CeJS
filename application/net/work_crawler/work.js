@@ -231,7 +231,7 @@ function module_code(library_namespace) {
 
 		library_namespace.warn([ 'extract_work_id_from_URL: ', {
 			// gettext_config:{"id":"unable-to-extract-work-id-from-the-work-url!-work-information-$1"}
-			T : [ '無法自作品網址提取出 work id！作品資訊：%1', work_information ]
+			T : [ '無法自作品網址提取出作品編號！作品資訊：%1', work_information ]
 		} ]);
 	}
 
