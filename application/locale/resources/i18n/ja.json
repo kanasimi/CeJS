@@ -519,7 +519,7 @@
 	"conversion-pairs-of-$1": "%1の変換ペア:",
 	"revision-id": "版の識別子",
 	"the-requested-robot-task-begins": "Bot依頼の作業を始めます。",
-	"the-section-does-not-set-the-task-configuration-$1": "セクション \"%1\" はタスク構成を設定していません。",
+	"the-section-does-not-set-the-task-configuration-$1": "セクション \"%1\" にタスクは設定されていません。",
 	"add-warning-messages": "警告メッセージを追加する。",
 	"no-title-found-for-$1": "タイトルが見つかりません：%1。",
 	"will-not-automatically-notify-the-task-begins": "タスク開始の自動通知はしません！",

@@ -610,7 +610,7 @@
 	"cannot-save-work-data-of-«$1»": "無法儲存作品《%1》之資訊至檔案！",
 	"create-and-use-the-work-url-regexp-$1": "創建並使用作品網址 RegExp：%1",
 	"extract-work-id-from-the-work-url-$1": "自作品網址提取出 work id：%1",
-	"unable-to-extract-work-id-from-the-work-url!-work-information-$1": "無法自作品網址提取出 work id！作品資訊：%1",
+	"unable-to-extract-work-id-from-the-work-url!-work-information-$1": "無法自作品網址提取出作品編號！作品資訊：%1",
 	"found-$1-works-$2": "找到%1個作品：%2",
 	"crawler.extract_work_id()-should-not-return-true!-please-modify-the-program-code": "crawler.extract_work_id() 不應回傳 true！請修改工具檔程式碼！",
 	"cache-file-of-previous-search-for-works-$1": "記錄先前搜尋作品所獲得結果的快取檔案：%1",
