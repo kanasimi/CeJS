@@ -2608,7 +2608,8 @@ function module_code(library_namespace) {
 					}
 
 					// console.trace(page_data);
-					redirects_data = page_data.title_data_map[_title];
+					redirects_data = page_data.title_data_map
+							&& page_data.title_data_map[_title];
 					if (!redirects_data) {
 						// e.g., "en:ABC"
 						// console.log(page_data);
