@@ -2780,7 +2780,7 @@
 		"message": "%1 is not exist in %2.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page title, %2: site name,",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L2755}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L2756}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-title-$1": {
@@ -7759,7 +7759,7 @@
 		"message": "Duplicate task name %1! Will overwrite old task with new task: %2→%3",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: task name, %2: old task configuration, %3, new task configuration",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L2816}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L703}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L2858}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L703}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-task(s)-from-$2": {
