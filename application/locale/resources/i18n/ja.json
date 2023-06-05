@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Anonymoususer12321",
 			"Funa-enpitu",
 			"Kanashimi",
 			"MathXplore",
@@ -47,8 +48,8 @@
 	"$1-ce": "%1年",
 	"calendar-date": "年暦譜",
 	"calendar-table": "暦日表",
-	"total-$1-time-period-records": "%1 件の期間記録",
-	"total-$1-year-records": "%1 件の年記録",
+	"total-$1-time-period-records": "%1 件の期間{{PLURAL:%1|記録}}",
+	"total-$1-year-records": "%1 件の年{{PLURAL:%1|記録}}",
 	"no-calendar-to-list": "ご提供できる情報がありません。",
 	"try-to-append-date": "日付を追加する",
 	"remove-all": "全ての列を削除する",
