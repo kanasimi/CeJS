@@ -1,7 +1,7 @@
 ﻿/**
  * @name CeL module for downloading baozimh comics.
  * 
- * @fileoverview 本檔案包含了解析並處理、批量下載 包子漫畫 的工具。
+ * @fileoverview 本檔案包含了解析並處理、批量下載 🌈️包子漫畫 的工具。
  * 
  * <code>
 
@@ -83,6 +83,7 @@ function module_code(library_namespace) {
 				id_list.push(text.between(null, '"'));
 				id_data.push(get_label(text.between('title="', '"')));
 			});
+			// console.log([ id_list, id_data ]);
 			return [ id_list, id_data ];
 		},
 
@@ -91,6 +92,7 @@ function module_code(library_namespace) {
 			return 'comic/' + work_id;
 		},
 		parse_work_data : function(html, get_label, extract_work_data) {
+			// console.log(html);
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
 				title : get_label(html.between(
@@ -127,6 +129,7 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		get_chapter_list : function(work_data, html, get_label) {
+			// console.log(html);
 			var _this = this;
 			// reset chapter list
 			work_data.chapter_list = [];
