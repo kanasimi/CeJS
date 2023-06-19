@@ -1105,11 +1105,13 @@ convert_MathML.reduce = function(structure, node, handler) {
 
 	// TODO: <munderover />, <math>∫_2^4 dy/dx</math>
 
+	// need_preserve_quotes: e.g., <math>P((A))</math>
+	var need_preserve_quotes = Array.isArray(structure[1]) && structure[0] === structure[1][0];
 	structure.forEach(function(operand, index) {
 		if (index > 0)
 			structure[index] = convert_MathML.reduce(operand, node, handler);
 	});
-	return structure[0] && !(structure[0] in {
+	return !need_preserve_quotes && structure[0] && !(structure[0] in {
 		'{' : true,
 		',' : true,
 		';' : true
