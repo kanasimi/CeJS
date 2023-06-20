@@ -75,6 +75,28 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// for get_all_anchors()
+	function expand_template_MultiAnchor(options) {
+		var parameters = this.parameters;
+		// {{MultiAnchor|标记内容1|标记内容2|标记内容3|……}}
+		var anchor_list = [];
+		for (var index = 1; index < this.length; index++) {
+			var anchor = parameters[index] && parameters[index].toString();
+			if (anchor) {
+				// @see [[Module:MultiAnchor]]
+				anchor_list.push('<span id="' + anchor + '"></span>');
+			}
+		}
+		// console.trace(anchor_list);
+		return anchor_list.join('');
+	}
+
+	function parse_template_MultiAnchor(token, index, parent, options) {
+		token.expand = expand_template_MultiAnchor;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// [[Module:Ruby]]
 	function expand_module_Ruby(parameters) {
 		// converted wikitext
@@ -189,6 +211,7 @@ function module_code(library_namespace) {
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
 		// 一些會添加 anchors 的特殊模板。
 		A : parse_template_A,
+		MultiAnchor : parse_template_MultiAnchor,
 		Ruby : parse_template_Ruby,
 		铁路车站名 : parse_template_铁路车站名,
 
