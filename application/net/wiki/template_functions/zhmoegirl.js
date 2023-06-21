@@ -79,16 +79,16 @@ function module_code(library_namespace) {
 	function expand_template_MultiAnchor(options) {
 		var parameters = this.parameters;
 		// {{MultiAnchor|标记内容1|标记内容2|标记内容3|……}}
-		var anchor_list = [];
+		var anchor_node_list = [];
 		for (var index = 1; index < this.length; index++) {
 			var anchor = parameters[index] && parameters[index].toString();
 			if (anchor) {
 				// @see [[Module:MultiAnchor]]
-				anchor_list.push('<span id="' + anchor + '"></span>');
+				anchor_node_list.push('<span id="' + anchor + '"></span>');
 			}
 		}
-		// console.trace(anchor_list);
-		return anchor_list.join('');
+		// console.trace(anchor_node_list);
+		return anchor_node_list.join('');
 	}
 
 	function parse_template_MultiAnchor(token, index, parent, options) {

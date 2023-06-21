@@ -620,12 +620,31 @@ function module_code(library_namespace) {
 								.parse_scalar(operand_2.mfenced);
 				}
 				// <mfrac> <mi>numerator</mi> <mi>denominator</mi> </mfrac>
+				/** {Boolean}分子或分母為分數 */
+				var content_hass_fraction = operand_1.mfrac || operand_2.mfrac;
 				operand_1 = {
 					mfrac : [ operand_1, operand_2 ]
 				};
 				// 除了這些外，皆當作分數，上下表示。
 				if (operator === '⁄' || operator === '∕')
 					operand_1.bevelled = true;
+				if (false && content_hass_fraction) {
+					// chrome 不支援 width : "150%"。
+					operand_1.mfrac[0] = {
+						mpadded : operand_1.mfrac[0],
+						width : "40px",
+						lspace : "10px"
+					};
+					operand_1.mfrac[1] = {
+						mpadded : operand_1.mfrac[1],
+						width : "40px",
+						lspace : "10px"
+					};
+				}
+				if (false && content_hass_fraction) {
+					// chrome 的 width : "100%" 指螢幕寬度。
+					operand_1.style = "width: 2em";
+				}
 				return operand_1;
 
 			case '^':
