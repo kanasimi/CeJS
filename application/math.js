@@ -626,19 +626,21 @@ function module_code(library_namespace) {
 					mfrac : [ operand_1, operand_2 ]
 				};
 				// 除了這些外，皆當作分數，上下表示。
-				if (operator === '⁄' || operator === '∕')
+				if (false && (operator === '⁄' || operator === '∕')) {
+					// @deprecated: https://github.com/w3c/mathml/issues/29
 					operand_1.bevelled = true;
+				}
 				if (false && content_hass_fraction) {
-					// chrome 不支援 width : "150%"。
+					// chrome 不支援 width : "150%"。支援 width : "10px"。
 					operand_1.mfrac[0] = {
 						mpadded : operand_1.mfrac[0],
-						width : "40px",
-						lspace : "10px"
+						width : "2em",
+						lspace : "1em"
 					};
 					operand_1.mfrac[1] = {
 						mpadded : operand_1.mfrac[1],
-						width : "40px",
-						lspace : "10px"
+						width : "2em",
+						lspace : "1em"
 					};
 				}
 				if (false && content_hass_fraction) {
