@@ -681,6 +681,7 @@ function module_code(library_namespace) {
 			if (!this.no_checking_of_long_time_no_updated
 					// 檢查是否久未更新。
 					&& this.recheck
+					&& this.recheck !== 'force'
 					&& !work_data.recheck
 					&& library_namespace.is_Object(work_data)
 					&& (Date.now()

@@ -453,7 +453,9 @@ function module_code(library_namespace) {
 			// crawler.show_work_data(work_data);
 			show_information_only : 'boolean',
 
-			one_by_one : 'boolean',
+			// 一張張下載圖片。
+			// string: image_time_interval
+			one_by_one : 'boolean|string',
 			// 篩選想要下載的章節標題關鍵字。例如"單行本"。
 			chapter_filter : 'string',
 			// 開始/接續下載的章節。將依類型轉成 .start_chapter_title 或
@@ -513,7 +515,8 @@ function module_code(library_namespace) {
 			// 重新擷取用的相關操作設定。
 			regenerate : 'boolean',
 			reget_chapter : 'boolean',
-			recheck : 'boolean|string:changed;multi_parts_changed',
+			// force: see "檢查是否久未更新。"
+			recheck : 'boolean|string:changed;multi_parts_changed;force',
 			search_again : 'boolean',
 			cache_title_to_id : 'boolean',
 
