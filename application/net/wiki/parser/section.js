@@ -1972,51 +1972,22 @@ function module_code(library_namespace) {
 		function parse_other_token_anchors() {
 			// 處理 <span class="anchor" id="anchor"></span>, <ref name="anchor">,
 			// id in table cell attribute
-			parsed.each('tag_attributes', function(attribute_token, index,
-					parent) {
-				// console.log(parent);
-				// console.trace(attribute_token);
-				// console.log(attribute_token.attributes);
-				// const
-				var anchor = attribute_token.attributes.id
-						|| attribute_token.attributes.name;
-				// console.trace(anchor);
-				// <ref name="..."> 會轉成 id="cite_re-..."
-				if (parent.tag ? parent.tag.toLowerCase() !== 'ref'
-				// e.g., @ [[w:en:Daniel Ricciardo]]
-				: parent.type === 'table_attributes') {
-					// e.g., <span id="anchor">, <div id="anchor">
-					if (Array.isArray(anchor)) {
-						if (anchor.type !== 'plain') {
-							anchor = wiki_API.parse.set_wiki_type([ anchor ],
-									'plain');
-						}
-						// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
-						// 解析 id="{{sfnref|...}}"
-						for_each_token.call(anchor, 'transclusion', function(
-								template_token, index, parent) {
-							// replace by expanded text
-							if (template_token.expand)
-								parent[index] = template_token.expand();
-						}, _options);
-						// preserve old properties
-						var toString = anchor.toString;
-						anchor = anchor.map(function(token) {
-							if (token.type === 'magic_word_function'
-							// && token.is_magic_word
-							&& token.name === 'ANCHORENCODE') {
-								return token[1];
-							}
-							return token;
-						});
-						// recover
-						anchor.toString = toString;
-					}
-					if (false && /{{/.test(normalize_anchor(anchor))) {
-						// Should not go to here.
-						console.trace([ anchor, attribute_token ]);
-					}
-					register_anchor(anchor, attribute_token);
+			parsed.each('tag', function(tag_token, index, parent) {
+				// console.trace(tag_token);
+				for_each_token.call(tag_token, 'tag_attributes',
+						parse_tag_attribute_anchors);
+				/**
+				 * <code>
+				<h4>__id__</h4>
+				會自動轉成
+				<h4><span id=".FF.FF mode __id__"></span><span class="mw-headline" id="__id__">__id__</span></h4>
+				@ zhmoegirl
+				</code>
+				 */
+				if (/^h[1-6]$/i.test(tag_token.tag)) {
+					var anchor = wiki_API.wikitext_to_plain_text(tag_token[1]);
+					// console.trace(anchor);
+					register_anchor(anchor, tag_token);
 				}
 			});
 
@@ -2027,6 +1998,53 @@ function module_code(library_namespace) {
 						.stringify(anchor_list) : anchor_list);
 			}
 			return anchor_list;
+		}
+
+		function parse_tag_attribute_anchors(attribute_token, index, parent) {
+			// console.log(parent);
+			// console.trace(attribute_token);
+			// console.log(attribute_token.attributes);
+			// const
+			var anchor = attribute_token.attributes.id
+					|| attribute_token.attributes.name;
+			// console.trace(anchor);
+			// <ref name="..."> 會轉成 id="cite_re-..."
+			if (parent.tag ? parent.tag.toLowerCase() !== 'ref'
+			// e.g., @ [[w:en:Daniel Ricciardo]]
+			: parent.type === 'table_attributes') {
+				// e.g., <span id="anchor">, <div id="anchor">
+				if (Array.isArray(anchor)) {
+					if (anchor.type !== 'plain') {
+						anchor = wiki_API.parse.set_wiki_type([ anchor ],
+								'plain');
+					}
+					// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
+					// 解析 id="{{sfnref|...}}"
+					for_each_token.call(anchor, 'transclusion', function(
+							template_token, index, parent) {
+						// replace by expanded text
+						if (template_token.expand)
+							parent[index] = template_token.expand();
+					}, _options);
+					// preserve old properties
+					var toString = anchor.toString;
+					anchor = anchor.map(function(token) {
+						if (token.type === 'magic_word_function'
+						// && token.is_magic_word
+						&& token.name === 'ANCHORENCODE') {
+							return token[1];
+						}
+						return token;
+					});
+					// recover
+					anchor.toString = toString;
+				}
+				if (false && /{{/.test(normalize_anchor(anchor))) {
+					// Should not go to here.
+					console.trace([ anchor, attribute_token ]);
+				}
+				register_anchor(anchor, attribute_token);
+			}
 		}
 	}
 
