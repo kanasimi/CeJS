@@ -6,8 +6,8 @@
  * TODO:<code>
 
 parser 所有子頁面加入白名單 white-list
-parser for_each_token() 所有node當前之level層級
-parser for_each_token() 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
+parser for_each_subtoken() 所有node當前之level層級
+parser for_each_subtoken() 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
 
 </code>
  * 
@@ -144,7 +144,7 @@ function module_code(library_namespace) {
 		// traversal_tokens()
 		// CeL.wiki.parser.parser_prototype.each.call(token_list,...)
 		// 在執行 .each() 之前，應該先執行 .parse()。
-		each : for_each_token,
+		each : for_each_subtoken,
 		parse : parse_page,
 		parse_references : parse_references,
 
@@ -405,14 +405,14 @@ function module_code(library_namespace) {
 	 * 
 	 * @see page_parser.type_alias
 	 */
-	function for_each_token(type, processor, modify_by_return, max_depth) {
+	function for_each_subtoken(type, processor, modify_by_return, max_depth) {
 		if (!Array.isArray(this)) {
 			// console.trace(this);
 			return this;
 		}
 
 		if (typeof type === 'function' && max_depth === undefined) {
-			// for_each_token(processor, modify_by_return, max_depth)
+			// for_each_subtoken(processor, modify_by_return, max_depth)
 			// shift arguments.
 			max_depth = modify_by_return;
 			modify_by_return = processor;
@@ -421,7 +421,7 @@ function module_code(library_namespace) {
 		}
 
 		var options;
-		// for_each_token(type, processor, options)
+		// for_each_subtoken(type, processor, options)
 		if (max_depth === undefined && typeof modify_by_return === 'object') {
 			options = modify_by_return;
 			modify_by_return = options.modify;
@@ -434,7 +434,7 @@ function module_code(library_namespace) {
 
 		if (typeof modify_by_return === 'number' && modify_by_return > 0
 				&& max_depth === undefined) {
-			// for_each_token(type, processor, max_depth)
+			// for_each_subtoken(type, processor, max_depth)
 			// shift arguments.
 			max_depth = modify_by_return;
 			modify_by_return = undefined;
@@ -453,8 +453,8 @@ function module_code(library_namespace) {
 		var token_name;
 		if (type || type === '') {
 			if (typeof type !== 'string') {
-				library_namespace.warn('for_each_token: Invalid type [' + type
-						+ ']');
+				library_namespace.warn('for_each_subtoken: Invalid type ['
+						+ type + ']');
 				return;
 			}
 
@@ -477,8 +477,8 @@ function module_code(library_namespace) {
 				type = page_parser.type_alias[type];
 			}
 			if (!(type in wiki_API.parse.wiki_token_toString)) {
-				library_namespace.warn('for_each_token: Unknown type [' + type
-						+ ']');
+				library_namespace.warn('for_each_subtoken: Unknown type ['
+						+ type + ']');
 			}
 		}
 
@@ -490,7 +490,7 @@ function module_code(library_namespace) {
 			// 第一層 start from ((slice))
 			slice = [ slice ];
 		} else if (slice && (!Array.isArray(slice) || slice.length > 2)) {
-			library_namespace.warn('for_each_token: Invalid slice: '
+			library_namespace.warn('for_each_subtoken: Invalid slice: '
 					+ JSON.stringify(slice));
 			slice = undefined;
 		}
@@ -580,7 +580,7 @@ function module_code(library_namespace) {
 					}
 
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
-					// for_each_token(token, token_index, parent_of_token,
+					// for_each_subtoken(token, token_index, parent_of_token,
 					// depth)
 					var result = processor(token, index, parent_token, depth);
 					// console.log(modify_by_return);
@@ -632,16 +632,16 @@ function module_code(library_namespace) {
 
 			function check_result(token, result) {
 				// assert: !promise || (promise is resolved)
-				if (result === for_each_token.exit) {
+				if (result === for_each_subtoken.exit) {
 					library_namespace.debug('Abort the operation', 3,
-							'for_each_token');
+							'for_each_subtoken');
 					// exit: 直接跳出。
 					exit = true;
 					return traversal_children();
 				}
 
 				// `return parsed.each.remove_token;`
-				if (result === for_each_token.remove_token) {
+				if (result === for_each_subtoken.remove_token) {
 					// 重新確認 index，預防中途做過了插入或者刪除操作。
 					var _index;
 					if (parent_token[index] !== token) {
@@ -666,7 +666,7 @@ function module_code(library_namespace) {
 							library_namespace.debug(
 									'將刪除可能被引用的 <ref>，並嘗試自動刪除所有引用。您仍須自行刪除非{{r|name}}型態的模板參考引用: '
 											+ token.toString(), 1,
-									'for_each_token');
+									'for_each_subtoken');
 							ref_list_to_remove.push(token.attributes.name);
 						}
 
@@ -707,7 +707,7 @@ function module_code(library_namespace) {
 				// depth-first search (DFS) 向下層巡覽，再進一步處理。
 				// 這樣最符合token在文本中的出現順序。
 				// Skip inner tokens, skip children.
-				if (result !== for_each_token.skip_inner
+				if (result !== for_each_subtoken.skip_inner
 				// is_atom: 不包含可 parse 之要素，不包含 text。
 				&& Array.isArray(token) && !token.is_atom
 				// 最起碼必須執行一次 `traversal_next_sibling()`。
@@ -769,32 +769,32 @@ function module_code(library_namespace) {
 			}
 
 			var result;
-			result = for_each_token.call(this, 'tag_single', function(token,
+			result = for_each_subtoken.call(this, 'tag_single', function(token,
 					index, parent) {
 				if (token.tag === 'ref' && token.attributes
 				// 嘗試自動刪除所有引用。
 				&& ref_list_to_remove.includes(token.attributes.name)) {
 					library_namespace.debug('Also remove: ' + token.toString(),
-							3, 'for_each_token');
-					return for_each_token.remove_token;
+							3, 'for_each_subtoken');
+					return for_each_subtoken.remove_token;
 				}
 			});
 			check_if_result_is_thenable(result);
 
-			result = for_each_token.call(this, 'transclusion',
+			result = for_each_subtoken.call(this, 'transclusion',
 			// also remove {{r|name}}
 			function(token, index, parent) {
-				if (for_each_token.ref_name_templates.includes(token.name)
+				if (for_each_subtoken.ref_name_templates.includes(token.name)
 				// 嘗試自動刪除所有引用。
 				&& ref_list_to_remove.includes(token.parameters['1'])) {
 					if (token.parameters['2']) {
 						library_namespace
-								.warn('for_each_token: Cannot remove: '
+								.warn('for_each_subtoken: Cannot remove: '
 										+ token.toString());
 					} else {
 						library_namespace.debug('Also remove: '
-								+ token.toString(), 3, 'for_each_token');
-						return for_each_token.remove_token;
+								+ token.toString(), 3, 'for_each_subtoken');
+						return for_each_subtoken.remove_token;
 					}
 				}
 			});
@@ -843,18 +843,18 @@ function module_code(library_namespace) {
 		});
 	}
 
-	Object.assign(for_each_token, {
+	Object.assign(for_each_subtoken, {
 		// CeL.wiki.parser.parser_prototype.each.exit
-		// for_each_token.exit: 直接跳出。
-		exit : typeof Symbol === 'function' ? Symbol('EXIT_for_each_token')
-				: [ 'for_each_token.exit: abort the operation' ],
-		// for_each_token.skip_inner: Skip inner tokens, skip children.
+		// for_each_subtoken.exit: 直接跳出。
+		exit : typeof Symbol === 'function' ? Symbol('EXIT_for_each_subtoken')
+				: [ 'for_each_subtoken.exit: abort the operation' ],
+		// for_each_subtoken.skip_inner: Skip inner tokens, skip children.
 		skip_inner : typeof Symbol === 'function' ? Symbol('SKIP_CHILDREN')
-				: [ 'for_each_token.skip_inner: skip children' ],
+				: [ 'for_each_subtoken.skip_inner: skip children' ],
 		// CeL.wiki.parser.parser_prototype.each.remove_token
-		// for_each_token.remove_token: remove current children token
+		// for_each_subtoken.remove_token: remove current children token
 		remove_token : typeof Symbol === 'function' ? Symbol('REMOVE_TOKEN')
-				: [ 'for_each_token.skip_inner: remove current token' ],
+				: [ 'for_each_subtoken.skip_inner: remove current token' ],
 		ref_name_templates : [ 'R' ]
 	});
 
@@ -928,7 +928,7 @@ function module_code(library_namespace) {
 	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用。
 	// 兩 token 都必須先有 .index, .parent!
 	// token.parent[token.index] === token
-	// @see options.add_index @ function for_each_token()
+	// @see options.add_index @ function for_each_subtoken()
 	// 注意: 這個交換純粹只操作於 page_data.parsed 上面，
 	// 不會改變其他參照，例如 page_data.parsed.reference_list!
 	// 通常一個頁面只能夠交換一次，交換兩次以上可能就會出現問題!
@@ -1006,7 +1006,7 @@ function module_code(library_namespace) {
 			template_token.index = index;
 			template_token.parent = parent;
 			// Find the first matched.
-			return for_each_token.exit;
+			return for_each_subtoken.exit;
 		}, options);
 
 		return template_token;
@@ -2002,7 +2002,8 @@ function module_code(library_namespace) {
 		}
 		function render_all_parameters(token) {
 			if (Array.isArray(token))
-				for_each_token.call(token, 'parameter', render_parameter, true);
+				for_each_subtoken.call(token, 'parameter', render_parameter,
+						true);
 		}
 		function render_result_of_parameter(name) {
 			name = function_token[function_token.index_of[name]];

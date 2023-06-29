@@ -25,7 +25,7 @@ https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.parser.wikitext',
-	// for_each_token
+	// for_each_subtoken
 	require : 'application.net.wiki.parser.',
 
 	// 設定不匯出的子函式。
@@ -684,7 +684,7 @@ function module_code(library_namespace) {
 		// section title / section name
 		// show all section titles:
 		// parser=CeL.wiki.parser(page_data);parser.each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
-		// @see for_each_token()
+		// @see for_each_subtoken()
 		// parser.each('plain',function(token){},{slice:[1,2]});
 		section_title : function(get_inner) {
 			// this.join(''): 必須與 wikitext 相同。見 parse_wikitext.title。
@@ -2527,7 +2527,7 @@ function module_code(library_namespace) {
 					'tag_attributes');
 			// 注意: attribute_token.attributes 中的 template 都不包含
 			// template_token.expand() !
-			// 可利用 for_each_token() 設定 template_token.expand()。
+			// 可利用 for_each_subtoken() 設定 template_token.expand()。
 			attributes.attributes = extract_tag_attributes(attributes
 					.toString());
 			return attributes;
@@ -2736,7 +2736,7 @@ function module_code(library_namespace) {
 
 			// [ ... ]: 在 inner 為 Template 之類時，
 			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
-			// 但仍需要設定 type=tag_inner 以應 for_each_token() 之需，因此多層[]包覆。
+			// 但仍需要設定 type=tag_inner 以應 for_each_subtoken() 之需，因此多層[]包覆。
 			inner = _set_wiki_type(Array.isArray(inner)
 			// 僅有一個 plain 的話就直接採用其內容，減少多層嵌套。
 			&& inner.type === 'plain' ? inner : [ inner || '' ], 'tag_inner');

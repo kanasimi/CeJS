@@ -40,7 +40,7 @@ function module_code(library_namespace) {
 	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var PATTERN_BOT_NAME = wiki_API.PATTERN_BOT_NAME;
-	var for_each_token = wiki_API.parser.parser_prototype.each;
+	var for_each_subtoken = wiki_API.parser.parser_prototype.each;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -86,7 +86,7 @@ function module_code(library_namespace) {
 			plain : true,
 			tag_inner : true
 		}) {
-			for_each_token.call(token, function(sub_token, index, parent) {
+			for_each_subtoken.call(token, function(sub_token, index, parent) {
 				// console.trace(sub_token);
 				sub_token = preprocess_section_link_token(sub_token, options);
 				// console.trace(sub_token);
@@ -573,7 +573,7 @@ function module_code(library_namespace) {
 		// TODO: for zhwiki, the anchor should NOT includes "-{", "}-"
 
 		// console.log(parsed_title);
-		for_each_token.call(parsed_title, function(token, index, parent) {
+		for_each_subtoken.call(parsed_title, function(token, index, parent) {
 			if (token.type === 'convert') {
 				// @see wiki_API.parse.wiki_token_toString.convert
 				// return token.join(';');
@@ -667,7 +667,8 @@ function module_code(library_namespace) {
 				link.tokens_maybe_handlable = parsed_title.tokens_maybe_handlable
 						.unique();
 				link.tokens_maybe_handlable.forEach(function(parsed) {
-					for_each_token.call(parsed, function(token, index, parent) {
+					for_each_subtoken.call(parsed, function(token, index,
+							parent) {
 						if (token.type === 'convert') {
 							token.toString
 							// recover .toString of token.type === 'convert'
@@ -930,7 +931,7 @@ function module_code(library_namespace) {
 		if (!representative_image) {
 			parsed.each('file', function(token) {
 				representative_image = token;
-				return for_each_token.exit;
+				return for_each_subtoken.exit;
 			});
 		}
 
@@ -1167,7 +1168,7 @@ function module_code(library_namespace) {
 				// assert: parsed[range[0]] === '\n',
 				// is the tail '\n' of "==title== "
 				range : range,
-				each : for_each_token,
+				each : for_each_subtoken,
 				replace_by : replace_section_by,
 				toString : _this.toString
 			});
@@ -1186,7 +1187,7 @@ function module_code(library_namespace) {
 		// default: level 2. 僅處理階級2的章節標題。
 		|| 2;
 
-		// get topics / section title / stanza title using for_each_token()
+		// get topics / section title / stanza title using for_each_subtoken()
 		// 讀取每一個章節的資料: 標題,內容
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
 		// TODO: 可以讀取含入的子頁面
@@ -1282,7 +1283,7 @@ function module_code(library_namespace) {
 
 			modify : false
 		},
-		// options.for_each_token_options
+		// options.for_each_subtoken_options
 		options));
 		// add the last section
 		add_root_section(this.length);
@@ -1501,7 +1502,7 @@ function module_code(library_namespace) {
 				return level_filter === section_title.level;
 			};
 
-			// TODO: return (result === for_each_token.remove_token)
+			// TODO: return (result === for_each_subtoken.remove_token)
 			// TODO: move section to another page
 			if (library_namespace.is_async_function(for_section)) {
 				// console.log(all_root_section_list);
@@ -1530,9 +1531,10 @@ function module_code(library_namespace) {
 				// for_section(section, section_index)
 				all_root_section_list.some(function(section) {
 					// return parsed.each.exit;
-					return section_filter(section) && (for_each_token.exit ===
-					// exit if the result calls exit
-					for_section.apply(this, arguments));
+					return section_filter(section)
+							&& (for_each_subtoken.exit ===
+							// exit if the result calls exit
+							for_section.apply(this, arguments));
 				}, this);
 			}
 		}
@@ -1741,22 +1743,22 @@ function module_code(library_namespace) {
 			// 忽略 <ref> 之類非固定的元素。不深入解開 <ref> 內模板可節省許多時間。
 			if (options.ignore_variable_anchors) {
 				var first_imprecise_token = undefined;
-				for_each_token.call(section_title_token, function(token, index,
-						parent) {
+				for_each_subtoken.call(section_title_token, function(token,
+						index, parent) {
 					// console.trace(sub_token);
 					if (token.tag === 'ref') {
 						first_imprecise_token = token;
-						return for_each_token.exit;
+						return for_each_subtoken.exit;
 					}
 					if (false && token.type === 'transclusion'
 							&& /^Cite \w+/.test(template_token.name)) {
 						first_imprecise_token = token;
-						return for_each_token.exit;
+						return for_each_subtoken.exit;
 					}
 					// e.g., [https://url ]
 					if (token.type === 'external_link' && !token[2]) {
 						first_imprecise_token = token;
-						return for_each_token.exit;
+						return for_each_subtoken.exit;
 					}
 				});
 				if (first_imprecise_token) {
@@ -1974,13 +1976,13 @@ function module_code(library_namespace) {
 			// id in table cell attribute
 			parsed.each('tag', function(tag_token, index, parent) {
 				// console.trace(tag_token);
-				for_each_token.call(tag_token, 'tag_attributes',
+				for_each_subtoken.call(tag_token, 'tag_attributes',
 						parse_tag_attribute_anchors);
 				/**
 				 * <code>
 				<h4>__id__</h4>
 				會自動轉成
-				<h4><span id=".FF.FF mode __id__"></span><span class="mw-headline" id="__id__">__id__</span></h4>
+				<h4><span id=".FF.FF 形式的 __id__"></span><span class="mw-headline" id="__id__">__id__</span></h4>
 				@ zhmoegirl
 				</code>
 				 */
@@ -2020,7 +2022,7 @@ function module_code(library_namespace) {
 					}
 					// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
 					// 解析 id="{{sfnref|...}}"
-					for_each_token.call(anchor, 'transclusion', function(
+					for_each_subtoken.call(anchor, 'transclusion', function(
 							template_token, index, parent) {
 						// replace by expanded text
 						if (template_token.expand)

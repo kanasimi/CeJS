@@ -24,7 +24,7 @@ https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.parser.evaluate',
-	// for_each_token
+	// for_each_subtoken
 	require : 'application.net.wiki.parser.',
 
 	// 設定不匯出的子函式。
@@ -37,7 +37,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.application.net.wiki, for_each_token = wiki_API.parser.parser_prototype.each;
+	var wiki_API = library_namespace.application.net.wiki, for_each_subtoken = wiki_API.parser.parser_prototype.each;
 	// @inner
 	var PATTERN_invalid_page_name_characters = wiki_API.PATTERN_invalid_page_name_characters;
 
@@ -56,7 +56,7 @@ function module_code(library_namespace) {
 		// console.trace(parsed);
 
 		var have_template_parameters, has_complex_parameter_name;
-		for_each_token.call(parsed, 'parameter', function(token) {
+		for_each_subtoken.call(parsed, 'parameter', function(token) {
 			have_template_parameters = true;
 			var value = token[0];
 			if (typeof value !== 'string') {
@@ -83,7 +83,7 @@ function module_code(library_namespace) {
 				if (Array.isArray(parsed)) {
 					// 預防循環參照。
 					parsed.parameter_NO = value;
-					for_each_token.call(parsed,
+					for_each_subtoken.call(parsed,
 					//
 					library_namespace.null_function, {
 						add_index : true
@@ -136,7 +136,7 @@ function module_code(library_namespace) {
 		if (parsed.type === 'magic_word_function') {
 			promise = evaluate_parser_function_token.call(parsed, options);
 		} else {
-			promise = for_each_token.call(parsed, 'magic_word_function',
+			promise = for_each_subtoken.call(parsed, 'magic_word_function',
 			//
 			function(token) {
 				// console.trace(token);
@@ -446,7 +446,7 @@ function module_code(library_namespace) {
 		// Error.stackTraceLimit = Infinity;
 		// console.trace(parsed.toString());
 		// Error.stackTraceLimit = 10;
-		var promise = for_each_token.call(parsed, 'transclusion', function(
+		var promise = for_each_subtoken.call(parsed, 'transclusion', function(
 				token) {
 			// Error.stackTraceLimit = Infinity;
 			// console.trace(token);
@@ -509,11 +509,11 @@ function module_code(library_namespace) {
 			if (false) {
 				console.trace(token);
 				var some_sub_token_not_evaluated;
-				for_each_token.call(token, 'magic_word_function', function(
+				for_each_subtoken.call(token, 'magic_word_function', function(
 						magic_word_function) {
 					if (magic_word_function.not_evaluated) {
 						some_sub_token_not_evaluated = true;
-						return for_each_token.exit;
+						return for_each_subtoken.exit;
 					}
 				});
 				console.trace(some_sub_token_not_evaluated);
@@ -936,22 +936,22 @@ function module_code(library_namespace) {
 		function value_to_String(value, allow_thenable, as_key) {
 			function return_parameter(value) {
 				if (Array.isArray(value)) {
-					for_each_token.call(value, 'comment', function() {
-						return for_each_token.remove_token;
+					for_each_subtoken.call(value, 'comment', function() {
+						return for_each_subtoken.remove_token;
 					});
 					if (as_key) {
 						var session = wiki_API.session_of_options(options);
 						var extensiontag_hash = session
 								&& session.configurations.extensiontag_hash
 								|| wiki_API.wiki_extensiontags;
-						for_each_token.call(value, function(token) {
+						for_each_subtoken.call(value, function(token) {
 							if ((token.type === 'tag'
 							//
 							|| token.type === 'tag_single')
 							//
 							&& (token.tag.toLowerCase() in extensiontag_hash)) {
 								value.has_extensiontag = true;
-								return for_each_token.exit;
+								return for_each_subtoken.exit;
 							}
 						});
 						if (value.has_extensiontag)

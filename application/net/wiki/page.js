@@ -3871,7 +3871,7 @@ function module_code(library_namespace) {
 									+ CeL.wiki.title_link_of(page_data));
 						}
 
-						// using for_each_token()
+						// using for_each_subtoken()
 						parsed.each('link', function(token, index) {
 							console.log(token);
 						});
