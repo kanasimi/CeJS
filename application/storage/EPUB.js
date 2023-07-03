@@ -1291,10 +1291,13 @@ function module_code(library_namespace) {
 			return '<img ' + inner.replace(/[\s\/]+$/g, '') + ' \/>';
 		})
 
+		// 去掉單純的空連結 <a ...></a>。
+		.replace(/<a(?:\s[^<>]*)*><\/a(?:\s[^<>]*)?>/ig, '')
+
 		// 2017/2/2 15:1:26
 		// 標準可以沒 <rb>。若有<rb>，反而無法通過 EpubCheck 檢測。
 		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
-		.replace(/<\/?rb\s*>/g, '')
+		.replace(/<\/?rb\s*>/ig, '')
 
 		// e.g., id="text" → id="text"
 		// .replace(/ ([a-z]+)=([a-z]+)/g, ' $1="$2"')
@@ -1874,7 +1877,8 @@ function module_code(library_namespace) {
 				if (item_data.words_so_far > 0) {
 					messages.push(',',
 					// gettext_config:{"id":"$1-word(s)-accumulated"}
-					[ '累計 %1 {{PLURAL:1|個字}}', item_data.words_so_far + item_data.word_count ]);
+					[ '累計 %1 {{PLURAL:1|個字}}',
+							item_data.words_so_far + item_data.word_count ]);
 				}
 
 				// 加入本章節之字數統計標示。
