@@ -1508,6 +1508,7 @@ function module_code(library_namespace) {
 				// 向後移一位，落點在第一個空白 token 上。
 				_index++;
 			}
+			// 未 force 強制則以第一個出現的為準。
 			if (force || !(layout_indices[layout_type] >= 0)) {
 				layout_indices[layout_type] = _index >= 0 ? _index : index;
 				return true;
@@ -1568,6 +1569,13 @@ function module_code(library_namespace) {
 					// e.g., [[w:en:Talk:Cuvier's dwarf caiman]]
 					set_index('content');
 					set_index('lead_section_end', BACKTRACKING_SPACES);
+				} else if (token.name === 'DYKEntry/archive') {
+					// 模板本身包含標題。
+					// e.g., [[w:zh:Template:DYKEntry/archive]]
+					set_index('content');
+					set_index('lead_section_end', BACKTRACKING_SPACES);
+					set_index('lead_templates_end', BACKTRACKING_SPACES);
+
 				} else if (set_index('maintenance_templates')) {
 					// maintenance tag
 				} else if (layout_indices.content_end >= 0) {
