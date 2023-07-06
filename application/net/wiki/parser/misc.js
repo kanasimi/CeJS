@@ -1797,10 +1797,26 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// 簡易但很有可能出錯的 converter。
-	// object = CeL.wiki.parse.lua_object(page_data.wikitext);
-	// @see https://www.lua.org/manual/5.3/manual.html#3.1
-	// TODO: secutity check
+	/**
+	 * 簡易、很可能出錯的 lua object parser。
+	 * 
+	 * @example<code>
+
+	object = CeL.wiki.parse.lua_object(page_data.wikitext);
+
+	</code>
+	 * 
+	 * TODO: secutity check
+	 * 
+	 * @param {String}lua_code
+	 *            lua object code to parse.
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns parsed lua object
+	 * 
+	 * @see https://www.lua.org/manual/5.3/manual.html#3.1
+	 */
 	function parse_lua_object_code(lua_code, options) {
 		options = library_namespace.setup_options(options);
 		lua_code = wiki_API.content_of(lua_code);
@@ -2036,18 +2052,23 @@ function module_code(library_namespace) {
 		// lua_code = eval('(function(){' + lua_code + '})()');
 
 		lua_code = lua_code.replace(/^[;\s\n]*return[\s\n]*{/, '{');
-		lua_code = lua_code.replace(/\t/g, '\\t');
+
+		// 遇到 async function check_system_conversions() @
+		// wiki/routine/20191129.check_language_conversion.js
+		// 會導致 `""` 外的 \t 被轉為 \\t。
+		// lua_code = lua_code.replace(/\t/g, '\\t');
 
 		// console.log(JSON.stringify(lua_code));
 		try {
 			lua_code = JSON.parse(lua_code);
 		} catch (e) {
-			library_namespace
-					.error('parse_lua_object_code: Cannot parse code as JSON: '
-					//
-					+ JSON.stringify(lua_code
-					// .slice(0)
-					));
+			library_namespace.error('parse_lua_object_code: '
+			//
+			+ 'Cannot parse code as JSON: ' + JSON.stringify(lua_code
+			// .slice(0)
+			));
+			// console.trace(lua_code);
+			// console.trace(e);
 			// TODO: handle exception
 			return;
 		}
