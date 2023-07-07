@@ -707,11 +707,12 @@ function module_code(library_namespace) {
 
 	// relationships, assignment, equalities
 	// https://en.wikipedia.org/wiki/Mathematical_operators_and_symbols_in_Unicode
+	// https://zh.wikipedia.org/wiki/%E6%95%B0%E5%AD%A6%E8%BF%90%E7%AE%97%E7%AC%A6_(Unicode%E5%8C%BA%E6%AE%B5)
 	// [≁-⊋]:
 	// ≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≔≕≖≗≘≙≚≛≜≝≞≟≠≡≢≣≤≥≦≧≨≩≪≫≬≭≮≯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋
 	// [⋀-⋭]: ⋀⋁⋂⋃⋄⋅⋆⋇⋈⋉⋊⋋⋌⋍⋎⋏⋐⋑⋒⋓⋔⋕⋖⋗⋘⋙⋚⋛⋜⋝⋞⋟⋠⋡⋢⋣⋤⋥⋦⋧⋨⋩⋪⋫⋬⋭
 	// TODO: "~"
-	convert_MathML.RELATIONSHIP_PATTERN = '=><∝≁-⊋⋀-⋭';
+	convert_MathML.RELATIONSHIP_PATTERN = '=><≪≫∝≁-⊋⋀-⋭';
 
 	// https://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
 	convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-−±∓'
