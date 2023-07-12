@@ -241,7 +241,7 @@ function module_code(library_namespace) {
 			if (false) {
 				library_namespace.info('parse_conversions: ' + page_data.title);
 			}
-			var object = wiki_API.content_of(page_data);
+			var object = wiki_API.content_of(page_data, options);
 			// local function Item
 			if (/function\s+Item\s*\(/.test(object)
 			// `local Item = require('Module:CGroup/core').Item;`
