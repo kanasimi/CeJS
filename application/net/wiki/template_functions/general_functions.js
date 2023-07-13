@@ -420,6 +420,41 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function expand_template_Track_listing(options) {
+		// console.trace(this);
+		var parameters = this.parameters;
+		// `track_id = 'track%d',` @ [[Module:Track listing/configuration]]
+		var anchor_prefix = 'track';
+		var wikitext = [];
+		// function p._main(args) @ [[Module:Track listing]]
+		for ( var parameter_name in parameters) {
+			var matched = parameter_name.match(/^(\D.*?)(\d+)$/);
+			if (!matched)
+				continue;
+			var track_number = +matched[2];
+			if (isNaN(track_number) || wikitext[track_number]
+			// Allow numbers like 0, 1, 2 ..., but not 00, 01, 02...,
+			|| track_number === 0 && matched[2] !== '0') {
+				continue;
+			}
+
+			// `track_id = 'track%d',` @ [[Module:Track listing/configuration]]
+			var anchor = anchor_prefix + track_number;
+			// 極度簡化版。
+			wikitext[track_number] = '<th id="' + anchor + '"></th>';
+		}
+
+		// console.trace(wikitext.join(''));
+		return wikitext.join('');
+	}
+
+	function parse_template_Track_listing(template_token, index, parent,
+			options) {
+		template_token.expand = expand_template_Track_listing;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	function parse_template_Pin_message(template_token, index, parent, options) {
 		var parameters = template_token.parameters, message_expire_date;
 		if (parameters[1]) {
@@ -569,10 +604,19 @@ function module_code(library_namespace) {
 		Wikicite : parse_template_Wikicite,
 		// Sfn : parse_template_Sfn,
 		SfnRef : parse_template_SfnRef,
+		/**
+		 * <code>
+
+		由於現在機器人還不能解析lua模組，在模板與模組的說明文件中應標示清楚其行為，就像像{{tl|Episode table}}一樣。這樣未來若有其他編輯者改變模板與模組的行為，就必須顧慮到受影響的機器人，並且會通知機器人操作者。
+		Since robots are not yet able to parse lua modules, the behaviour of templates and modules should be clearly marked in their documentation, as in {{tl|Episode table}}. In this way, if another editor changes the behaviour of a template or module in the future, the affected robot will have to be taken into account and the robot operator will be notified.
+
+		</code>
+		 */
 		'Episode table' : parse_template_Episode_table,
 		'Episode table/part' : parse_template_Episode_table__part,
 		'Episode list' : parse_template_Episode_list,
 		'Episode list/sublist' : parse_template_Episode_list,
+		'Track listing' : parse_template_Track_listing,
 
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
 		'Pin message' : parse_template_Pin_message,
