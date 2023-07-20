@@ -718,8 +718,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}lead section wikitext 文字
 	 * 
-	 * @see [[mw:Extension:Labeled_Section_Transclusion#Transclude_the_introduction]]
-	 *      {{subst:#lsth:page title}}
+	 * @see function simplify_transclusion() @ CeL.application.net.wiki.parser.evaluate
 	 * 
 	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction),
 	 *      [[en:Wikipedia:Hatnote]] 頂註
@@ -1976,8 +1975,13 @@ function module_code(library_namespace) {
 			// id in table cell attribute
 			parsed.each('tag', function(tag_token, index, parent) {
 				// console.trace(tag_token);
-				for_each_subtoken.call(tag_token, 'tag_attributes',
-						parse_tag_attribute_anchors);
+
+				// 不放在 `parsed.each('tag'` 裡面，因為 table_cell 也能設定 id。
+				if (false) {
+					for_each_subtoken.call(tag_token, 'tag_attributes',
+							parse_tag_attributes_anchors);
+				}
+
 				/**
 				 * <code>
 				<h4>__id__</h4>
@@ -1993,6 +1997,10 @@ function module_code(library_namespace) {
 				}
 			});
 
+			// 不放在 `parsed.each('tag'` 裡面，因為 table_cell 也能設定 id。
+			// e.g., @ [[w:en:Sergio Pérez]]
+			parsed.each('tag_attributes', parse_tag_attributes_anchors);
+
 			var anchor_list = Object.keys(anchor_hash);
 			if (options && options.print_anchors) {
 				library_namespace.info('get_all_anchors: anchors:');
@@ -2002,18 +2010,27 @@ function module_code(library_namespace) {
 			return anchor_list;
 		}
 
-		function parse_tag_attribute_anchors(attribute_token, index, parent) {
+		function parse_tag_attributes_anchors(attribute_token, index, parent) {
 			// console.log(parent);
 			// console.trace(attribute_token);
 			// console.log(attribute_token.attributes);
+
 			// const
 			var anchor = attribute_token.attributes.id
 					|| attribute_token.attributes.name;
 			// console.trace(anchor);
+			if (false && attribute_token.toString())
+				console.trace(attribute_token.toString());
+			if (!anchor)
+				return;
+
 			// <ref name="..."> 會轉成 id="cite_re-..."
 			if (parent.tag ? parent.tag.toLowerCase() !== 'ref'
 			// e.g., @ [[w:en:Daniel Ricciardo]]
-			: parent.type === 'table_attributes') {
+			: parent.type === 'table_attributes'
+			// e.g., @ [[w:en:Sergio Pérez]]
+			// ...|-\n|id=2007R|...
+			|| parent.type === 'table_cell') {
 				// e.g., <span id="anchor">, <div id="anchor">
 				if (Array.isArray(anchor)) {
 					if (anchor.type !== 'plain') {
