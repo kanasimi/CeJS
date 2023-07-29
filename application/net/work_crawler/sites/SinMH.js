@@ -404,7 +404,8 @@ function module_code(library_namespace) {
 					library_namespace.info({
 						// gettext_config:{"id":"using-the-previous-cache-to-download-§$1"}
 						T : [ '使用之前的快取，自 §%1 接續下載。',
-								latest_chapter_list.length ]
+						//
+						latest_chapter_list.length ]
 					});
 					// 這可以保留 work_data.chapter_list 先前的屬性。
 					work_data.chapter_list = Object.assign(latest_chapter_list,
@@ -572,6 +573,16 @@ function module_code(library_namespace) {
 					mode : CryptoJS.mode.CBC,
 					padding : CryptoJS.pad.Pkcs7
 				}).toString(CryptoJS.enc.Utf8));
+			}
+
+			// console.trace(chapter_data);
+			if (!chapter_data.chapterImages.map
+					&& chapter_data.chapterImages[0]) {
+				// e.g., https://www.ymh1234.com/comic/20693/1223511.html
+				// 万古最强宗 88 我踢球的
+				// {'0':'....jpg','2':...}
+				chapter_data.chapterImages = Object
+						.values(chapter_data.chapterImages);
 			}
 
 			// assert: Array.isArray(chapter_data.chapterImages)
