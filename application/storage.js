@@ -134,7 +134,8 @@ function module_code(library_namespace) {
 
 		_.copy_file = storage_module.fs_copySync;
 
-		_.remove_file = _.remove_directory = function(path, recursive) {
+		_.remove_file = _.remove_directory = function remove_fso(path,
+				recursive) {
 			return storage_module.fs_remove(path, recursive);
 		};
 
@@ -378,6 +379,28 @@ function module_code(library_namespace) {
 	}
 
 	_.extract_wildcard = extract_wildcard;
+
+	/**
+	 * Delete files in the directory that fit the filter.
+	 * 刪除掉directory中符合filter的檔案。
+	 * 
+	 * @param {String}directory
+	 *            in the directory
+	 * @param {String}filter
+	 *            file name filter
+	 */
+	function remove_files_in_directory(directory, filter) {
+		// const
+		var file_list = library_namespace.read_directory(directory);
+		file_list = file_list.filter(filter);
+		directory = append_path_separator(directory);
+		file_list.forEach(function(file_name) {
+			library_namespace.debug('Remove ' + directory + file_name);
+			_.remove_file(directory + file_name);
+		});
+	}
+
+	_.remove_files_in_directory = remove_files_in_directory;
 
 	// 決定預設的主要下載目錄。
 	// macOS dmg APP 中無法將檔案儲存在APP目錄下。
