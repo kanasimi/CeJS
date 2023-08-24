@@ -81,19 +81,44 @@ function module_code(library_namespace) {
 	function Converter_initialization(options) {
 		// console.trace(this.files);
 
+		/**
+		 * 正規化 item，轉成純粹 `from "\t" to`。
+		 * 
+		 * @param {String}text
+		 *            text line
+		 * 
+		 * @return {String} `from "\t" to`
+		 */
 		function item_processor(item) {
 			var matched = item.match(/^([^\t]+)\t([^\t]+)$/);
 			if (matched) {
-				if (!matched[1].trim())
+				var trimmed_convert_from = matched[1].trim();
+				if (!trimmed_convert_from) {
+					library_namespace.warn('Skip line without convert from: '
+							+ item);
 					return;
-				if (/ [^\t]+$/.test(matched[2])) {
-					if (matched[2].startsWith(matched[1] + ' ')) {
+				}
+				if (trimmed_convert_from !== matched[1]) {
+					library_namespace.warn('前後有空白: [' + matched[1] + '] @ '
+							+ item);
+				}
+
+				// 當from含有空白字元時不當作有不同選項可用。
+				// e.g., "第三百二十五章 面" → "第三百二十五章 麵"
+				var splitted = !/\s/.test(trimmed_convert_from)
+						&& matched[2].split(/\s+/);
+				// 當to含有空白字元時表示有不同選項可用。
+				if (splitted && splitted.length > 1
+				// e.g., "方便面" → "泡麵 速食麵"
+				// && matched[1].length === splitted[0].length
+				) {
+					if (matched[1] === splitted[0]) {
 						// console.log('詞有疑意: ' + item);
 						// 但像是"小丑"之類的還是必須保留。
 						// return;
 					}
 					// 必須置換，那就換個最常用的。
-					return item.replace(/ +[^\t]+$/, '');
+					item = matched[1] + '\t' + splitted[0];
 				}
 			}
 			return item;
