@@ -391,13 +391,22 @@ function module_code(library_namespace) {
 	 */
 	function remove_files_in_directory(directory, filter) {
 		// const
-		var file_list = library_namespace.read_directory(directory);
-		file_list = file_list.filter(filter);
+		var fso_list = library_namespace.read_directory(directory);
+		fso_list = fso_list.filter(filter);
 		directory = append_path_separator(directory);
-		file_list.forEach(function(file_name) {
-			library_namespace.debug('Remove ' + directory + file_name);
-			_.remove_file(directory + file_name);
+		var errors = Object.create(null);
+		fso_list.forEach(function(fso_name) {
+			var fso_path = directory + fso_name;
+			library_namespace.debug('Remove ' + fso_path);
+			var error = _.remove_file(fso_path);
+			if (error) {
+				errors[fso_name] = {
+					fso_path : fso_path,
+					error : error
+				};
+			}
 		});
+		return errors;
 	}
 
 	_.remove_files_in_directory = remove_files_in_directory;
