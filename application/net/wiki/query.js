@@ -794,6 +794,7 @@ function module_code(library_namespace) {
 
 	// 用戶相關功能，避免延遲回應以使用戶等待。 The user is waiting online.
 	// Only respect maxlag. 因為數量太多，只好增快速度。
+	// @see [[w:ja:Wikipedia:Bot#大量の件数を処置する場合の手続き]]
 	// CeL.wiki.query.default_edit_time_interval = 0;
 	// wiki_session.edit_time_interval = 0;
 

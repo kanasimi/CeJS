@@ -295,9 +295,10 @@ function module_code(library_namespace) {
 		/**
 		 * TODO:<code>
 
-		parse 嵌入section內文 [[mw:Extension:Labeled_Section_Transclusion]]:
+		parse 嵌入section內文 [[mw:Extension:Labeled Section Transclusion#Transclude the introduction]]:
 		{{#lsth:page_title|section begin in wikitext|section end in wikitext}}, {{#section-h:page_title}} 語意上相當於 {{page_title#section}}。如果有多個相同名稱的section，僅轉換第一個。The matching is case insensitive
 		TODO: parse <section begin=chapter1 />, {{#lst:page_title|section begin|section end}}, {{#lstx:page_title|section|replacement_text}}
+		@see [[w:en:Template:Excerpt]]
 
 		</code>
 		 */

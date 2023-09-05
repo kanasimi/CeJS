@@ -319,7 +319,12 @@ function module_code(library_namespace) {
 			/-{([\s\S]+?)}-/g, function(all, inner) {
 				return '-{H|' + inner
 				// trim any trailling comments starting with '//'
-				.replace(/\/\/[^\n]+/g, '')
+				// `//blah blah`是可省的注釋，其目的是解釋該轉換規則；
+				.replace(/\/\/[^\n]+/g, function(all) {
+					// 如果使用//作注釋的話，;要放在注釋的後面。
+					var matched = all.match(/;\s*$/);
+					return matched ? matched[0] : '';
+				})
 				// 每條轉換須用如下格式書寫：* abc => xyz //blah blah ;
 				.replace(/["'*#\n]/g, '').replace(/=>/g, '=>'
 				// language code
