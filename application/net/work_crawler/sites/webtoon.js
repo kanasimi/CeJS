@@ -186,7 +186,8 @@ function module_code(library_namespace) {
 					'<div class="episode_area"');
 
 			while (matched = PATTERN_image.exec(html)) {
-				matched = new library_namespace.URI(matched[1]);
+				matched = new library_namespace.URI(CeL
+						.HTML_to_Unicode(matched[1]));
 				// 去掉?type=q70s的部分 畫質較好 q70是手機版 q90是電腦版
 				delete matched.search_params.type;
 				// 去除?x-oss-process=image/quality,q_90 可會有更高的畫質
