@@ -153,6 +153,7 @@ function module_code(library_namespace) {
 					id_data.push(get_label(matched[2]));
 				}
 			});
+			// console.trace(id_list, id_data);
 			return [ id_list, id_data ];
 		},
 
@@ -344,7 +345,7 @@ function module_code(library_namespace) {
 			}
 
 			if (this.remove_ads) {
-				text = this.remove_ads(text);
+				text = this.remove_ads(text, chapter_data);
 			}
 			// console.log(text);
 

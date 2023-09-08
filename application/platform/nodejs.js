@@ -596,7 +596,7 @@ function module_code(library_namespace) {
 					// gettext_config:{"id":"cannot-save-data-to-file-$1"}
 					T : [ 'Cannot save data to file [%1]!', file_path ]
 				} ]);
-				library_namespace.error(e);
+				console.error(e);
 			}
 			return e;
 		}

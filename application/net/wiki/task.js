@@ -1638,8 +1638,10 @@ function module_code(library_namespace) {
 				next[1] = next[1].call(next[2], next[2].page_to_edit);
 			}
 
+			// If the content is not changed, using `skip_nochange` will skip
+			// the actual edit. Otherwise, a null edit will be made.
 			if (next[2] && next[2].skip_nochange
-			// 採用 skip_nochange 可以跳過實際 edit 的動作。
+			// 內容沒變更時，採用 `skip_nochange` 可以跳過實際 edit 的動作。否則會作出一次零編輯。
 			&& next[1] === wiki_API.content_of(next[2].page_to_edit)) {
 				// console.log(next[2]);
 				// console.trace(next[2].page_to_edit.title);

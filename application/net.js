@@ -499,6 +499,13 @@ function module_code(library_namespace) {
 		if (false && path && !/^(?:[^%]|%[\dA-F]{2})+$/i.test(path)) {
 			library_namespace.warn('URI: encoding error: [' + path + ']');
 		}
+		if (path && /&#\d{2,5};/i.test(path)) {
+			library_namespace
+					.warn('URI: You may need to decode "&#...;" first (e.g., via '
+							// CeL.HTML_to_Unicode()
+							+ library_namespace.Class
+							+ '.HTML_to_Unicode()): [' + path + ']');
+		}
 
 		// console.trace([ href, path, uri ]);
 		library_namespace.debug('parse path: [' + path + ']', 9);

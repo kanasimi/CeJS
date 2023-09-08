@@ -886,8 +886,9 @@ function module_code(library_namespace) {
 	function ebook_path(work_data, file_name, options) {
 		if (!file_name) {
 			if (!work_data.author || !work_data.site_name) {
-				library_namespace
-						.error('ebook_path: 尚未設定作者或下載站點，可能導致先前 cache 無用。');
+				library_namespace.error('ebook_path: ' + '尚未設定作者('
+						+ work_data.author + ')或下載站點(' + work_data.site_name
+						+ ')，可能導致先前 cache 無用。');
 			}
 			// e.g., "(一般小説) [author] title [site 20170101 1話].id.epub"
 			file_name = [
@@ -901,8 +902,9 @@ function module_code(library_namespace) {
 					this.convert_text_language(work_data.site_name
 					// , options
 					),
-					' ',
-					work_data.last_update_Date.format('%Y%2m%2d'),
+					work_data.last_update_Date ? ' '
+							+ work_data.last_update_Date.format('%Y%2m%2d')
+							: '',
 					work_data.chapter_count >= 1
 					//
 					? ' ' + work_data.chapter_count
