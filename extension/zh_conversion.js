@@ -140,11 +140,27 @@ function module_code(library_namespace) {
 		};
 		// 警告: .add_conversions({sort:}) 必須配合 Converter.options @
 		// CeL.zh_conversion！
+		if (options.sort) {
+			this.files.some(function(file_list, index) {
+				if (file_list.sort_name === options.sort
+				// Array.isArray(file_list)
+				|| file_list[0] && file_list[0].sort_name === options.sort) {
+					library_namespace.debug('.sort_name ' + options.sort + '→'
+							+ index + ': ' + file_list, 1, 'add_conversions');
+					options.sort = index;
+					return true;
+				}
+			});
+		}
 		if (options.sort >= 0) {
 			if (!Array.isArray(this.files[options.sort]))
 				this.files[options.sort] = [ this.files[options.sort] ];
 			this.files[options.sort].push(file_options);
 		} else {
+			if (options.sort !== undefined) {
+				library_namespace.error('add_conversions: Invalid sort: '
+						+ options.sort);
+			}
 			this.files.push(file_options);
 		}
 
@@ -172,8 +188,8 @@ function module_code(library_namespace) {
 			use_conversion.add_path(options);
 		} else {
 			var convert_Pairs = new Convert_Pairs(null, options);
-			console.trace(this);
-			console.trace(convert_Pairs);
+			// console.trace(this);
+			// console.trace(convert_Pairs);
 			// console.trace(convert_Pairs.pair_Map.size);
 			if (convert_Pairs.pair_Map.size > 0) {
 				this.conversions.unshift(convert_Pairs);
@@ -202,7 +218,7 @@ function module_code(library_namespace) {
 
 		this.conversions = [];
 		// @see add_conversions()
-		this.files.map(function(file_list) {
+		this.files.forEach(function(file_list) {
 			var _options = {
 				file_filter : this.file_filter,
 
@@ -218,10 +234,16 @@ function module_code(library_namespace) {
 				file_list = [ file_list ];
 
 			// 載入 resources。
-			_options.path = file_list.map(function(file_path) {
-				if (typeof file_path === 'string')
-					return to_full_file_path(file_path);
+			_options.path = [];
+			file_list.forEach(function(file_path) {
+				if (typeof file_path === 'string') {
+					_options.path.push(to_full_file_path(file_path));
+					return;
+				}
 				// assert: library_namespace.is_Object(file_path)
+				if (file_path.sort_name) {
+					file_list.sort_name = file_path.sort_name;
+				}
 				var __options = file_path;
 				// e.g., for .remove_comments
 				if (!__options.file_path && !__options.path
@@ -231,8 +253,8 @@ function module_code(library_namespace) {
 					//
 					= to_full_file_path(__options.file_name);
 				}
-				// assert: !!__options.file_path === true
-				return __options;
+				if (__options.file_path)
+					_options.path.push(__options);
 			});
 			// console.trace(_options);
 
@@ -387,7 +409,9 @@ function module_code(library_namespace) {
 			// prefix_conversions : {},
 			// postfix_conversions : {},
 
-			files : [ [ 'STPhrases', 'STCharacters',
+			files : [ [ {
+				sort_name : '主要繁簡轉換'
+			}, 'STPhrases', 'STCharacters',
 			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的辭典檔。
 			'additional.to_TW.auto-generated',
 			// 後來的會覆蓋前面的。
@@ -397,7 +421,9 @@ function module_code(library_namespace) {
 			} ],
 			// ------------------------------------------------------
 			// ** 下面的是上面詞彙與單字轉換後的再轉換。
-			[ 'TWPhrasesIT',
+			[ {
+				sort_name : '再轉換'
+			}, 'TWPhrasesIT',
 			// ↑ TWPhrasesIT.txt 有許多常用詞彙，在 corrections_to_TW.txt 取消。
 			'TWPhrasesName', 'TWPhrasesOther',
 			// 若要篩選或增減 conversion files，可參考範例：
@@ -407,7 +433,10 @@ function module_code(library_namespace) {
 				remove_comments : true
 			} ],
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/s2twp.json
-			'TWVariants' ],
+			[ {
+				sort_name : '變體字'
+			}, 'TWVariants' ] ],
+			// 手動修正表
 			corrections : 'corrections_to_TW.txt'
 		},
 		TW_to_CN : {
@@ -417,7 +446,9 @@ function module_code(library_namespace) {
 
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
 			// https://github.com/BYVoid/OpenCC/blob/master/node/dicts.gypi
-			files : [ 'TWVariantsRevPhrases', [ 'TSPhrases', 'TSCharacters',
+			files : [ 'TWVariantsRevPhrases', [ {
+				sort_name : '主要繁簡轉換'
+			}, 'TSPhrases', 'TSCharacters',
 			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的辭典檔。
 			'additional.to_CN.auto-generated',
 			// 後來的會覆蓋前面的。
