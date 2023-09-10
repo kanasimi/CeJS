@@ -281,6 +281,7 @@ function module_code(library_namespace) {
 		// console.trace(cecc);
 		if (cecc && cecc.load_text_to_check) {
 			var promise_load_text_to_check = cecc.load_text_to_check({
+				// 設定 work_title 可載入 watch_target.* 辭典修訂測試集。
 				work_title : work_data.title,
 				convert_to_language : this.convert_to_language
 			}, {

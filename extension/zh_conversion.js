@@ -78,51 +78,113 @@ function module_code(library_namespace) {
 		// console.trace(this.files);
 	}
 
+	/**
+	 * 正規化 item，轉成純粹 `from "\t" to`。
+	 * 
+	 * @param {String}text
+	 *            text line
+	 * 
+	 * @return {String} `from "\t" to`
+	 */
+	function default_item_processor(item) {
+		var matched = item.match(/^([^\t]+)\t([^\t]+)$/);
+		if (matched) {
+			var trimmed_convert_from = matched[1].trim();
+			if (!trimmed_convert_from) {
+				library_namespace
+						.warn('default_item_processor: Skip line without convert from: '
+								+ item);
+				return;
+			}
+			if (trimmed_convert_from !== matched[1]) {
+				library_namespace.warn('default_item_processor: 前後有空白: ['
+						+ matched[1] + '] @ ' + item);
+			}
+
+			// 當from含有空白字元時不當作有不同選項可用。
+			// e.g., "第三百二十五章 面" → "第三百二十五章 麵"
+			var splitted = !/\s/.test(trimmed_convert_from)
+					&& matched[2].split(/\s+/);
+			// 當to含有空白字元時表示有不同選項可用。
+			if (splitted && splitted.length > 1
+			// e.g., "方便面" → "泡麵 速食麵"
+			// && matched[1].length === splitted[0].length
+			) {
+				if (matched[1] === splitted[0]) {
+					// console.log('詞有疑意: ' + item);
+					// 但像是"小丑"之類的還是必須保留。
+					// return;
+				}
+				// 必須置換，那就換個最常用的。
+				item = matched[1] + '\t' + splitted[0];
+			}
+		}
+		return item;
+	}
+
+	// CeL.zh_conversion.CN_to_TW[CeL.zh_conversion.KEY_converter].add_conversions(file_path)
+	function add_conversions(file_path_list) {
+		var options = {
+			// remove_comments : true,
+			item_processor : default_item_processor,
+			may_remove_pair_Map : true
+		};
+		if (library_namespace.is_Object(file_path_list)) {
+			Object.assign(options, file_path_list);
+			file_path_list = options.file_path;
+		}
+
+		var file_options = {
+			file_path : file_path_list,
+			remove_comments : options.remove_comments
+		};
+		// 警告: .add_conversions({sort:}) 必須配合 Converter.options @
+		// CeL.zh_conversion！
+		if (options.sort >= 0) {
+			if (!Array.isArray(this.files[options.sort]))
+				this.files[options.sort] = [ this.files[options.sort] ];
+			this.files[options.sort].push(file_options);
+		} else {
+			this.files.push(file_options);
+		}
+
+		// console.trace(this);
+		if (!this.conversions) {
+			// 尚未執行 Converter_initialization(options)。
+			// 將在 Converter_initialization() 一起載入。
+			return;
+		}
+
+		if (!Array.isArray(file_path_list))
+			file_path_list = [ file_path_list ];
+
+		options.path = file_path_list;
+
+		var use_conversion = this.conversions[options.sort];
+		if (use_conversion && use_conversion.pair_Map_by_length
+				&& !use_conversion.pair_Map) {
+			library_namespace
+					.error('add_conversions: 先前未保留 .pair_Map，忽略 .sort 設定!');
+			use_conversion = null;
+		}
+
+		if (use_conversion) {
+			use_conversion.add_path(options);
+		} else {
+			var convert_Pairs = new Convert_Pairs(null, options);
+			console.trace(this);
+			console.trace(convert_Pairs);
+			// console.trace(convert_Pairs.pair_Map.size);
+			if (convert_Pairs.pair_Map.size > 0) {
+				this.conversions.unshift(convert_Pairs);
+			}
+		}
+
+		delete this.max_convert_word_length;
+	}
+
 	function Converter_initialization(options) {
 		// console.trace(this.files);
-
-		/**
-		 * 正規化 item，轉成純粹 `from "\t" to`。
-		 * 
-		 * @param {String}text
-		 *            text line
-		 * 
-		 * @return {String} `from "\t" to`
-		 */
-		function item_processor(item) {
-			var matched = item.match(/^([^\t]+)\t([^\t]+)$/);
-			if (matched) {
-				var trimmed_convert_from = matched[1].trim();
-				if (!trimmed_convert_from) {
-					library_namespace.warn('Skip line without convert from: '
-							+ item);
-					return;
-				}
-				if (trimmed_convert_from !== matched[1]) {
-					library_namespace.warn('前後有空白: [' + matched[1] + '] @ '
-							+ item);
-				}
-
-				// 當from含有空白字元時不當作有不同選項可用。
-				// e.g., "第三百二十五章 面" → "第三百二十五章 麵"
-				var splitted = !/\s/.test(trimmed_convert_from)
-						&& matched[2].split(/\s+/);
-				// 當to含有空白字元時表示有不同選項可用。
-				if (splitted && splitted.length > 1
-				// e.g., "方便面" → "泡麵 速食麵"
-				// && matched[1].length === splitted[0].length
-				) {
-					if (matched[1] === splitted[0]) {
-						// console.log('詞有疑意: ' + item);
-						// 但像是"小丑"之類的還是必須保留。
-						// return;
-					}
-					// 必須置換，那就換個最常用的。
-					item = matched[1] + '\t' + splitted[0];
-				}
-			}
-			return item;
-		}
 
 		function corrections_item_processor(item, options) {
 			var matched = item.match(/^-([^\t\n]{1,30})$/);
@@ -139,6 +201,7 @@ function module_code(library_namespace) {
 		}
 
 		this.conversions = [];
+		// @see add_conversions()
 		this.files.map(function(file_list) {
 			var _options = {
 				file_filter : this.file_filter,
@@ -146,7 +209,7 @@ function module_code(library_namespace) {
 				// no_the_same_key_value : !Array.isArray(file_list)
 				// || file_list.length < 2,
 
-				item_processor : item_processor,
+				item_processor : default_item_processor,
 				// 在開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。
 				may_remove_pair_Map : !options || !options.mode
 			};
@@ -154,9 +217,8 @@ function module_code(library_namespace) {
 			if (!Array.isArray(file_list))
 				file_list = [ file_list ];
 
-			_options.path = file_list
 			// 載入 resources。
-			.map(function(file_path) {
+			_options.path = file_list.map(function(file_path) {
 				if (typeof file_path === 'string')
 					return to_full_file_path(file_path);
 				// assert: library_namespace.is_Object(file_path)
@@ -172,8 +234,11 @@ function module_code(library_namespace) {
 				// assert: !!__options.file_path === true
 				return __options;
 			});
+			// console.trace(_options);
 
 			var convert_Pairs = new Convert_Pairs(null, _options);
+			// console.trace(convert_Pairs);
+			// console.trace(convert_Pairs.pair_Map.size);
 			if (convert_Pairs.pair_Map.size > 0) {
 				// console.trace([ convert_Pairs.pair_Map.get('猜拳斗酒') ]);
 				this.conversions.push(convert_Pairs);
@@ -273,8 +338,16 @@ function module_code(library_namespace) {
 		// console.trace(text);
 
 		if (!(this.max_convert_word_length >= 0)) {
+			// console.trace(this);
+			var may_remove_pair_Map = this.may_remove_pair_Map;
+			if (may_remove_pair_Map) {
+				library_namespace.debug('在開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。', 1,
+						'Convert_Pairs__convert');
+			}
 			this.max_convert_word_length = this.conversions.reduce(function(
 					length, conversion) {
+				if (may_remove_pair_Map)
+					delete conversion.pair_Map;
 				return Math.max(length, conversion.pair_Map_by_length.length);
 			}, 0);
 			// console.trace(this);
@@ -302,7 +375,8 @@ function module_code(library_namespace) {
 	Object.assign(Converter.prototype, {
 		initialization : Converter_initialization,
 		convert : convert_text,
-		file : convert_file
+		file : convert_file,
+		add_conversions : add_conversions
 	});
 
 	Converter.options = {
@@ -363,6 +437,9 @@ function module_code(library_namespace) {
 		library_namespace[method_name] = _[method_name] = method;
 	}
 
+	var KEY_converter = typeof Symbol === 'function' ? Symbol('KEY_converter')
+			: 'KEY converter';
+	_.KEY_converter = KEY_converter;
 	function generate_converter(type, options) {
 		options = library_namespace.setup_options(options);
 		if (!(type in Converter.options)) {
@@ -376,6 +453,8 @@ function module_code(library_namespace) {
 				.clone(Converter.options[type]), options));
 		var converter_interface = converter.convert.bind(converter);
 		converter['interface'] = converter_interface;
+		// method to get the original converter.
+		converter_interface[KEY_converter] = converter;
 		if (options.set_as_default) {
 			set_as_default(type, converter_interface);
 		}
