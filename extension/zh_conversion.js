@@ -134,6 +134,22 @@ function module_code(library_namespace) {
 			file_path_list = options.file_path;
 		}
 
+		if (!this.file_path_loaded_Set)
+			this.file_path_loaded_Set = new Set;
+		if (!Array.isArray(file_path_list))
+			file_path_list = [ file_path_list ];
+		// 不重複載入 conversions file。
+		file_path_list = file_path_list.filter(function(file_path) {
+			if (!this.file_path_loaded_Set.has(file_path)) {
+				this.file_path_loaded_Set.add(file_path);
+				return true;
+			}
+		}, this);
+		if (file_path_list.length === 0) {
+			return;
+		}
+		// console.trace(file_path_list);
+
 		var file_options = {
 			file_path : file_path_list,
 			remove_comments : options.remove_comments
@@ -170,9 +186,6 @@ function module_code(library_namespace) {
 			// 將在 Converter_initialization() 一起載入。
 			return;
 		}
-
-		if (!Array.isArray(file_path_list))
-			file_path_list = [ file_path_list ];
 
 		options.path = file_path_list;
 
