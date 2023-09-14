@@ -3543,36 +3543,46 @@ function module_code(library_namespace) {
 					.edit(messages.join('\n'), log_options,
 					// wiki_API.work() 添加網頁報告。
 					function(title, error, result) {
-						if (error) {
-							library_namespace.warn('wiki_API.work: '
-							//
-							+ 'Cannot write log to '
-							//
-							+ wiki_API.title_link_of(log_to)
-							//
-							+ '! Try to write to '
-							//
-							+ wiki_API.title_link_of('User:'
-							//
-							+ session.token.login_user_name));
-							library_namespace.log('\nlog:<br />\n'
-							//
-							+ messages.join('<br />\n'));
-							// console.trace([ log_options, messages ]);
-
-							log_options.page_to_edit
-							// reset .page_to_edit
-							= wiki_API.VALUE_set_page_to_edit;
-							delete log_options.page_title_to_edit;
-
-							// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
-							// TODO: bug: 當分批時，只會寫入最後一次。
-							session.page('User:'
-							//
-							+ session.token.login_user_name, log_options)
-							//
-							.edit(messages.join('\n'), log_options);
+						if (!error) {
+							return;
 						}
+
+						library_namespace.warn('wiki_API.work: '
+						//
+						+ 'Cannot write log to '
+						//
+						+ wiki_API.title_link_of(log_to)
+						//
+						+ '!' + error);
+
+						// 當發生錯誤的時候不要回寫到機器人頁面。
+						if (config.no_fallback_log_to_on_error) {
+							// library_namespace.log(messages.join('\n'));
+							return;
+						}
+
+						library_namespace.info('Try to write to '
+						//
+						+ wiki_API.title_link_of('User:'
+						//
+						+ session.token.login_user_name));
+						library_namespace.log('\nlog:<br />\n'
+						//
+						+ messages.join('<br />\n'));
+						// console.trace([ log_options, messages ]);
+
+						log_options.page_to_edit
+						// reset .page_to_edit
+						= wiki_API.VALUE_set_page_to_edit;
+						delete log_options.page_title_to_edit;
+
+						// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
+						// TODO: bug: 當分批時，只會寫入最後一次。
+						session.page('User:'
+						//
+						+ session.token.login_user_name, log_options)
+						//
+						.edit(messages.join('\n'), log_options);
 					});
 				} else {
 					library_namespace.log('\nlog:<br />\n'
