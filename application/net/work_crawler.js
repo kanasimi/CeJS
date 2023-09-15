@@ -233,33 +233,64 @@ function module_code(library_namespace) {
 		if (!Array.isArray(text_list))
 			text_list = [ text_list ];
 
-		var _this = this;
+		var _this = this, promise;
 		text_list = text_list.filter(function(text) {
-			return text && text.trim()
-			//
-			&& !(text in _this.converted_text_cache);
+			// @see function convert_text_language(text, options)
+			if (!text || !text.trim())
+				return false;
+
+			if (text in _this.converted_text_cache) {
+				_this.converted_text_cache[text].requiring_thread_count++;
+				if (!_this.converted_text_cache[text].converted_text) {
+					promise = promise ? promise
+							.then(_this.converted_text_cache[text].promise)
+							: _this.converted_text_cache[text].promise;
+				}
+				// 先前已要求過要轉換這段文字。不需要再要求一次。
+				return false;
+			} else {
+				// 正常情況: 首次要求轉換這段文字。
+				if (initializated) {
+					_this.converted_text_cache[text] = {
+						requiring_thread_count : 1
+					};
+				}
+				// 尚未初始化的情況下，還是必須 return true 以讓 text_list.length > 0 並執行初始化。
+				return true;
+			}
 		});
+		// console.trace(initializated, text_list, promise);
 		if (text_list.length === 0) {
-			// Already cached all text needed.
-			return;
+			// !promise: Already cached all text needed.
+			return promise;
 		}
 
 		// console.trace(text_list.length + ' text to be converted.');
 		if (initializated) {
-			return this.convert_text_language_using(text_list, options)
+			// 初始化後正常的程序。
+			var _promise = this.convert_text_language_using(text_list, options)
 			// assert: .convert_text_language_using() return thenable
 			.then(function set_text_list(converted_text_list) {
+				// console.trace(converted_text_list);
 				text_list.forEach(function(text, index) {
-					_this.converted_text_cache[text]
-					//
+					// free
+					delete _this.converted_text_cache[text].promise;
+					_this.converted_text_cache[text].converted_text
+					// assert: {Object}_this.converted_text_cache[text]
+					// && !!converted_text_list[index] === true
 					= converted_text_list[index];
 				});
 				// console.trace(_this.converted_text_cache);
 			});
+			text_list.forEach(function(text) {
+				_this.converted_text_cache[text].promise = _promise;
+			});
+			return promise ? promise.then(_promise) : _promise;
 		}
 
 		// console.trace('cache_converted_text: 初始化 initialization');
 
+		// 僅有初始化時會執行一次。
 		return Promise.resolve(library_namespace.using_CeCC({
 			// e.g., @ function create_ebook()
 			skip_server_test : options.skip_server_test,
@@ -292,7 +323,14 @@ function module_code(library_namespace) {
 
 		// ('text' in options)
 		if (typeof options.text === 'string') {
-			delete this.converted_text_cache[options.text];
+			if (false) {
+				library_namespace.log('Delete cache of '
+						+ options.text.slice(0, 40) + '...('
+						+ options.text.length + ')');
+			}
+			// 採用 .requiring_thread_count 以避免要求轉換相同文字，後來的取用時已被刪除。
+			if (--this.converted_text_cache[options.text].requiring_thread_count === 0)
+				delete this.converted_text_cache[options.text];
 		} else {
 			// console.trace(options);
 			delete this.converted_text_cache;
@@ -303,6 +341,7 @@ function module_code(library_namespace) {
 	}
 
 	function convert_text_language(text, options) {
+		// @see function cache_converted_text(text_list, options)
 		if (!text || !text.trim() || !this.convert_to_language)
 			return text;
 
@@ -310,19 +349,20 @@ function module_code(library_namespace) {
 			return this.convert_text_language_using(text);
 
 		// 當無法取得文章內容時，可能出現 this.converted_text_cache === undefined
-		if (text in this.converted_text_cache) {
-			var converted_text = this.converted_text_cache[text];
-			if (false && text.length !== converted_text.length) {
+		var converted_text_data = this.converted_text_cache[text];
+		if (converted_text_data && converted_text_data.converted_text) {
+			if (false && text.length !== converted_text_data.converted_text.length) {
 				throw new Error('Different length:\n' + text + '\n'
-						+ converted_text);
+						+ converted_text_data.converted_text);
 			}
 			if (options && options.persistence)
-				this.converted_text_cache_persisted[text] = converted_text;
-			return converted_text;
+				this.converted_text_cache_persisted[text] = converted_text_data;
+			return converted_text_data.converted_text;
 		}
 
-		if (text in this.converted_text_cache_persisted) {
-			return this.converted_text_cache_persisted[text];
+		if ((text in this.converted_text_cache_persisted)
+				&& this.converted_text_cache_persisted[text].converted_text) {
+			return this.converted_text_cache_persisted[text].converted_text;
 		}
 
 		if (options && options.allow_non_cache) {

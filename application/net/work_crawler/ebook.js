@@ -340,15 +340,15 @@ function module_code(library_namespace) {
 		work_data.author, work_data.site_name ];
 		// console.trace('Convert: ' + text_list);
 		// 先測試是否使用 asynchronous 的 LTP server。
-		var promise_language_convert = this.cache_converted_text(text_list,
+		var promise_of_language_convert = this.cache_converted_text(text_list,
 		// 盡可能只使用 cache，不去動到 LTP server。
 		Object.assign({
 			skip_server_test : true
 		}, work_data.convert_options));
-		if (promise_language_convert) {
+		if (promise_of_language_convert) {
 			// 先初始化完畢後再重新執行。
 			// 注意: 這會造成 create_ebook() 這邊之前的程式碼執行兩遍!
-			return promise_language_convert.then(create_ebook.bind(this,
+			return promise_of_language_convert.then(create_ebook.bind(this,
 			// 跳過不需要的前置作業。本次執行不再重複解開 cache 檔，但仍需要
 			// cecc.load_text_to_check() 以載入作品的特設檢核。
 			work_data, Object.assign({
@@ -365,6 +365,7 @@ function module_code(library_namespace) {
 
 		crawler_namespace.set_last_update_Date(work_data, true);
 
+		// console.trace(work_data);
 		var ebook_directory = work_data.directory + work_data.directory_name
 		// + ' ebook'
 		, ebook_files = library_namespace.read_directory(ebook_directory),
@@ -443,10 +444,10 @@ function module_code(library_namespace) {
 				work_data.site_name ];
 		text_list.append(subject);
 		// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
-		promise_language_convert = this.cache_converted_text(text_list,
+		promise_of_language_convert = this.cache_converted_text(text_list,
 				work_data.convert_options)
 				|| Promise.resolve();
-		return ebook.working_promise = promise_language_convert
+		return ebook.working_promise = promise_of_language_convert
 				.then(setup_ebook.bind(this, work_data, setup_ebook_options));
 	}
 
@@ -566,13 +567,18 @@ function module_code(library_namespace) {
 		// return needing to wait language converted
 		var text_list = [ part_title, chapter_title, data.text ];
 		// console.trace(work_data.convert_options);
-		var promise_language_convert = this.cache_converted_text(text_list,
+		var promise_of_language_convert = this.cache_converted_text(text_list,
 				work_data.convert_options);
-		if (promise_language_convert) {
+		if (promise_of_language_convert) {
+			if (false) {
+				library_namespace.log('Convert      ' + part_title + '§'
+						+ chapter_title + ': ' + data.text.slice(0, 40)
+						+ '...(' + data.text.length + ')');
+			}
 			return ebook.working_promise = ebook.working_promise
 			//
 			.then(function() {
-				return promise_language_convert.then(
+				return promise_of_language_convert.then(
 				// TODO: 這邊失敗，例如 timeout 的話，會直接跳到最後一章並且出現錯誤。
 				add_ebook_chapter_actual_work.bind(this, work_data, chapter_NO,
 						data, options));
@@ -606,6 +612,11 @@ function module_code(library_namespace) {
 			// gettext_config:{"id":"simplify-$1"}
 			: '简化: %1', chapter_title) + ' @ ' + this.id;
 			data.original_text = data.text;
+			if (false) {
+				library_namespace.log('Get cache of ' + part_title + '§'
+						+ chapter_title + ': ' + data.text.slice(0, 40)
+						+ '...(' + data.text.length + ')');
+			}
 			data.text = this.convert_text_language(data.text)
 			// TODO: 把半形標點符號轉換為全形標點符號
 			.replace(/["'](?:zh-(?:cmn-)?|cmn-)?(?:Hans-)?CN["']/ig,
