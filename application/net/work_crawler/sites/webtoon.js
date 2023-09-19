@@ -186,8 +186,16 @@ function module_code(library_namespace) {
 					'<div class="episode_area"');
 
 			while (matched = PATTERN_image.exec(html)) {
-				matched = new library_namespace.URI(CeL
-						.HTML_to_Unicode(matched[1]));
+				/**
+				 * <code>
+				e.g., https://github.com/kanasimi/work_crawler/issues/609
+				https://www.webtoons.com/en/drama/whos-mr-president/episode-30/viewer?title_no=4117&episode_no=30
+				<img src="https://webtoons-static.pstatic.net/image/bg_transparency.png" width="800" height="1280.0" alt="image" class="_images" data-url="https://webtoon-phinf.pstatic.net/20220926_15/1664179088538pQVIx_JPEG/Who&amp;#39;s_Mr._President_Episode_30_(FINAL)_0006.jpg?type=q90"
+				</code>
+				 */
+				matched = matched[1].replace(/&amp;/g, '&');
+				matched = library_namespace.HTML_to_Unicode(matched);
+				matched = new library_namespace.URI(matched);
 				// 去掉?type=q70s的部分 畫質較好 q70是手機版 q90是電腦版
 				delete matched.search_params.type;
 				// 去除?x-oss-process=image/quality,q_90 可會有更高的畫質
