@@ -69,7 +69,9 @@ function module_code(library_namespace) {
 		// e.g., woshenshangyoutiaolong-pikapi 我身上有条龙/
 		// 0590 第590话 父母过往/woshenshangyoutiaolong-pikapi-590-017.jpg
 
-		// one_by_one : true,
+		// 2023/7/22 7:15:15 不停滯下載一百多章後會自動封鎖IP
+		one_by_one : '1s',
+		chapter_time_interval : '1s',
 
 		acceptable_types : 'jpg|webp',
 
