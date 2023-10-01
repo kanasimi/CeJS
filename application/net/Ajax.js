@@ -3121,13 +3121,26 @@ function module_code(library_namespace) {
 
 			// options.force_download
 			if (!options.reget) {
+				var XMLHttp;
+				if (options.simulate_XMLHttpRequest_response) {
+					// Simulates an XMLHttpRequest response.
+					// 模擬 XMLHttpRequest response。
+					XMLHttp = {
+						// 模擬 XMLHttpRequest response。
+						buffer : data,
+						responseText : data && data.toString(options.charset),
+						responseURL : URL,
+						get_from_cache : true
+					};
+				}
+
 				if (!error && options.web_resource_date && file_status) {
 					// download newer only
 					if ((file_status.mtimeMs || file_status.mtime)
 					//
 					- Date.parse(options.web_resource_date) > -1) {
 						// No new file on web.
-						onload(data);
+						onload(data, null, XMLHttp);
 						return;
 					}
 				}
@@ -3143,7 +3156,7 @@ function module_code(library_namespace) {
 							+ data.slice(0, 200) + ']...', 5,
 							'get_URL_cache_node');
 					// TODO: use cached_status
-					onload(data);
+					onload(data, null, XMLHttp);
 					return;
 				}
 

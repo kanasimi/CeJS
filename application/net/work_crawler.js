@@ -805,6 +805,8 @@ function module_code(library_namespace) {
 		PATTERN_non_CJK : /^[\u0000-\u2E7F]*$/i,
 		get_label : get_label,
 		regenerate_user_agent : regenerate_user_agent,
+		// Simulates an XMLHttpRequest response.
+		// 模擬 XMLHttpRequest response。
 		null_XMLHttp : {
 			responseText : ''
 		}

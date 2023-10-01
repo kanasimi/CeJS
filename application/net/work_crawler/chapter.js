@@ -158,6 +158,15 @@ function module_code(library_namespace) {
 		}
 	}
 
+	var KEY_last_fetch_timevalue = 'last_fetch_timevalue';
+
+	function set_chapter_time_interval(XMLHttp) {
+		// 可能是從 library_namespace.get_URL_cache() 過來的。
+		if (XMLHttp && XMLHttp.responseURL && !XMLHttp.get_from_cache) {
+			this[KEY_last_fetch_timevalue] = Date.now();
+		}
+	}
+
 	/**
 	 * 下載/獲取下載章節資訊/章節內容前的等待時間。
 	 * 
@@ -184,7 +193,7 @@ function module_code(library_namespace) {
 				.to_millisecond(chapter_time_interval);
 
 		if (chapter_time_interval >= 0) {
-			var delta = Date.now() - this.last_fetch_time;
+			var delta = Date.now() - this[KEY_last_fetch_timevalue];
 			if (delta > 0)
 				chapter_time_interval -= delta;
 			return chapter_time_interval;
@@ -1511,10 +1520,7 @@ function module_code(library_namespace) {
 			}
 
 			function pre_parse_chapter_data(XMLHttp, error) {
-				// 可能是從 library_namespace.get_URL_cache() 過來的。
-				if (XMLHttp && XMLHttp.responseURL) {
-					_this.last_fetch_time = Date.now();
-				}
+				_this.set_chapter_time_interval(XMLHttp);
 
 				// 對於每一張圖片都得要從載入的頁面獲得資訊的情況，可以參考 hhcool.js, dm5.js。
 
@@ -1557,24 +1563,27 @@ function module_code(library_namespace) {
 				_this.get_URL(chapter_URL, pre_parse_chapter_data);
 			}
 
+			// console.trace(_this);
+			// console.trace(work_data);
 			if (work_data.reget_chapter) {
 				reget_chapter_data();
 
 			} else {
+				// @see function get_work_page() @
+				// CeL.application.net.work_crawler.work
+
 				// 警告: reget_chapter=false 僅適用於小說之類不下載/獲取圖片的情形，
 				// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL獲取名稱的於目錄中。
 				library_namespace.get_URL_cache(chapter_URL, function(data,
 						error, XMLHttp) {
-					pre_parse_chapter_data({
-						buffer : data,
-						responseText : data && data.toString(_this.charset),
-						responseURL : XMLHttp && XMLHttp.responseURL
-					});
+					pre_parse_chapter_data(XMLHttp, error);
 				}, {
+					no_write_info : true,
 					file_name : chapter_file_name,
 					encoding : undefined,
 					charset : _this.charset,
-					get_URL_options : _this.get_URL_options
+					get_URL_options : _this.get_URL_options,
+					simulate_XMLHttpRequest_response : true
 				});
 			}
 		}
@@ -1868,6 +1877,100 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * 回復被審核屏蔽的文字。去除一般性敏感文字審查及過濾功能 censorship, censored text。 Calling inside
+	 * parse_chapter_data()
+	 * 
+	 * @example<code>
+	text = CeL.work_crawler.fix_general_censorship(text);
+	</code>
+	 */
+	function fix_general_censorship(text) {
+		text = text
+
+		/**
+		 * <code>
+
+		// https://www.piaotian.com/html/13/13793/9355310.html	我只想安静的做个苟道中人 第一百七十六章：你想要什么？（第一更！求订阅！）
+		艹亻尔女马的郑荆山！
+		扌喿扌喿扌喿！！！
+		// avoid: "那位少女馬上眼前一亮"	劍仙三千萬-第六十六章武宗
+
+		// https://www.piaotian.com/html/13/13793/9355452.html	我只想安静的做个苟道中人 第四十八章：再来一次。（第四更！求订阅！）
+		接着就开始被厉师姐采衤卜……
+
+		// https://www.piaotian.com/html/13/13793/9355454.html	我只想安静的做个苟道中人 第五十章：太刺激了。（第一更！求订阅！）
+		这是要在光天化日之下里予占戈？
+
+		// https://www.piaotian.com/html/13/13793/9355285.html	我只想安静的做个苟道中人 第一百五十一章：厉仙子的大长腿。（第二更！求订阅！）
+		艹亻也女马白勺！
+
+		女干氵?掳掠
+		女干夫氵女彐
+		女干情
+		禁女干乱
+		钅肖魂入骨
+		那月匈……
+
+		</code>
+		 */
+		.replace(/亻尔女马/g, '你媽').replace(/亻尔/g, '你').replace(/扌喿/g, '操')
+		//
+		.replace(/衤卜/g, '補').replace(/采衣卜/g, '採補').replace(/里予占戈/g, '野戰')
+		//
+		.replace(/米青丬士/g, '精壮').replace(/口申口今/g, '呻吟').replace(/月几月夫/g, '肌肤')
+		// 孚乚汁
+		.replace(/酉禾月匈/g, '酥胸').replace(/酉禾孚乚/g, '酥乳').replace(/孚乚/g, '乳')
+		// 谷欠念 谷欠望 情谷欠
+		.replace(/谷欠([念望])/g, '欲$1').replace(/([情])谷欠/g, '$1欲')
+		// 冫夌辱
+		.replace(/冫夌/g, '凌')
+		// 忄青趣
+		.replace(/忄青/g, '情')
+		// 忄夬感
+		.replace(/忄夬/g, '快')
+		// 衤果体 衤果露
+		.replace(/衤果/g, '裸')
+
+		/**
+		 * <code>
+
+		// https://www.piaotian.com/html/14/14229/9757030.html	修仙三百年突然发现是武侠 第一百二十五章 飞剑千里取人头
+		我渡法马上就要彻底蜕去这**凡胎，成就罗汉金身了！
+
+		// 肉眼凡胎
+
+		</code>
+		 */
+		.replace(/([^*])\*{2}凡胎/g, '$1肉体凡胎')
+
+		/**
+		 * <code>
+
+		// https://www.ptwxz.com/html/6/6682/3851642.html	最仙遊 正文 第一百二十六章 强敌 （谢盟更之一）
+		其所说十有*为真。
+
+		</code>
+		 */
+		.replace(/十有\*{1,2}([^*])/g, '十有八九$1')
+
+		/**
+		 * <code>
+
+		// https://www.piaotian.com/html/14/14229/9785496.html	修仙三百年突然发现是武侠 第一百四十八章 心魔蛊惑，恭请九火炎龙！
+		意味着这个猜测**不离十。
+
+		</code>
+		 */
+		.replace(/([^*])\*{2}不离十/g, '$1八九不离十')
+
+		;
+
+		return text;
+	}
+
+	Work_crawler.fix_general_censorship = fix_general_censorship;
+
 	var PATTERN_AD_cfwx
 	/**
 	 * <code>
@@ -1990,6 +2093,7 @@ function module_code(library_namespace) {
 		// retry delay. cf. .one_by_one
 		// {Natural|String|Function}當網站不允許太過頻繁的訪問讀取/access時，可以設定下載章節資訊/章節內容前的等待時間。
 		// chapter_time_interval : '1s',
+		set_chapter_time_interval : set_chapter_time_interval,
 		get_chapter_time_interval : get_chapter_time_interval
 	});
 

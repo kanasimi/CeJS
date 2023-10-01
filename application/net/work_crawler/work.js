@@ -344,6 +344,7 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
+		var original_work_title;
 		function finish(no_cache) {
 			if (!no_cache) {
 				// write cache
@@ -360,7 +361,8 @@ function module_code(library_namespace) {
 			}
 			_this.get_work_data({
 				id : search_result,
-				title : work_title
+				title : work_title,
+				original_work_title : original_work_title
 			}, finish_up);
 		}
 
@@ -599,6 +601,7 @@ function module_code(library_namespace) {
 				// gettext_config:{"id":"using-title"}
 				[ gettext('Using title:'), work_title ],
 						[ '→', approximate_title[1] ] ]));
+				original_work_title = work_title;
 				work_title = approximate_title[1];
 				id_list = approximate_title[0];
 			}
@@ -703,15 +706,16 @@ function module_code(library_namespace) {
 	'chapter_title', 'part_title', 'image_list' ]);
 
 	function get_work_data(work_id, callback, error_count) {
-		var work_title, input_url;
+		var work_title, input_url, original_work_title;
 		// 預防並列執行的時候出現交叉干擾。
 		this.running = true;
 		if (library_namespace.is_Object(work_id)) {
 			input_url = work_id.input_url;
 			work_title = work_id.title;
+			original_work_title = work_id.original_work_title;
 			work_id = work_id.id;
 		}
-		// console.trace([ work_id, work_title ]);
+		// console.trace([ work_id, work_title, original_work_title ]);
 		// gettext_config:{"id":"download-$1-info-@-$2"}
 		process.title = gettext('下載%1 - 資訊 @ %2', work_title || work_id,
 				this.id);
@@ -759,6 +763,23 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			if (!_this.reget_chapter) {
+				// @see function get_data() @
+				// CeL.application.net.work_crawler.chapter
+				library_namespace.get_URL_cache(work_URL, function(data, error,
+						XMLHttp) {
+					process_work_data(XMLHttp, error);
+				}, {
+					no_write_info : true,
+					file_name : work_page_path,
+					encoding : undefined,
+					charset : _this.charset,
+					get_URL_options : _this.get_URL_options,
+					simulate_XMLHttpRequest_response : true
+				});
+				return;
+			}
+
 			// TODO: work_time_interval
 			var chapter_time_interval = _this.get_chapter_time_interval(
 					work_URL, work_data);
@@ -785,7 +806,8 @@ function module_code(library_namespace) {
 
 		function process_work_data(XMLHttp, error) {
 			// console.log(XMLHttp);
-			_this.last_fetch_time = Date.now();
+			_this.set_chapter_time_interval(XMLHttp);
+
 			var html = XMLHttp.responseText;
 			if (!html && !_this.skip_get_work_page) {
 				library_namespace.error({
@@ -868,6 +890,11 @@ function module_code(library_namespace) {
 
 			// work_title: search key
 			work_data.input_title = work_title;
+			if (original_work_title && !work_data.original_work_title) {
+				work_data.original_work_title = original_work_title;
+				// 作品別名列表。
+				work_data.work_aliases = [ original_work_title ];
+			}
 			if (!work_data.title) {
 				work_data.title = work_title;
 			} else {
@@ -1017,7 +1044,7 @@ function module_code(library_namespace) {
 			if (_this.preserve_work_page) {
 				// 先寫入作品資料 cache。
 				library_namespace.create_directory(work_cache_directory);
-				node_fs.writeFileSync(work_page_path);
+				node_fs.writeFileSync(work_page_path, html);
 			} else if (_this.preserve_work_page === false) {
 				// 明確指定不保留，將刪除已存在的作品資料 cache。
 				library_namespace.debug({
@@ -1073,6 +1100,7 @@ function module_code(library_namespace) {
 				// work_data properties to reset. do not inherit
 				// 設定不繼承哪些作品資訊。
 				var skip_cache = Object.assign({
+					reget_chapter : true,
 					process_status : _this.recheck,
 
 					ebook_directory : _this.need_create_ebook,
@@ -1541,6 +1569,15 @@ function module_code(library_namespace) {
 				});
 			}
 
+			if (_this.regenerate
+					&& !Object.hasOwn(_this, 'preserve_chapter_page')) {
+				// regenerate 的情況下，預設為 .preserve_chapter_page = true;
+				_this.preserve_chapter_page = true;
+				_this.preserve_work_page = true;
+			}
+
+			// console.trace(_this);
+			// console.trace(work_data);
 			if (recheck_flag
 			// _this.get_chapter_list() 中
 			// 可能重新設定過 work_data.last_download.chapter。
@@ -1638,6 +1675,7 @@ function module_code(library_namespace) {
 					: _this.regenerate
 					// gettext_config:{"id":"rebuild-data-only-with-cache-(such-as-novels-e-books)-and-not-re-download-all-chapter-content"}
 					? '僅利用快取重建資料（如小說、電子書），不重新下載所有章節內容。'
+					// ↑ （警告：必須先以 preserve_work_page preserve_chapter_page 執行過！）
 					// gettext_config:{"id":"skip-this-work-without-processing"}
 					: '跳過本作品不處理。' ]);
 
@@ -1664,8 +1702,8 @@ function module_code(library_namespace) {
 				});
 				work_data.last_download.chapter = Work_crawler.prototype.start_chapter_NO;
 
-			} else if (_this.start_chapter_NO > Work_crawler.prototype.start_chapter_NO
-					&& work_data.last_download.chapter > _this.start_chapter_NO) {
+			} else if (_this.start_chapter_NO >= Work_crawler.prototype.start_chapter_NO
+					&& !(work_data.last_download.chapter < _this.start_chapter_NO)) {
 				library_namespace.info({
 					// gettext_config:{"id":"previously-downloaded-to-the-newer-$2-$3-backtracked-by-specifying-start_chapter_no=$1"}
 					T : [ '之前已下載到較新的第 %2 %3，因指定 start_chapter_NO=%1 而回溯。',
@@ -1675,13 +1713,16 @@ function module_code(library_namespace) {
 				});
 				work_data.last_download.chapter = _this.start_chapter_NO;
 			}
+			// console.trace(_this);
+			// console.trace(work_data);
 
 			if (!('reget_chapter' in work_data)) {
 				// .reget_chapter 為每個作品可能不同之屬性，非全站點共用屬性。
 				work_data.reget_chapter = typeof _this.reget_chapter === 'function' ? _this
 						.reget_chapter(work_data)
-						: _this.reget_chapter;
+						: !_this.regenerate && _this.reget_chapter;
 			}
+			// console.trace(work_data);
 
 			if (work_data.last_download.chapter > work_data.chapter_count) {
 				library_namespace.warn({
@@ -1846,10 +1887,14 @@ function module_code(library_namespace) {
 						start_to_process_chapter_data);
 			}
 			function start_to_process_chapter_data() {
+				// console.trace(_this);
+				// console.trace(work_data);
+
 				// 開始下載 chapter。
 				crawler_namespace.pre_get_chapter_data.call(_this, work_data,
-						crawler_namespace.get_next_chapter_NO_item(work_data,
-								work_data.last_download.chapter), callback);
+				// work_data.start_downloading_chapter
+				crawler_namespace.get_next_chapter_NO_item(work_data,
+						work_data.last_download.chapter), callback);
 			}
 			if (typeof _this.after_get_work_data === 'function') {
 				// 必須自行保證執行 callback()，不丟出異常、中斷。

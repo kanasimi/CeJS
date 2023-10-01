@@ -282,7 +282,8 @@ function module_code(library_namespace) {
 		if (cecc && cecc.load_text_to_check) {
 			var promise_load_text_to_check = cecc.load_text_to_check({
 				// 設定 work_title 可載入 watch_target.* 辭典修訂測試集。
-				work_title : work_data.title,
+				// .original_work_title: 字典檔檔名以沒加料的作品名稱為準。
+				work_title : work_data.original_work_title || work_data.title,
 				convert_to_language : this.convert_to_language
 			}, {
 				reset : true
@@ -375,23 +376,29 @@ function module_code(library_namespace) {
 		});
 		// ebook_file_path = ebook_file_path[0] + ebook_file_path[1];
 
-		if ((!Array.isArray(ebook_files) || !ebook_files.includes('mimetype'))
-				&& !this.discard_old_ebook_file
-				&& library_namespace.file_exists(ebook_file_path[0]
-						+ ebook_file_path[1])) {
-			// 若是沒有cache，但是有舊的epub檔，那麼就將之解壓縮。
-			// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法下載/獲取。
-			// 由於這個動作，當舊的電子書存在時將不會清場。若有必要清場（如太多冗贅），須設定.discard_old_ebook_file或自行將舊電子書刪除。
-			var ebook_archive = new library_namespace.storage.archive(
-					ebook_file_path[0] + ebook_file_path[1]);
-			library_namespace.log_temporary({
-				// ebook_archive.archive_file_path
-				// gettext_config:{"id":"extract-ebook-as-cache-$1"}
-				T : [ 'Extract ebook as cache: [%1]', ebook_file_path[1] ]
-			});
-			ebook_archive.extract({
-				output : ebook_directory
-			});
+		if (!this.discard_old_ebook_file
+		// 有舊的檔案存在就不覆寫。
+		&& (!Array.isArray(ebook_files) || !ebook_files.includes('mimetype'))) {
+			if (library_namespace.file_exists(ebook_file_path[0]
+					+ ebook_file_path[1])) {
+				// 若是沒有cache，但是有舊的epub檔，那麼就將之解壓縮。
+				// 其用意是為了保留媒體檔案與好的舊章節，預防已經無法下載/獲取。
+				// 由於這個動作，當舊的電子書存在時將不會清場。若有必要清場（如太多冗贅），須設定.discard_old_ebook_file或自行將舊電子書刪除。
+				var ebook_archive = ebook_file_path[0] + ebook_file_path[1];
+				ebook_archive = new library_namespace.storage.archive(
+						ebook_archive);
+				library_namespace.log_temporary({
+					// ebook_archive.archive_file_path
+					// gettext_config:{"id":"extract-ebook-as-cache-$1"}
+					T : [ 'Extract ebook as cache: [%1]', ebook_file_path[1] ]
+				});
+				ebook_archive.extract({
+					output : ebook_directory
+				});
+			} else if (this.regenerate) {
+				library_namespace.error('create_ebook: '
+						+ '設定了 .regenerate，但不存在可用的舊電子書！');
+			}
 		}
 
 		// library_namespace.log('using CeL.application.storage.EPUB');
@@ -896,6 +903,7 @@ function module_code(library_namespace) {
 
 	// ebook_path.call(this, work_data, file_name)
 	function ebook_path(work_data, file_name, options) {
+		// options = library_namespace.setup_options(options);
 		if (!file_name) {
 			if (!work_data.author || !work_data.site_name) {
 				library_namespace.error('ebook_path: ' + '尚未設定作者('
@@ -956,7 +964,10 @@ function module_code(library_namespace) {
 
 		if (this.convert_to_language) {
 			ebook.working_promise = ebook.working_promise
-					.then(archive_convert_cache_directory.bind(this, work_data));
+			//
+			.then(this.clear_converted_text_cache.bind(this, true))
+			//
+			.then(archive_convert_cache_directory.bind(this, work_data));
 		}
 
 		ebook.working_promise = ebook.working_promise.then(
@@ -973,7 +984,6 @@ function module_code(library_namespace) {
 	function pack_up_ebook(work_data, file_name) {
 		var file_path = ebook_path.call(this, work_data, file_name);
 
-		this.clear_converted_text_cache(true);
 		var cecc = this.convert_text_language_using
 				&& this.convert_text_language_using.cecc;
 		// console.trace(cecc);
@@ -995,8 +1005,8 @@ function module_code(library_namespace) {
 		var ebook = work_data && work_data[this.KEY_EBOOK];
 
 		// this: this_work_crawler
-		ebook.pack(file_path, this.remove_ebook_directory, remove_old_ebooks
-				.bind(this, work_data.id));
+		return ebook.pack(file_path, this.remove_ebook_directory,
+				remove_old_ebooks.bind(this, work_data.id));
 		// 等待打包...
 	}
 
