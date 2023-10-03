@@ -239,7 +239,9 @@ function module_code(library_namespace) {
 		this.running = true;
 		var _this = this;
 
-		if (this.must_browse_first && !this.had_browsed) {
+		if (this.must_browse_first && !this.had_browsed
+		// && this.reget_chapter
+		) {
 			// e.g., novel.cmn-Hans-CN/biqugse.js 用以設定 cookie。
 			this.get_URL(this.base_URL, function(XMLHttp, error) {
 				this.had_browsed = Date.now();
@@ -771,7 +773,7 @@ function module_code(library_namespace) {
 					process_work_data(XMLHttp, error);
 				}, {
 					no_write_info : true,
-					file_name : work_page_path,
+					file_name : get_work_page_path(work_data),
 					encoding : undefined,
 					charset : _this.charset,
 					get_URL_options : _this.get_URL_options,
@@ -803,6 +805,24 @@ function module_code(library_namespace) {
 		get_work_page();
 
 		// ----------------------------------------------------------
+
+		var work_cache_directory = _this.main_directory
+				+ _this.cache_directory_name;
+		function get_work_page_path(work_data) {
+			// TODO: using work_data.directory
+			var work_page_path = work_cache_directory
+					+ work_data.directory_name + '.'
+					// .data.htm
+					+ Work_crawler.HTML_extension;
+			return work_page_path;
+		}
+		function get_chapter_list_path(work_data) {
+			var chapter_list_path = work_cache_directory
+					+ work_data.directory_name
+					// .TOC.htm
+					+ '.list.' + Work_crawler.HTML_extension;
+			return chapter_list_path;
+		}
 
 		function process_work_data(XMLHttp, error) {
 			// console.log(XMLHttp);
@@ -1036,11 +1056,7 @@ function module_code(library_namespace) {
 			work_data.data_file = work_data.directory
 					+ work_data.directory_name + '.json';
 
-			var work_cache_directory = _this.main_directory
-					+ _this.cache_directory_name,
-			// .data.htm
-			work_page_path = work_cache_directory + work_data.directory_name
-					+ '.' + Work_crawler.HTML_extension, html;
+			var work_page_path = get_work_page_path(work_data), html;
 			if (_this.preserve_work_page) {
 				// 先寫入作品資料 cache。
 				library_namespace.create_directory(work_cache_directory);
@@ -1161,6 +1177,11 @@ function module_code(library_namespace) {
 				}
 			}
 
+			if (!_this.chapter_list_URL) {
+				pre_process_chapter_list_data(XMLHttp);
+				return;
+			}
+
 			/**
 			 * 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 e.g., <code>
 			chapter_list_URL : '',
@@ -1168,25 +1189,41 @@ function module_code(library_namespace) {
 			chapter_list_URL : function(work_id, work_data) { return [ 'url', { post_data } ]; },
 			 </code>
 			 */
-			if (_this.chapter_list_URL) {
-				work_data.chapter_list_URL = work_URL = _this.full_URL(
-						_this.chapter_list_URL, work_id, work_data);
-				// console.trace(work_URL);
-				var post_data = null;
-				if (Array.isArray(work_URL)) {
-					post_data = work_URL[1];
-					work_URL = _this.full_URL(work_URL[0]);
-				}
-				_this.get_URL(work_URL, pre_process_chapter_list_data,
-						post_data, true);
-			} else {
-				pre_process_chapter_list_data(XMLHttp);
+			work_data.chapter_list_URL = work_URL = _this.full_URL(
+					_this.chapter_list_URL, work_id, work_data);
+			// console.trace(work_URL);
+			var post_data = null;
+			if (Array.isArray(work_URL)) {
+				post_data = work_URL[1];
+				work_URL = _this.full_URL(work_URL[0]);
 			}
+
+			if (!_this.reget_chapter) {
+				// @see function get_data() @
+				// CeL.application.net.work_crawler.chapter
+				library_namespace.get_URL_cache(work_URL, function(data, error,
+						XMLHttp) {
+					pre_process_chapter_list_data(XMLHttp, error);
+				}, {
+					no_write_info : true,
+					file_name : get_chapter_list_path(work_data),
+					encoding : undefined,
+					charset : _this.charset,
+					get_URL_options : _this.get_URL_options,
+					simulate_XMLHttpRequest_response : true
+				});
+				return;
+			}
+
+			_this.get_URL(work_URL, pre_process_chapter_list_data, post_data,
+					true);
 		}
 
 		// ----------------------------------------------------------
 
 		function pre_process_chapter_list_data(XMLHttp) {
+			_this.set_chapter_time_interval(XMLHttp);
+
 			// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
 			if (/(?:\.html?|\/)$/.test(XMLHttp.responseURL))
 				_this.setup_value('Referer', XMLHttp.responseURL);
@@ -1473,11 +1510,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var chapter_list_path = _this.main_directory
-			//
-			+ _this.cache_directory_name + work_data.directory_name
-			// .TOC.htm
-			+ '.list.' + Work_crawler.HTML_extension;
+			var chapter_list_path = get_chapter_list_path(work_data);
 			if (_this.preserve_work_page && _this.chapter_list_URL) {
 				// 所在目錄應該已經在上一個 _this.preserve_work_page 那個時候建造完畢。
 				node_fs.writeFileSync(chapter_list_path, html);
@@ -1489,8 +1522,8 @@ function module_code(library_namespace) {
 				}, 1, 'process_chapter_list_data');
 				library_namespace.remove_file(chapter_list_path);
 				if (false) {
-					library_namespace.fs_remove(_this.main_directory
-							+ _this.cache_directory_name);
+					// 假如沒有檔案，是空的目錄就會被移除。
+					library_namespace.fs_remove(work_cache_directory);
 				}
 			}
 

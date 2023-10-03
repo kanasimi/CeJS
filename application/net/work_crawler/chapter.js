@@ -1896,29 +1896,29 @@ function module_code(library_namespace) {
 		扌喿扌喿扌喿！！！
 		// avoid: "那位少女馬上眼前一亮"	劍仙三千萬-第六十六章武宗
 
+		// https://www.piaotian.com/html/13/13793/9355285.html	我只想安静的做个苟道中人 第一百五十一章：厉仙子的大长腿。（第二更！求订阅！）
+		艹亻也女马白勺！
+
 		// https://www.piaotian.com/html/13/13793/9355452.html	我只想安静的做个苟道中人 第四十八章：再来一次。（第四更！求订阅！）
 		接着就开始被厉师姐采衤卜……
 
 		// https://www.piaotian.com/html/13/13793/9355454.html	我只想安静的做个苟道中人 第五十章：太刺激了。（第一更！求订阅！）
 		这是要在光天化日之下里予占戈？
 
-		// https://www.piaotian.com/html/13/13793/9355285.html	我只想安静的做个苟道中人 第一百五十一章：厉仙子的大长腿。（第二更！求订阅！）
-		艹亻也女马白勺！
-
-		女干氵?掳掠
-		女干夫氵女彐
-		女干情
-		禁女干乱
-		钅肖魂入骨
-		那月匈……
-
 		</code>
 		 */
-		.replace(/亻尔女马/g, '你媽').replace(/亻尔/g, '你').replace(/扌喿/g, '操')
-		//
-		.replace(/衤卜/g, '補').replace(/采衣卜/g, '採補').replace(/里予占戈/g, '野戰')
+		.replace(/(艹|扌喿)?(亻尔|亻也)女马(白勺)?/g, function(all, 操, 你他, 的) {
+			// [[wikt:zh:肏你媽]]
+			return (操 ? '操' : '') + (你他 === '亻尔' ? '你' : '他') + '媽'
+			//
+			+ (的 ? '的' : '');
+		}).replace(/亻尔/g, '你').replace(/扌喿/g, '操')
+		// 采衣卜 采衤卜
+		.replace(/采[衣衤]卜/g, '採補').replace(/衤卜/g, '補').replace(/里予占戈/g, '野戰')
 		//
 		.replace(/米青丬士/g, '精壮').replace(/口申口今/g, '呻吟').replace(/月几月夫/g, '肌肤')
+		// 那月匈……
+		.replace(/那月匈/g, '那胸')
 		// 孚乚汁
 		.replace(/酉禾月匈/g, '酥胸').replace(/酉禾孚乚/g, '酥乳').replace(/孚乚/g, '乳')
 		// 谷欠念 谷欠望 情谷欠
@@ -1927,6 +1927,14 @@ function module_code(library_namespace) {
 		.replace(/冫夌/g, '凌')
 		// 忄青趣
 		.replace(/忄青/g, '情')
+		// 女干氵?掳掠
+		.replace(/女干氵\??/g, '奸淫')
+		// 女干情 禁女干乱 女干夫氵女彐
+		.replace(/女干([情乱夫])/g, '奸$1')
+		// 女干夫氵女彐
+		.replace(/氵\??女彐/g, '淫婦')
+		// 钅肖魂入骨
+		.replace(/钅肖魂/g, '銷')
 		// 忄夬感
 		.replace(/忄夬/g, '快')
 		// 衤果体 衤果露
@@ -1963,6 +1971,9 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		.replace(/([^*])\*{2}不离十/g, '$1八九不离十')
+
+		// 坦坦荡荡
+		.replace(/(空|浩浩|坦坦)\*{2,3}/g, '$1荡荡')
 
 		;
 

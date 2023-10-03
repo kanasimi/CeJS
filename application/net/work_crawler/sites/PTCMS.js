@@ -346,6 +346,10 @@ function module_code(library_namespace) {
 
 			if (this.remove_ads) {
 				text = this.remove_ads(text, chapter_data);
+				if (typeof text !== 'string') {
+					library_namespace
+							.error('parse_chapter_data: .remove_ads() do not return {String}!');
+				}
 			}
 			// console.log(text);
 
