@@ -1505,8 +1505,10 @@ function module_code(library_namespace) {
 			// TODO: move section to another page
 			if (library_namespace.is_async_function(for_section)) {
 				// console.log(all_root_section_list);
-				return Promise.allSettled(all_root_section_list.map(function(
-						section, section_index) {
+
+				// Promise.allSettled() 不會 throw。
+				return Promise.all(all_root_section_list.map(function(section,
+						section_index) {
 					return section_filter(section)
 							&& for_section.apply(this, arguments);
 				}));
