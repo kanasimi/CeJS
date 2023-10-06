@@ -1733,10 +1733,11 @@ function module_code(library_namespace) {
 							work_data.last_download.chapter,
 							work_data.chapter_unit || _this.chapter_unit ]
 				});
+				// 從頭檢查章節標題。
 				work_data.last_download.chapter = Work_crawler.prototype.start_chapter_NO;
 
-			} else if (_this.start_chapter_NO >= Work_crawler.prototype.start_chapter_NO
-					&& !(work_data.last_download.chapter < _this.start_chapter_NO)) {
+			} else if (_this.start_chapter_NO > Work_crawler.prototype.start_chapter_NO
+					&& work_data.last_download.chapter > _this.start_chapter_NO) {
 				library_namespace.info({
 					// gettext_config:{"id":"previously-downloaded-to-the-newer-$2-$3-backtracked-by-specifying-start_chapter_no=$1"}
 					T : [ '之前已下載到較新的第 %2 %3，因指定 start_chapter_NO=%1 而回溯。',
@@ -1745,6 +1746,9 @@ function module_code(library_namespace) {
 							work_data.chapter_unit || _this.chapter_unit ]
 				});
 				work_data.last_download.chapter = _this.start_chapter_NO;
+			} else if (_this.regenerate) {
+				// 從頭生成電子書。
+				work_data.last_download.chapter = Work_crawler.prototype.start_chapter_NO;
 			}
 			// console.trace(_this);
 			// console.trace(work_data);
