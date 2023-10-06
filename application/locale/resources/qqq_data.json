@@ -8829,7 +8829,7 @@
 	},
 	"favorite-series-list": {
 		"message": "最愛作品清單",
-		"notes": "",
+		"notes": "最愛作品收藏夾",
 		"scope": "GUI: gui_electron/gui_electron.html",
 		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/gui_electron/gui_electron.html}}",

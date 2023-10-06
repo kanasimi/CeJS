@@ -1138,7 +1138,7 @@
 	"download_options.start_chapter": "Start/continue download. It will be automatically converted to .start_chapter_NO or .start_chapter_title. For the downloaded chapters, you must match .recheck.",
 	"download_options.start_chapter_no": "Start/continue download from this chapter number.",
 	"download_options.start_chapter_title": "Start/continue download from this chapter title.",
-	"download_options.start_list_serial": "Specifies the serial number of the work to start downloading. The work before this signal will be skipped. Generally only used in command line settings. Default:1",
+	"download_options.start_list_serial": "Specifies the serial number of the work to start downloading. The work before this serial number will be skipped. Generally only used in command line settings. Default:1",
 	"download_options.timeout": "Timeout period (ms) for downloading a web page or image. If the timeout period is too small (such as 10 seconds), downloading a large file is easy to fail.",
 	"download_options.user_agent": "Browser identification. Always maintain the same browser recognition before and after the run, it should not affect the download.",
 	"download_options.vertical_writing": "Change the novel from horizontal to vertical.",
