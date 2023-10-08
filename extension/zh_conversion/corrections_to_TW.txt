@@ -959,8 +959,10 @@ https://www.nutn.edu.tw/personnel/upload/files/1100805fw-3.pdf
 //着	著
 
 
+// [STPhrases.txt]
 // 弦樂器 管弦樂團 「絃」少用
--/弦/
+// 絲竹管絃
+//-/弦/
 
 
 -人欲

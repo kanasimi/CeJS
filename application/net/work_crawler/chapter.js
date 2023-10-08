@@ -1943,6 +1943,18 @@ function module_code(library_namespace) {
 		/**
 		 * <code>
 
+		// https://www.piaotian.com/html/13/13793/10232511.html	我只想安静的做个苟道中人 第四十一章：龙后有赏！（四合一大章！求订阅！）
+		沦落到在整个大地上东躲xz，
+
+		// 肉眼凡胎
+
+		</code>
+		 */
+		.replace(/东躲xz/g, '东躲西藏')
+
+		/**
+		 * <code>
+
 		// https://www.piaotian.com/html/14/14229/9757030.html	修仙三百年突然发现是武侠 第一百二十五章 飞剑千里取人头
 		我渡法马上就要彻底蜕去这**凡胎，成就罗汉金身了！
 
@@ -1973,7 +1985,7 @@ function module_code(library_namespace) {
 		.replace(/([^*])\*{2}不离十/g, '$1八九不离十')
 
 		// 坦坦荡荡
-		.replace(/(空|浩浩|坦坦)\*{2,3}/g, '$1荡荡')
+		.replace(/(空|浩浩|坦坦)\*{2,4}/g, '$1荡荡')
 
 		;
 
