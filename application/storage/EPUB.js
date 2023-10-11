@@ -380,7 +380,7 @@ function module_code(library_namespace) {
 						// TODO: calibre 不認得 "cmn-Hant-TW"
 						'dc:language' : options.language || 'en'
 					}, {
-						// epub 發行時間應用 dc:date。
+						// epub 發行時間/電子書生成日期 應用 dc:date。
 						// the publication date of the EPUB Publication.
 						'dc:date' : date_to_String()
 					}, {

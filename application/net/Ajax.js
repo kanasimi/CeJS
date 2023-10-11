@@ -3121,18 +3121,15 @@ function module_code(library_namespace) {
 
 			// options.force_download
 			if (!options.reget) {
-				var XMLHttp;
-				if (options.simulate_XMLHttpRequest_response) {
+				// 未設定 options.simulate_XMLHttpRequest_response 就會傳入 undefined。
+				var XMLHttp = options.simulate_XMLHttpRequest_response && {
 					// Simulates an XMLHttpRequest response.
 					// 模擬 XMLHttpRequest response。
-					XMLHttp = {
-						// 模擬 XMLHttpRequest response。
-						buffer : data,
-						responseText : data && data.toString(options.charset),
-						responseURL : URL,
-						get_from_cache : true
-					};
-				}
+					buffer : data,
+					responseText : data && data.toString(options.charset),
+					responseURL : URL,
+					get_from_cache : true
+				};
 
 				if (!error && options.web_resource_date && file_status) {
 					// download newer only
