@@ -1959,10 +1959,10 @@ function module_code(library_namespace) {
 
 		var session = wiki_API.session_of_options(options),
 		// @see .SQL_config
-		where = options.SQL_options
+		SQL_where = options.SQL_options
 		//
 		|| (options.SQL_options = Object.create(null));
-		where = where.where || (where.where = Object.create(null));
+		SQL_where = SQL_where.where || (SQL_where.where = Object.create(null));
 		// console.log(session);
 
 		if (!session
@@ -2129,7 +2129,7 @@ function module_code(library_namespace) {
 		} else if ((last_query_time = library_namespace
 				.to_millisecond(options.start)) > 0) {
 			// treat as time back to 回溯這麼多時間。
-			if (last_query_time > library_namespace.to_millisecond('31d')) {
+			if (last_query_time >= library_namespace.to_millisecond('31d')) {
 				library_namespace.info([ 'add_listener: ', {
 					// gettext_config:{"id":"wikimedia-wikis-can-be-backtracked-up-to-about-$1"}
 					T : [ 'Wikimedia wikis 最多可回溯約 %1。',
@@ -2228,17 +2228,18 @@ function module_code(library_namespace) {
 					// 可能來自"設定成已經取得的最新一個編輯rev。"
 					last_query_time = new Date(last_query_time);
 				}
-				where.timestamp = '>=' + last_query_time
+				SQL_where.timestamp = '>=' + last_query_time
 				// MediaWiki format
 				.format('%4Y%2m%2d%2H%2M%2S');
-				where.this_oldid = '>' + last_query_revid;
+				SQL_where.this_oldid = '>' + last_query_revid;
 				if (delay_ms > 0) {
-					where[''] = 'rc_timestamp<='
+					SQL_where[''] = 'rc_timestamp<='
 					// 截止期限。
 					+ new Date(Date.now() - delay_ms)
 					// MediaWiki format
 					.format('%4Y%2m%2d%2H%2M%2S');
 				}
+				// console.trace(options.SQL_options);
 			} else {
 				// rcend
 				recent_options.parameters.rcstart = library_namespace
@@ -2256,7 +2257,10 @@ function module_code(library_namespace) {
 			}
 
 			get_recent(function process_rows(rows) {
-				// console.trace(rows);
+				if (false) {
+					console.trace(rows, recent_options.parameters,
+							last_query_revid, last_query_time, delay_ms);
+				}
 				if (!rows) {
 					library_namespace.warn((new Date).toISOString()
 							+ ': No rows get.');
@@ -2272,12 +2276,13 @@ function module_code(library_namespace) {
 				// 去除之前已經處理過的頁面。
 				if (rows.length > 0) {
 					// 判別新舊順序。
-					var has_new_to_old = rows.length > 1
-					// 2019/9/12: 可能有亂序。
+					var has_new_revid_to_old = rows.length > 1
+					// 2019/9/12: 雖然 rcid 依小排到大，但 revid 可能有亂序交錯。
 					&& rows.some(function(row, index) {
 						return index > 0 && rows[index - 1].revid > row.revid;
 					});
-					if (has_new_to_old) {
+					if (has_new_revid_to_old) {
+						// console.trace(rows);
 						// e.g., use SQL
 						library_namespace.debug('判別新舊順序: 有新到舊或亂序: Get '
 								+ rows.length + ' recent pages:\n'
@@ -2290,6 +2295,14 @@ function module_code(library_namespace) {
 								}), 1, 'add_listener');
 						// 因可能有亂序，不能光以 .reverse() 轉成 old to new。
 						rows.sort(function(row_1, row_2) {
+							if (Date.parse(row_1.timestamp) >
+							//
+							Date.parse(recent_options.parameters.rcend)) {
+								console.trace([ row_1,
+										recent_options.parameters ]);
+								throw new Error(row_1.timestamp + '>'
+										+ recent_options.parameters.rcend);
+							}
 							return row_1.revid - row_2.revid;
 						});
 					}
@@ -2301,13 +2314,16 @@ function module_code(library_namespace) {
 									+ rows.map(function(row) {
 										return row.revid;
 									}), 3);
+					// console.trace(rows);
 					// e.g., use API 常常會回傳和上次有重疊的資料
 					while (rows.length > 0
 					// 去除掉重複的紀錄。因為是從舊的排列到新的，因此從起頭開始去除。
 					&& rows[0].revid <= last_query_revid) {
 						rows.shift();
 					}
+					// console.trace(rows);
 
+					rows.previous_query_time = last_query_time;
 					if (rows.length > 0) {
 						// assert: options.max_page >= 1
 						if (rows.length > options.max_page) {
@@ -2323,6 +2339,12 @@ function module_code(library_namespace) {
 						last_query_time = last_query_time.timestamp;
 						// 確保 {Date}last_query_time
 						// last_query_time = new Date(last_query_time);
+					} else {
+						library_namespace
+								.debug('last_query_time 直接採用本次查詢的結束時刻: '
+										+ last_query_time + '→'
+										+ recent_options.parameters.rcend);
+						last_query_time = recent_options.parameters.rcend;
 					}
 
 					// 預設全部都處理完，因此先登記。假如僅處理其中的一部分，屆時再特別登記。
@@ -2337,7 +2359,7 @@ function module_code(library_namespace) {
 					return row.revid;
 				}).join(', ') + '. title: ' + rows.map(function(row) {
 					return row.title;
-				}).join(', ') : ''), 1);
+				}).join(', ') : ''), 1, 'add_listener');
 				library_namespace.log_temporary('add_listener: '
 						+ last_query_time + ' ('
 						+ library_namespace.indicate_date_time(
@@ -2435,7 +2457,7 @@ function module_code(library_namespace) {
 							+ rows.map(function(row) {
 								return row.revid;
 							}), 2, 'add_listener');
-					// console.log([ row.title, options.filter ]);
+					// console.trace([ rows, options.filter ]);
 				}
 
 				// TODO: configuration_row 應該按照 rows 的順序，
@@ -2501,6 +2523,7 @@ function module_code(library_namespace) {
 				};
 
 				if (rows.length > 0) {
+					// console.trace(rows);
 					library_namespace.log_temporary('add_listener.with_diff: '
 							+ 'Fetching ' + rows.length
 							+ ' page(s) starting from '
@@ -2520,7 +2543,7 @@ function module_code(library_namespace) {
 						// 因為採用.run_serial(.page())，因此約一秒會跑一頁面。
 						// TODO: 改 .shift()
 						rows.run_serial(function(run_next, row, index, list) {
-							// console.log(row);
+							// console.trace(row);
 							if (false) {
 								console.trace([ index + '/' + rows.length,
 										row.title ]);
@@ -2573,7 +2596,9 @@ function module_code(library_namespace) {
 									+ library_namespace.indicate_date_time(
 									//
 									last_query_time) + ')');
+							// console.trace(row);
 							session.page(row, function(page_data, error) {
+								// console.trace([ row, page_data ]);
 								library_namespace.log_temporary(
 								// 'Get ' +
 								(index + 1)
@@ -2595,10 +2620,22 @@ function module_code(library_namespace) {
 
 								// console.log(wiki_API.title_link_of(page_data));
 								var revisions = page_data.revisions;
-								// console.trace([ page_options, revisions ]);
-								if (latest_only && (!revisions || !revisions[0]
-								// 確定是最新版本 revisions[0].revid。
-								|| revisions[0].revid !== row.revid)) {
+								if (false) {
+									console.trace([ page_options, revisions,
+											last_query_time,
+											Date.parse(revisions[0].timestamp),
+											Date.parse(last_query_time),
+											delay_ms ]);
+								}
+								if (!revisions || !revisions[0] || (
+								// 以 revisions[0] 確定 row 是最新版本。
+								latest_only
+								//
+								? Date.parse(revisions[0].timestamp) >
+								//
+								Date.parse(last_query_time) + delay_ms
+								//
+								: revisions[0].revid !== row.revid)) {
 									library_namespace.log(
 									//
 									'add_listener.with_diff: '
@@ -2611,7 +2648,8 @@ function module_code(library_namespace) {
 									//
 									+ (revisions && revisions[0]
 									//
-									&& revisions[0].revid) + '，跳過這一項。');
+									&& revisions[0].revid)
+											+ '，可能之後又有更新的編輯，跳過這一項。');
 									run_next();
 									return;
 								}
@@ -3522,6 +3560,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/maintenance/tables.sql
+	 *      https://www.mediawiki.org/wiki/API:Database_field_and_API_property_associations
 	 */
 	var all_revision_SQL = 'SELECT `page`.`page_id` AS `i`, `page`.`page_latest` AS `r` FROM `page` INNER JOIN `revision` ON `page`.`page_latest` = `revision`.`rev_id` WHERE `revision`.`rev_id` > 0 AND `revision`.`rev_deleted` = 0 AND `page`.`page_namespace` = 0';
 

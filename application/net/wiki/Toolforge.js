@@ -646,9 +646,9 @@ function module_code(library_namespace) {
 				if (!name) {
 					// condition[''] = [ condition 1, condition 2, ...];
 					if (Array.isArray(value)) {
-						value_array.append(value);
+						condition_array.append(value);
 					} else {
-						value_array.push(value);
+						condition_array.push(value);
 					}
 					continue;
 				}
@@ -783,7 +783,8 @@ function module_code(library_namespace) {
 			console.log([ options.config, options.language,
 					options[KEY_SESSION] && options[KEY_SESSION].language ]);
 			console.log(options[KEY_SESSION]);
-			throw 1;
+			console.log(SQL);
+			throw new Error(String(SQL));
 		}
 
 		run_SQL(SQL, function(error, rows, fields) {
