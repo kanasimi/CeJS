@@ -626,6 +626,9 @@ function module_code(library_namespace) {
 		+ 'T' + timestamp[4] + ':' + timestamp[5] + ':' + timestamp[6] + 'Z';
 	}
 
+	// [wiki_API.run_SQL.KEY_additional_row_conditions]
+	run_SQL.KEY_additional_row_conditions = '';
+
 	function generate_SQL_WHERE(condition, field_prefix) {
 		var condition_array = [], value_array = [];
 
@@ -643,8 +646,9 @@ function module_code(library_namespace) {
 					// 跳過這一筆設定。
 					continue;
 				}
-				if (!name) {
-					// condition[''] = [ condition 1, condition 2, ...];
+				if (name === run_SQL.KEY_additional_row_conditions) {
+					// condition[run_SQL.KEY_additional_row_conditions] = [
+					// condition 1, condition 2, ...];
 					if (Array.isArray(value)) {
 						condition_array.append(value);
 					} else {
@@ -652,9 +656,11 @@ function module_code(library_namespace) {
 					}
 					continue;
 				}
-				if (!/^[a-z_]+$/.test(name)) {
-					throw 'Invalid field name: ' + name;
+
+				if (!name || !/^[a-z_]+$/.test(name)) {
+					throw new Error('Invalid field name: ' + name);
 				}
+
 				if (!name.startsWith(field_prefix)) {
 					name = field_prefix + name;
 				}

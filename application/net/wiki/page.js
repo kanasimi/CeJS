@@ -784,6 +784,7 @@ function module_code(library_namespace) {
 							data.query.pages.redirect_loop = true;
 						}
 						data.query.pages = {
+							// [wiki_API.run_SQL.KEY_additional_row_conditions]
 							'' : data.query.pages
 						};
 					}
@@ -2233,9 +2234,9 @@ function module_code(library_namespace) {
 				.format('%4Y%2m%2d%2H%2M%2S');
 				SQL_where.this_oldid = '>' + last_query_revid;
 				if (delay_ms > 0) {
-					SQL_where[''] = 'rc_timestamp<='
+					SQL_where[wiki_API.run_SQL.KEY_additional_row_conditions]
 					// 截止期限。
-					+ new Date(Date.now() - delay_ms)
+					= 'rc_timestamp<=' + new Date(Date.now() - delay_ms)
 					// MediaWiki format
 					.format('%4Y%2m%2d%2H%2M%2S');
 				}
@@ -2627,15 +2628,15 @@ function module_code(library_namespace) {
 											Date.parse(last_query_time),
 											delay_ms ]);
 								}
-								if (!revisions || !revisions[0] || (
+								if (!revisions || !revisions[0] ||
+								// 設定 .rctoponly 的話，舊版本會被直接篩選掉。
+								!latest_only && (
 								// 以 revisions[0] 確定 row 是最新版本。
-								latest_only
+								revisions[0].revid !== row.revid
 								//
-								? Date.parse(revisions[0].timestamp) >
+								|| Date.parse(revisions[0].timestamp) >
 								//
-								Date.parse(last_query_time) + delay_ms
-								//
-								: revisions[0].revid !== row.revid)) {
+								Date.parse(last_query_time) + delay_ms)) {
 									library_namespace.log(
 									//
 									'add_listener.with_diff: '
@@ -2653,6 +2654,7 @@ function module_code(library_namespace) {
 									run_next();
 									return;
 								}
+								// assert: revisions[0].revid === row.revid
 
 								// merge page data
 								Object.assign(row, page_data);
