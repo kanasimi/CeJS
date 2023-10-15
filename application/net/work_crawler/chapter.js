@@ -1987,6 +1987,20 @@ function module_code(library_namespace) {
 		// 坦坦荡荡
 		.replace(/(空|浩浩|坦坦)\*{2,4}/g, '$1荡荡')
 
+		/**
+		 * TODO<code>
+
+		// https://www.quanben5.com/n/gouzaixianwuquqichangsheng/8.html	《苟在仙武娶妻长生》第008章 老祖又又纳妾了
+		人**满
+		人口爆满
+
+		// https://www.quanben5.com/n/gouzaixianwuquqichangsheng/10.html	《苟在仙武娶妻长生》第010章 照顾师兄妻女
+		躺在**，
+		躺在床上，
+
+		</code>
+		 */
+
 		;
 
 		return text;
@@ -2073,12 +2087,19 @@ function module_code(library_namespace) {
 					/(.)长\1风\1文\1?学\s*/g, '');
 		}
 
-		// e.g.,
+		/**
+		 * <code>
+
 		// xshuyaya.js
-		// http://www.shuyyw.com/read/24334/16566634.html
+		// http://www.shuyyw.com/read/24334/16566634.html	苍青之剑 第十三章 小孩子听不懂大道理
+		诺菈和埃莉诺的.asxs.就比你们高出不知道多少，
+
 		// piaotian.js
-		// https://www.ptwxz.com/html/14/14466/10115811.html
-		// 女主从书里跑出来了怎么办 第四百三十三章 复更
+		// https://www.ptwxz.com/html/14/14466/10115811.html	女主从书里跑出来了怎么办 第四百三十三章 复更
+		你们都是住在.asxs.的吗？
+
+		</code>
+		 */
 		text = text.replace(/\.asxs\./g, '起点');
 
 		return text;

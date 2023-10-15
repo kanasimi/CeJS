@@ -2527,11 +2527,11 @@ function module_code(library_namespace) {
 					// console.trace(rows);
 					library_namespace.log_temporary('add_listener.with_diff: '
 							+ 'Fetching ' + rows.length
-							+ ' page(s) starting from '
+							+ ' page(s) starting from page '
 							+ wiki_API.title_link_of(rows[0]));
 
 					library_namespace.debug('Fetching ' + rows.length
-							+ ' recent pages:\n' + rows.map(function(row) {
+							+ ' recent page(s):\n' + rows.map(function(row) {
 								return row.revid;
 							}), 2, 'add_listener.with_diff');
 
