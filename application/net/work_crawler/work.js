@@ -613,6 +613,10 @@ function module_code(library_namespace) {
 			search_result[work_title] = typeof id_data === 'object'
 			// {Array}或{Object}
 			? id_data : id_list;
+			if (original_work_title) {
+				// 一同紀錄進 cache，避免每次執行重複查詢。
+				search_result[original_work_title] = search_result[work_title];
+			}
 			if (typeof _this.post_get_work_id === 'function') {
 				// post_get_work_id :
 				// function(callback, work_title, search_result) {}
@@ -706,6 +710,27 @@ function module_code(library_namespace) {
 	// 'images_downloaded',
 	// 'part_NO', 'NO_in_part', 'chapter_NO',
 	'chapter_title', 'part_title', 'image_list' ]);
+
+	/**
+	 * 增添別名至作品別名列表。
+	 * 
+	 * @param {Object}work_data
+	 *            作品資訊。
+	 * @param {String}original_work_title
+	 *            要添加的作品別名。
+	 * 
+	 * @inner
+	 */
+	function add_work_aliases(work_data, original_work_title) {
+		if (!original_work_title || original_work_title === work_data.title)
+			return;
+		if (!work_data.original_work_title) {
+			work_data.original_work_title = original_work_title;
+		}
+		if (!Array.isArray(work_data.work_aliases))
+			work_data.work_aliases = [];
+		work_data.work_aliases.push(original_work_title);
+	}
 
 	function get_work_data(work_id, callback, error_count) {
 		var work_title, input_url, original_work_title;
@@ -910,11 +935,7 @@ function module_code(library_namespace) {
 
 			// work_title: search key
 			work_data.input_title = work_title;
-			if (original_work_title && !work_data.original_work_title) {
-				work_data.original_work_title = original_work_title;
-				// 作品別名列表。
-				work_data.work_aliases = [ original_work_title ];
-			}
+			add_work_aliases(work_data, original_work_title);
 			if (!work_data.title) {
 				work_data.title = work_title;
 			} else {
@@ -943,6 +964,14 @@ function module_code(library_namespace) {
 						library_namespace.write_file(search_result_file,
 								search_result);
 					}
+				}
+
+				if (work_title !== work_data.title) {
+					library_namespace.warn(library_namespace.display_align([
+					// gettext_config:{"id":"using-title"}
+					[ gettext('Using title:'), work_title ],
+							[ '→', work_data.title ] ]));
+					add_work_aliases(work_data, work_title);
 				}
 			}
 
