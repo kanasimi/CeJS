@@ -357,22 +357,24 @@ function module_code(library_namespace) {
 		// cache original Buffer.prototype.toString
 		Buffer.prototype.native_toString = Buffer.prototype.toString;
 		/** @deprecated */
-		Buffer.prototype.toString = function deprecated_Buffer_toString(
-				encoding) {
-			var endoding_error;
-			try {
-				return this.native_toString(encoding);
-			} catch (e) {
-				endoding_error = e;
-			}
+		if (false) {
+			Buffer.prototype.toString = function deprecated_Buffer_toString(
+					encoding) {
+				var endoding_error;
+				try {
+					return this.native_toString(encoding);
+				} catch (e) {
+					endoding_error = e;
+				}
 
-			try {
-				return code_array_to_String.call(this, encoding);
-			} catch (e) {
-				// throw e;
-				throw endoding_error;
-			}
-		};
+				try {
+					return code_array_to_String.call(this, encoding);
+				} catch (e) {
+					// throw e;
+					throw endoding_error;
+				}
+			};
+		}
 
 		// 把 Buffer 物件的內容當作是 encoding 編碼，並解析成 {String}UTF-8 string。
 		Buffer.prototype.toString = function Buffer_toString(encoding, options) {
@@ -380,10 +382,13 @@ function module_code(library_namespace) {
 				// buffer.toString(null) will throw!
 				return this.native_toString(encoding);
 			} catch (e) {
+				// TypeError [ERR_UNKNOWN_ENCODING]: Unknown encoding: gbk
+				// console.trace(e);
 			}
 
 			// 有錯誤直接丟出去。
-			return code_array_to_String.call(this, encoding, options);
+			return code_array_to_String.call(this, /* charset */encoding,
+					options);
 		};
 
 		// TODO: use StringDecoder
@@ -411,7 +416,7 @@ function module_code(library_namespace) {
 					+ '. You may need to run ' + module_name + '.load("'
 					+ encoding + '") first?');
 		}
-		// console.log(code_map);
+		// console.trace(code_map);
 
 		var code_index = 0,
 		// converted result

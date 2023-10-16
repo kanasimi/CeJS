@@ -3126,6 +3126,7 @@ function module_code(library_namespace) {
 					// Simulates an XMLHttpRequest response.
 					// 模擬 XMLHttpRequest response。
 					buffer : data,
+					// using CeL.data.character
 					responseText : data && data.toString(options.charset),
 					responseURL : URL,
 					get_from_cache : true

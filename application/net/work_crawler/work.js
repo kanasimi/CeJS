@@ -784,17 +784,50 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------------
 
+		var work_cache_directory = _this.main_directory
+				+ _this.cache_directory_name;
+		// work_data.directory_name 會在
+		// function process_work_data() 設定。
+		// 從 get_work_page() 呼叫時 work_data === undefined。
+		function get_work_directory_name(work_data) {
+			var work_directory_name = work_data ? work_data.directory_name
+					: work_id + (work_title ? ' ' + work_title : '');
+			return work_directory_name;
+		}
+		function get_work_page_path(work_data) {
+			// TODO: using work_data.directory
+			var work_directory_name = get_work_directory_name(work_data);
+			var work_page_path = work_cache_directory + work_directory_name
+					+ '.'
+					// .data.htm
+					+ Work_crawler.HTML_extension;
+			// console.trace(work_page_path);
+			return work_page_path;
+		}
+		function get_chapter_list_path(work_data) {
+			var work_directory_name = get_work_directory_name(work_data);
+			var chapter_list_path = work_cache_directory + work_directory_name
+			// .TOC.htm
+			+ '.list.' + Work_crawler.HTML_extension;
+			return chapter_list_path;
+		}
+
+		// ----------------------------------------------------------
+
 		function get_work_page() {
 			if (_this.skip_get_work_page) {
 				process_work_data(crawler_namespace.null_XMLHttp);
 				return;
 			}
 
-			if (!_this.reget_chapter) {
+			// this.reget_chapter 要在 function process_chapter_list_data(html)
+			// 才設定好，這邊的是預設值。因此必須處理特殊情況，例如 _this.regenerate。
+			if (_this.regenerate || !_this.reget_chapter) {
 				// @see function get_data() @
 				// CeL.application.net.work_crawler.chapter
 				library_namespace.get_URL_cache(work_URL, function(data, error,
 						XMLHttp) {
+					// console.trace(XMLHttp, error);
 					process_work_data(XMLHttp, error);
 				}, {
 					no_write_info : true,
@@ -830,24 +863,6 @@ function module_code(library_namespace) {
 		get_work_page();
 
 		// ----------------------------------------------------------
-
-		var work_cache_directory = _this.main_directory
-				+ _this.cache_directory_name;
-		function get_work_page_path(work_data) {
-			// TODO: using work_data.directory
-			var work_page_path = work_cache_directory
-					+ work_data.directory_name + '.'
-					// .data.htm
-					+ Work_crawler.HTML_extension;
-			return work_page_path;
-		}
-		function get_chapter_list_path(work_data) {
-			var chapter_list_path = work_cache_directory
-					+ work_data.directory_name
-					// .TOC.htm
-					+ '.list.' + Work_crawler.HTML_extension;
-			return chapter_list_path;
-		}
 
 		function process_work_data(XMLHttp, error) {
 			// console.log(XMLHttp);
@@ -1049,6 +1064,7 @@ function module_code(library_namespace) {
 					T : [ '自訂作品目錄名稱模式 %1 令不同作品產生相同名稱，改採預設作品目錄模式！',
 							JSON.stringify(_this.directory_name_pattern) ]
 				});
+				// using `Work_crawler.prototype.directory_name_pattern`
 				delete _this.directory_name_pattern;
 			}
 			work_data.directory_name = library_namespace.to_file_name(
@@ -1087,9 +1103,12 @@ function module_code(library_namespace) {
 
 			var work_page_path = get_work_page_path(work_data), html;
 			if (_this.preserve_work_page) {
-				// 先寫入作品資料 cache。
-				library_namespace.create_directory(work_cache_directory);
-				node_fs.writeFileSync(work_page_path, html);
+				if (!_this.regenerate) {
+					// 先寫入作品資料 cache。
+					library_namespace.create_directory(work_cache_directory);
+					// .regenerate 表示採用舊資料，無須重新儲存一次。
+					node_fs.writeFileSync(work_page_path, XMLHttp.buffer);
+				}
 			} else if (_this.preserve_work_page === false) {
 				// 明確指定不保留，將刪除已存在的作品資料 cache。
 				library_namespace.debug({
@@ -1227,7 +1246,9 @@ function module_code(library_namespace) {
 				work_URL = _this.full_URL(work_URL[0]);
 			}
 
-			if (!_this.reget_chapter) {
+			// this.reget_chapter 要在 function process_chapter_list_data(html)
+			// 才設定好，這邊的是預設值。因此必須處理特殊情況，例如 _this.regenerate。
+			if (_this.regenerate || !_this.reget_chapter) {
 				// @see function get_data() @
 				// CeL.application.net.work_crawler.chapter
 				library_namespace.get_URL_cache(work_URL, function(data, error,
@@ -1265,6 +1286,27 @@ function module_code(library_namespace) {
 				_this.onerror(message, work_data);
 				typeof callback === 'function' && callback(work_data);
 				return Work_crawler.THROWED;
+			}
+
+			// console.trace(XMLHttp);
+			var chapter_list_path = get_chapter_list_path(work_data);
+			if (_this.preserve_work_page && _this.chapter_list_URL) {
+				// 所在目錄應該已經在上一個 _this.preserve_work_page 那個時候建造完畢。
+				if (!_this.regenerate) {
+					// .regenerate 表示採用舊資料，無須重新儲存一次。
+					node_fs.writeFileSync(chapter_list_path, XMLHttp.buffer);
+				}
+			} else if (_this.preserve_work_page === false) {
+				// 明確指定不保留，將刪除已存在的章節列表頁面(網頁)。
+				library_namespace.debug({
+					// gettext_config:{"id":"remove-chapter-list-page-$1"}
+					T : [ 'Remove chapter list page: %1', chapter_list_path ]
+				}, 1, 'pre_process_chapter_list_data');
+				library_namespace.remove_file(chapter_list_path);
+				if (false) {
+					// 假如沒有檔案，是空的目錄就會被移除。
+					library_namespace.fs_remove(work_cache_directory);
+				}
 			}
 
 			if (false) {
@@ -1537,23 +1579,6 @@ function module_code(library_namespace) {
 
 				typeof callback === 'function' && callback(work_data);
 				return;
-			}
-
-			var chapter_list_path = get_chapter_list_path(work_data);
-			if (_this.preserve_work_page && _this.chapter_list_URL) {
-				// 所在目錄應該已經在上一個 _this.preserve_work_page 那個時候建造完畢。
-				node_fs.writeFileSync(chapter_list_path, html);
-			} else if (_this.preserve_work_page === false) {
-				// 明確指定不保留，將刪除已存在的章節列表頁面(網頁)。
-				library_namespace.debug({
-					// gettext_config:{"id":"remove-chapter-list-page-$1"}
-					T : [ 'Remove chapter list page: %1', chapter_list_path ]
-				}, 1, 'process_chapter_list_data');
-				library_namespace.remove_file(chapter_list_path);
-				if (false) {
-					// 假如沒有檔案，是空的目錄就會被移除。
-					library_namespace.fs_remove(work_cache_directory);
-				}
 			}
 
 			var recheck_flag = 'recheck' in work_data ? work_data.recheck
