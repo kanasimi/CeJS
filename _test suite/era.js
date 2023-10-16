@@ -2360,7 +2360,7 @@ function translate_era(era) {
 			add_注('紀年線圖', {
 				a : [ '📊', {
 					// gettext_config:{"id":"showing-timeline"}
-					T : '展示線圖'
+					T : '展示時間線圖'
 				} ],
 				D : {
 					hierarchy : date.name.slice(0, 4).reverse().slice(0, -1)

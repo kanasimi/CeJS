@@ -224,7 +224,7 @@ function module_code(library_namespace) {
 			matched = matched[1];
 			library_namespace.info([ 'extract_work_id_from_URL: ', {
 				// gettext_config:{"id":"extract-work-id-from-the-work-url-$1"}
-				T : [ '自作品網址提取出 work id：%1', matched ]
+				T : [ '自作品網址提取出作品🆔：%1', matched ]
 			} ]);
 			return /* this.extract_work_id(matched) && */matched;
 		}

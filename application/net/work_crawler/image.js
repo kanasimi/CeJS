@@ -410,9 +410,9 @@ function module_code(library_namespace) {
 							library_namespace.warn({
 								T : [ _this.archive_images
 								// gettext_config:{"id":"the-quality-of-the-image-in-the-archive-is-better-than-in-the-directory-but-will-be-overwritten-after-downloading-$1"}
-								? '壓縮檔內的圖片品質比目錄中的更好，但在下載完後將可能在壓縮時被覆蓋：%1'
+								? '壓縮檔內的圖片品質優於目錄中，但下載完後可能在壓縮時被覆蓋：%1'
 								// gettext_config:{"id":"the-quality-of-the-image-in-the-archive-is-better-than-in-the-directory-$1"}
-								: '壓縮檔內的圖片品質比目錄中的更好：%1',
+								: '壓縮檔內的圖片品質優於目錄中：%1',
 								//
 								old_archived_file.path ]
 							});

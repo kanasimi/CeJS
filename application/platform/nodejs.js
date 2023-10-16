@@ -245,7 +245,7 @@ function module_code(library_namespace) {
 						&& directory_name.endsWith('.')) {
 					library_namespace.warn({
 						// gettext_config:{"id":"a-directory-name-ending-with-a-.-will-result-in-no-way-to-delete-or-copy-$1"}
-						T : [ '以點 "." 作為結尾的目錄名稱，將導致沒有辦法刪除或者複製：%1',
+						T : [ '以點 "." 作為結尾的目錄名稱，將無法刪除或複製：%1',
 								JSON.stringify(directory_name) ]
 					});
 				}

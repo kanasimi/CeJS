@@ -68,7 +68,7 @@
 	"\u7236\u89aa": "Far",
 	"\u6bcd\u89aa": "Mor",
 	"\u914d\u5076": "Make/maka",
-	"\u5c55\u793a\u7dda\u5716": "Visar tidslinje",
+	"\u5c55\u793a\u6642\u9593\u7dda\u5716": "Visar tidslinje",
 	"\u7d00\u5e74 %1": "Era %1",
 	"Initializing...": "Initierar...",
 	"\u5df2\u8f09\u5165 %1 \u7b46\u8cc7\u6599\u3002": function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'inlägg' : 'inlägg') + ' laddad.'; },

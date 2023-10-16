@@ -775,7 +775,7 @@ function module_code(library_namespace) {
 				var index = this.resource_index_of_id[item.id];
 				library_namespace.error([ 'add_manifest_item: ', {
 					// gettext_config:{"id":"resources-with-the-same-id-already-exist-so-the-resources-that-follow-will-deleted"}
-					T : '已經存在相同 id 之資源，後面的資源將直接消失！'
+					T : '已存在相同 id 之資源，後面的資源將直接消失！'
 				} ]);
 				console.error(this.resources[index]);
 				console.error(item);
@@ -793,7 +793,7 @@ function module_code(library_namespace) {
 				var index = this.chapter_index_of_id[item.id];
 				library_namespace.error([ 'add_manifest_item: ', {
 					// gettext_config:{"id":"resources-with-the-same-chapter-already-exist-so-the-resources-that-follow-will-deleted"}
-					T : '已經存在相同 id 之章節，後面的章節將直接消失！'
+					T : '已存在相同 id 之章節，後面的章節將直接消失！'
 				} ]);
 				console.error(this.chapters[index]);
 				console.error(item);
