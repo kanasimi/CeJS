@@ -893,6 +893,8 @@
 真正拼起來	真正拚起來
 // 《回到过去变成猫》	总之人家拼起来的时候咱装死就好。 (~拚<ATT>n:时候 ~拚<role.type:A0>人家 c:总之+r:人家+v:拼+v:起来+u:的+n:时候+r:咱+v:装+a:死+d:就+a:好+wp:。)
 人家拼起來	人家拚起來
+// 《苟在仙武娶妻长生》	她有时候也想劝韩永临不用如此拼， (~拚<VOB>v:劝 ~拚<role.type:A0>韩永临 ~拚<role.type:ARGM-ADV>不用 ~拚<role.type:ARGM-ADV>如此 r:她+d:有时候+d:也+v:想+v:劝+nh:韩永临+d:不用+r:如此+v:拼+wp:，)
+不用如此拼	不用如此拚
 
 // 《最仙遊》	所以才会大胆放心的和圆法拼在一起。 (~拚<COO>v:了解 ~拚<role.type:ARGM-DIS>所以 ~拚<role.type:ARGM-ADV>才 ~拚<role.type:ARGM-ADV>大胆放心的 ~拚<role.type:ARGM-ADV>和圆法 ~拚<role.type:ARGM-ADV>在 ~拚<role.type:ARGM-ADV>一 起 ~拚<role.type:A0>圆法 ~拚<role.type:ARGM-ADV>还是 ~拚<role.type:ARGM-ADV>怎么 c:所以+d:才+v:会+a:大胆+v:放心+u:的+p:和+n:圆法+v:拼+p:在+nl:一起+wp:。)
 和圓法拼	和圓法拚
