@@ -401,78 +401,132 @@ function module_code(library_namespace) {
 		}
 
 		var search_url_data = this.search_URL, search_URL_string, post_data, get_URL_options;
-		if (!search_url_data || typeof this.parse_search_result !== 'function') {
-			if (callback && callback.options) {
-				// e.g., for .get_data_only
+		return handle_search_url_data();
+
+		function handle_search_url_data() {
+			if (!search_url_data
+					|| typeof _this.parse_search_result !== 'function') {
+				if (callback && callback.options) {
+					// e.g., for .get_data_only
+					// gettext_config:{"id":"the-search-function-is-not-available-for-$1-web-site"}
+					finish_up(gettext('本網路作品網站 %1 的模組未提供搜尋功能。', _this.id));
+					return;
+				}
+
+				search_url_data = Object.create(null);
+				search_url_data[work_title] = '';
 				// gettext_config:{"id":"the-search-function-is-not-available-for-$1-web-site"}
-				finish_up(gettext('本網路作品網站 %1 的模組未提供搜尋功能。', this.id));
-				return;
+				_this.onerror(gettext('本網路作品網站 %1 的模組未提供搜尋功能。', _this.id)
+				// gettext_config:{"id":"please-enter-the-work-id-first.-after-downloading-once-the-tool-will-automatically-record-the-title-and-id-conversion"}
+				+ gettext('請先輸入作品 id，下載過一次後工具會自動記錄作品標題與 id 的轉換。')
+				// gettext_config:{"id":"can-also-be-set-manually-by-editing-the-id-of-«$1»-to-$2"}
+				+ gettext('亦可手動設定，編輯《%1》之 id 於 %2', work_title,
+				//
+				search_result_file) + '\n (e.g., '
+						+ JSON.stringify(search_url_data) + ')', work_title);
+				finish(true);
+				return Work_crawler.THROWED;
 			}
 
-			search_url_data = Object.create(null);
-			search_url_data[work_title] = '';
-			// gettext_config:{"id":"the-search-function-is-not-available-for-$1-web-site"}
-			this.onerror(gettext('本網路作品網站 %1 的模組未提供搜尋功能。', this.id)
-			// gettext_config:{"id":"please-enter-the-work-id-first.-after-downloading-once-the-tool-will-automatically-record-the-title-and-id-conversion"}
-			+ gettext('請先輸入作品 id，下載過一次後工具會自動記錄作品標題與 id 的轉換。')
-			// gettext_config:{"id":"can-also-be-set-manually-by-editing-the-id-of-«$1»-to-$2"}
-			+ gettext('亦可手動設定，編輯《%1》之 id 於 %2', work_title, search_result_file)
-					+ '\n (e.g., ' + JSON.stringify(search_url_data) + ')',
-					work_title);
-			finish(true);
-			return Work_crawler.THROWED;
-		}
-		if (typeof search_url_data === 'function') {
-			// 通過關鍵詞搜索作品。 解析 作品名稱 → 作品id
-			// search_url_data = search_url_data.call(this, work_title,
-			// crawler_namespace.get_label);
-			// return [ search_url_data, POST data ]
-			search_url_data = this.search_URL(work_title,
-					crawler_namespace.get_label);
-			if (Array.isArray(search_url_data)) {
-				// use POST method, also see this.get_URL()
-				// [ url, post_data, options ]
-				post_data = search_url_data[1];
-				get_URL_options = search_url_data[2];
-				search_url_data = search_url_data[0];
+			if (typeof search_url_data === 'function') {
+				// 通過關鍵詞搜索作品。 解析 作品名稱 → 作品id
+				// search_url_data = search_url_data.call(_this, work_title,
+				// crawler_namespace.get_label);
+				// return [ search_url_data, POST data ]
+				search_url_data = search_url_data.call(_this, work_title,
+						crawler_namespace.get_label);
+				if (library_namespace.is_thenable(search_url_data)) {
+					search_url_data.then(function(_search_url_data) {
+						search_url_data = _search_url_data;
+						handle_search_url_data();
+					}, function(error) {
+						finish_up(error || true);
+					});
+					return;
+				}
+
+				if (Array.isArray(search_url_data)) {
+					// use POST method, also see _this.get_URL()
+					// [ url, post_data, options ]
+					post_data = search_url_data[1];
+					get_URL_options = search_url_data[2];
+					search_url_data = search_url_data[0];
+				}
+				search_url_data = _this.full_URL(search_url_data);
+				search_URL_string = search_url_data.URL || search_url_data;
+
+			} else {
+				if (Array.isArray(search_url_data)) {
+					// use POST method, also see _this.get_URL()
+					// [ url, post_data, options ]
+					post_data = search_url_data[1];
+					get_URL_options = search_url_data[2];
+					search_url_data = search_url_data[0];
+				}
+
+				// default:
+				// assert: typeof search_url_data==='string'
+				// || search_url_data==={URL:'',charset:''}
+				// TODO: .replace(/%t/g, work_title)
+				search_url_data = _this.full_URL(search_url_data);
+				// 對 {Object}search_url_data，不可動到 search_url_data。
+				search_URL_string = (search_url_data.URL || search_url_data)
+				//
+				+ crawler_namespace.encode_URI_component(
+				// e.g., 找不到"隔离带 2"，須找"隔离带"。
+				work_title.replace(/\s+\d{1,2}$/, '')
+				// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
+				.replace(/&/g, ''), search_url_data.charset || _this.charset);
 			}
-			search_url_data = this.full_URL(search_url_data);
-			search_URL_string = search_url_data.URL || search_url_data;
-		} else {
-			// default:
-			// assert: typeof search_url_data==='string'
-			// || search_url_data==={URL:'',charset:''}
-			// TODO: .replace(/%t/g, work_title)
-			search_url_data = this.full_URL(search_url_data);
-			// 對 {Object}search_url_data，不可動到 search_url_data。
-			search_URL_string = (search_url_data.URL || search_url_data)
+
+			// console.log(search_url_data);
+			var regenerate_user_agent = _this.regenerate_user_agent === true
+					|| _this.regenerate_user_agent === 'work';
+			_this.setup_agent(search_URL_string, regenerate_user_agent);
+			if (regenerate_user_agent) {
+				crawler_namespace.regenerate_user_agent(_this);
+			}
+
+			// delay time
+			var time_to_waiting = _this.search_work_interval;
+			if (time_to_waiting) {
+				time_to_waiting
+				//
+				= library_namespace.to_millisecond(time_to_waiting)
+						- (Date.now() - _this.latest_search_time);
+				if (false) {
+					console
+							.trace([ _this.search_work_interval,
+									time_to_waiting ]);
+				}
+			}
+
+			if (time_to_waiting > 0) {
+				library_namespace.log_temporary({
+					// gettext_config:{"id":"waiting-$1"}
+					T : [ 'Waiting %1...',
+							library_namespace.age_of(0, time_to_waiting, {
+								digits : 1
+							}) ]
+				});
+				setTimeout(get_search_result, time_to_waiting);
+			} else {
+				get_search_result();
+			}
+		}
+
+		function get_search_result() {
+			// console.trace([ search_URL_string, search_url_data, post_data ]);
+			_this.get_URL(search_URL_string, handle_search_response,
 			//
-			+ crawler_namespace.encode_URI_component(
-			// e.g., 找不到"隔离带 2"，須找"隔离带"。
-			work_title.replace(/\s+\d{1,2}$/, '')
-			// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
-			.replace(/&/g, ''), search_url_data.charset || this.charset);
+			post_data, Object.assign({
+				error_retry : _this.MAX_ERROR_RETRY
+			}, get_URL_options), search_url_data.charset);
 		}
 
-		// console.log(search_url_data);
-		var regenerate_user_agent = this.regenerate_user_agent === true
-				|| this.regenerate_user_agent === 'work';
-		this.setup_agent(search_URL_string, regenerate_user_agent);
-		if (regenerate_user_agent) {
-			crawler_namespace.regenerate_user_agent(this);
-		}
-
-		// delay time
-		var time_to_waiting = this.search_work_interval;
-		if (time_to_waiting) {
-			time_to_waiting = library_namespace.to_millisecond(time_to_waiting)
-					- (Date.now() - this.latest_search_time);
-			// console.trace([ this.search_work_interval, time_to_waiting ]);
-		}
-
-		function handler_search_response(XMLHttp) {
-			if (this.search_work_interval)
-				this.latest_search_time = Date.now();
+		function handle_search_response(XMLHttp) {
+			if (_this.search_work_interval)
+				_this.latest_search_time = Date.now();
 
 			_this.setup_agent();
 			if (!XMLHttp.responseText) {
@@ -484,7 +538,7 @@ function module_code(library_namespace) {
 				finish_up('沒有搜索結果。網站暫時不可用或改版？');
 				return;
 			}
-			// this.parse_search_result() returns 關鍵字搜尋結果:
+			// _this.parse_search_result() returns 關鍵字搜尋結果:
 			// [ {Array}id_list, 與id_list相對應之{Array}或{Object} ]
 			// e.g., [ [id,id,...], [title,title,...] ]
 			// e.g., [ [id,id,...], [data,data,...] ]
@@ -627,27 +681,6 @@ function module_code(library_namespace) {
 
 		}
 
-		function get_search_result() {
-			// console.trace([ search_URL_string, search_url_data, post_data ]);
-			_this.get_URL(search_URL_string, handler_search_response,
-			//
-			post_data, Object.assign({
-				error_retry : _this.MAX_ERROR_RETRY
-			}, get_URL_options), search_url_data.charset);
-		}
-
-		if (time_to_waiting > 0) {
-			library_namespace.log_temporary({
-				// gettext_config:{"id":"waiting-$1"}
-				T : [ 'Waiting %1...',
-						library_namespace.age_of(0, time_to_waiting, {
-							digits : 1
-						}) ]
-			});
-			setTimeout(get_search_result, time_to_waiting);
-		} else {
-			get_search_result();
-		}
 	}
 
 	function extract_work_data(work_data, html, PATTERN_work_data, overwrite) {

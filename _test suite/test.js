@@ -5019,7 +5019,7 @@ function test_wiki() {
 			promise = promise.then(function () {
 				return CeL.wiki.expand_transclusion('{{支持}}\n{{新增條文|條文}}\n{{反对}}', options);
 			}).then(function (parsed) {
-				console.trace(parsed.toString());
+				//console.trace(parsed.toString());
 				assert(["<span style=\"font-weight:bold;\">(＋)</span>'''<span class=\"zhwpVoteSupport\">-{支持}-</span>'''\n<span style=\"background-color: #ccffcc;\">條文</span>\n<span class=\"zhwpVoteOppose\" style=\"font-weight:bold;\">(－)</span>'''反对'''", parsed.toString()], 'CeL.wiki.expand_transclusion() fetch multiple pages');
 			});
 
