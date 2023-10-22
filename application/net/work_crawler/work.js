@@ -1731,7 +1731,7 @@ function module_code(library_namespace) {
 						}
 						_this.reget_chapter = true;
 					}
-					// 無論是哪一種，既然是recheck則都得要從頭check並生成資料。
+					// 無論是哪一種，既然是 recheck 則都得要從頭 check 並生成資料。
 					work_data.reget_chapter = _this.reget_chapter;
 					work_data.last_download.chapter = _this.start_chapter_NO;
 

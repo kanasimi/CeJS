@@ -87,6 +87,7 @@ function module_code(library_namespace) {
 		try {
 			return node_fs.lstatSync(file_path);
 		} catch (e) {
+			// console.error(e);
 			if (with_error) {
 				return e;
 			}
@@ -96,6 +97,7 @@ function module_code(library_namespace) {
 
 	_.file_exists = function file_exists(file_path) {
 		var fso_status = fs_status(file_path);
+		// console.trace([ file_path, fso_status ]);
 		return fso_status
 				&& (fso_status.isFile() || fso_status.isSymbolicLink());
 	};

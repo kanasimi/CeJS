@@ -182,6 +182,11 @@ function module_code(library_namespace) {
 	 * @returns {Integer|Undefined}下載章節資訊/章節內容前的等待時間 (ms)。
 	 */
 	function get_chapter_time_interval(argument_1, work_data) {
+		if (work_data && work_data.reget_chapter === false) {
+			// 不重新擷取。
+			return;
+		}
+
 		// this.chapter_time_interval: 下載章節資訊/章節內容前的等待時間。
 		var chapter_time_interval = this.chapter_time_interval;
 		if (typeof chapter_time_interval === 'function') {
@@ -354,6 +359,7 @@ function module_code(library_namespace) {
 		chapter_time_interval = this.get_chapter_time_interval(chapter_NO,
 				work_data);
 
+		// console.trace([ work_data.reget_chapter, chapter_time_interval ]);
 		var next = chapter_time_interval > 0 ? (function() {
 			var message = [ this.id, ': ', work_data.title + ': ',
 			// gettext_config:{"id":"waiting-for-$3-before-downloading-$1-$2"}

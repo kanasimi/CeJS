@@ -3116,7 +3116,7 @@ function module_code(library_namespace) {
 		node_fs.readFile(file_name, encoding,
 		//
 		function(error, data) {
-			// console.trace([ error, !!data, options.reget ]);
+			// console.trace([ file_name, data, error, options.reget ]);
 			// 警告: 對於從 HTTP 標頭獲得文件名的情況，就算不設定 options.reget 也沒用，還是會重新獲取檔案。
 
 			// options.force_download
