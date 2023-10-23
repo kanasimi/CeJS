@@ -1145,7 +1145,7 @@
 	"download_options.start_chapter": "Começar/Continuar o download. Vai ser convertido aumáticamente para .start_chapter_NO ou .start_chapter_title. Para capítulos baixados, você deve refazer a verificação.",
 	"download_options.start_chapter_no": "Começar/continuar o download a partir dessa numeração do capítulo.",
 	"download_options.start_chapter_title": "Começar/continuar o download a partir desse título do capítulo.",
-	"download_options.start_list_serial": "Especifique o número serial da obra para começar o download. A obra antes disso será pulada. Geralmente usada apenas em configurações de linha de comando. Padrão:1",
+	"download_options.start_list_serial": "Especifica o número serial da obra para começar o download. A obra antes disso será pulada. Geralmente usado apenas em configurações de linha de comando. Padrão:1",
 	"download_options.timeout": "Tempo limite (ms) para baixar um site ou imagem. Se a quantidade de tempo limite for muito pequena (por exemplo, 10 segundos), facilmente falhará quando se estiver baixando um arquivo grande.",
 	"download_options.user_agent": "Identificação do navegador. Sempre mantenha o mesmo reconhecimento do navegador antes e depois da execução, isso não deve afetar o download.",
 	"download_options.vertical_writing": "Muda a orientação da novel de horizontal para vertical.",

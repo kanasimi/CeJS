@@ -1149,7 +1149,7 @@
 	"download_options.start_chapter": "開始/接續下載的章節。將依類型自動轉成 .start_chapter_NO 或 .start_chapter_title。對已下載過的章節，必須配合 .recheck。",
 	"download_options.start_chapter_no": "開始/接續下載的章節編號。",
 	"download_options.start_chapter_title": "開始/接續下載的章節標題。",
-	"download_options.start_list_serial": "指定了要開始下載的列表序號。將會跳過這個序號之前的作品。一般僅使用於命令列設定。Default:1",
+	"download_options.start_list_serial": "指定要開始下載的作品標題列表序號(serial)。從這個序號開始下載，該序號之前的作品標題將會被跳過。一般僅使用於命令列執行時。預設值:1",
 	"download_options.timeout": "下載網頁或圖片的逾時等待時間(ms)。若逾時時間太小（如10秒），下載大檔案容易失敗。",
 	"download_options.user_agent": "瀏覽器識別。運行前後始終維持相同的瀏覽器識別，應該就不會影響到下載。",
 	"download_options.vertical_writing": "將小說從橫書改成縱書。",
