@@ -1140,7 +1140,7 @@
 	"download_options.start_chapter": "Come\u00e7ar/Continuar o download. Vai ser convertido aum\u00e1ticamente para .start_chapter_NO ou .start_chapter_title. Para cap\u00edtulos baixados, voc\u00ea deve refazer a verifica\u00e7\u00e3o.",
 	"download_options.start_chapter_NO": "Come\u00e7ar/continuar o download a partir dessa numera\u00e7\u00e3o do cap\u00edtulo.",
 	"download_options.start_chapter_title": "Come\u00e7ar/continuar o download a partir desse t\u00edtulo do cap\u00edtulo.",
-	"download_options.start_list_serial": "Especifique o n\u00famero serial da obra para come\u00e7ar o download. A obra antes disso ser\u00e1 pulada. Geralmente usada apenas em configura\u00e7\u00f5es de linha de comando. Padr\u00e3o:1",
+	"download_options.start_list_serial": "Especifica o n\u00famero serial da obra para come\u00e7ar o download. A obra antes disso ser\u00e1 pulada. Geralmente usado apenas em configura\u00e7\u00f5es de linha de comando. Padr\u00e3o:1",
 	"download_options.timeout": "Tempo limite (ms) para baixar um site ou imagem. Se a quantidade de tempo limite for muito pequena (por exemplo, 10 segundos), facilmente falhar\u00e1 quando se estiver baixando um arquivo grande.",
 	"download_options.user_agent": "Identifica\u00e7\u00e3o do navegador. Sempre mantenha o mesmo reconhecimento do navegador antes e depois da execu\u00e7\u00e3o, isso n\u00e3o deve afetar o download.",
 	"download_options.vertical_writing": "Muda a orienta\u00e7\u00e3o da novel de horizontal para vertical.",
