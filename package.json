@@ -30,6 +30,8 @@
 		"type": "git",
 		"url": "git+https://github.com/kanasimi/CeJS.git"
 	},
+
+	"type": "commonjs",
 	"main": "./index.js",
 	"scripts": {
 		"test": "node \"_test suite/test.js\""

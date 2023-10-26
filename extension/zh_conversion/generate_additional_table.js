@@ -17,15 +17,6 @@ CeL.env.ignore_COM_error = true;
 CeL.run(['application.storage',]);
 // move additional.to_TW.auto-generated.txt
 
-const convert_type = process.argv[2] in files_config ? process.argv[2] : 'to_TW';
-const target_additional_dictionary_file = `OpenCC/additional.${convert_type}.auto-generated.txt`;
-// 存在此檔案的情況下，含入 extension.zh_conversion 會造成干擾。
-CeL.move_file(target_additional_dictionary_file, target_additional_dictionary_file.replace(/(\.\w+)$/, '.old$1'));
-
-CeL.run(['extension.zh_conversion', 'data.CSV',]);
-//console.log(CeL.TW_to_CN('當日糧草便是從各地徵調過來的。'));
-//console.log(CeL.TW_to_CN('規'));
-
 let files_config = {
 	to_TW: {
 		method: 'CN_to_TW',
@@ -38,6 +29,15 @@ let files_config = {
 		tongwen: ['t2s-phrase.json', 't2s-char.json']
 	},
 };
+
+const convert_type = process.argv[2] in files_config ? process.argv[2] : 'to_TW';
+const target_additional_dictionary_file = `OpenCC/additional.${convert_type}.auto-generated.txt`;
+// 存在此檔案的情況下，含入 extension.zh_conversion 會造成干擾。
+CeL.move_file(target_additional_dictionary_file, target_additional_dictionary_file.replace(/(\.\w+)$/, '.old$1'));
+
+CeL.run(['extension.zh_conversion', 'data.CSV',]);
+//console.log(CeL.TW_to_CN('當日糧草便是從各地徵調過來的。'));
+//console.log(CeL.TW_to_CN('規'));
 
 files_config = files_config[convert_type];
 
