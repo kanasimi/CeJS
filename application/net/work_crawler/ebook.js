@@ -551,6 +551,18 @@ function module_code(library_namespace) {
 		 * <code>
 
 		// xshuyaya.js
+		http://www.shuyy8.cc/read/43486/27151902.html	我在修仙界长生不死 第一百九十五章 一剑断山
+		<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;饭团看书<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;
+
+		</code>
+		 */
+		text = text
+				.replace(/(?:<br[^<>]*>)*(?:&nbsp;)*饭团看书(?=<br[^<>]*>)/g, '');
+
+		/**
+		 * <code>
+
+		// xshuyaya.js
 		// http://www.shuyyw.com/read/24334/16566634.html	苍青之剑 第十三章 小孩子听不懂大道理
 		诺菈和埃莉诺的.asxs.就比你们高出不知道多少，
 
