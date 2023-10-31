@@ -405,12 +405,12 @@ function module_code(library_namespace) {
 
 		// https://www.piaotian.com/html/13/13793/10232511.html	我只想安静的做个苟道中人 第四十一章：龙后有赏！（四合一大章！求订阅！）
 		沦落到在整个大地上东躲xz，
-
-		// 肉眼凡胎
+		// http://www.shuyy8.cc/read/43486/27152005.html	我在修仙界长生不死 第二百九十四章 左右逢源
+		元婴魔君任凭怎么东躲XZ，
 
 		</code>
 		 */
-		.replace(/东躲xz/g, '东躲西藏')
+		.replace(/东躲xz/ig, '东躲西藏')
 
 		/**
 		 * <code>
