@@ -2154,6 +2154,7 @@ function module_code(library_namespace) {
 			// default: search from NOW
 			last_query_time = new Date;
 		}
+		// console.trace(last_query_time);
 
 		library_namespace.info([ 'add_listener: ', {
 			T : [ Date.now() - last_query_time > 100
@@ -2189,6 +2190,9 @@ function module_code(library_namespace) {
 
 		// 取得頁面資料。
 		function receive() {
+			var next_task_id = undefined;
+			/** {Number}上一次執行 receive() 的時間 timevalue。 */
+			var receive_time = Date.now();
 
 			function receive_next() {
 				// 預防上一個任務還在執行的情況。
@@ -2211,10 +2215,6 @@ function module_code(library_namespace) {
 				Math.max(interval - real_interval_ms, 0));
 			}
 
-			var next_task_id = undefined;
-			// 上一次執行 receive() 的時間。
-			var receive_time = Date.now();
-
 			library_namespace.debug('Get recent change from '
 					+ (library_namespace.is_Date(last_query_time)
 							&& last_query_time.getTime() ? last_query_time
@@ -2236,7 +2236,7 @@ function module_code(library_namespace) {
 				if (delay_ms > 0) {
 					SQL_where[wiki_API.run_SQL.KEY_additional_row_conditions]
 					// 截止期限。
-					= 'rc_timestamp<=' + new Date(Date.now() - delay_ms)
+					= 'rc_timestamp<=' + new Date(receive_time - delay_ms)
 					// MediaWiki format
 					.format('%4Y%2m%2d%2H%2M%2S');
 				}
@@ -2253,7 +2253,7 @@ function module_code(library_namespace) {
 				if (delay_ms > 0) {
 					recent_options.parameters.rcend
 					// 截止期限。
-					= new Date(Date.now() - delay_ms).toISOString();
+					= new Date(receive_time - delay_ms).toISOString();
 				}
 			}
 
@@ -2340,17 +2340,19 @@ function module_code(library_namespace) {
 						last_query_time = last_query_time.timestamp;
 						// 確保 {Date}last_query_time
 						// last_query_time = new Date(last_query_time);
-					} else {
+						library_namespace.debug('The lastest record: '
+								+ JSON.stringify(last_query_time), 4);
+					} else if (recent_options.parameters.rcend) {
 						library_namespace
 								.debug('last_query_time 直接採用本次查詢的結束時刻: '
 										+ last_query_time + '→'
 										+ recent_options.parameters.rcend);
 						last_query_time = recent_options.parameters.rcend;
+					} else {
+						last_query_time = new Date(receive_time);
 					}
 
 					// 預設全部都處理完，因此先登記。假如僅處理其中的一部分，屆時再特別登記。
-					library_namespace.debug('The lastest record: '
-							+ JSON.stringify(last_query_time), 4);
 				}
 				library_namespace.debug('去除掉重複的紀錄之後 last_query_revid='
 				//

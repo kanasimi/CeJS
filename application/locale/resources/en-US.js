@@ -1004,7 +1004,7 @@
 	"Fixing broken anchor": "Fixing broken anchor",
 	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}",
 	"Anchor %1 links to a specific web page: %2.": "Anchor %1 links to a specific web page: %2.",
-	"The anchor (%2) is no longer available because it was [[Special:Diff/%1|deleted by a user]] before.": "The anchor (%2) is no longer available because it was [[Special:Diff/%1|deleted by a user]] before.",
+	"The anchor (%2) [[Special:Diff/%1|has been deleted]].": "The anchor (%2) [[Special:Diff/%1|has been deleted]].",
 	"Reminder of an inactive anchor": "Reminder of an inactive anchor",
 	"Update links to archived section %1: %2": "Update links to archived section %1: %2",
 	"Incorrect capitalization/spaced section title": "Incorrect capitalization/spaced section title",

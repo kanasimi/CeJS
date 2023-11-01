@@ -604,7 +604,7 @@
 	"work_status-not-found": "未找到",
 	"work-information": "作品資訊",
 	"work_data.chapter_no": "章節編號",
-	"work_data.chapter_title": "章節標題",
+	"work_data.chapter_title": "章節標題：",
 	"you-may-set-start_chapter_no=chapter-number-or-start_chapter_title=chapter-title-to-decide-where-to-start-downloading": "您可指定 \"start_chapter_NO=章節編號數字\" 或 \"start_chapter_title=章節標題\" 來選擇要開始下載的章節。",
 	"or-set-chapter_filter=chapter-title-to-download-specific-chapter": "或指定 \"chapter_filter=章節標題\" 僅下載某個章節。",
 	"cannot-save-work-data-of-«$1»": "無法儲存作品《%1》之資訊至檔案！",

@@ -1004,7 +1004,7 @@
 	"Fixing broken anchor": "Correction de l\u2019ancre rompue",
 	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "Supprimer %1 ancre{{PLURAL:%1||s}} non d\u00e9funte{{PLURAL:%1||s}}",
 	"Anchor %1 links to a specific web page: %2.": "L\u2019ancre %1 est li\u00e9e \u00e0 une page web sp\u00e9cifique\u202f: %2.",
-	"The anchor (%2) is no longer available because it was [[Special:Diff/%1|deleted by a user]] before.": "L\u2019ancre (%2) n\u2019est plus disponible, car elle a \u00e9t\u00e9 [[Special:Diff/%1|supprim\u00e9e par un utilisateur]] auparavant.",
+	"The anchor (%2) [[Special:Diff/%1|has been deleted]].": "L\u2019ancre (%2) n\u2019est plus disponible, car elle a \u00e9t\u00e9 [[Special:Diff/%1|supprim\u00e9e par un utilisateur]] auparavant.",
 	"Reminder of an inactive anchor": "Rappel d\u2018une ancre inactive",
 	"Update links to archived section %1: %2": "Met \u00e0 jour les liens vers la section archiv\u00e9e %1\u202f: %2",
 	"Incorrect capitalization/spaced section title": "Capitalisation ou espacement incorrect du titre de section",

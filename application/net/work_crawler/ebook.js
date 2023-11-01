@@ -321,7 +321,7 @@ function module_code(library_namespace) {
 
 		if (full_title && chapter_data.title === title) {
 			library_namespace.log(library_namespace.display_align([
-			// gettext_config:{"id":"work_data.chapter_title"}
+			// @see gettext_config:{"id":"work_data.chapter_title"}
 			[ gettext('章節標題：'), title ],
 			//
 			[ '→', full_title ] ]));
