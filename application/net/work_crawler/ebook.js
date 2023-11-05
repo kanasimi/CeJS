@@ -369,12 +369,12 @@ function module_code(library_namespace) {
 		 */
 		.replace(/(艹|扌喿)?(亻尔|亻也)女马(白勺)?/g, function(all, 操, 你他, 的) {
 			// [[wikt:zh:肏你媽]]
-			return (操 ? '操' : '') + (你他 === '亻尔' ? '你' : '他') + '媽'
+			return (操 ? '操' : '') + (你他 === '亻尔' ? '你' : '他') + '妈'
 			//
 			+ (的 ? '的' : '');
 		}).replace(/亻尔/g, '你').replace(/扌喿/g, '操')
 		// 采衣卜 采衤卜
-		.replace(/采[衣衤]卜/g, '採補').replace(/衤卜/g, '補').replace(/里予占戈/g, '野戰')
+		.replace(/采[衣衤]卜/g, '採补').replace(/衤卜/g, '补').replace(/里予占戈/g, '野战')
 		//
 		.replace(/米青丬士/g, '精壮').replace(/口申口今/g, '呻吟').replace(/月几月夫/g, '肌肤')
 		// 那月匈……
@@ -393,8 +393,11 @@ function module_code(library_namespace) {
 		.replace(/女干([情乱夫])/g, '奸$1')
 		// 女干夫氵女彐
 		.replace(/氵\??女彐/g, '淫婦')
+		// http://www.shuyy8.cc/read/43486/27152132.html 我在修仙界长生不死 第四百二十六章 建元隆庆
+		// 大忠似女干，大女干似忠，
+		.replace(/大忠似女干/g, '大忠似奸').replace(/大女干似忠/g, '大奸似忠')
 		// 钅肖魂入骨
-		.replace(/钅肖魂/g, '銷')
+		.replace(/钅肖魂/g, '销')
 		// 忄夬感
 		.replace(/忄夬/g, '快')
 		// 衤果体 衤果露
