@@ -158,30 +158,89 @@ function module_code(library_namespace) {
 			return work_data;
 		},
 		// for AlphaPolis.js , AlphaPolis_user_manga.js
-		get_chapter_list : function(work_data, html) {
+		get_chapter_list : function(work_data, html, get_label) {
 			work_data.chapter_list = [];
 			var _this = this;
-			html = html.between('<div class="nav">', '<div class="freespace">')
-			//
-			.each_between('<a href="/'
-			//
-			+ _this.work_type + '/', '</a>', function(text) {
-				work_data.chapter_list.push({
-					url : '/' + _this.work_type + '/'
-					//
-					+ text.between(null, '"'),
+			html = html.between('<div class="nav">', '<div class="freespace">');
+			html = html.between('<div class="episodes">') || html;
+
+			var matched, last_index, chapter_text_list = [], last_data;
+			var PATTERN_chapter = /<div class="chapter-rental[\s\S]*?<h3>([\s\S]+?)<\/h3>|<div class="rental-episode([\s\S]*?<h3>[\s\S]+?)<\/h3>|(<div class="episode)|<h3>([\s\S]+?)<\/h3>/g;
+			while (matched = PATTERN_chapter.exec(html)) {
+				if (last_index > 0) {
+					if (false)
+						console.log([ last_index, matched.index,
+								PATTERN_chapter.lastIndex,
+								html.slice(last_index, matched.index) ]);
+					last_data.push(html.slice(last_index, matched.index));
+					chapter_text_list.push(last_data);
+				}
+				last_index = PATTERN_chapter.lastIndex;
+				for (var index = 1;; index++) {
+					if (matched[index]) {
+						last_data = [ index, matched[index] ];
+						break;
+					}
+				}
+			}
+			last_data.push(html.slice(last_index));
+			chapter_text_list.push(last_data);
+			// console.trace(chapter_text_list.slice(0));
+
+			chapter_text_list.forEach(function(data, index) {
+				if (data[0] === 4) {
+					_this.set_part(work_data, get_label(data[1]));
+					return;
+				}
+
+				if (data[0] === 1) {
+					_this.set_part(work_data, get_label(data[1]));
+					return;
+				}
+
+				if (data[0] === 2) {
+					var chapter_data = {
+						url : data[1].between(' href="', '"'),
+						title : get_label(data[1].between('<h3>')),
+						limited : data[1].between('<div class="rental-price">',
+								'</div>')
+								|| data[1].between('<div class="rental-info">',
+										'</div>')
+					};
+					chapter_data.limited = chapter_data.limited.between(
+							'alt="', '"')
+							|| chapter_data.limited;
+					if (!chapter_data.limited)
+						_this.add_chapter(work_data, chapter_data);
+					return;
+				}
+
+				var text = data[2];
+				// console.log(text);
+				// assert: data[0] === 3
+				var chapter_data = {
+					url : text.between(' href="', '"'),
 					date : text.between('<span class="open-date">', '</span>')
 					//
 					.to_Date({
 						zone : work_data.time_zone
 					}),
-					title : text.between(' class="title">',
-					// '<span class="title"><span
-					// class="bookmark-dummy"></span>',
-					// '</span>'
-					'<span class="open-date">')
-				});
+					title : get_label(text.between(' class="title">',
+					/**
+					 * <code>
+					<span class="title"><span class="bookmark-dummy"></span>人物設定②神様関連</span>
+					</code>
+					 */
+					'<span class="open-date">'))
+				};
+				if (!chapter_data.url.includes('://')) {
+					chapter_data.url = '/' + _this.work_type + '/'
+							+ chapter_data.url;
+				}
+				_this.add_chapter(work_data, chapter_data);
 			});
+
+			// console.log(work_data.chapter_list);
 		},
 
 		// for AlphaPolis_user_manga.js , AlphaPolis_official_manga.js
@@ -190,7 +249,9 @@ function module_code(library_namespace) {
 			var chapter_data = work_data.chapter_list[chapter_NO - 1];
 			Object.assign(chapter_data, {
 				// 設定必要的屬性。
-				title : get_label(html.between('<h2>', '</h2>')),
+				title : get_label(html.between('<h2 class="episode-title">',
+						'</h2>')
+						|| html.between('<h2>', '</h2>')),
 				image_list : []
 			});
 
