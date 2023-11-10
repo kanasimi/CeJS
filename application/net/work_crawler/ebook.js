@@ -221,8 +221,22 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	/**
+	 * <code>
+
+	內文的標題更為完整。
+	https://www.69shuba.com/txt/47114/32996074	第265章 夫君，我们去钓鱼嘛~感动的凤眠，莫比乌斯环？韩厉与圆鼎器灵
+
+	包含特殊字元，但標題與內文的標題同樣完整。
+	https://www.69shuba.com/txt/39164/26818931	第124章 【骨魔】（求订阅~）
+
+	https://www.69shuba.com/txt/51594/33701770	请公子斩妖 第240章 封口费 【感谢“春江花月夜&nbsp;&nbsp;”的盟主】
+	第240章 封口费 【感谢“春江花月夜&emsp;”的盟主】
+
+	</code>
+	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /~/g;
+	trim_start_title.PATTERN_special_chars = /[~\u00A0]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
@@ -262,17 +276,6 @@ function module_code(library_namespace) {
 
 		var special_chars_count = 0, full_title;
 		var title_start_index = first_line.indexOf(title);
-		/**
-		 * <code>
-
-		內文的標題更為完整。
-		https://www.69shuba.com/txt/47114/32996074	第265章 夫君，我们去钓鱼嘛~感动的凤眠，莫比乌斯环？韩厉与圆鼎器灵
-
-		包含特殊字元，但標題與內文的標題同樣完整。
-		https://www.69shuba.com/txt/39164/26818931	第124章 【骨魔】（求订阅~）
-
-		</code>
-		 */
 		if (title_start_index === NOT_FOUND) {
 			// assert: 第一行不包含完整標題。
 
@@ -286,6 +289,8 @@ function module_code(library_namespace) {
 				return text;
 			}
 
+			// 標題 → 去除特殊字元後的標題。
+			title = title.replace(trim_start_title.PATTERN_special_chars, '');
 			title_start_index = first_line_used.indexOf(title);
 			if (title_start_index === NOT_FOUND) {
 				// 第一行不包含去除特殊字元後的標題。
