@@ -92,6 +92,7 @@ function module_code(library_namespace) {
 		},
 		// for AlphaPolis.js , AlphaPolis_user_manga.js
 		parse_work_data : function(html, get_label, extract_work_data) {
+			// console.trace(html);
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
 				// 2019/8/16 19:0 改版。
@@ -154,6 +155,29 @@ function module_code(library_namespace) {
 				delete work_data.image;
 			}
 
+			/**
+			 * <code>
+
+			<div class="http-error section">
+			<h1 class="h1">ページが見つかりません</h1>
+
+			<p class="error">
+			ご指定のページは削除されたか、URLが変更になった可能性があります。<br/>
+			ご迷惑をおかけして申し訳ありませんが、<a href="https://www.alphapolis.co.jp">トップページ</a>からアクセスしなおしてください。<br/>
+			</p>
+			</div>
+
+			</code>
+			 */
+			matched = html
+					.between('<div class="http-error section">', '</div>');
+			if (matched) {
+				matched = get_label(matched.between('<h1 class="h1">', '</h1>')
+						|| matched);
+				delete work_data.title;
+				work_data.removed = matched;
+			}
+
 			// console.log(work_data);
 			return work_data;
 		},
@@ -168,10 +192,11 @@ function module_code(library_namespace) {
 			var PATTERN_chapter = /<div class="chapter-rental[\s\S]*?<h3>([\s\S]+?)<\/h3>|<div class="rental-episode([\s\S]*?<h3>[\s\S]+?)<\/h3>|(<div class="episode)|<h3>([\s\S]+?)<\/h3>/g;
 			while (matched = PATTERN_chapter.exec(html)) {
 				if (last_index > 0) {
-					if (false)
+					if (false) {
 						console.log([ last_index, matched.index,
 								PATTERN_chapter.lastIndex,
 								html.slice(last_index, matched.index) ]);
+					}
 					last_data.push(html.slice(last_index, matched.index));
 					chapter_text_list.push(last_data);
 				}
@@ -182,6 +207,9 @@ function module_code(library_namespace) {
 						break;
 					}
 				}
+			}
+			if (!last_data && work_data.removed) {
+				return;
 			}
 			last_data.push(html.slice(last_index));
 			chapter_text_list.push(last_data);

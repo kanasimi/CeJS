@@ -71,7 +71,7 @@ function module_code(library_namespace) {
 
 		// 2023/7/22 7:15:15 不停滯下載一百多章後會自動封鎖IP
 		one_by_one : '1s',
-		chapter_time_interval : '1s',
+		chapter_time_interval : '2s',
 
 		acceptable_types : 'jpg|webp',
 
