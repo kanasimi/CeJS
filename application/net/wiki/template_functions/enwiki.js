@@ -79,7 +79,8 @@ function module_code(library_namespace) {
 	// export 導出.
 
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
-		// 一些會添加 anchors 的特殊模板。
+		// 一些會產生網頁錨點 anchors 的模板或模組。
+		// Templates or modules that generate web anchors
 		'Football box' : parse_template_Football_box
 	};
 

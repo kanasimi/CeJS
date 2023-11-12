@@ -1684,7 +1684,7 @@ function module_code(library_namespace) {
 		}
 
 		// const
-		var anchor_hash = Object.create(null);
+		var anchor_hash = Object.create(null), imprecise_anchor_count = 0;
 		function register_anchor(anchor, token, preserve_spaces) {
 			anchor = normalize_anchor(anchor, preserve_spaces);
 			if (!anchor) {
@@ -1765,6 +1765,7 @@ function module_code(library_namespace) {
 				if (first_imprecise_token) {
 					library_namespace.log('get_all_anchors: 跳過包含不固定錨點的章節標題: '
 							+ section_title_token);
+					imprecise_anchor_count++;
 					return;
 				}
 			}
@@ -1838,6 +1839,7 @@ function module_code(library_namespace) {
 					}));
 					// Also show .imprecise_tokens
 					console.trace(section_title_token);
+					imprecise_anchor_count++;
 				} else {
 					library_namespace.warn(
 					//
@@ -1845,6 +1847,7 @@ function module_code(library_namespace) {
 							+ section_title_token.title);
 					// Also show .imprecise_tokens
 					console.trace(section_title_link);
+					imprecise_anchor_count++;
 				}
 			}
 		});
@@ -2004,6 +2007,19 @@ function module_code(library_namespace) {
 			parsed.each('tag_attributes', parse_tag_attributes_anchors);
 
 			var anchor_list = Object.keys(anchor_hash);
+			anchor_list.imprecise_anchor_count = imprecise_anchor_count;
+			anchor_list.anchor_count = anchor_list.length
+					+ imprecise_anchor_count;
+			if (options && Array.isArray(options.anchor_list)) {
+				// TODO: remove duplicates
+				options.anchor_list.append(anchor_list);
+				if (!options.anchor_list.imprecise_anchor_count)
+					options.anchor_list.imprecise_anchor_count = 0;
+				options.anchor_list.imprecise_anchor_count += imprecise_anchor_count;
+				if (!options.anchor_list.anchor_count)
+					options.anchor_list.anchor_count = 0;
+				options.anchor_list.anchor_count += anchor_list.anchor_count;
+			}
 			if (options && options.print_anchors) {
 				library_namespace.info('get_all_anchors: anchors:');
 				console.trace(anchor_list.length > 100 ? JSON

@@ -170,7 +170,8 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// 一些會添加 anchors 的特殊模板。
+	// 一些會產生網頁錨點 anchors 的模板或模組。
+	// Templates or modules that generate web anchors
 
 	// {{Anchor|anchor|別名1|別名2}}
 	function expand_template_Anchor(options) {
@@ -202,10 +203,6 @@ function module_code(library_namespace) {
 			wikitext.push('<span id="' + anchor + '"></span>');
 		}
 		return wikitext.join('');
-	}
-
-	function parse_template_Anchor(template_token, index, parent, options) {
-		template_token.expand = expand_template_Anchor;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -594,11 +591,18 @@ function module_code(library_namespace) {
 
 		'Module:If empty' : parse_module_If_empty,
 
-		// 一些會添加 anchors 的特殊模板。
-		// 會生成網頁錨點的模板或模組。
+		// 一些會產生網頁錨點 anchors 的模板或模組。
 		// Templates or modules that generate web anchors
-		Anchor : parse_template_Anchor,
-		'Module:Anchor' : parse_template_Anchor,
+		Anchor : {
+			properties : {
+				expand : expand_template_Anchor
+			}
+		},
+		'Module:Anchor' : {
+			properties : {
+				expand : expand_template_Anchor
+			}
+		},
 		'Visible anchor' : parse_template_Visible_anchor,
 		Term : parse_template_Term,
 		Wikicite : parse_template_Wikicite,
