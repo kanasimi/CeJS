@@ -424,8 +424,6 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// assert: typeof text === 'string'
-
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(title)) {
 			action = [ title[0], action ];
@@ -444,6 +442,21 @@ function module_code(library_namespace) {
 			library_namespace.debug('#1: ' + Object.keys(options).join(','), 4,
 					'wiki_API_edit');
 		}
+
+		var change_to_contentmodel;
+		if (typeof text === 'object'
+				&& /\.json$/i.test(wiki_API.title_of(title))) {
+			text = JSON.stringify(text);
+			change_to_contentmodel = wiki_API.content_of.revision(title);
+			change_to_contentmodel = change_to_contentmodel
+					&& change_to_contentmodel.contentmodel;
+			change_to_contentmodel = change_to_contentmodel === 'json' ? null
+					: 'json';
+			// console.trace(change_to_contentmodel);
+		}
+
+		// assert: typeof text === 'string'
+
 		// 前置處理。
 		if (is_undo) {
 			options = library_namespace.setup_options(options);
@@ -576,6 +589,26 @@ function module_code(library_namespace) {
 					wiki_API.title_link_of(title) ]
 				} ]);
 			}
+
+			if (!error && data && data.edit && change_to_contentmodel) {
+				library_namespace.info('wiki_API_edit: 自動變更頁面的內容模型: '
+						+ wiki_API.title_link_of(title) + '→'
+						+ change_to_contentmodel);
+				// console.trace(session, title, change_to_contentmodel);
+				wiki_API.changecontentmodel(title,
+				//
+				change_to_contentmodel, function(_data, _error) {
+					if (_error && _error.code === 'nochanges')
+						_error = null;
+					// Copy the result of .changecontentmodel()
+					data.changecontentmodel_data = _data;
+					if (typeof callback === 'function') {
+						callback(title, _error, data);
+					}
+				}, options);
+				return;
+			}
+
 			if (typeof callback === 'function') {
 				// assert: wiki_API.is_page_data(title)
 				// BUT title IS NOT latest page data!
@@ -995,7 +1028,47 @@ function module_code(library_namespace) {
 
 	wiki_API_edit.copy_from = wiki_API_prototype_copy_from;
 
-	// ------------------------------------------------------------------------
+	// ================================================================================================================
+
+	// https://www.mediawiki.org/w/api.php?action=help&modules=changecontentmodel
+	function changecontentmodel(title, model, callback, options) {
+		if (wiki_API.need_get_API_parameters('changecontentmodel', options,
+				changecontentmodel, arguments)) {
+			return;
+		}
+
+		var action = wiki_API.normalize_title_parameter(title, Object.assign({
+			multi : false
+		}, options));
+		// console.trace(title, action);
+		var session = wiki_API.session_of_options(options);
+		Object.assign(action[1], {
+			action : 'changecontentmodel',
+			model : model
+		});
+		// console.trace(action, options);
+
+		// console.trace(action, options, arguments);
+		var post_data = Object.assign({
+			token : session.token.csrftoken
+		}, wiki_API.extract_parameters(options, action));
+		// console.trace(action, options);
+
+		wiki_API.query(action, function(data, error) {
+			// console.trace(data, error);
+			if (!error && data && data.error
+			// && data.error.code !== 'nochanges'
+			) {
+				error = data.error;
+				error.toString = wiki_API.query.error_toString;
+			}
+			callback && callback(data, error);
+		}, post_data, options);
+	}
+
+	wiki_API.changecontentmodel = changecontentmodel;
+
+	// ================================================================================================================
 
 	/**
 	 * 上傳檔案/媒體。

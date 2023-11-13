@@ -67,6 +67,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// console.trace(result);
 		if (result ? result.error
 		// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
 		? result.error.code === 'badtoken'
@@ -75,7 +76,11 @@ function module_code(library_namespace) {
 		//
 		: options.rollback_action && !options.get_page_before_undo
 		// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
-		&& (!result.edit
+		&& (
+		// e.g., {edit:{result:'Success',...}}
+		!result.edit
+		// e.g., {changecontentmodel:{result:'Success',...}}
+		&& !result.changecontentmodel
 		// flow:
 		// {status:'ok',workflow:'...',committed:{topiclist:{...}}}
 		&& result.status !== 'ok'

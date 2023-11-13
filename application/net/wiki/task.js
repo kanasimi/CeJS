@@ -615,7 +615,7 @@ function module_code(library_namespace) {
 					&& next[1].revisions_parameters || Object.create(null);
 			// → 此法會採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (wiki_API.is_page_data(next[1])
-
+			//
 			&& (!next[3]
 			// 檢查是否非 cached 的內容。
 			|| next[3].rvprop === revisions_parameters.rvprop
@@ -828,7 +828,8 @@ function module_code(library_namespace) {
 			break;
 
 		case 'purge':
-			if (typeof next[1] === 'string' || typeof next[1] === 'number') {
+			if (typeof next[1] === 'string' || typeof next[1] === 'number'
+					|| wiki_API.is_page_data(next[1])) {
 				// purge() 可以直接輸入頁面，不必先 .page('Title')
 				// wiki.purge('Title', callback, options)
 				// wiki.purge('Title', options)
@@ -1227,6 +1228,35 @@ function module_code(library_namespace) {
 			break;
 
 		// ----------------------------------------------------------------------------------------
+
+		case 'changecontentmodel':
+			if (typeof next[2] === 'string'
+					&& (typeof next[1] === 'string'
+							|| typeof next[1] === 'number' || wiki_API
+							.is_page_data(next[1]))) {
+				// 直接輸入頁面。
+				// wiki.changecontentmodel('Title', model, callback, options)
+				// wiki.changecontentmodel(pageid, callback, options)
+			} else {
+				// wiki.page('Title').changecontentmodel(model)
+				// wiki.page('Title').changecontentmodel(model, callback,
+				// options)
+				next.splice(1, 0, this.last_page);
+			}
+			// console.trace(next);
+
+			wiki_API.changecontentmodel(next[1], next[2],
+			//
+			function wiki_API_changecontentmodel_callback(data, error) {
+				var callback_result_relying_on_this;
+				if (typeof next[3] === 'function') {
+					callback_result_relying_on_this
+					// next[2] : callback(...)
+					= next[3].call(_this, data, error);
+				}
+				_this.next(callback_result_relying_on_this);
+			}, wiki_API.add_session_to_options(this, next[4]));
+			break;
 
 		case 'check':
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
@@ -2450,7 +2480,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see function wiki_API_prototype_methods()
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|download|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|structured_data|edit_structured_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|download|changecontentmodel|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|structured_data|edit_structured_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------
