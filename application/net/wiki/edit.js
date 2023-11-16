@@ -598,6 +598,7 @@ function module_code(library_namespace) {
 				wiki_API.changecontentmodel(title,
 				//
 				change_to_contentmodel, function(_data, _error) {
+					// console.trace(_error);
 					if (_error && _error.code === 'nochanges')
 						_error = null;
 					// Copy the result of .changecontentmodel()

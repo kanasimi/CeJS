@@ -343,8 +343,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	/**
-	 * 回復被審核屏蔽的文字。去除一般性敏感文字審查及過濾功能 censorship, censored text。 Calling inside
-	 * parse_chapter_data()
+	 * 回復網路小說一般性的被審核屏蔽文字。去除一般性敏感文字審查及過濾功能 censorship, censored text。 Calling
+	 * inside parse_chapter_data()
 	 * 
 	 * @example<code>
 	text = CeL.work_crawler.fix_general_censorship(text);
@@ -533,7 +533,7 @@ function module_code(library_namespace) {
 	= /([\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀～≯]*)长[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀～≯]{0,20}风[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀～≯]{0,20}文[\u0020-\u00ff—＋＝。？＊《〈｛｝［］／｜｀～≯]{0,20}学(?:，[\u0020-\u00ff—＋＝　⊥↓↘□]+?et|｀?[\u0020-\u00ff—＋＝　]*)/g;
 
 	/**
-	 * 去除廣告。 Calling inside parse_chapter_data()
+	 * 去除網路小說的一般性廣告。 Calling inside parse_chapter_data()
 	 * 
 	 * @example<code>
 	text = CeL.work_crawler.fix_general_ADs(text);
@@ -581,6 +581,23 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		text = text.replace(/\.asxs\./g, '起点');
+
+		/**
+		 * <code>
+
+		// https://www.69shuba.com/txt/47114/31439934	苟在仙武娶妻长生 第1章 老祖又纳妾了
+		&emsp;&emsp;(本章完)
+
+		// https://www.69shuba.com/txt/51594/33699515	请公子斩妖 第1章 楚梁
+		&emsp;&emsp;(本章完)
+		<br /><br />
+
+		// https://www.piaotia.com/html/12/12788/9021489.html	开局奖励一亿条命 第826章 逃得掉吗
+		<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;(本章完)<br/><br/>
+
+		</code>
+		 */
+		text = text.replace(/\(本章完\)(?:<br[^<>]*>|\s)*$/, '');
 
 		return text;
 	}
