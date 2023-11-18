@@ -2688,6 +2688,9 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(title);
+
+		// modules=query&titles= overwrite multi=false
+		delete options.multi;
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
 			throw 'wiki_API.redirects_here: Invalid title: '

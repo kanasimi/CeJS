@@ -57,11 +57,6 @@ function module_code(library_namespace) {
 		return '';
 	}
 
-	function expand_template_get_parameter_1(options) {
-		var parameters = this.parameters;
-		return parameters[1] ? parameters[1].toString() : '';
-	}
-
 	function trim_param(param) {
 		return param && param.toString().trim();
 	}
@@ -73,41 +68,21 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * 忽略其他 parameters，直接拓展成第一個 parameter。<br />
+	 * {{t|p|...}} → p
+	 * 
+	 * for preprocess_section_link_token()
+	 */
+	function expand_template_get_parameter_1(options) {
+		var parameters = this.parameters;
+		return parameters[1] ? parameters[1].toString() : '';
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	function expand_template_Void(options) {
 		return '';
-	}
-
-	function parse_template_Void(template_token, index, parent, options) {
-		template_token.expand = expand_template_Void;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
-	// Not completed! Only for get_all_anchors()
-	// @ zh.moegirl [[FLOWERS(Innocent Grey)]]
-	function parse_template_Center(template_token) {
-		template_token.expand = expand_template_get_parameter_1;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
-	// Not completed! Only for get_all_anchors()
-	// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
-	function parse_template_Font(template_token) {
-		template_token.expand = expand_template_get_parameter_1;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
-	// {{color|英文顏色名稱或是RGB 16進制編碼|文字}}
-	function expand_template_Color(options) {
-		var parameters = this.parameters;
-		return '<span style="color:' + (parameters[1] || '') + '">'
-				+ (parameters[2] || parameters[1] || '') + '</span>';
-	}
-
-	function parse_template_Color(template_token) {
-		template_token.expand = expand_template_Color;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -117,20 +92,12 @@ function module_code(library_namespace) {
 		return '[[File:At_sign.svg|' + (parameters[1] || 15) + 'px|link=]]';
 	}
 
-	function parse_template_At(template_token) {
-		template_token.expand = expand_template_At;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_User_link(options) {
 		var parameters = this.parameters;
 		return '[[User:' + (parameters[1]) + '|'
 				+ (parameters[2] || parameters[1]) + ']]';
-	}
-
-	function parse_template_User_link(template_token) {
-		template_token.expand = expand_template_User_link;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -150,8 +117,13 @@ function module_code(library_namespace) {
 		return '';
 	}
 
-	function parse_module_If_empty(token) {
-		token.expand = expand_module_If_empty;
+	// --------------------------------------------------------------------------------------------
+
+	// {{color|英文顏色名稱或是RGB 16進制編碼|文字}}
+	function expand_template_Color(options) {
+		var parameters = this.parameters;
+		return '<span style="color:' + (parameters[1] || '') + '">'
+				+ (parameters[2] || parameters[1] || '') + '</span>';
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -163,10 +135,6 @@ function module_code(library_namespace) {
 		// {{Colored link|顏色|頁面名稱鏈接|顯示名稱}}]
 		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1]
 				+ '">' + (parameters[3] || parameters[2]) + '</span>]]';
-	}
-
-	function parse_template_Colored_link(template_token) {
-		template_token.expand = expand_template_Colored_link;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -217,11 +185,6 @@ function module_code(library_namespace) {
 		;
 	}
 
-	function parse_template_Visible_anchor(template_token, index, parent,
-			options) {
-		template_token.expand = expand_template_Visible_anchor;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_Term(options) {
@@ -238,10 +201,6 @@ function module_code(library_namespace) {
 		return wikitext;
 	}
 
-	function parse_template_Term(template_token, index, parent, options) {
-		template_token.expand = expand_template_Term;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_Wikicite(options) {
@@ -253,10 +212,6 @@ function module_code(library_namespace) {
 				+ parameters.reference + '</cite>';
 		// console.log(wikitext);
 		return wikitext;
-	}
-
-	function parse_template_Wikicite(template_token, index, parent, options) {
-		template_token.expand = expand_template_Wikicite;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -272,10 +227,6 @@ function module_code(library_namespace) {
 		// anchor = anchor.replace(/\s+/g, ' ');
 
 		return anchor;
-	}
-
-	function parse_template_SfnRef(template_token, index, parent, options) {
-		template_token.expand = expand_template_SfnRef;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -317,10 +268,6 @@ function module_code(library_namespace) {
 		return wikitext.join('');
 	}
 
-	function parse_template_Sfn(template_token, index, parent, options) {
-		template_token.expand = expand_template_Sfn;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// @see createEpisodeNumberCellSecondary() @ [[Module:Episode list]]
@@ -353,10 +300,6 @@ function module_code(library_namespace) {
 
 		// console.trace(wikitext);
 		return wikitext.join('');
-	}
-
-	function parse_template_Episode_list(template_token, index, parent, options) {
-		template_token.expand = expand_template_Episode_list;
 	}
 
 	function expand_template_Episode_table(options) {
@@ -410,11 +353,6 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function parse_template_Episode_table__part(template_token, index, parent,
-			options) {
-		template_token.expand = expand_template_Episode_table__part;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_Track_listing(options) {
@@ -445,9 +383,15 @@ function module_code(library_namespace) {
 		return wikitext.join('');
 	}
 
-	function parse_template_Track_listing(template_token, index, parent,
-			options) {
-		template_token.expand = expand_template_Track_listing;
+	// --------------------------------------------------------------------------------------------
+
+	// Not completed! Only for get_all_anchors().
+	function expand_template_Football_box(options) {
+		var parameters = this.parameters;
+		// [[Module:Football box]]
+		return '<div id="' + (parameters.id || '') + '">'
+		// TODO: The content is skipped.
+		+ '</div>';
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -554,20 +498,12 @@ function module_code(library_namespace) {
 		// TODO:
 	}
 
-	function parse_module_IPAddress(token, index, parent, options) {
-		token.expand = expand_module_IPAddress;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_Template_link(options) {
 		var parameters = this.parameters;
 		return '&#123;&#123;[[Template:' + parameters[1] + '|' + parameters[1]
 				+ ']]&#125;&#125;';
-	}
-
-	function parse_template_Template_link(token, index, parent, options) {
-		token.expand = expand_template_Template_link;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -578,18 +514,52 @@ function module_code(library_namespace) {
 	// 如 CeL.application.net.wiki.template_functions.jawiki 依賴於
 	// general_functions！
 	wiki_API.template_functions.functions_of_all_sites = {
-		Void : parse_template_Void,
-		Center : parse_template_Center,
+		Void : {
+			properties : {
+				expand : expand_template_Void
+			}
+		},
+		Center : {
+			properties : {
+				expand : expand_template_get_parameter_1
+			}
+		},
 
 		// 一些會用於章節標題的特殊模板。 for preprocess_section_link_token()
-		Font : parse_template_Font,
-		Color : parse_template_Color,
-		'Colored link' : parse_template_Colored_link,
+		Color : {
+			properties : {
+				expand : expand_template_Color
+			}
+		},
+		'Colored link' : {
+			properties : {
+				expand : expand_template_Colored_link
+			}
+		},
+		// Not completed! Only for get_all_anchors()
+		// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
+		Font : {
+			properties : {
+				expand : expand_template_get_parameter_1
+			}
+		},
 
-		'@' : parse_template_At,
-		'User link' : parse_template_User_link,
+		'@' : {
+			properties : {
+				expand : expand_template_At
+			}
+		},
+		'User link' : {
+			properties : {
+				expand : expand_template_User_link
+			}
+		},
 
-		'Module:If empty' : parse_module_If_empty,
+		'Module:If empty' : {
+			properties : {
+				expand : expand_module_If_empty
+			}
+		},
 
 		// 一些會產生網頁錨點 anchors 的模板或模組。
 		// Templates or modules that generate web anchors
@@ -603,11 +573,27 @@ function module_code(library_namespace) {
 				expand : expand_template_Anchor
 			}
 		},
-		'Visible anchor' : parse_template_Visible_anchor,
-		Term : parse_template_Term,
-		Wikicite : parse_template_Wikicite,
-		// Sfn : parse_template_Sfn,
-		SfnRef : parse_template_SfnRef,
+		'Visible anchor' : {
+			properties : {
+				expand : expand_template_Visible_anchor
+			}
+		},
+		Term : {
+			properties : {
+				expand : expand_template_Term
+			}
+		},
+		Wikicite : {
+			properties : {
+				expand : expand_template_Wikicite
+			}
+		},
+		// Sfn : { properties : { expand : expand_template_Sfn } },
+		SfnRef : {
+			properties : {
+				expand : expand_template_SfnRef
+			}
+		},
 		/**
 		 * <code>
 
@@ -617,23 +603,53 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		'Episode table' : parse_template_Episode_table,
-		'Episode table/part' : parse_template_Episode_table__part,
-		'Episode list' : parse_template_Episode_list,
-		'Episode list/sublist' : parse_template_Episode_list,
-		'Track listing' : parse_template_Track_listing,
+		'Episode table/part' : {
+			properties : {
+				expand : expand_template_Episode_table__part
+			}
+		},
+		'Episode list' : {
+			properties : {
+				expand : expand_template_Episode_list
+			}
+		},
+		'Episode list/sublist' : {
+			properties : {
+				expand : expand_template_Episode_list
+			}
+		},
+		'Track listing' : {
+			properties : {
+				expand : expand_template_Track_listing
+			}
+		},
 
-		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
-		'Pin message' : parse_template_Pin_message,
+		'Football box' : {
+			properties : {
+				expand : expand_template_Football_box
+			}
+		},
 
-		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters,
-
-		'Module:IPAddress' : parse_module_IPAddress,
+		'Module:IPAddress' : {
+			properties : {
+				expand : expand_module_IPAddress
+			}
+		},
 
 		// TODO
 		// 'Module:Unsubst' : parse_module_Unsubst,
 
 		// 'Template link'
-		Tl : parse_template_Template_link
+		Tl : {
+			properties : {
+				expand : expand_template_Template_link
+			}
+		},
+
+		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
+		'Pin message' : parse_template_Pin_message,
+
+		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters
 	};
 
 	// --------------------------------------------------------------------------------------------

@@ -407,6 +407,9 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(title, arguments);
+
+		// modules=query&titles= overwrite multi=false
+		delete options.multi;
 		action = normalize_title_parameter(title, options);
 		// console.trace(action);
 		if (!action) {

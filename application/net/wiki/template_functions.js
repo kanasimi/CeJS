@@ -1134,7 +1134,8 @@ function module_code(library_namespace) {
 
 		if (function_config.properties) {
 			// 為 template_token 加上 template_functions 的屬性。
-			// e.g., token.expand()
+			// 一些僅設定 token.expand() 的 parse 函數可採此法，設定成：
+			// Template_name:{properties:{expand:expand_template_Template_name}},
 			Object.assign(template_token, function_config.properties);
 		}
 

@@ -61,16 +61,27 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * 忽略其他 parameters，直接拓展成第一個 parameter。<br />
+	 * {{t|p|...}} → p
+	 * 
+	 * for preprocess_section_link_token()
+	 * 
+	 * Copy from CeL.application.net.wiki.template_functions.general_functions
+	 */
+	function expand_template_get_parameter_1(options) {
+		var parameters = this.parameters;
+		return parameters[1] ? parameters[1].toString() : '';
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// for get_all_anchors()
 	function expand_template_A(options) {
 		var parameters = this.parameters;
 		// {{a|锚点名称|显示文字}}
 		return '<span id="' + parameters[1] + '">'
 				+ (parameters[2] || parameters[1]) + '</span>';
-	}
-
-	function parse_template_A(token, index, parent, options) {
-		token.expand = expand_template_A;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -89,10 +100,6 @@ function module_code(library_namespace) {
 		}
 		// console.trace(anchor_node_list);
 		return anchor_node_list.join('');
-	}
-
-	function parse_template_MultiAnchor(token, index, parent, options) {
-		token.expand = expand_template_MultiAnchor;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -122,34 +129,6 @@ function module_code(library_namespace) {
 		return expand_module_Ruby(parameters);
 	}
 
-	function parse_template_Ruby(token, index, parent, options) {
-		token.expand = expand_template_Ruby;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
-	// for preprocess_section_link_token()
-	function expand_template_Dead(options) {
-		var parameters = this.parameters;
-		return parameters[1];
-	}
-
-	function parse_template_Dead(token) {
-		token.expand = expand_template_Dead;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
-	// for preprocess_section_link_token()
-	function expand_template_黑幕(options) {
-		var parameters = this.parameters;
-		return parameters[1];
-	}
-
-	function parse_template_黑幕(token) {
-		token.expand = expand_template_黑幕;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// for preprocess_section_link_token()
@@ -157,10 +136,6 @@ function module_code(library_namespace) {
 	function expand_template_Lj(options) {
 		var parameters = this.parameters;
 		return '-{' + parameters[1] + '}-';
-	}
-
-	function parse_template_Lj(token) {
-		token.expand = expand_template_Lj;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -173,10 +148,6 @@ function module_code(library_namespace) {
 		+ '</span>';
 	}
 
-	function parse_template_铁路车站名(token) {
-		token.expand = expand_template_铁路车站名;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// Not completed! Only for get_all_anchors() as section title
@@ -184,10 +155,6 @@ function module_code(library_namespace) {
 	function expand_template_ARGONAVIS_Icon(options) {
 		// TODO: The content is skipped.
 		return '';
-	}
-
-	function parse_template_ARGONAVIS_Icon(token) {
-		token.expand = expand_template_ARGONAVIS_Icon;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -200,10 +167,6 @@ function module_code(library_namespace) {
 		return parameters[2] || '';
 	}
 
-	function parse_template_Gradient_Text(token) {
-		token.expand = expand_template_Gradient_Text;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// export 導出.
@@ -211,17 +174,53 @@ function module_code(library_namespace) {
 	wiki_API.template_functions.functions_of_site[module_site_name] = {
 		// 一些會產生網頁錨點 anchors 的模板或模組。
 		// Templates or modules that generate web anchors
-		A : parse_template_A,
-		MultiAnchor : parse_template_MultiAnchor,
-		Ruby : parse_template_Ruby,
-		铁路车站名 : parse_template_铁路车站名,
+		A : {
+			properties : {
+				expand : expand_template_A
+			}
+		},
+		MultiAnchor : {
+			properties : {
+				expand : expand_template_MultiAnchor
+			}
+		},
+		Ruby : {
+			properties : {
+				expand : expand_template_Ruby
+			}
+		},
+		铁路车站名 : {
+			properties : {
+				expand : expand_template_铁路车站名
+			}
+		},
 
 		// 一些會用於章節標題的特殊模板。 for preprocess_section_link_token()
-		Dead : parse_template_Dead,
-		黑幕 : parse_template_黑幕,
-		Lj : parse_template_Lj,
-		'ARGONAVIS/Icon' : parse_template_ARGONAVIS_Icon,
-		'Gradient Text' : parse_template_Gradient_Text
+		Dead : {
+			properties : {
+				expand : expand_template_get_parameter_1
+			}
+		},
+		黑幕 : {
+			properties : {
+				expand : expand_template_get_parameter_1
+			}
+		},
+		Lj : {
+			properties : {
+				expand : expand_template_Lj
+			}
+		},
+		'ARGONAVIS/Icon' : {
+			properties : {
+				expand : expand_template_ARGONAVIS_Icon
+			}
+		},
+		'Gradient Text' : {
+			properties : {
+				expand : expand_template_Gradient_Text
+			}
+		}
 	};
 
 	// library_namespace.info(module_site_name + ': 採用 zhwiki 的模板特設功能設定。');

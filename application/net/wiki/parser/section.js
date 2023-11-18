@@ -1891,7 +1891,8 @@ function module_code(library_namespace) {
 		function parse_template_anchors() {
 			// console.trace(parsed.toString());
 			// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
-			var promise = parsed.each('transclusion', function(template_token) {
+			var promise = parsed.each('transclusion', function(template_token,
+					index, parent_token) {
 				if (false && template_token.name === 'template_token') {
 					console.trace([ template_token.name,
 					//
@@ -1907,8 +1908,17 @@ function module_code(library_namespace) {
 						return;
 
 					template_token = anchors;
-					// console.trace(anchors);
-					anchors = get_all_anchors(anchors.toString(), _options);
+					anchors = anchors.toString();
+					// console.trace(anchors, parent_token);
+					if (parent_token.type === 'tag_attributes') {
+						// {| {{t}}
+						// <div {{t}}></div>
+						// e.g., expand_template_Kopfzeile_Synchronisation()
+						anchors = '<span ' + anchors + '></span>';
+					}
+					// console.trace(anchors, parent_token);
+
+					anchors = get_all_anchors(anchors, _options);
 					// console.trace(anchors);
 					anchors.forEach(function(anchor) {
 						register_anchor(anchor, template_token);
@@ -2083,6 +2093,7 @@ function module_code(library_namespace) {
 				register_anchor(anchor, attribute_token);
 			}
 		}
+
 	}
 
 	// CeL.wiki.parse.anchor.essential_templates

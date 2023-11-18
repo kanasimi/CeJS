@@ -217,10 +217,6 @@ function module_code(library_namespace) {
 				+ parameters[2] + '}-';
 	}
 
-	function parse_template_Lang(token, index, parent, options) {
-		token.expand = expand_template_Lang;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// [[w:zh:Template:NoteTA]]
@@ -380,7 +376,11 @@ function module_code(library_namespace) {
 
 		// [[Template:Interlanguage link]] 跨語言模板 多語言模板。
 
-		Lang : parse_template_Lang,
+		Lang : {
+			properties : {
+				expand : expand_template_Lang
+			}
+		},
 		NoteTA : parse_template_NoteTA,
 		簡繁轉換 : parse_template_簡繁轉換
 	};

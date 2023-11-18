@@ -85,10 +85,6 @@ function module_code(library_namespace) {
 		return ' (' + parameters[1] + ')';
 	}
 
-	function parse_template_Enlink(token) {
-		token.expand = expand_template_Enlink;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_to_display_language(options) {
@@ -97,19 +93,11 @@ function module_code(library_namespace) {
 		return parameters[1];
 	}
 
-	function parse_template_to_display_language(token) {
-		token.expand = expand_template_to_display_language;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	function expand_template_拡張漢字(options) {
 		var parameters = this.parameters;
 		return parameters[2] || parameters[1];
-	}
-
-	function parse_template_拡張漢字(token) {
-		token.expand = expand_template_拡張漢字;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -126,10 +114,6 @@ function module_code(library_namespace) {
 		;
 	}
 
-	function parse_template_RFD(token) {
-		token.expand = expand_template_RFD;
-	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// export 導出.
@@ -139,20 +123,68 @@ function module_code(library_namespace) {
 		// Templates or modules that generate web anchors
 		Anchors : wiki_API.template_functions.functions_of_all_sites.Anchor,
 
-		Enlink : parse_template_Enlink,
+		Enlink : {
+			properties : {
+				expand : expand_template_Enlink
+			}
+		},
 
-		ARIB外字フォント : parse_template_to_display_language,
-		CP932フォント : parse_template_to_display_language,
-		JIS90フォント : parse_template_to_display_language,
-		JIS2004フォント : parse_template_to_display_language,
-		MacJapanese : parse_template_to_display_language,
-		変体仮名フォント : parse_template_to_display_language,
-		絵文字フォント : parse_template_to_display_language,
-		補助漢字フォント : parse_template_to_display_language,
-		通貨フォント : parse_template_to_display_language,
-		拡張漢字 : parse_template_拡張漢字,
+		ARIB外字フォント : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		CP932フォント : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		JIS90フォント : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		JIS2004フォント : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		MacJapanese : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		変体仮名フォント : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		絵文字フォント : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		補助漢字フォント : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		通貨フォント : {
+			properties : {
+				expand : expand_template_to_display_language
+			}
+		},
+		拡張漢字 : {
+			properties : {
+				expand : expand_template_拡張漢字
+			}
+		},
 
-		RFD : parse_template_RFD
+		RFD : {
+			properties : {
+				expand : expand_template_RFD
+			}
+		}
 	};
 
 	// --------------------------------------------------------------------------------------------

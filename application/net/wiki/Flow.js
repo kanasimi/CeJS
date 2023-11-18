@@ -71,6 +71,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function Flow_info(title, callback, options) {
+		// options.multi = true;
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
 			throw 'Flow_info: Invalid title: ' + wiki_API.title_link_of(title);

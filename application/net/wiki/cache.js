@@ -92,7 +92,7 @@ function module_code(library_namespace) {
 		CeL.wiki.cache({
 			type : 'page',
 			file_name : 'file_name',
-			list : 'WP:SB',
+			list : 'Wikipedia:Sandbox',
 			operator : function(data) {
 				console.log(data);
 			}
