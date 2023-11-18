@@ -1713,6 +1713,7 @@ function module_code(library_namespace) {
 				// console.trace([ anchor, token, options ]);
 			}
 			anchor_hash[anchor] = token;
+			return anchor;
 		}
 
 		// options: pass session. for options.language
@@ -1855,10 +1856,15 @@ function module_code(library_namespace) {
 		options = Object.assign({
 			allow_promise : options && options.try_to_expand_templates
 		}, options);
+		/** {Object} options that do not print anchors */
 		var _options = Object.assign(Object.clone(options), {
 			print_anchors : false
 		});
 		// console.trace(options);
+
+		/** {Object}除了模板之外，其他嵌入包含的頁面。 */
+		var transcluded_pages = Object.create(null), anchors_in_transcluded_pages = Object
+				.create(null);
 
 		// console.trace(promise);
 		if (!promise) {
@@ -1893,23 +1899,74 @@ function module_code(library_namespace) {
 			// 處理包含於 template 中之 anchor 網頁錨點 (section title / id="" / name="")
 			var promise = parsed.each('transclusion', function(template_token,
 					index, parent_token) {
+				// console.trace(template_token);
 				if (false && template_token.name === 'template_token') {
 					console.trace([ template_token.name,
 					//
 					template_token.expand ]);
 				}
 
+				if (template_token.name === template_token.page_title
+						&& options.try_to_expand_templates) {
+					// 處理嵌入正常頁面中的 anchors。
+					// e.g., [[w:en:List of Latin phrases (Q)]]
+					// TODO: 一次處理所有頁面，別一個個處理。
+					var promise = new Promise(function(resolve, reject) {
+						wiki_API.page(template_token.name, function(page_data,
+								error) {
+							if (error) {
+								reject(error);
+								return;
+							}
+
+							function set_transclusion_page_anchors(_anchors) {
+								// console.trace(template_token, _anchors);
+								var anchors = [];
+								_anchors.map(function(anchor) {
+									anchor = register_anchor(anchor,
+											template_token);
+									if (anchor) {
+										anchors_in_transcluded_pages[anchor]
+										//
+										= template_token.name;
+										anchors.push(anchor);
+									}
+								});
+								transcluded_pages[template_token.name] = {
+									page_data : page_data,
+									anchors : anchors
+								};
+								resolve();
+							}
+
+							// console.trace(page_data);
+							var wikitext = wiki_API.content_of(page_data);
+							var anchors = get_all_anchors(wikitext, _options);
+							if (library_namespace.is_thenable(anchors)) {
+								anchors.then(set_transclusion_page_anchors,
+										reject);
+							} else {
+								set_transclusion_page_anchors(anchors);
+							}
+						}, options);
+					});
+					return promise;
+				}
+
 				var anchors = wiki_API.repeatedly_expand_template_token(
 						template_token, options);
+				// console.trace(template_token, anchors);
 				if (template_token !== anchors) {
 					// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}},
 					// {{term}}
-					if (!anchors || typeof anchors.toString !== 'function')
+					if (!anchors || typeof anchors.toString !== 'function') {
 						return;
+					}
 
 					template_token = anchors;
 					anchors = anchors.toString();
 					// console.trace(anchors, parent_token);
+					// TODO: Should use parse_other_token_anchors()?
 					if (parent_token.type === 'tag_attributes') {
 						// {| {{t}}
 						// <div {{t}}></div>
@@ -2016,26 +2073,7 @@ function module_code(library_namespace) {
 			// e.g., @ [[w:en:Sergio Pérez]]
 			parsed.each('tag_attributes', parse_tag_attributes_anchors);
 
-			var anchor_list = Object.keys(anchor_hash);
-			anchor_list.imprecise_anchor_count = imprecise_anchor_count;
-			anchor_list.anchor_count = anchor_list.length
-					+ imprecise_anchor_count;
-			if (options && Array.isArray(options.anchor_list)) {
-				// TODO: remove duplicates
-				options.anchor_list.append(anchor_list);
-				if (!options.anchor_list.imprecise_anchor_count)
-					options.anchor_list.imprecise_anchor_count = 0;
-				options.anchor_list.imprecise_anchor_count += imprecise_anchor_count;
-				if (!options.anchor_list.anchor_count)
-					options.anchor_list.anchor_count = 0;
-				options.anchor_list.anchor_count += anchor_list.anchor_count;
-			}
-			if (options && options.print_anchors) {
-				library_namespace.info('get_all_anchors: anchors:');
-				console.trace(anchor_list.length > 100 ? JSON
-						.stringify(anchor_list) : anchor_list);
-			}
-			return anchor_list;
+			return finish_up();
 		}
 
 		function parse_tag_attributes_anchors(attribute_token, index, parent) {
@@ -2094,6 +2132,34 @@ function module_code(library_namespace) {
 			}
 		}
 
+		function finish_up() {
+			var anchor_list = Object.keys(anchor_hash);
+			anchor_list.imprecise_anchor_count = imprecise_anchor_count;
+			anchor_list.anchor_count = anchor_list.length
+					+ imprecise_anchor_count;
+			if (options && Array.isArray(options.anchor_list)) {
+				// TODO: remove duplicates
+				options.anchor_list.append(anchor_list);
+				if (!options.anchor_list.imprecise_anchor_count)
+					options.anchor_list.imprecise_anchor_count = 0;
+				options.anchor_list.imprecise_anchor_count += imprecise_anchor_count;
+				if (!options.anchor_list.anchor_count)
+					options.anchor_list.anchor_count = 0;
+				options.anchor_list.anchor_count += anchor_list.anchor_count;
+			}
+
+			if (library_namespace.is_empty_object(transcluded_pages))
+				anchor_list.transcluded_pages = transcluded_pages;
+			if (library_namespace.is_empty_object(anchors_in_transcluded_pages))
+				anchor_list.anchors_in_transcluded_pages = anchors_in_transcluded_pages;
+
+			if (options && options.print_anchors) {
+				library_namespace.info('get_all_anchors: anchors:');
+				console.trace(anchor_list.length > 100 ? JSON
+						.stringify(anchor_list) : anchor_list);
+			}
+			return anchor_list;
+		}
 	}
 
 	// CeL.wiki.parse.anchor.essential_templates
