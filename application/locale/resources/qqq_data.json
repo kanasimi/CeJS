@@ -1625,7 +1625,7 @@
 		"message": "The bot operation is completed %1% in total",
 		"original_message_language_code": "en-US",
 		"notes": "Overall progress. 整體作業進度。用在編輯摘要時通常放在最後面，預防擠掉更重要的內容。; Repositories: {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1044}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3451}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L646}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1008}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L200}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1044}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3451}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L646}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1008}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L201}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"finished": {
@@ -1649,7 +1649,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1134}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3473}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L488}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1134}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3473}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L489}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-word(s)-in-this-chapter": {
@@ -8316,13 +8316,13 @@
 	"$1-pages-modified": {
 		"message": "%1 {{PLURAL:%1|page|pages}} modified",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L486}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L487}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"fixing-broken-anchor": {
 		"message": "Fixing broken anchor",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1060}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1067}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-$1-non-defunct-anchors": {
@@ -8331,7 +8331,7 @@
 		"parameters": "%1: count of anchors",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"fIXME": "https://github.com/kanasimi/CeJS/issues/33",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1182}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1189}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"anchor-$1-links-to-a-specific-web-page-$2": {
@@ -8339,7 +8339,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "As a note phrase in talk pages.",
 		"parameters": "%1: link to a web anchor, %2: link to the target page",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1268}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1477}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1275}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1484}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": {
@@ -8347,14 +8347,14 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: revid, %2: anchor name",
 		"notes": "{{tl|Broken anchors}}の内で表示。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1275}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1282}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-of-an-inactive-anchor": {
 		"message": "Reminder of an inactive anchor",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1280}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1289}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1287}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1296}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-links-to-archived-section-$1-$2": {
@@ -8362,35 +8362,35 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: percentage 百分比 e.g., \"42%\"; %2: links being processed 正在處理的連結",
 		"notes": "Use in edit summaries. 用於編輯註解。[[w:ja:Wikipedia:井戸端/subj/議論の過去ログのリンク修正はいかがでしょうか|過去ログリンク修正]]の編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1390}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1397}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"incorrect-capitalization-spaced-section-title": {
 		"message": "Incorrect capitalization/spaced section title",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。 Too different to be considered as the same meaning.",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1439}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1446}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"inconsistency-between-traditional-and-simplified-chinese": {
 		"message": "繁簡不符匹配而失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1442}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1449}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"very-different": {
 		"message": "VERY DIFFERENT",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries to mark edits that need special attention. Too different to be regarded as the same meaning. 用於編輯註解以標註特別需要注意的編輯。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1459}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1466}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"please-help-to-check-this-edit": {
 		"message": "Please help to check this edit.",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。應採用不存在的頁面名稱，將用紅色連結顯示以突顯警告效果。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1512}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1519}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1→most-alike-anchor-$2": {
@@ -8398,7 +8398,7 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: original anchor, %2: target anchor",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1520}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1527}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"append-$1-topics": {
