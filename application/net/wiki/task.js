@@ -3135,6 +3135,8 @@ function module_code(library_namespace) {
 			}
 
 			pages = data;
+			if (config.sort_function)
+				pages = pages.sort(config.sort_function);
 
 			// run before every batch task. 在處理每個批次前執行此function。
 			// 注意: 一次取得大量頁面時，回傳內容不一定會按照原先輸入的次序排列！
@@ -3754,6 +3756,8 @@ function module_code(library_namespace) {
 				// 避免 read-only page list。
 				target = target.slice();
 			}
+			if (config.sort_function)
+				target = target.sort(config.sort_function);
 			// Split when length is too long. 分割過長的 page list。
 			setup_target = (function() {
 				var this_slice = config.untouch_page_list ? target.slice(

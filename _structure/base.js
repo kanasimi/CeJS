@@ -2362,6 +2362,14 @@ OS='UNIX'; // unknown
 
 		} else if (is_DOM_node(messages)) {
 			style_array = true;
+		} else if(_.is_Object(messages)
+		// 這邊不轉換成 {String} 的話，在 _.to_SGR(messages) 裡 messages 會被轉換成 null。
+		&& (Object.hasOwn ? Object.hasOwn(messages, 'toString')
+		//
+		: typeof messages.toString === 'function'
+		//
+		&& (!Object.prototype || messages.toString !== Object.prototype.toString))) {
+			messages = messages.toString();
 		}
 		if (style_array) {
 			// 從頭到尾沒有特殊格式的話，就轉成純粹的字串。
@@ -2406,6 +2414,7 @@ OS='UNIX'; // unknown
 			}
 		}
 
+		// SGR_code()
 		return _.to_SGR(messages);
 	}
 

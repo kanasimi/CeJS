@@ -254,7 +254,7 @@ function module_code(library_namespace) {
 		try {
 			// Object.getPrototypeOf() 返回給定對象的原型。
 			var prototype = Object.getPrototypeOf(this);
-			return (key in this)
+			return (key in this) && prototype
 			//
 			&& (!(key in prototype) || this[key] !== prototype[key]);
 		} catch (e) {
