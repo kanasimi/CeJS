@@ -2766,7 +2766,7 @@
 		"notes": "沒有頁面內容。; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1696}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3900}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L882}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1080}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1696}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3881}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3900}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L882}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1083}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-results": {
@@ -2793,14 +2793,14 @@
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2969}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2978}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3002}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3011}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2808,14 +2808,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3082}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3091}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3597}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3606}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -4010,7 +4010,7 @@
 		"notes": "注記本電子書已經過語言轉換（繁簡中文轉換，將簡體小說轉換為繁體小說）的標籤",
 		"scope": "work_crawler.js: create_ebook()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L640}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L643}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"extract-ebook-as-cache-$1": {
@@ -4019,7 +4019,7 @@
 		"scope": "work_crawler.js: create_ebook()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: ebook_file_path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L759}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L100}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L59}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L762}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L100}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L59}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"convert-simplified-chinese-to-traditional-chinese-«$1»": {
@@ -4028,7 +4028,7 @@
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L978}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L981}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"convert-traditional-chinese-to-simplified-chinese-«$1»": {
@@ -4037,7 +4037,7 @@
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hans-CN",
 		"parameters": "%1: chapter_title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L980}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L983}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"traditionalize-$1": {
@@ -4046,7 +4046,7 @@
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: chapter_title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L984}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L987}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"simplify-$1": {
@@ -4055,7 +4055,7 @@
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hans-CN",
 		"parameters": "%1: chapter_title",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L986}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L989}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"too-few-words-($1-characters)": {
@@ -4063,7 +4063,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1078}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1081}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"there-is-no-directory-for-archive-files-$1": {
@@ -4071,7 +4071,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1175}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1178}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"preserve": {
@@ -4079,7 +4079,7 @@
 		"notes": "Set milestone: 日本小說網站有時會商業化，將之前的作品內容大幅刪除。這時若刪掉舊檔，就會失去這些內容。",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1244}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1247}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"move-to-→": {
@@ -4087,7 +4087,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1246}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1249}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"removed-old-files": {
@@ -4095,7 +4095,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1256}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1259}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"archive-epub-ebook-$1": {
@@ -4104,7 +4104,7 @@
 		"scope": "work_crawler.js: remove_old_ebooks()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title / file path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1363}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1368}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1366}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1371}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unspecified-image-data": {

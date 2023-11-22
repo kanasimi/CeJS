@@ -1114,9 +1114,15 @@ function module_code(library_namespace) {
 					// e.g., [[:title]]
 					n = n.slice(1);
 				}
+				if (false && n.startsWith(':')) {
+					// Invalid page title / namespace
+					list.push(undefined);
+				}
 				// get namespace `_n` only.
 				// e.g., 'wikipedia:sandbox' → 'wikipedia'
-				var _n = n.replace(/:.*$/, '').trim();
+				var _n = n.includes(':') ? n.replace(/:.*$/, '').trim()
+				// e.g., get_namespace('Wikipedia', {...})
+				: is_page_title ? 0 : n;
 				if (!_n) {
 					// _n === ''
 					list.push(0);
@@ -1412,6 +1418,7 @@ function module_code(library_namespace) {
 	function page_title_is_namespace(page_title, options) {
 		var namespace = namespace_of_options(options);
 		var page_ns;
+		// console.trace(namespace, wiki_API.is_page_data(page_title));
 		if (wiki_API.is_page_data(page_title)) {
 			page_ns = page_title.ns;
 		} else {
@@ -1504,20 +1511,22 @@ function module_code(library_namespace) {
 		} else {
 			page_title = wiki_API.normalize_title(page_title, options);
 			if (!session) {
-				// 模組|模塊|模块 → Module talk
 				if (/^(Special|特殊|特別|Media|媒體|媒体|メディア|Topic|話題|话题):/i
 						.test(page_title)) {
 					// There is no talk page for Topic or virtual namespaces.
 					return;
 				}
 
-				// for zhwiki only. But you should use session.to_talk_page() !
-				page_title = page_title.replace(/^(?:模組|模塊|模块):/i, 'Module:');
+				// for zhwiki, jawiki only.
+				// But you should use session.to_talk_page() !
+				// 模組|模塊|模块|モジュール → Module talk
+				page_title = page_title.replace(/^(?:模組|模塊|模块|モジュール):/i,
+						'Module:');
 			}
 			// assert: {Number|Undefined}namespace
 			namespace = wiki_API.namespace(page_title, options);
 		}
-		// console.log([ namespace, page_title ]);
+		// console.trace([ namespace, page_title ]);
 
 		if (!page_title || typeof page_title !== 'string' || namespace < 0)
 			return;
@@ -1766,7 +1775,7 @@ function module_code(library_namespace) {
 
 		// true === /^\s$/.test('\uFEFF')
 
-		page_name = page_name.replace(/<!--[\s\S]*-->/g, '')
+		page_name = page_name.replace(/<!--[\s\S]*-->/g, '');
 
 		// [[A&quot;A]]→[[A"A]]
 		// fix "&#39;". 由於裡面包含"#"，所以必須在 PATTERN_anchor_of_page_title 之前處理。
@@ -1831,6 +1840,10 @@ function module_code(library_namespace) {
 		var no_session_namespace_hash = !session
 				|| !session.configurations.namespace_hash;
 
+		var _options = Object.assign(Object.create(null), options, {
+			is_page_title : false,
+			get_name : true
+		});
 		page_name.some(function(section, index) {
 			section = use_underline ? section.replace(/^[\s_]+/, '') : section
 					.trimStart();
@@ -1867,9 +1880,7 @@ function module_code(library_namespace) {
 
 			var namespace = isNaN(section)
 			//
-			&& get_namespace(section, Object.assign({
-				get_name : true
-			}, options));
+			&& get_namespace(section, _options);
 			// console.log([ index, section, namespace ]);
 			if (namespace) {
 				// Wikipedia namespace

@@ -3280,6 +3280,9 @@ function test_wiki() {
 		[['en:2001: A Space Odyssey', CeL.wiki.normalize_title('en:2001: A Space Odyssey')], 'normalize_title #17'],
 		[['D［di:］;', CeL.wiki.normalize_title('D%EF%BC%BBdi:%EF%BC%BD%3B')], 'normalize_title #18'],
 		[["A 'n B", CeL.wiki.normalize_title('A &#39;n B')], 'normalize_title #19'],
+		[["Talk:ABC", CeL.wiki.normalize_title('talk:ABC')], 'normalize_title #20'],
+		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC')], 'normalize_title #21'],
+		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC', { is_page_title : true })], 'normalize_title #22'],
 
 		// Should use CeL.wiki.title_of(page_data, options);
 		[['Wikipedia:ABC', CeL.wiki.title_of('Wikipedia:ABC')], 'title_of #1'],
@@ -4873,6 +4876,8 @@ function test_wiki() {
 
 			assert(enwiki.is_namespace('2001: A Space Odyssey', 0), 'wiki.is_namespace() #1');
 			assert(enwiki.is_namespace('Talk:ABC', 'talk'), 'wiki.is_namespace() #2');
+			assert(!enwiki.is_namespace('Wikipedia', 'Wikipedia'), 'wiki.is_namespace() #3');
+			assert(!enwiki.is_namespace('File', 'file'), 'wiki.is_namespace() #4');
 
 			var link = CeL.wiki.parse('[[Page title#anchor|display text]]');
 			assert(['[[Page title#anchor|display text]]', CeL.wiki.title_link_of(link)], 'CeL.wiki.title_link_of(link) #1');
