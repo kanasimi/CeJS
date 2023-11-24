@@ -3432,6 +3432,25 @@ function test_wiki() {
 
 	]);
 
+	all_error_count += CeL.test('wiki: CeL.wiki.Variable_Map', function (assert) {
+
+		var replace_from = 'replace from';
+		var replace_to = 'summary report';
+		var wikitext = '123<!-- update summary table: The text between update comments will be automatically overwritten by the bot. -->' + replace_from + '<!-- update end: summary table -->789';
+
+		var report_Variable_Map = new CeL.wiki.Variable_Map();
+		report_Variable_Map.set('summary table', replace_to);
+		assert([report_Variable_Map.update(wikitext), wikitext.replace(replace_from, replace_to)], 'wiki: CeL.wiki.Variable_Map #1');
+
+		replace_from = '\nreplace from\n';
+		wikitext = 'ABC\n<!-- update summary table: NOTE -->' + replace_from + '<!-- update end: summary table -->\nDEF';
+		assert([report_Variable_Map.update(wikitext), wikitext.replace(replace_from, replace_to)], 'wiki: CeL.wiki.Variable_Map #2');
+
+		wikitext = 'ABC\nDEF';
+		assert([report_Variable_Map.update(wikitext, { force_change : true }), wikitext.replace(replace_from, replace_to)], 'wiki: CeL.wiki.Variable_Map #3');
+
+	});
+
 	all_error_count += CeL.test('wiki: CeL.wiki.parser()', function (assert) {
 		var wikitext, parsed;
 

@@ -1615,10 +1615,30 @@ function module_code(library_namespace) {
 	}
 
 	// [ all_mark, start_mark, variable_name, original_value, end_mark ]
-	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]+?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
-	var Variable_Map__PATTERN_template_mark = /({{Auto-generated\s*\|([^{}|]+)}})([\s\S]+?)({{Auto-generated\s*\|\2\|end}})/;
+	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]*?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
+	var Variable_Map__PATTERN_template_mark = /({{Auto-generated\s*\|([^{}|]+)}})([\s\S]*?)({{Auto-generated\s*\|\2\|end}})/;
+
+	// Get all mark list
+	Variable_Map.get_all_marks = {
+		get_all_marks : true
+	};
+	Variable_Map.text_has_mark = function text_has_mark(wikitext,
+			mark_variable_name) {
+		var matched, mark_list = mark_variable_name === Variable_Map.get_all_marks
+				&& [];
+		while (matched = Variable_Map__PATTERN_mark.exec(wikitext)) {
+			if (mark_list) {
+				mark_list.push(matched[2]);
+			}
+			if (matched[2] === mark_variable_name)
+				break;
+		}
+		Variable_Map__PATTERN_mark.lastIndex = 0;
+		return mark_list || !!matched;
+	};
 
 	function Variable_Map_update(wikitext, options) {
+		// options.force_change 可強制回傳 {String}
 		var changed = options && options.force_change, variable_Map = this;
 		// console.trace(variable_Map);
 
