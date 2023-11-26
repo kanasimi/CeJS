@@ -390,6 +390,17 @@ function module_code(library_namespace) {
 				// delete token.expand;
 				break;
 			}
+
+			if (token.expand.incomplete) {
+				// 生成未完全實作的註解。
+				promise = '<!-- Incomplete expansion of '
+						+ token.page_title
+						+ (typeof token.expand.incomplete === 'string' ? ': '
+								+ token.expand.incomplete : '') + ' -->'
+						+ promise;
+				// console.trace(promise);
+			}
+
 			token = wiki_API.parse(promise, options);
 		}
 

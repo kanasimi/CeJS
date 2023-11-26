@@ -5613,9 +5613,9 @@ function module_code(library_namespace) {
 									+ '\n<\/div><hr />'
 									: '')
 							+ '<div id="c" style="color:#404;background-color:#8FF;">\n'
-							+ oTxt.replace(/\n/g, '<br />')
+							+ oTxt
 							// 以不換行(pre)的方式顯示.patch
-							.replace(/ /g, '&nbsp;')
+							.replace(/ /g, '&nbsp;').replace(/\n/g, '<br />')
 							+ '\n<\/div><hr />[ <b style="cursor:pointer;color:#40f;" onclick="javascript:opener.focus();self.close();">'
 							+ sPopP.close_message + '<\/b> ]'
 					// + '</body></html>'

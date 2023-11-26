@@ -128,14 +128,14 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// Not completed! Only for get_all_anchors()
-	// @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_Colored_link(options) {
 		var parameters = this.parameters;
 		// {{Colored link|顏色|頁面名稱鏈接|顯示名稱}}]
 		return '[[:' + parameters[2] + '|<span style="color:' + parameters[1]
 				+ '">' + (parameters[3] || parameters[2]) + '</span>]]';
 	}
+
+	expand_template_Colored_link.incomplete = 'Only for get_all_anchors() @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]';
 
 	// --------------------------------------------------------------------------------------------
 	// 一些會產生網頁錨點 anchors 的模板或模組。
@@ -385,7 +385,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// Not completed! Only for get_all_anchors().
 	function expand_template_Football_box(options) {
 		var parameters = this.parameters;
 		// [[Module:Football box]]
@@ -393,6 +392,8 @@ function module_code(library_namespace) {
 		// TODO: The content is skipped.
 		+ '</div>';
 	}
+
+	expand_template_Football_box.incomplete = 'Only for get_all_anchors()';
 
 	// --------------------------------------------------------------------------------------------
 

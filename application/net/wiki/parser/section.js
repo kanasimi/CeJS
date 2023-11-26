@@ -654,6 +654,7 @@ function module_code(library_namespace) {
 		var link = [ options && options.page_title,
 		// Warning: anchor, display_text are with "&amp;",
 		// id is not with "&amp;".
+		// Warning: 這裡的網頁錨點沒包括 "#"，和 wiki_token_toString.link 不同。
 		anchor, display_text ];
 		// console.log(link);
 		// console.trace(parsed_title);
@@ -2108,8 +2109,11 @@ function module_code(library_namespace) {
 					for_each_subtoken.call(anchor, 'transclusion', function(
 							template_token, index, parent) {
 						// replace by expanded text
-						if (template_token.expand)
-							parent[index] = template_token.expand();
+						if (template_token.expand) {
+							parent[index] = wiki_API
+									.repeatedly_expand_template_token(
+											template_token, options);
+						}
 					}, _options);
 					// preserve old properties
 					var toString = anchor.toString;

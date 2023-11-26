@@ -236,10 +236,13 @@ function module_code(library_namespace) {
 	https://www.69shuba.com/txt/51594/33706686	请公子斩妖 第767章 小朋友 【感谢“长安”的盟主打赏】
 	&emsp;&emsp;第767章 小朋友 【感谢“长々安”的盟主打赏】
 
+	https://www.69shuba.com/txt/51594/33707465	请公子斩妖 第848章 无名古佛 【感谢“wangyao023”的盟主打赏】
+	&emsp;&emsp;第848章 无名古佛 【感谢“wangyao-023”的盟主打赏】
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~々\u00A0]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\-々\u00A0]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */

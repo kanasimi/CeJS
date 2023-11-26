@@ -140,7 +140,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// Not completed! Only for get_all_anchors() @ [[ACGN作品中出場的鐵路車站列表]]
 	function expand_template_铁路车站名(options) {
 		var parameters = this.parameters;
 		return '<span id="' + (parameters.name || parameters[1]) + '">'
@@ -148,24 +147,26 @@ function module_code(library_namespace) {
 		+ '</span>';
 	}
 
+	expand_template_铁路车站名.incomplete = 'Only for get_all_anchors() @ [[ACGN作品中出場的鐵路車站列表]]';
+
 	// --------------------------------------------------------------------------------------------
 
-	// Not completed! Only for get_all_anchors() as section title
-	// @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]
 	function expand_template_ARGONAVIS_Icon(options) {
 		// TODO: The content is skipped.
 		return '';
 	}
 
+	expand_template_ARGONAVIS_Icon.incomplete = 'Only for get_all_anchors() as section title @ [[ARGONAVIS from BanG Dream! 翻唱曲列表]]';
+
 	// --------------------------------------------------------------------------------------------
 
-	// Not completed! Only for get_all_anchors()
-	// @ zh.moegirl [[FLOWERS(Innocent Grey)]]
 	function expand_template_Gradient_Text(options) {
 		var parameters = this.parameters;
 		// {{Gradient_Text|漸變色代碼|文字內容|title=鼠標懸停在文字上顯示的注釋}}
 		return parameters[2] || '';
 	}
+
+	expand_template_Gradient_Text.incomplete = 'Only for get_all_anchors() @ [[FLOWERS(Innocent Grey)]]';
 
 	// --------------------------------------------------------------------------------------------
 

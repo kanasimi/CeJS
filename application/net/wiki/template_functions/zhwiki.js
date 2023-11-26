@@ -67,10 +67,69 @@ function module_code(library_namespace) {
 		return '';
 	}
 
+	// [[Module:Yesno]]
+	function Module_Yesno(value, default_value) {
+		if (/^(?:[yt是开開]|yes|true|on)$/i.test(value))
+			return true;
+		if (/^(?:[nf否关關]|no|false|off)$/i.test(value))
+			return false;
+		return default_value;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// token.expand() 可將模板轉換成一般 wiki 語法。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 	// 用於 function preprocess_section_link_token()。
+
+	// --------------------------------------------------------------------------------------------
+
+	// {{#invoke:Number}} [[Module:Number]]
+	function expand_template_數字性質列表(options) {
+		var parameters = this.parameters;
+
+		// function p.numberDivisorInformation(frame) @ [[Module:Number]]
+		var white_index;
+		var number_step = parameters.white_list || parameters['white list'];
+		if (number_step) {
+			white_index = Object.create(null);
+			number_step.split(',').forEach(function(number) {
+				white_index[+number] = true;
+			});
+		}
+
+		var num_start = +parameters.start || 0;
+		var num_end = +parameters.end || 0;
+
+		if (Module_Yesno(parameters['sort invert'] || parameters.sort_invert)) {
+			// Swap start, end
+			number_step = num_start;
+			num_start = num_end;
+			num_end = number_step;
+			number_step = -1;
+		} else {
+			number_step = 1;
+		}
+
+		if (parameters.type === '少量列舉' || parameters.type === '複雜') {
+			// function p.manyNumberInformation(frame) @ [[Module:Number]]
+			white_index = null;
+			num_start = +parameters[1];
+			num_end = num_start + (parameters.count || 1) + 1;
+			number_step = 1;
+		}
+
+		var wikitext = [];
+		for (; number_step > 0 ? num_start <= num_end : num_start >= num_end; num_start += number_step) {
+			if (white_index && !(num_start in white_index))
+				continue;
+			wikitext.push(';' + num_start + '<span id="' + num_start
+					+ '"></span>');
+		}
+
+		return wikitext.join('\n');
+	}
+
+	expand_template_數字性質列表.incomplete = 'Only for get_all_anchors()';
 
 	// --------------------------------------------------------------------------------------------
 
@@ -359,6 +418,12 @@ function module_code(library_namespace) {
 		'Invisible anchor' : {
 			properties : {
 				expand : wiki_API.template_functions.functions_of_all_sites.Anchor.properties.expand
+			}
+		},
+		// {{#invoke:Number}} [[Module:Number]]
+		數字性質列表 : {
+			properties : {
+				expand : expand_template_數字性質列表
 			}
 		},
 
