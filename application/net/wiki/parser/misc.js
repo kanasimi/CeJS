@@ -115,6 +115,10 @@ function module_code(library_namespace) {
 			post_processor) {
 		var text_array = [ '{{' + template_name ], index = 1;
 
+		if (!template_object)
+			template_object = Object.create(null);
+
+		// 先置放數字 parameters。
 		while (true) {
 			var value = template_object[index];
 			if (!is_valid_parameters_value(value)) {
@@ -135,8 +139,10 @@ function module_code(library_namespace) {
 		}
 
 		for ( var key in template_object) {
-			if (key in text_array)
+			if (key in text_array) {
+				// 已處理過。
 				continue;
+			}
 			var value = template_object[key];
 			if (is_valid_parameters_value(value)) {
 				value = String(value);
@@ -384,6 +390,14 @@ function module_code(library_namespace) {
 							template_token[next_insert_index] += '|'
 									+ replace_to;
 						} else {
+							template_token.index_of[replace_from] = template_token.length;
+							if (false) {
+								console.trace('index_of[' + replace_from + ']='
+										+ template_token.length, replace_to
+										.trim());
+								template_token.parameters[replace_from] = replace_to
+										.trim();
+							}
 							template_token.push(replace_to);
 						}
 						operated_template_count = 1;

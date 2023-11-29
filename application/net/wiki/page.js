@@ -408,9 +408,10 @@ function module_code(library_namespace) {
 
 		// console.trace(title, arguments);
 
-		// modules=query&titles= overwrite multi=false
-		delete options.multi;
-		action = normalize_title_parameter(title, options);
+		action = normalize_title_parameter(title, Object.assign(Object.create(null), options, {
+			// modules=query&titles= overwrite multi=false
+			multi : undefined
+		}));
 		// console.trace(action);
 		if (!action) {
 			library_namespace.error([ 'wiki_API_page: ', {
@@ -2801,9 +2802,11 @@ function module_code(library_namespace) {
 								// e.g., 還原編輯
 								// wiki_API.page: Unknown response:
 								// [{"batchcomplete":""}]
-								if (error !== 'Unknown response')
+								if (error !== 'Unknown response') {
 									library_namespace.error(error
 											|| 'add_listener: No page got!');
+									// console.trace(page_list, options);
+								}
 								receive_next();
 								return;
 							}
@@ -2834,13 +2837,13 @@ function module_code(library_namespace) {
 							page_id_hash = page_list = null;
 							check_and_receive_next();
 
-						}, Object.assign({
+						}, Object.assign(Object.create(null), options.with_content, {
 							// Deprecated: rvdiffto, rvcontentformat
 							// rvdiffto : 'prev',
 							// rvcontentformat : 'text/javascript',
 							// is_id : true,
 							multi : true
-						}, options.with_content));
+						}));
 						return;
 					}
 

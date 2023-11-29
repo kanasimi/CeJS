@@ -283,6 +283,14 @@ function module_code(library_namespace) {
 			parent_token[next_index] = parent_token[next_index].replace(/^\n/,
 					'');
 
+		} else if (index > 0 && index + 1 === parent_token.length
+				&& typeof parent_token[index - 1] === 'string'
+				&& /\n$/.test(parent_token[index - 1])) {
+			// e.g., "{{t|TTT\nto del}}" → "{{t|TTT\n}}"
+			// → "{{t|TTT}}"
+			parent_token[index - 1] = parent_token[index - 1]
+					.replace(/\n$/, '');
+
 		} else if ((index === 0 || /\n$/.test(parent_token[index - 1]))
 				&& /^\s/.test(parent_token[next_index])) {
 			// e.g., "\n{{t}} [[L]]" → "[[L]]"
@@ -848,6 +856,7 @@ function module_code(library_namespace) {
 		// for_each_subtoken.exit: 直接跳出。
 		exit : typeof Symbol === 'function' ? Symbol('EXIT_for_each_subtoken')
 				: [ 'for_each_subtoken.exit: abort the operation' ],
+		// CeL.wiki.parser.parser_prototype.each.skip_inner
 		// for_each_subtoken.skip_inner: Skip inner tokens, skip children.
 		skip_inner : typeof Symbol === 'function' ? Symbol('SKIP_CHILDREN')
 				: [ 'for_each_subtoken.skip_inner: skip children' ],
@@ -1661,6 +1670,7 @@ function module_code(library_namespace) {
 	}
 
 	// insert_navigate_template
+	// 注意: 這個操作之後再改變 token 可能無效!
 	function insert_layout_token(token, options) {
 		/** {String}layout_type */
 		var location;

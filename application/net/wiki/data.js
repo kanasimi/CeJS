@@ -1738,7 +1738,8 @@ function module_code(library_namespace) {
 		if (value === wikidata_edit.remove_all)
 			return false;
 
-		if ('multi' in options)
+		// 'multi' in options
+		if (options.multi !== undefined)
 			return options.multi;
 
 		if (!Array.isArray(value))

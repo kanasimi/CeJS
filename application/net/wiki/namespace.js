@@ -341,7 +341,8 @@ function module_code(library_namespace) {
 
 		// 處理 [ {String}API_URL, title ]
 		action[1] = wiki_API.query.title_param(action[1],
-				'multi' in options ? options.multi : true, options.is_id);
+		// 'multi' in options
+		options.multi !== undefined ? options.multi : true, options.is_id);
 
 		if (options.redirects) {
 			// 舊版毋須 '&redirects=1'，'&redirects' 即可。
