@@ -942,6 +942,8 @@ function module_code(library_namespace) {
 
 			// next[3] : options
 			next[3] = Object.assign({
+				// 取得定向的終點。
+				redirects : 1,
 				// [KEY_SESSION]
 				session : this,
 				// Making .redirect_list[0] the redirect target.
@@ -1017,6 +1019,7 @@ function module_code(library_namespace) {
 			// next[1]: page_title
 			wiki_API.redirects_here(next[1], function(root_page_data,
 					redirect_list, error) {
+				// console.trace([ root_page_data, redirect_list, error ]);
 				if (error) {
 					// console.trace(error);
 					// next[2] : callback(root_page_data, error)

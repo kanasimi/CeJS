@@ -1470,7 +1470,7 @@ function module_code(library_namespace) {
 
 	var default_layout_order = [
 	// header
-	'page_begin', 'short_description', 'hatnote_templates',
+	'page_begin', 'short_description', 'hatnote_templates', 'talk_page_lead',
 			'deletion_templates', 'protection_templates', 'dispute_templates',
 			'maintenance_templates', 'infobox_templates',
 			//
@@ -1485,6 +1485,30 @@ function module_code(library_namespace) {
 	// 整個頁面只能有單一個這種元素。
 	var single_layout_types = [ 'short_description',
 			'authority_control_templates', 'featured_template', 'DEFAULTSORT' ];
+
+	// 警告: 使用這個功能必須先 wiki.register_redirects(
+	// CeL.wiki.setup_layout_elements.template_order_of_layout[CeL.wiki.site_name(wiki)].talk_page_lead
+	// )
+	// @see wikibot/routine/20200122.update_vital_articles.js
+	setup_layout_elements.template_order_of_layout = {
+		enwiki : {
+			// [[w:en:Wikipedia:Talk page layout#Lead (bannerspace)]]
+			talk_page_lead : [ 'GA nominee', 'Featured article candidates',
+					'Peer review', 'Skip to talk', 'Talk header',
+					'Contentious topics/talk notice', 'Gs/talk notice',
+					'BLP others', 'Calm', 'Censor', 'Controversial',
+					'Not a forum', 'FAQ', 'Round in circles',
+					'American English', 'British English', 'GA', 'FailedGA',
+					'Old XfD multi', 'Old prod', 'DYK talk', 'On this day',
+					'ITN talk', 'Article history', 'WikiProject banner shell',
+					'WikiProject Biography', 'Image requested',
+					'Infobox requested', 'Connected contributor', 'To do',
+					'Consensus', 'Reliable sources for medical articles',
+					'Copied', 'Split article', 'Merged-from', 'Merged-to',
+					'Annual readership', 'Section sizes', 'Translated page',
+					'Archives' ]
+		}
+	};
 
 	// TODO: analysis wiki page layout 定位版面布局元素
 	// [[w:en:Wikipedia:Talk page layout#Talk page layout]]
@@ -1560,6 +1584,7 @@ function module_code(library_namespace) {
 					// TODO: 若 [[w:zh:Template:DYKEntry/archive]]
 					// 這種自包含章節標題的模板放在首段，插入時會出錯。
 					set_index('hatnote_templates');
+					set_index('talk_page_lead');
 				} else if (/^(?:Db-\w+)$|^(?:Proposed deletion|Article for deletion)/
 						.test(token.name)) {
 					set_index('deletion_templates');
@@ -1719,6 +1744,43 @@ function module_code(library_namespace) {
 					throw new Error(
 							'insert_layout_token: Cannot insert token as '
 									+ location);
+				}
+			}
+		}
+
+		var session = wiki_API.session_of_options(parsed || options)
+				|| wiki_API;
+		var insert_after_templates = options.insert_after_templates;
+		if (!insert_after_templates
+				&& (insert_after_templates = setup_layout_elements.template_order_of_layout[wiki_API
+						.site_name(session)])
+				&& (insert_after_templates = insert_after_templates[location])) {
+			for (var _index = 0;; _index++) {
+				if (session.is_template(insert_after_templates[_index], token)) {
+					insert_after_templates = insert_after_templates.slice(0,
+							_index);
+					break;
+				}
+				if (_index === insert_after_templates.length) {
+					insert_after_templates = null;
+					break;
+				}
+			}
+			// console.trace(insert_after_templates);
+		}
+		if (insert_after_templates) {
+			// console.trace(session, parsed_index, parsed.length);
+			for (var _index = parsed_index; _index < parsed.length
+					&& parsed[_index].type !== 'section_title'; _index++) {
+				if (false && parsed[_index].type === 'transclusion') {
+					console.trace(session.is_template(insert_after_templates,
+							parsed[_index]), parsed[_index]);
+				}
+				if (parsed[_index].type === 'transclusion'
+						&& session.is_template(insert_after_templates,
+								parsed[_index])) {
+					parsed_index = _index + 1;
+					break;
 				}
 			}
 		}

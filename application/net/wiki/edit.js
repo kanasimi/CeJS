@@ -457,6 +457,32 @@ function module_code(library_namespace) {
 
 		// assert: typeof text === 'string'
 
+		if (options && options.skip_nochange && options.page_to_edit) {
+			var original_content = wiki_API.content_of(options.page_to_edit);
+			if (/\.json$/i.test(wiki_API.title_of(title))) {
+				try {
+					// text = JSON.stringify(JSON.parse(text));
+					original_content = JSON.stringify(JSON
+							.parse(original_content));
+				} catch (e) {
+					// TODO: handle exception
+				}
+			}
+			if (text === original_content) {
+				// free
+				original_content = null;
+				library_namespace.debug('Skip '
+				//
+				+ wiki_API.title_link_of(options.page_to_edit)
+				// 'nochange', no change
+				+ ': The same content.', 1, 'wiki_API_edit');
+				callback(title, 'nochange');
+				return;
+			}
+			// free
+			original_content = null;
+		}
+
 		// 前置處理。
 		if (is_undo) {
 			options = library_namespace.setup_options(options);

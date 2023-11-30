@@ -3259,6 +3259,8 @@ function module_code(library_namespace) {
 			}, this);
 		}
 
+		// console.trace(this.redirects_data);
+		// console.trace(page_title + '→' + this.redirects_data[page_title]);
 		return this.redirects_data[page_title] || page_title;
 	}
 
@@ -3283,18 +3285,27 @@ function module_code(library_namespace) {
 
 	// TODO: test for 'Module:Check for unknown parameters'
 	function is_template(template_name_to_test, template_token, options) {
-		options = Object.assign({
-			namespace : 'Template'
-		}, options);
-
 		if (!template_name_to_test || !template_token) {
 			// e.g., async function for_each_discussion_page(page_data) @
 			// 20210429.Auto-archiver.js:130
 			return;
 		}
 
+		options = Object.assign({
+			namespace : 'Template'
+		}, options);
+
 		var session = wiki_API.session_of_options(options)
 				|| wiki_API.is_wiki_API(this) && this;
+
+		if (Array.isArray(template_token)
+				&& !template_token.type
+				&& (!Array.isArray(template_name_to_test) || template_name_to_test.type)) {
+			// Swap
+			var tmp = template_name_to_test;
+			template_name_to_test = template_token;
+			template_token = tmp;
+		}
 
 		if (template_token.type === 'transclusion') {
 			// treat `template_token` as template token
@@ -3302,10 +3313,36 @@ function module_code(library_namespace) {
 			template_token = template_token.name;
 		}
 
+		// console.trace([ template_token, template_name_to_test ]);
 		if (template_name_to_test.type === 'transclusion') {
 			// e.g., wiki.is_template(template_token, template_name_to_test);
 			template_name_to_test = template_name_to_test.name;
+
+		} else if (session && Array.isArray(template_name_to_test)
+				&& !template_name_to_test.type) {
+			if (!template_name_to_test.normalized_template_name_Set) {
+				template_name_to_test.normalized_template_name_Set = new Set(
+						session.redirect_target_of(template_name_to_test,
+								options));
+				// console.trace(template_name_to_test.normalized_template_name_Set);
+			}
+			if (session) {
+				// normalize template name
+				template_token = session.redirect_target_of(template_token,
+						options);
+			} else {
+				template_token = wiki_API.normalize_title(template_token,
+						options);
+			}
+			if (false) {
+				console.trace(template_token,
+						template_name_to_test.normalized_template_name_Set);
+			}
+			return template_name_to_test.normalized_template_name_Set
+					.has(template_token);
 		}
+
+		// ------------------------------------------------------------
 
 		if (session) {
 			// normalize template name

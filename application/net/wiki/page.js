@@ -408,7 +408,8 @@ function module_code(library_namespace) {
 
 		// console.trace(title, arguments);
 
-		action = normalize_title_parameter(title, Object.assign(Object.create(null), options, {
+		action = normalize_title_parameter(title, Object.assign(Object
+				.create(null), options, {
 			// modules=query&titles= overwrite multi=false
 			multi : undefined
 		}));
@@ -2837,7 +2838,9 @@ function module_code(library_namespace) {
 							page_id_hash = page_list = null;
 							check_and_receive_next();
 
-						}, Object.assign(Object.create(null), options.with_content, {
+						}, Object.assign(Object.create(null),
+						//
+						options.with_content, {
 							// Deprecated: rvdiffto, rvcontentformat
 							// rvdiffto : 'prev',
 							// rvcontentformat : 'text/javascript',

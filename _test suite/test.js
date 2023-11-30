@@ -3282,7 +3282,7 @@ function test_wiki() {
 		[["A 'n B", CeL.wiki.normalize_title('A &#39;n B')], 'normalize_title #19'],
 		[["Talk:ABC", CeL.wiki.normalize_title('talk:ABC')], 'normalize_title #20'],
 		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC')], 'normalize_title #21'],
-		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC', { is_page_title : true })], 'normalize_title #22'],
+		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC', { is_page_title: true })], 'normalize_title #22'],
 
 		// Should use CeL.wiki.title_of(page_data, options);
 		[['Wikipedia:ABC', CeL.wiki.title_of('Wikipedia:ABC')], 'title_of #1'],
@@ -3447,7 +3447,7 @@ function test_wiki() {
 		assert([report_Variable_Map.update(wikitext), wikitext.replace(replace_from, replace_to)], 'wiki: CeL.wiki.Variable_Map #2');
 
 		wikitext = 'ABC\nDEF';
-		assert([report_Variable_Map.update(wikitext, { force_change : true }), wikitext.replace(replace_from, replace_to)], 'wiki: CeL.wiki.Variable_Map #3');
+		assert([report_Variable_Map.update(wikitext, { force_change: true }), wikitext.replace(replace_from, replace_to)], 'wiki: CeL.wiki.Variable_Map #3');
 
 	});
 
