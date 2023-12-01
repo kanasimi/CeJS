@@ -487,7 +487,7 @@ function module_code(library_namespace) {
 			project += '.org';
 		}
 
-		// console.trace(wiki_API.API_URL);
+		// console.trace([ wiki_API.API_URL, project ]);
 		var url = new library_namespace.URI(project,
 		//
 		/:\/\//.test(wiki_API.API_URL) && wiki_API.API_URL);
@@ -771,7 +771,9 @@ function module_code(library_namespace) {
 
 		// 不能保證 wiki_API.is_wiki_API(language) → is_Object(language)，
 		// 因此使用 typeof。
-		if (language && typeof language === 'object') {
+		if (language && (typeof language === 'object'
+		// || language === wiki_API
+		)) {
 			// treat language as options with session.
 			session = wiki_API.session_of_options(language);
 			// options.language 較 session 的設定優先。
@@ -784,6 +786,8 @@ function module_code(library_namespace) {
 			;
 			if (false && typeof language === 'object')
 				console.trace(language);
+		} else if (typeof language === 'function') {
+			throw new Error('Invalid type of language: ' + typeof language);
 		}
 		// console.log(session);
 		// console.trace(session.family);
@@ -960,6 +964,10 @@ function module_code(library_namespace) {
 		if (!family || family === 'wiki')
 			family = 'wikipedia';
 
+		if (false) {
+			console.trace([ API_URL, session && session.API_URL, language,
+					family ]);
+		}
 		API_URL = API_URL || session && session.API_URL
 				|| api_URL(language + '.' + family);
 		// console.trace(API_URL);
@@ -3244,12 +3252,13 @@ function module_code(library_namespace) {
 		if (!page_title)
 			return page_title;
 
-		if (options && options.namespace) {
-			page_title = this.to_namespace(page_title, options.namespace);
-		} else if (Array.isArray(page_title)
-				&& page_title.type === 'transclusion') {
+		if (Array.isArray(page_title) && page_title.type === 'transclusion') {
+			// console.trace(page_title);
 			// treat `page_title` as template token
 			page_title = this.to_namespace(page_title.name, 'Template');
+		}
+		if (options && options.namespace) {
+			page_title = this.to_namespace(page_title, options.namespace);
 		}
 		page_title = this.normalize_title(page_title);
 

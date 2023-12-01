@@ -2793,14 +2793,14 @@
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2981}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L2989}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3014}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3022}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2808,14 +2808,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3094}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3102}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3646}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3655}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2927,7 +2927,7 @@
 		"message": "There are more than one %1 in %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: layout type, %2: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1552}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1554}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {

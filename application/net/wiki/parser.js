@@ -278,7 +278,7 @@ function module_code(library_namespace) {
 
 		if (index > 0 && /\n$/.test(parent_token[index - 1])
 				&& /^\n/.test(parent_token[next_index])) {
-			// e.g., "\n{{t}}\n==t==\n" → "\n\n==t==\n"
+			// e.g., "\n{{to del}}\n==t==\n" → "\n\n==t==\n"
 			// → "\n==t==\n"
 			parent_token[next_index] = parent_token[next_index].replace(/^\n/,
 					'');
@@ -286,14 +286,14 @@ function module_code(library_namespace) {
 		} else if (index > 0 && index + 1 === parent_token.length
 				&& typeof parent_token[index - 1] === 'string'
 				&& /\n$/.test(parent_token[index - 1])) {
-			// e.g., "{{t|TTT\nto del}}" → "{{t|TTT\n}}"
+			// e.g., "{{t|TTT\n{{to del}}}}" → "{{t|TTT\n}}"
 			// → "{{t|TTT}}"
 			parent_token[index - 1] = parent_token[index - 1]
 					.replace(/\n$/, '');
 
 		} else if ((index === 0 || /\n$/.test(parent_token[index - 1]))
 				&& /^\s/.test(parent_token[next_index])) {
-			// e.g., "\n{{t}} [[L]]" → "[[L]]"
+			// e.g., "\n{{to del}} [[L]]" → "[[L]]"
 			if (index > 0) {
 				parent_token[index - 1] = parent_token[index - 1].replace(
 						/\n$/, '');
@@ -1474,7 +1474,7 @@ function module_code(library_namespace) {
 			'deletion_templates', 'protection_templates', 'dispute_templates',
 			'maintenance_templates', 'infobox_templates',
 			//
-			'lead_templates_end', 'content', 'content_end',
+			'lead_templates_end', 'lead_section_end', 'content', 'content_end',
 			//
 			'footer', 'succession_templates', 'navigation_templates',
 			'authority_control_templates', 'coord_templates',
@@ -1486,6 +1486,8 @@ function module_code(library_namespace) {
 	var single_layout_types = [ 'short_description',
 			'authority_control_templates', 'featured_template', 'DEFAULTSORT' ];
 
+	var KEY_map_template_to_location = typeof Symbol === 'function' ? Symbol('REMOVE_TOKEN')
+			: '\0template_to_location';
 	// 警告: 使用這個功能必須先 wiki.register_redirects(
 	// CeL.wiki.setup_layout_elements.template_order_of_layout[CeL.wiki.site_name(wiki)].talk_page_lead
 	// )
@@ -1694,6 +1696,66 @@ function module_code(library_namespace) {
 		return parsed.toString();
 	}
 
+	/** @inner */
+	function get_template_order_of_layout(session, location) {
+		// console.trace(wiki_API.site_name(session));
+		var template_order_of_layout = setup_layout_elements.template_order_of_layout[wiki_API
+				.site_name(session)];
+		// assert: !(wiki_API.site_name(session) in
+		// setup_layout_elements.template_order_of_layout)
+		// || Array.isArray(template_order_of_layout)
+		if (template_order_of_layout && location) {
+			// template_order_of_layout_of_location
+			return template_order_of_layout[location];
+		}
+		return template_order_of_layout;
+	}
+
+	/** @inner */
+	function get_location_of_template(token, options) {
+		if (!token || token.type !== 'transclusion')
+			return;
+
+		var parsed = this;
+
+		var session = wiki_API.session_of_options(parsed || options);
+		var template_order_of_layout = get_template_order_of_layout(session);
+		// console.trace(template_order_of_layout);
+		if (!template_order_of_layout)
+			return;
+
+		options = Object.assign({
+			namespace : 'Template'
+		}, options);
+
+		var template_to_location_hash = template_order_of_layout[KEY_map_template_to_location];
+		if (!template_to_location_hash) {
+			template_to_location_hash = template_order_of_layout[KEY_map_template_to_location] = Object
+					.create(null);
+			for ( var location in template_order_of_layout) {
+				if (location === KEY_map_template_to_location)
+					continue;
+				var template_Array = session ? session.redirect_target_of(
+						template_order_of_layout[location], options) : wiki_API
+						.to_namespace(template_order_of_layout[location],
+								options);
+				template_Array.forEach(function(template_name) {
+					template_to_location_hash[template_name] = location;
+				});
+			}
+			// console.trace(template_to_location_hash);
+		}
+
+		var template_name = session ? session
+				.redirect_target_of(token, options) : wiki_API.to_namespace(
+				token, options);
+		if (false) {
+			console.trace([ token, template_name,
+					template_to_location_hash[template_name] ]);
+		}
+		return template_to_location_hash[template_name];
+	}
+
 	// insert_navigate_template
 	// 注意: 這個操作之後再改變 token 可能無效!
 	function insert_layout_token(token, options) {
@@ -1708,10 +1770,14 @@ function module_code(library_namespace) {
 			location = options.location;
 		}
 
+		// Guess location
 		if (!location) {
 			if (typeof token === 'string')
 				token = wiki_API.parse(token, options);
-			if (token.type === 'category') {
+			location = get_location_of_template.call(this, token, options);
+			// console.trace(token, location);
+			if (location) {
+			} else if (token.type === 'category') {
 				location = 'categories';
 			}
 		}
@@ -1734,6 +1800,19 @@ function module_code(library_namespace) {
 					if (parsed_index >= 0)
 						break;
 				}
+				if (false) {
+					console.trace([ layout_index,
+							default_layout_order.indexOf('lead_section_end'),
+							parsed_index, layout_indices.lead_section_end ]);
+				}
+				// assert: default_layout_order.indexOf('lead_section_end') >= 0
+				if (layout_index < default_layout_order
+						.indexOf('lead_section_end')
+						&& parsed_index > layout_indices.lead_section_end) {
+					// 預防如欲求 hatnote_templates 但 maintenance_templates
+					// 出現在頁面中段的情況。
+					parsed_index = layout_indices.lead_section_end;
+				}
 			}
 			if (!(parsed_index >= 0)) {
 				if (options.force_insert) {
@@ -1742,47 +1821,59 @@ function module_code(library_namespace) {
 					parsed_index = parsed.length;
 				} else {
 					throw new Error(
-							'insert_layout_token: Cannot insert token as '
+							'insert_layout_token: Cannot insert token as location: '
 									+ location);
 				}
 			}
 		}
 
-		var session = wiki_API.session_of_options(parsed || options)
-				|| wiki_API;
+		var session = wiki_API.session_of_options(parsed || options);
+
 		var insert_after_templates = options.insert_after_templates;
-		if (!insert_after_templates
-				&& (insert_after_templates = setup_layout_elements.template_order_of_layout[wiki_API
-						.site_name(session)])
-				&& (insert_after_templates = insert_after_templates[location])) {
-			for (var _index = 0;; _index++) {
-				if (session.is_template(insert_after_templates[_index], token)) {
-					insert_after_templates = insert_after_templates.slice(0,
-							_index);
-					break;
+		// Guess insert_after_templates
+		if (!insert_after_templates) {
+			var template_order_of_layout_of_location = get_template_order_of_layout(
+					session, location);
+			if (template_order_of_layout_of_location) {
+				for (var _index = 0;; _index++) {
+					if ((session || wiki_API)
+							.is_template(
+									template_order_of_layout_of_location[_index],
+									token)) {
+						insert_after_templates = template_order_of_layout_of_location
+								.slice(0, _index);
+						break;
+					}
+					if (_index === template_order_of_layout_of_location.length) {
+						insert_after_templates = null;
+						break;
+					}
 				}
-				if (_index === insert_after_templates.length) {
-					insert_after_templates = null;
-					break;
-				}
+				// console.trace(insert_after_templates);
+				// console.trace(template_order_of_layout_of_location);
 			}
-			// console.trace(insert_after_templates);
 		}
 		if (insert_after_templates) {
-			// console.trace(session, parsed_index, parsed.length);
-			for (var _index = parsed_index; _index < parsed.length
-					&& parsed[_index].type !== 'section_title'; _index++) {
-				if (false && parsed[_index].type === 'transclusion') {
-					console.trace(session.is_template(insert_after_templates,
-							parsed[_index]), parsed[_index]);
-				}
-				if (parsed[_index].type === 'transclusion'
-						&& session.is_template(insert_after_templates,
-								parsed[_index])) {
-					parsed_index = _index + 1;
+			// console.trace(!!session, location, parsed_index, parsed.length);
+			for (var _index = parsed_index; _index < parsed.length; _index++) {
+				if (parsed[_index].type === 'section_title') {
+					// 這些 layout templates 通常不會跨越章節。
 					break;
 				}
+				if (false && parsed[_index].type === 'transclusion') {
+					console.trace((session || wiki_API).is_template(
+							insert_after_templates, parsed[_index]),
+							parsed[_index], options);
+				}
+				if (parsed[_index].type === 'transclusion'
+						&& (session || wiki_API)
+								.is_template(insert_after_templates,
+										parsed[_index], options)) {
+					parsed_index = _index + 1;
+				}
+				// console.trace(parsed_index);
 			}
+			// console.trace([ parsed_index, parsed[parsed_index] ]);
 		}
 
 		// ----------------------------

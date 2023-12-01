@@ -4862,6 +4862,35 @@ function test_wiki() {
 		// Create template_token.expand()
 		parsed.each('template', CeL.null_function);
 		assert(['<span style="color:red">text</span>', parsed[0].expand()], 'CeL.wiki.template_functions.functions_of_all_sites #1');
+
+		wikitext = '\n{{to del}}\n==t==\n'; parsed = CeL.wiki.parser(wikitext).parse(); 0;
+		parsed.each('template', function (token) { if (CeL.wiki.is_template('To del', token)) { return parsed.each.remove_token; } });
+		assert([parsed.toString(), '\n==t==\n'], 'parsed.each.remove_token #1');
+
+		wikitext = '{{t|TTT\n{{to del}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		parsed.each('template', function (token) { if (CeL.wiki.is_template('To del', token)) { return parsed.each.remove_token; } });
+		assert([parsed.toString(), '{{t|TTT}}'], 'parsed.each.remove_token #2');
+
+		wikitext = '{{t|TTT\n{{to del}}\n}}'; parsed = CeL.wiki.parser(wikitext).parse(); 0;
+		parsed.each('template', function (token) { if (CeL.wiki.is_template('To del', token)) { return parsed.each.remove_token; } });
+		assert([parsed.toString(), '{{t|TTT\n}}'], 'parsed.each.remove_token #3');
+
+		wikitext = '\n{{to del}} [[L]]'; parsed = CeL.wiki.parser(wikitext).parse(); 0;
+		parsed.each('template', function (token) { if (CeL.wiki.is_template('To del', token)) { return parsed.each.remove_token; } });
+		assert([parsed.toString(), '[[L]]'], 'parsed.each.remove_token #3');
+
+
+		CeL.wiki.set_language('en');
+		assert([CeL.wiki.site_name(), 'enwiki'], 'CeL.wiki.site_name() after CeL.wiki.set_language("en")');
+		// from [[w:en:Talk:Change ringing]]
+		wikitext = '\n{{Article history|action1=PR}}\n{{WikiProject Percussion |class=C |importance=Mid}}\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		var WPBS_text = '{{WikiProject banner shell}}';
+		assert([parsed.insert_layout_token(WPBS_text), true], 'parsed.insert_layout_token() #1');
+		assert([parsed.toString(), wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject')], 'parsed.insert_layout_token() #2');
+
+		// recover
+		CeL.wiki.set_language('zh');
+		assert([CeL.wiki.site_name(), 'zhwiki'], 'CeL.wiki.site_name() after CeL.wiki.set_language("zh")');
 	});
 
 	// 2021/11/10 6:21:45	nodejs v8.11.1 以及之前的版本皆有此問題。
@@ -4970,6 +4999,21 @@ function test_wiki() {
 				_finish_test(test_name);
 			});
 		});
+
+		enwiki.register_redirects(CeL.wiki.setup_layout_elements.template_order_of_layout[CeL.wiki.site_name(enwiki)].talk_page_lead, function test_insert_layout_token() {
+			var test_name = 'enwiki: insert_layout_token';
+			_setup_test(test_name);
+
+			// from [[w:en:Talk:Change ringing]]
+			var wikitext = '\n{{ArticleHistory\n|action1=PR\n}}\n{{WikiProject Percussion|class=C|importance=Mid}}\n\n==A==\ntext';
+			var parsed = CeL.wiki.parser(wikitext, enwiki).parse();
+			var WPBS_template_name = 'WikiProject banner shell' && 'WPBS';
+			var WPBS_text = '{{' + WPBS_template_name + '}}';
+			assert([parsed.insert_layout_token(CeL.wiki.parse(CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/))), true], 'enwiki: parsed.insert_layout_token() #1');
+			assert([parsed.toString(), wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject')], 'enwiki: parsed.insert_layout_token() #2');
+
+			_finish_test(test_name);
+		}, { namespace: 'Template', no_message: true });
 
 
 		var jawiki = new CeL.wiki(null, null, 'ja');
