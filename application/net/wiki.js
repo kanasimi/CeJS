@@ -206,7 +206,7 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(API_URL);
-		// setup session.
+		// setup session, as wiki site of pywikibot.Site().
 		if (API_URL) {
 			// e.g., 'cmn'
 			if (API_URL in wiki_API.language_code_to_site_alias)

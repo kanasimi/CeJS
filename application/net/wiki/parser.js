@@ -1730,8 +1730,9 @@ function module_code(library_namespace) {
 
 		var template_to_location_hash = template_order_of_layout[KEY_map_template_to_location];
 		if (!template_to_location_hash) {
-			template_to_location_hash = template_order_of_layout[KEY_map_template_to_location] = Object
-					.create(null);
+			template_to_location_hash = template_order_of_layout[KEY_map_template_to_location]
+			// Or new Map
+			= Object.create(null);
 			for ( var location in template_order_of_layout) {
 				if (location === KEY_map_template_to_location)
 					continue;

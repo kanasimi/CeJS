@@ -197,6 +197,20 @@ function module_code(library_namespace) {
 	}
 
 	// @inner
+	function set_original_parameter_index(template_token, index) {
+		if (template_token[index].original_parameter_index >= 0)
+			return;
+
+		var parameter_token = template_token[index] = [ [],
+				template_token[index], [] ];
+		parameter_token.original_parameter_index = 1;
+		template_token.need_reparse = true;
+		wiki_API.parse.set_wiki_type(parameter_token[0], 'plain');
+		wiki_API.parse.set_wiki_type(parameter_token[2], 'plain');
+		wiki_API.parse.set_wiki_type(parameter_token, 'plain');
+	}
+
+	// @inner
 	function mode_space_of_parameters(template_token, parameter_name) {
 		if (false) {
 			template_token.forEach(function(parameter, index) {
@@ -214,6 +228,8 @@ function module_code(library_namespace) {
 		}
 
 		var this_parameter = template_token[index];
+		if (this_parameter.original_parameter_index >= 0)
+			this_parameter = this_parameter[this_parameter.original_parameter_index];
 		// this_parameter = [ key, " = ", value ] || [ "", "", value ]
 
 		// 判斷上下文使用的 spaces。
@@ -243,6 +259,34 @@ function module_code(library_namespace) {
 		this_parameter[3] || '' ];
 
 		return spaces;
+	}
+
+	/** @inner */
+	function template_token__delete_elements(template_token, start, deleteCount) {
+		if (start > 0 && deleteCount > 0) {
+			for (var index = start, to_index = Math.min(start + deleteCount,
+					template_token.length); index < to_index; index++) {
+				var parameter_name = template_token[index][0].toString().trim();
+				if (!template_token.index_of[parameter_name]) {
+					parameter_name = null;
+					for ( var name in template_token.index_of) {
+						if (template_token.index_of[name] === index) {
+							parameter_name = name;
+							break;
+						}
+					}
+					if (!parameter_name) {
+						console.trace(template_token);
+						throw new Error('Cannot find parameter name of index: '
+								+ index);
+					}
+				}
+				delete template_token.index_of[parameter_name];
+				delete template_token.parameters[parameter_name];
+			}
+		}
+		TODO
+		Array.prototype.splice.apply(template_token, arguments);
 	}
 
 	/**
@@ -370,7 +414,10 @@ function module_code(library_namespace) {
 				if (!(index >= 1)) {
 					// 不存在此 parameter name 可 replace。
 					if (options.value_only && options.force_add) {
-						if ((!key_of_spaces || key_of_spaces !== latest_OK_key)
+						// options.preserve_spacing
+						if (!options.no_space
+						//
+						&& (!key_of_spaces || key_of_spaces !== latest_OK_key)
 						//
 						&& (key_of_spaces = options.append_key_value
 						//
@@ -384,11 +431,26 @@ function module_code(library_namespace) {
 						replace_to = spaces && spaces[1] ? spaces[0]
 								+ replace_from + spaces[1] + replace_to
 								+ spaces[2] : replace_from + '=' + replace_to;
-						if (options.append_key_value && next_insert_index >= 1) {
+						if (options.before_parameter
+								&& template_token.index_of[options.before_parameter]) {
+							// insert before parameter
+							next_insert_index = template_token.index_of[options.before_parameter];
+							set_original_parameter_index(template_token,
+									next_insert_index);
+							// assert:
+							// template_token[next_insert_index].type ===
+							// 'plain'
+							template_token[next_insert_index][0].push(
+									replace_to, '|');
+						} else if (options.append_key_value
+								&& next_insert_index >= 1) {
 							// 警告: 這會使 template_token[next_insert_index]
-							// 不合正規格式！但能插入在最接近前一個插入點之後。
-							template_token[next_insert_index] += '|'
-									+ replace_to;
+							// 不合正規格式！但能插入在最接近前一個插入點之後，
+							// 並維持 template_token.index_of 的可用性。
+							set_original_parameter_index(template_token,
+									next_insert_index);
+							template_token[next_insert_index][2].push('|'
+									+ replace_to);
 						} else {
 							template_token.index_of[replace_from] = template_token.length;
 							if (false) {
@@ -400,7 +462,7 @@ function module_code(library_namespace) {
 							}
 							template_token.push(replace_to);
 						}
-						operated_template_count = 1;
+						operated_template_count++;
 					}
 					continue;
 				}

@@ -3331,8 +3331,8 @@ function module_code(library_namespace) {
 				&& !template_name_to_test.type) {
 			if (!template_name_to_test.normalized_template_name_Set) {
 				template_name_to_test.normalized_template_name_Set = new Set(
-						session.redirect_target_of(template_name_to_test,
-								options));
+				// normalize
+				session.redirect_target_of(template_name_to_test, options));
 				// console.trace(template_name_to_test.normalized_template_name_Set);
 			}
 			if (session) {
