@@ -755,6 +755,103 @@ function module_code(library_namespace) {
 		}
 	};
 
+	/** @inner */
+	function template_token__splice(start, deleteCount) {
+		if (!((start |= 0) >= 1))
+			return;
+
+		var template_token = this;
+		var args = [ start, deleteCount |= 0 ];
+		if (deleteCount >= 1) {
+			var deleted_numeric_parameters = 0;
+			for (var index = start, to_index = Math.min(start + deleteCount,
+					template_token.length); index < to_index; index++) {
+				var parameter_name = template_token[index][0].toString().trim();
+				if (!template_token.index_of[parameter_name]) {
+					// assert: 數字 parameter name。
+					parameter_name = null;
+					for ( var name in template_token.index_of) {
+						if (template_token.index_of[name] === index) {
+							parameter_name = name;
+							break;
+						}
+					}
+					if (!parameter_name) {
+						console.trace(template_token);
+						throw new Error(
+								'template_token__splice: Cannot find parameter name of index: '
+										+ index);
+					}
+					deleted_numeric_parameters++;
+				}
+				delete template_token.index_of[parameter_name];
+				delete template_token.parameters[parameter_name];
+			}
+
+			if (deleted_numeric_parameters > 0) {
+				// 處理會因為刪除中間數字元素而改變的數字 parameter name。
+				for (var index = /* 1 */start + deleteCount; index < template_token.length; index++) {
+					if (template_token[index][0].toString().trim())
+						continue;
+					var original_index = template_token[index].key;
+					if (original_index >= start + deleteCount) {
+						template_token[index].key -= deleteCount;
+						// Copy
+						template_token.index_of[template_token[index].key] = template_token.index_of[original_index];
+						delete template_token.index_of[original_index];
+						template_token.parameters[template_token[index].key] = template_token.parameters[original_index];
+						delete template_token.parameters[original_index];
+					}
+				}
+			}
+			console.trace(template_token);
+		}
+
+		if (arguments.length > 2) {
+			var add_template_token = Array.prototype.slice.call(arguments, 2), skip_parameters = 0;
+			// 補足數字 parameter name。
+			for (var index = 1; index < start; index++) {
+				if (!template_token[index][0].toString().trim()) {
+					add_template_token.unshift('');
+					skip_parameters++;
+				}
+			}
+			// console.trace(add_template_token);
+			add_template_token = parse_wikitext('{{T|'
+					+ add_template_token.join('|') + '}}');
+			console.trace(skip_parameters, add_template_token);
+			var add_index = start, add_index_of = Object.create(null);
+			for ( var parameter_name in add_template_token.index_of) {
+				var index = add_template_token.index_of[parameter_name];
+				if (index < skip_parameters)
+					continue;
+				var parameter_token = add_template_token[add_template_token.index_of[parameter_name]];
+				if (parameter_name in template_token.index_of) {
+					// Copy to existed parameter.
+					template_token[template_token.index_of[parameter_name]] = parameter_token;
+				} else {
+					// New parameter.
+					args.push(parameter_token);
+					add_index_of[parameter_name] = add_index++;
+				}
+				// Set template_token.parameters first.
+				template_token.parameters[parameter_name] = add_template_token.parameters[parameter_name];
+			}
+			console.trace([ start, add_index ]);
+			// 處理會因為增添中間數字元素而改變的數字 parameter name。
+			if ((add_index -= start) > 0) {
+				// assert: add_index element(s) added
+				for ( var parameter_name in add_template_token.index_of) {
+					if (add_template_token.index_of[parameter_name] >= start)
+						add_template_token.index_of[parameter_name] += add_index;
+				}
+				Object.assign(template_token.index_of, add_index_of);
+			}
+		}
+
+		return Array.prototype.splice.apply(template_token, args);
+	}
+
 	// const , for <dl>
 	var DEFINITION_LIST = 'd';
 
@@ -2259,6 +2356,12 @@ function module_code(library_namespace) {
 				// console.trace(parameters.name);
 				// 後面不允許空白。 must / *DEFAULTSORT:/
 				parameters.name = parameters.name.trimStart();
+				if (!parameters.name) {
+					// e.g., '{{ |t}}'
+					// e.g., '{{ <!----> |t}}'
+					return all;
+				}
+
 				// whitespace between the opening braces and the "subst:"
 				// [^...]: incase `{{ {{UCFIRST:T}} | tl }}`
 				// @see PATTERN_invalid_page_name_characters
@@ -2423,6 +2526,7 @@ function module_code(library_namespace) {
 			// 參數有分大小寫與繁簡體。
 			parameters.parameters = _parameters;
 			parameters.index_of = parameter_index_of;
+			parameters.splice = template_token__splice;
 
 			_set_wiki_type(parameters, matched ? 'magic_word_function'
 					: 'transclusion');

@@ -261,34 +261,6 @@ function module_code(library_namespace) {
 		return spaces;
 	}
 
-	/** @inner */
-	function template_token__delete_elements(template_token, start, deleteCount) {
-		if (start > 0 && deleteCount > 0) {
-			for (var index = start, to_index = Math.min(start + deleteCount,
-					template_token.length); index < to_index; index++) {
-				var parameter_name = template_token[index][0].toString().trim();
-				if (!template_token.index_of[parameter_name]) {
-					parameter_name = null;
-					for ( var name in template_token.index_of) {
-						if (template_token.index_of[name] === index) {
-							parameter_name = name;
-							break;
-						}
-					}
-					if (!parameter_name) {
-						console.trace(template_token);
-						throw new Error('Cannot find parameter name of index: '
-								+ index);
-					}
-				}
-				delete template_token.index_of[parameter_name];
-				delete template_token.parameters[parameter_name];
-			}
-		}
-		TODO
-		Array.prototype.splice.apply(template_token, arguments);
-	}
-
 	/**
 	 * 將 wiki_API.parse === parse_wikitext() 獲得之 template_token 中的指定 parameter
 	 * 換成 replace_to。 replace_template_parameter(), set_parameter(),

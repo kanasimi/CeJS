@@ -1916,6 +1916,8 @@ function module_code(library_namespace) {
 						wiki_API.page(template_token.name, function(page_data,
 								error) {
 							if (error) {
+								console.trace([ template_token.toString(),
+										template_token ]);
 								reject(error);
 								return;
 							}

@@ -3783,6 +3783,15 @@ function test_wiki() {
 		wikitext = '{{t\n |p\n}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #25');
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #25-1');
+		wikitext = '{{|t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse.transclusion #26-1');
+		wikitext = '{{ |t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse.transclusion #27-1');
+		wikitext = '{{ 　 |t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse.transclusion #28-1');
+		wikitext = '{{ <!----> |t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #29');
+		assert(['plain', parsed.type], 'wiki.parse.transclusion #29-1');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
