@@ -4691,7 +4691,7 @@ function test_wiki() {
 		assert(['{{t|b=2|1}}', CeL.wiki.parse.replace_parameter(token, 'a', KEY_remove_parameter) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #3');
 		assert(['{{t|1}}', CeL.wiki.parse.replace_parameter(token, { b: KEY_remove_parameter }, { parameter_name_only: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
 		token = CeL.wiki.parse('{{WPBS|1=\n{{TT}}\n}}');
-		assert(['{{WPBS|class=A|vital=yes|1=\n{{TT}}\n}}', CeL.wiki.parse.replace_parameter(token, { 'class': 'A', vital: 'yes' }, { value_only: true, force_add: true, before_parameter: 1, no_space: true }) === 2 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
+		assert(['{{WPBS|class=A|vital=yes|1=\n{{TT}}\n}}', CeL.wiki.parse.replace_parameter(token, { 'class': 'A', vital: 'yes' }, { value_only: true, force_add: true, before_parameter: 1, no_value_space: true }) === 2 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
 
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{#parserfunctions:}} #1');
@@ -4902,6 +4902,12 @@ function test_wiki() {
 		// recover
 		CeL.wiki.set_language('zh');
 		assert([CeL.wiki.site_name(), 'zhwiki'], 'CeL.wiki.site_name() after CeL.wiki.set_language("zh")');
+
+
+		wikitext = '{{t|_1|_2|s=1|_3|_4}}'; parsed = CeL.wiki.parse(wikitext);
+		parsed.splice(2, 3, 'y=t|4', 'ddd|q=1');
+		parsed.toString();
+
 	});
 
 	// 2021/11/10 6:21:45	nodejs v8.11.1 以及之前的版本皆有此問題。

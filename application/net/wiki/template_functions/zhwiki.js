@@ -67,15 +67,6 @@ function module_code(library_namespace) {
 		return '';
 	}
 
-	// [[Module:Yesno]]
-	function Module_Yesno(value, default_value) {
-		if (/^(?:[yt是开開]|yes|true|on)$/i.test(value))
-			return true;
-		if (/^(?:[nf否关關]|no|false|off)$/i.test(value))
-			return false;
-		return default_value;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// token.expand() 可將模板轉換成一般 wiki 語法。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
@@ -100,7 +91,7 @@ function module_code(library_namespace) {
 		var num_start = +parameters.start || 0;
 		var num_end = +parameters.end || 0;
 
-		if (Module_Yesno(parameters['sort invert'] || parameters.sort_invert)) {
+		if (wiki_API.Yesno(parameters['sort invert'] || parameters.sort_invert)) {
 			// Swap start, end
 			number_step = num_start;
 			num_start = num_end;

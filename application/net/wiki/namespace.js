@@ -3252,9 +3252,11 @@ function module_code(library_namespace) {
 		if (!page_title)
 			return page_title;
 
+		var page_title_is_template;
 		if (Array.isArray(page_title) && page_title.type === 'transclusion') {
 			// console.trace(page_title);
 			// treat `page_title` as template token
+			page_title_is_template = page_title;
 			page_title = this.to_namespace(page_title.name, 'Template');
 		}
 		if (options && options.namespace) {
@@ -3270,7 +3272,8 @@ function module_code(library_namespace) {
 
 		// console.trace(this.redirects_data);
 		// console.trace(page_title + '→' + this.redirects_data[page_title]);
-		return this.redirects_data[page_title] || page_title;
+		page_title = this.redirects_data[page_title] || page_title;
+		return page_title;
 	}
 
 	function aliases_of_page(page_title, options) {

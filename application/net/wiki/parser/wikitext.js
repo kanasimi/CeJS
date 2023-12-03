@@ -755,101 +755,27 @@ function module_code(library_namespace) {
 		}
 	};
 
-	/** @inner */
-	function template_token__splice(start, deleteCount) {
-		if (!((start |= 0) >= 1))
-			return;
+	function template_token__splice() {
+		var result = Array.prototype.splice.apply(this, arguments);
+		inplace_reparse_token(this);
+		return result;
+	}
+	function template_token__push() {
+		var result = Array.prototype.push.apply(this, arguments);
+		inplace_reparse_token(this);
+		return result;
+	}
 
-		var template_token = this;
-		var args = [ start, deleteCount |= 0 ];
-		if (deleteCount >= 1) {
-			var deleted_numeric_parameters = 0;
-			for (var index = start, to_index = Math.min(start + deleteCount,
-					template_token.length); index < to_index; index++) {
-				var parameter_name = template_token[index][0].toString().trim();
-				if (!template_token.index_of[parameter_name]) {
-					// assert: 數字 parameter name。
-					parameter_name = null;
-					for ( var name in template_token.index_of) {
-						if (template_token.index_of[name] === index) {
-							parameter_name = name;
-							break;
-						}
-					}
-					if (!parameter_name) {
-						console.trace(template_token);
-						throw new Error(
-								'template_token__splice: Cannot find parameter name of index: '
-										+ index);
-					}
-					deleted_numeric_parameters++;
-				}
-				delete template_token.index_of[parameter_name];
-				delete template_token.parameters[parameter_name];
-			}
+	function inplace_reparse_token(token, options) {
+		var session = wiki_API.session_of_options(options || token);
+		options = wiki_API.add_session_to_options(session, Object
+				.clone(options));
 
-			if (deleted_numeric_parameters > 0) {
-				// 處理會因為刪除中間數字元素而改變的數字 parameter name。
-				for (var index = /* 1 */start + deleteCount; index < template_token.length; index++) {
-					if (template_token[index][0].toString().trim())
-						continue;
-					var original_index = template_token[index].key;
-					if (original_index >= start + deleteCount) {
-						template_token[index].key -= deleteCount;
-						// Copy
-						template_token.index_of[template_token[index].key] = template_token.index_of[original_index];
-						delete template_token.index_of[original_index];
-						template_token.parameters[template_token[index].key] = template_token.parameters[original_index];
-						delete template_token.parameters[original_index];
-					}
-				}
-			}
-			console.trace(template_token);
-		}
+		var parsed = parse_wikitext(token.toString(), options);
 
-		if (arguments.length > 2) {
-			var add_template_token = Array.prototype.slice.call(arguments, 2), skip_parameters = 0;
-			// 補足數字 parameter name。
-			for (var index = 1; index < start; index++) {
-				if (!template_token[index][0].toString().trim()) {
-					add_template_token.unshift('');
-					skip_parameters++;
-				}
-			}
-			// console.trace(add_template_token);
-			add_template_token = parse_wikitext('{{T|'
-					+ add_template_token.join('|') + '}}');
-			console.trace(skip_parameters, add_template_token);
-			var add_index = start, add_index_of = Object.create(null);
-			for ( var parameter_name in add_template_token.index_of) {
-				var index = add_template_token.index_of[parameter_name];
-				if (index < skip_parameters)
-					continue;
-				var parameter_token = add_template_token[add_template_token.index_of[parameter_name]];
-				if (parameter_name in template_token.index_of) {
-					// Copy to existed parameter.
-					template_token[template_token.index_of[parameter_name]] = parameter_token;
-				} else {
-					// New parameter.
-					args.push(parameter_token);
-					add_index_of[parameter_name] = add_index++;
-				}
-				// Set template_token.parameters first.
-				template_token.parameters[parameter_name] = add_template_token.parameters[parameter_name];
-			}
-			console.trace([ start, add_index ]);
-			// 處理會因為增添中間數字元素而改變的數字 parameter name。
-			if ((add_index -= start) > 0) {
-				// assert: add_index element(s) added
-				for ( var parameter_name in add_template_token.index_of) {
-					if (add_template_token.index_of[parameter_name] >= start)
-						add_template_token.index_of[parameter_name] += add_index;
-				}
-				Object.assign(template_token.index_of, add_index_of);
-			}
-		}
+		token.truncate();
 
-		return Array.prototype.splice.apply(template_token, args);
+		Object.assign(token, parsed);
 	}
 
 	// const , for <dl>
@@ -2526,7 +2452,8 @@ function module_code(library_namespace) {
 			// 參數有分大小寫與繁簡體。
 			parameters.parameters = _parameters;
 			parameters.index_of = parameter_index_of;
-			parameters.splice = template_token__splice;
+			// parameters.splice = template_token__splice;
+			// parameters.push = template_token__push;
 
 			_set_wiki_type(parameters, matched ? 'magic_word_function'
 					: 'transclusion');
@@ -4065,6 +3992,7 @@ function module_code(library_namespace) {
 		HTML_to_wikitext : HTML_to_wikitext,
 		// wikitext_to_plain_text : wikitext_to_plain_text,
 
+		inplace_reparse_token : inplace_reparse_token,
 		parse : parse_wikitext
 	});
 

@@ -1130,6 +1130,7 @@ function module_code(library_namespace) {
 		// 設定 title 'Template:tl' 可取得使用指定 Template 的頁面。
 		// https://en.wikipedia.org/wiki/Wikipedia:Transclusion
 		// https://www.mediawiki.org/wiki/API:Embeddedin
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bembeddedin
 		embeddedin : 'ei',
 
 		// 回傳連結至指定頁面的所有重新導向。 Returns all redirects to the given pages.

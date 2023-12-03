@@ -266,6 +266,9 @@ function module_code(library_namespace) {
 	 * 換成 replace_to。 replace_template_parameter(), set_parameter(),
 	 * modify_template()
 	 * 
+	 * WARNING: 本函數只保證 template_token.toString() 這個正確。若之後還要利用
+	 * template_token，應先執行 `CeL.wiki.inplace_reparse_token(template_token)`。
+	 * 
 	 * WARNING: 若不改變 parameter name，只變更 value，<br />
 	 * 則應該使用 { value_only: true }，<br />
 	 * 或使用 'parameter name = value' 而非僅 'value'。
@@ -387,7 +390,7 @@ function module_code(library_namespace) {
 					// 不存在此 parameter name 可 replace。
 					if (options.value_only && options.force_add) {
 						// options.preserve_spacing
-						if (!options.no_space
+						if (!options.no_value_space
 						//
 						&& (!key_of_spaces || key_of_spaces !== latest_OK_key)
 						//
@@ -443,6 +446,17 @@ function module_code(library_namespace) {
 				if (options.value_only
 						&& (typeof replace_to === 'string' || typeof replace_to === 'number')) {
 					var this_parameter = template_token[template_token.index_of[replace_from]];
+					if (options.no_value_space) {
+						if (this_parameter[3]) {
+							this_parameter[3] = this_parameter[3].toString()
+									.trimStart();
+							if (!this_parameter[3])
+								this_parameter.splice(3, 1);
+						}
+						this_parameter[1] = this_parameter[1].toString()
+								.trimEnd();
+					}
+
 					var parameters = template_token.parameters;
 
 					// using this_parameter[2] to keep spaces and parameter

@@ -1564,12 +1564,33 @@ function module_code(library_namespace) {
 		return expand_transclusion(token, options);
 	}
 
+	// ------------------------------------------------------------------------
+
+	// @see [[Module:Yesno]], [[Template:Yesno]]
+	function Yesno(value, default_value) {
+		if (value === undefined)
+			return;
+		if (/^(?:[nf否关關]|no|false|off)$/i.test(value))
+			return false;
+		if (/^(?:[yt是开開]|yes|true|on)$/i.test(value))
+			return true;
+		return default_value;
+	}
+
+	// ------------------------------------------------------------------------
+
+	// export 導出.
+	// @static
+
+	// CeL.wiki.*
 	Object.assign(wiki_API, {
 		repeatedly_expand_template_token : repeatedly_expand_template_token,
 
 		expand_transclusion : expand_transclusion,
 
-		evaluate_parser_function_token : evaluate_parser_function_token
+		evaluate_parser_function_token : evaluate_parser_function_token,
+
+		Yesno : Yesno
 	});
 
 	// --------------------------------------------------------------------------------------------
