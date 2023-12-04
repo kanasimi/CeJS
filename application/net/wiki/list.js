@@ -2690,11 +2690,9 @@ function module_code(library_namespace) {
 
 		// console.trace(title);
 
-		var action = normalize_title_parameter(title, Object.assign(Object
-				.create(null), options, {
-			// modules=query&titles= overwrite multi=false
-			multi : undefined
-		}));
+		// modules=query&titles= overwrite multi=false
+		options.multi_param = true;
+		var action = normalize_title_parameter(title, options);
 		if (!action) {
 			throw 'wiki_API.redirects_here: Invalid title: '
 					+ wiki_API.title_link_of(title);

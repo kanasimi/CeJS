@@ -408,11 +408,9 @@ function module_code(library_namespace) {
 
 		// console.trace(title, arguments);
 
-		action = normalize_title_parameter(title, Object.assign(Object
-				.create(null), options, {
-			// modules=query&titles= overwrite multi=false
-			multi : undefined
-		}));
+		// modules=query&titles= overwrite multi=false
+		options.multi_param = true;
+		action = normalize_title_parameter(title, options);
 		// console.trace(action);
 		if (!action) {
 			library_namespace.error([ 'wiki_API_page: ', {

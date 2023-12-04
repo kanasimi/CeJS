@@ -849,20 +849,21 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
-	 * @param {Boolean}[multi]
+	 * @param {Boolean}[multi_param]
 	 *            page_data is {Array}multi-page_data
 	 * @param {Boolean}[is_id]
 	 *            page_data is page_id instead of page_data
 	 * @param {String}[param_name]
 	 *            param name. default: 'title' or 'titles'.
 	 */
-	wiki_API_query.title_param = function(page_data, multi, is_id, param_name) {
+	wiki_API_query.title_param = function(page_data, multi_param, is_id,
+			param_name) {
 		var pageid;
 
 		if (Array.isArray(page_data)) {
 			// auto detect multiple pages
-			if (multi === undefined) {
-				multi = pageid && pageid.length > 1;
+			if (multi_param === undefined) {
+				multi_param = pageid && pageid.length > 1;
 			}
 
 			pageid = [];
@@ -927,9 +928,9 @@ function module_code(library_namespace) {
 
 		var parameters = new library_namespace.Search_parameters();
 		if (pageid !== undefined) {
-			parameters[multi ? 'pageids' : 'pageid'] = pageid;
+			parameters[multi_param ? 'pageids' : 'pageid'] = pageid;
 		} else if (page_data) {
-			parameters[param_name || (multi ? 'titles' : 'title')] = page_data;
+			parameters[param_name || (multi_param ? 'titles' : 'title')] = page_data;
 		}
 
 		return parameters;

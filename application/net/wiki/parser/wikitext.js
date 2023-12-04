@@ -755,29 +755,6 @@ function module_code(library_namespace) {
 		}
 	};
 
-	function template_token__splice() {
-		var result = Array.prototype.splice.apply(this, arguments);
-		inplace_reparse_token(this);
-		return result;
-	}
-	function template_token__push() {
-		var result = Array.prototype.push.apply(this, arguments);
-		inplace_reparse_token(this);
-		return result;
-	}
-
-	function inplace_reparse_token(token, options) {
-		var session = wiki_API.session_of_options(options || token);
-		options = wiki_API.add_session_to_options(session, Object
-				.clone(options));
-
-		var parsed = parse_wikitext(token.toString(), options);
-
-		token.truncate();
-
-		Object.assign(token, parsed);
-	}
-
 	// const , for <dl>
 	var DEFINITION_LIST = 'd';
 
@@ -3961,6 +3938,21 @@ function module_code(library_namespace) {
 		}
 
 		return wikitext;
+	}
+
+	// ------------------------------------------------------------------------
+
+	// CeL.wiki.inplace_reparse_token(template_token)
+	function inplace_reparse_token(token, options) {
+		var session = wiki_API.session_of_options(options || token);
+		options = wiki_API.add_session_to_options(session, Object
+				.clone(options));
+
+		var parsed = parse_wikitext(token.toString(), options);
+
+		token.truncate();
+
+		Object.assign(token, parsed);
 	}
 
 	// ------------------------------------------------------------------------
