@@ -1690,8 +1690,6 @@ function module_code(library_namespace) {
 		parsed.insert_layout_token('{{maintenance_template}}',
 				'maintenance_templates');
 		parsed.insert_layout_token('[[Category:category name]]');
-		parsed.insert_layout_token('{{DEFAULTSORT:sort key}}', 'DEFAULTSORT');
-		// TODO:
 		parsed.insert_layout_token('{{DEFAULTSORT:sort key}}');
 		return parsed.toString();
 	}
@@ -1780,6 +1778,8 @@ function module_code(library_namespace) {
 			if (location) {
 			} else if (token.type === 'category') {
 				location = 'categories';
+			} else if (token.type === 'magic_word_function' && token.name === 'DEFAULTSORT') {
+				location = 'DEFAULTSORT';
 			}
 		}
 
