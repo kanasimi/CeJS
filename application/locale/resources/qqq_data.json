@@ -2766,7 +2766,7 @@
 		"notes": "沒有頁面內容。; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1742}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3885}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3904}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L882}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1086}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1757}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3885}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3904}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L882}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1086}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-results": {

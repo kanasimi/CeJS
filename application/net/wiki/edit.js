@@ -1641,7 +1641,7 @@ function module_code(library_namespace) {
 	}
 
 	// [ all_mark, start_mark, variable_name, original_value, end_mark ]
-	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]*?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)/g;
+	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]*?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)(\n)?/g;
 	var Variable_Map__PATTERN_template_mark = /({{Auto-generated\s*\|([^{}|]+)}})([\s\S]*?)({{Auto-generated\s*\|\2\|end}})/;
 
 	// Get all mark list
@@ -1664,16 +1664,31 @@ function module_code(library_namespace) {
 	};
 
 	function Variable_Map_update(wikitext, options) {
+		// 前置處理。
+		options = library_namespace.new_options(options);
+
 		// options.force_change 可強制回傳 {String}
-		var changed = options && options.force_change, variable_Map = this;
+		var changed = options.force_change, variable_Map = this, counter = new Map, remove_duplicates = options.remove_duplicates
+				&& (typeof options.remove_duplicates === 'string' ? [ options.remove_duplicates ]
+						: Array.isArray(options.remove_duplicates)
+								&& options.remove_duplicates);
 		// console.trace(variable_Map);
 
 		function replacer(all_mark, start_mark, variable_name, original_value,
-				end_mark) {
+				end_mark, tail) {
 			if (false) {
 				console.trace([ all_mark, variable_name,
 						variable_Map.has(variable_name) ]);
 			}
+
+			// 保留第一個標記。 options.preserve_the_first_mark
+			if (remove_duplicates && remove_duplicates.includes(variable_name)
+					&& counter.get(variable_name) > 0) {
+				return '';
+			}
+
+			counter.set(variable_name, (counter.get(variable_name) || 0) + 1);
+
 			// console.trace(variable_Map);
 			if (variable_Map.has(variable_name)) {
 				var value = variable_Map.get(variable_name), may_not_update;
@@ -1687,7 +1702,7 @@ function module_code(library_namespace) {
 					if (!may_not_update)
 						changed = variable_name;
 					// preserve start_mark, end_mark
-					return start_mark + value + end_mark;
+					return start_mark + value + end_mark + tail;
 				}
 			}
 			return all_mark;
