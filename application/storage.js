@@ -40,7 +40,11 @@ function detect_require(library_namespace) {
 		return 'application.OS.Windows.file.';
 	}
 
-	library_namespace.error('It seems I am running on an unknown OS.');
+	if (library_namespace.is_WWW()) {
+		library_namespace.debug('It looks like we are running in a web environment.', 1, 'detect_require');
+		return;
+	}
+	library_namespace.error('It looks like we are running in an unknown OS.');
 }
 
 function module_code(library_namespace) {

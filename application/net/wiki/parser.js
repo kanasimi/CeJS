@@ -1778,7 +1778,8 @@ function module_code(library_namespace) {
 			if (location) {
 			} else if (token.type === 'category') {
 				location = 'categories';
-			} else if (token.type === 'magic_word_function' && token.name === 'DEFAULTSORT') {
+			} else if (token.type === 'magic_word_function'
+					&& token.name === 'DEFAULTSORT') {
 				location = 'DEFAULTSORT';
 			}
 		}
