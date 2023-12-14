@@ -1640,7 +1640,7 @@ function module_code(library_namespace) {
 		return start_mark + value + end_mark;
 	}
 
-	// [ all_mark, start_mark, variable_name, original_value, end_mark ]
+	// [ all_mark, start_mark, variable_name, original_value, end_mark, tail ]
 	var Variable_Map__PATTERN_mark = /(<!--\s*update ([^():]+)[\s\S]*?-->)([\s\S]*?)(<!--\s*update end:\s*\2(?:\W[\s\S]*?)?-->)(\n)?/g;
 	var Variable_Map__PATTERN_template_mark = /({{Auto-generated\s*\|([^{}|]+)}})([\s\S]*?)({{Auto-generated\s*\|\2\|end}})/;
 
@@ -1702,7 +1702,7 @@ function module_code(library_namespace) {
 					if (!may_not_update)
 						changed = variable_name;
 					// preserve start_mark, end_mark
-					return start_mark + value + end_mark + tail;
+					return start_mark + value + end_mark + (tail || '');
 				}
 			}
 			return all_mark;
