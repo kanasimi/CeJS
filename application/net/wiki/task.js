@@ -974,10 +974,19 @@ function module_code(library_namespace) {
 				break;
 			}
 
+			var redirects_data = next[3].register_target || this.redirects_data;
 			if (next[3].reget) {
 			} else if (Array.isArray(next[1])) {
 				next[1] = next[1].filter(function(page_title) {
-					return page_title && !(page_title in _this.redirects_data);
+					if (false && redirects_data !== _this.redirects_data
+					// Copy data: 這會漏掉 page_data.original_title,
+					// page_data.redirect_from
+					&& (page_title in _this.redirects_data)) {
+						redirects_data[page_title]
+						//
+						= _this.redirects_data[page_title];
+					}
+					return page_title && !(page_title in redirects_data);
 				}).unique();
 				if (next[1].length === 0) {
 					// next[2] : callback(root_page_data, error)
@@ -985,10 +994,10 @@ function module_code(library_namespace) {
 					break;
 				}
 
-			} else if (next[1] in this.redirects_data) {
+			} else if (next[1] in redirects_data) {
 				if (false) {
 					console.trace('已處理過 have registered, use cache: ' + next[1]
-							+ '→' + this.redirects_data[next[1]]);
+							+ '→' + redirects_data[next[1]]);
 				}
 				// next[2] : callback(root_page_data, error)
 				this.next(next[2]);
@@ -1039,14 +1048,14 @@ function module_code(library_namespace) {
 				// from: alias, to: 正式名稱
 				function register_title(from, to) {
 					if (!from
-					// || (from in _this.redirects_data)
+					// || (from in redirects_data)
 					) {
 						return;
 					}
 					// assert: from ===
 					// _this.normalize_title(from)
 					// the namespace of from, to is normalized
-					_this.redirects_data[from] = to;
+					redirects_data[from] = to;
 					registered_page_list.push(from);
 				}
 				function register_root_alias(page_data) {
@@ -1130,7 +1139,7 @@ function module_code(library_namespace) {
 					});
 				}
 
-				// console.trace(_this.redirects_data);
+				// console.trace(redirects_data);
 
 				if (false) {
 					console.trace([ next[3].no_languagevariants,
@@ -1149,17 +1158,17 @@ function module_code(library_namespace) {
 				// 處理 converttitles。
 				// console.trace('處理繁簡轉換問題: ' + registered_page_list);
 				// console.trace(root_page_data);
-				// console.trace(JSON.stringify(_this.redirects_data));
+				// console.trace(JSON.stringify(redirects_data));
 				function register_redirect_list_via_mapper(original_list,
 						list_to_map) {
 					// console.trace(next[3].uselang + ': ' + list_to_map);
 					list_to_map.forEach(function(map_from, index) {
-						// if (map_from in _this.redirects_data) return;
+						// if (map_from in redirects_data) return;
 						var map_to
 						//
-						= _this.redirects_data[original_list[index]];
+						= redirects_data[original_list[index]];
 						// console.log(map_from + ' → ' + map_to);
-						_this.redirects_data[map_from] = map_to;
+						redirects_data[map_from] = map_to;
 					});
 				}
 

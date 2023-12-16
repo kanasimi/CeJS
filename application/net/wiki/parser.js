@@ -1600,12 +1600,11 @@ function module_code(library_namespace) {
 				} else if (/^Coord/.test(token.name)) {
 					// Geographical coordinates
 					set_index('coord_templates');
-				} else if (/^(?:\w[ _])?Talk:/.test(token.name)) {
-					// 嵌入包含了其他頁面。
-					// e.g., [[w:en:Talk:Cuvier's dwarf caiman]]
-					set_index('content');
-					set_index('lead_section_end', BACKTRACKING_SPACES);
-				} else if (token.name === 'DYKEntry/archive') {
+				} else if (token.name === 'DYKEntry/archive'
+				// 嵌入包含了其他頁面。
+				// e.g., [[w:en:Talk:Cuvier's dwarf caiman]],
+				// [[w:en:Talk:Siege of Viborg (1710)]]
+				|| /^(?:\w[ _])?Talk:/.test(token.name)) {
 					// 模板本身包含標題。
 					// e.g., [[w:zh:Template:DYKEntry/archive]]
 					set_index('content');
@@ -1638,6 +1637,7 @@ function module_code(library_namespace) {
 				set_index('content');
 				// 機器人是看標題與起始 hatnote templates 來判斷。若這個模板之前還有其他章節標題的話，就不會出錯了。
 				set_index('lead_section_end', BACKTRACKING_SPACES);
+				set_index('lead_templates_end', BACKTRACKING_SPACES);
 				break;
 
 			case 'magic_word_function':
