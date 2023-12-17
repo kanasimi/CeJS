@@ -239,6 +239,17 @@ function module_code(library_namespace) {
 	https://www.69shuba.com/txt/51594/33707465	请公子斩妖 第848章 无名古佛 【感谢“wangyao023”的盟主打赏】
 	&emsp;&emsp;第848章 无名古佛 【感谢“wangyao-023”的盟主打赏】
 
+	https://www.piaotian.com/html/14/14431/10164343.html	道诡异仙 第434章 北风
+	&nbsp;&nbsp;&nbsp;&nbsp;第434章 北风
+
+	https://www.piaotian.com/html/9/9051/5938845.html	超神机械师 011 天若有情天亦老，我为萧哥***
+
+	https://www.piaotian.com/html/5/5982/3239153.html	随波逐流之一代军师 外传 清梵曲
+	&nbsp;&nbsp;&nbsp;&nbsp;清梵曲作者：加兰<br/><br/>
+
+	https://www.piaotian.com/html/14/14431/10565524.html	道诡异仙 第1027章 番外1 感谢白银盟主（李火旺0402生
+	&nbsp;&nbsp;&nbsp;&nbsp;第1027章 番外1 感谢白银盟主（李火旺0402生日快乐）的打赏。<br/><br/>
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
@@ -248,10 +259,25 @@ function module_code(library_namespace) {
 	/** {RegExp}搜尋新行新段落用。 */
 	trim_start_title.PATTERN_new_line = /<br(?:\s[^<>]*)?>|\n|<\/?p(?:\s[^<>]*)?>/i;
 
-	// 當文章內文以章節標題起始時，去除章節標題的部分。
+	// 當文章內文以章節標題起始時，去除一開始章節標題的部分。
 	function trim_start_title(text, chapter_data) {
 		// const
-		var title = chapter_data.title || chapter_data;
+		var title = chapter_data.title || typeof chapter_data === 'string'
+				&& chapter_data;
+		if (!title
+		// || !/第.+章/.test(title)
+		) {
+			// console.trace(chapter_data);
+			return text;
+		}
+
+		// ols method
+		if (false) {
+			text = text.replace(new RegExp(/^(?:&nbsp;|\s)*/.source
+					+ library_namespace.to_RegExp_pattern(title)
+					+ /\s*(?:<br\s*\/?>)+/.source), '');
+		}
+
 		/** {Number}第一行結束的index @ text。 */
 		var first_line_end_index = 0;
 		/** {String}第一行的內容。 */
@@ -343,7 +369,7 @@ function module_code(library_namespace) {
 				+ special_chars_count);
 	}
 
-	// CeL.work_crawler.trim_start_title()
+	// text = CeL.work_crawler.trim_start_title(text, chapter_data);
 	Work_crawler.trim_start_title = trim_start_title;
 
 	// --------------------------------------------------------------------------------------------
