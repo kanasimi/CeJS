@@ -600,7 +600,7 @@
 	"\u6216\u6307\u5b9a \"chapter_filter=\u7ae0\u7bc0\u6a19\u984c\" \u50c5\u4e0b\u8f09\u67d0\u500b\u7ae0\u7bc0\u3002": "ou defina \"chapter_filter = t\u00edtulo do cap\u00edtulo\" para fazer o download de um cap\u00edtulo espec\u00edfico.",
 	"\u7121\u6cd5\u5132\u5b58\u4f5c\u54c1\u300a%1\u300b\u4e4b\u8cc7\u8a0a\u81f3\u6a94\u6848\uff01": "N\u00e3o \u00e9 poss\u00edvel salvar os dados de trabalho de \"%1\"!",
 	"\u5275\u5efa\u4e26\u4f7f\u7528\u4f5c\u54c1\u7db2\u5740 RegExp\uff1a%1": "Criar e usar o URL de trabalho RegExp: %1",
-	"\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1\ud83c\udd94\uff1a%1": "Extrair o ID do trabalho do URL do trabalho: %1",
+	"\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1ID\uff1a%1": "Extrair o ID do trabalho do URL do trabalho: %1",
 	"\u7121\u6cd5\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1\u7de8\u865f\uff01\u4f5c\u54c1\u8cc7\u8a0a\uff1a%1": "N\u00e3o foi poss\u00edvel extrair o ID do trabalho do URL do trabalho! Informa\u00e7\u00f5es sobre o trabalho: %1",
 	"\u627e\u5230%1\u500b\u4f5c\u54c1\uff1a%2": "Encontrado %1 funciona: %2",
 	"crawler.extract_work_id() \u4e0d\u61c9\u56de\u50b3 true\uff01\u8acb\u4fee\u6539\u5de5\u5177\u6a94\u7a0b\u5f0f\u78bc\uff01": "crawler.extract_work_id() n\u00e3o deve retornar true! Modifique o c\u00f3digo do programa!",

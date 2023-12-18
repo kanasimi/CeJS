@@ -600,7 +600,7 @@
 	"\u6216\u6307\u5b9a \"chapter_filter=\u7ae0\u7bc0\u6a19\u984c\" \u50c5\u4e0b\u8f09\u67d0\u500b\u7ae0\u7bc0\u3002": "o bin defin\u00ec \u00abchapter_filter=chapter title\u00bb p\u00ebr d\u00ebscari\u00e9 un cap\u00ectol \u00ebspess\u00ecfich.",
 	"\u7121\u6cd5\u5132\u5b58\u4f5c\u54c1\u300a%1\u300b\u4e4b\u8cc7\u8a0a\u81f3\u6a94\u6848\uff01": "Imposs\u00ecbil argistr\u00e9 ij d\u00e0it \u00ebd l'euvra \u00ebd \u00ab%1\u00bb!",
 	"\u5275\u5efa\u4e26\u4f7f\u7528\u4f5c\u54c1\u7db2\u5740 RegExp\uff1a%1": "Cre\u00e9 e dovr\u00e9 l'espression regolar d'URL d'euvra: %1",
-	"\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1\ud83c\udd94\uff1a%1": "Tir\u00e9 f\u00f2ra l'identificativ \u00ebd l'euvra da s\u00f2 URL: %1",
+	"\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1ID\uff1a%1": "Tir\u00e9 f\u00f2ra l'identificativ \u00ebd l'euvra da s\u00f2 URL: %1",
 	"\u7121\u6cd5\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1\u7de8\u865f\uff01\u4f5c\u54c1\u8cc7\u8a0a\uff1a%1": "Imposs\u00ecbil tir\u00e9 f\u00f2ra l'identificativ \u00ebd l'euvra a parte da s\u00f2 URL! Anformassion an sl'euvra: %1",
 	"\u627e\u5230%1\u500b\u4f5c\u54c1\uff1a%2": "Trov\u00e0 %1 euvre: %2",
 	"crawler.extract_work_id() \u4e0d\u61c9\u56de\u50b3 true\uff01\u8acb\u4fee\u6539\u5de5\u5177\u6a94\u7a0b\u5f0f\u78bc\uff01": "crawler.extract_work_id() a dovr\u00eca pa r\u00ebsponde ver! P\u00ebr pias\u00ec, ch'a mod\u00ecfica \u00ebl c\u00f2des d\u00ebl programa!",

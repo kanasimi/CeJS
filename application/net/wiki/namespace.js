@@ -1655,7 +1655,7 @@ function module_code(library_namespace) {
 		// "ロイ・トーマス<!-- 曖昧さ回避ページ -->"
 		.replace(/<\!--[\s\S]*?-->/g, '')
 		// 沒先處理的話，也會去除 <br />
-		.replace(/\s*<br(?:[^\w<>][^<>]*)?>/ig, '\n').replace(
+		.replace(/\s*<br(?:[^\s\/][^<>]*)?>/ig, '\n').replace(
 				/<\/?[a-z][^>]*>/g, '')
 		// "{{=}}" → "="
 		.replace(/{{=\s*}}/ig, '=')

@@ -600,7 +600,7 @@
 	"\u6216\u6307\u5b9a \"chapter_filter=\u7ae0\u7bc0\u6a19\u984c\" \u50c5\u4e0b\u8f09\u67d0\u500b\u7ae0\u7bc0\u3002": "ou bien d\u00e9finir \u00ab\u202fchapter_filter=chapter title\u202f\u00bb pour t\u00e9l\u00e9charger un chapitre sp\u00e9cifique.",
 	"\u7121\u6cd5\u5132\u5b58\u4f5c\u54c1\u300a%1\u300b\u4e4b\u8cc7\u8a0a\u81f3\u6a94\u6848\uff01": "Impossible d\u2019enregistrer les donn\u00e9es de l\u2019\u0153uvre pour \u00ab\u202f%1\u202f\u00bb\u202f!",
 	"\u5275\u5efa\u4e26\u4f7f\u7528\u4f5c\u54c1\u7db2\u5740 RegExp\uff1a%1": "Cr\u00e9ation et utilisation de l\u2019expression rationnelle d\u2019URL d\u2019\u0153uvre\u202f: %1",
-	"\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1\ud83c\udd94\uff1a%1": "Extraction de l\u2019identifiant de l\u2019\u0153uvre depuis son URL\u202f: %1",
+	"\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1ID\uff1a%1": "Extraction de l\u2019identifiant de l\u2019\u0153uvre depuis son URL\u202f: %1",
 	"\u7121\u6cd5\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1\u7de8\u865f\uff01\u4f5c\u54c1\u8cc7\u8a0a\uff1a%1": "Impossible d\u2019extraire l\u2019identifiant de l\u2019\u0153uvre depuis son URL\u202f! Informations sur l\u2019\u0153uvre\u202f: %1",
 	"\u627e\u5230%1\u500b\u4f5c\u54c1\uff1a%2": "%1 oeuvre(s) trouv\u00e9e(s)\u202f: %2",
 	"crawler.extract_work_id() \u4e0d\u61c9\u56de\u50b3 true\uff01\u8acb\u4fee\u6539\u5de5\u5177\u6a94\u7a0b\u5f0f\u78bc\uff01": "\u00ab\u202fcrawler.extract_work_id()\u202f\u00bb ne doit pas retourner \u00ab\u202ftrue\u202f\u00bb (vrai)\u202f! Veuillez corriger le code du programme\u202f!",

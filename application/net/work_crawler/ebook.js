@@ -244,9 +244,6 @@ function module_code(library_namespace) {
 
 	https://www.piaotian.com/html/9/9051/5938845.html	超神机械师 011 天若有情天亦老，我为萧哥***
 
-	https://www.piaotian.com/html/5/5982/3239153.html	随波逐流之一代军师 外传 清梵曲
-	&nbsp;&nbsp;&nbsp;&nbsp;清梵曲作者：加兰<br/><br/>
-
 	https://www.piaotian.com/html/14/14431/10565524.html	道诡异仙 第1027章 番外1 感谢白银盟主（李火旺0402生
 	&nbsp;&nbsp;&nbsp;&nbsp;第1027章 番外1 感谢白银盟主（李火旺0402生日快乐）的打赏。<br/><br/>
 
@@ -257,21 +254,25 @@ function module_code(library_namespace) {
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
-	trim_start_title.PATTERN_new_line = /<br(?:\s[^<>]*)?>|\n|<\/?p(?:\s[^<>]*)?>/i;
+	trim_start_title.PATTERN_new_line = /<br(?:[\s\/][^<>]*)?>|\n|<\/?p(?:\s[^<>]*)?>/i;
 
 	// 當文章內文以章節標題起始時，去除一開始章節標題的部分。
 	function trim_start_title(text, chapter_data) {
 		// const
-		var title = chapter_data.title || typeof chapter_data === 'string'
-				&& chapter_data;
-		if (!title
-		// || !/第.+章/.test(title)
-		) {
-			// console.trace(chapter_data);
+		var title;
+		if (chapter_data.title) {
+			title = chapter_data.title;
+		} else if (typeof chapter_data === 'string' && chapter_data) {
+			title = chapter_data;
+		} else {
+			return text;
+		}
+		if (false && !/第.+章/.test(title)) {
+			console.trace(chapter_data);
 			return text;
 		}
 
-		// ols method
+		// old method
 		if (false) {
 			text = text.replace(new RegExp(/^(?:&nbsp;|\s)*/.source
 					+ library_namespace.to_RegExp_pattern(title)
@@ -308,12 +309,14 @@ function module_code(library_namespace) {
 
 		var special_chars_count = 0, full_title;
 		var title_start_index = first_line.indexOf(title);
-		if (title_start_index === NOT_FOUND) {
-			// assert: 第一行不包含完整標題。
+		// console.trace([ title, title_start_index, first_line ]);
 
-			var first_line_used = first_line.replace(
+		if (title_start_index === NOT_FOUND) {
+			// assert: 第一行不包含與 title 相同之標題。
+
+			var first_line_trimmed = first_line.replace(
 					trim_start_title.PATTERN_special_chars, '');
-			special_chars_count = first_line.length - first_line_used.length;
+			special_chars_count = first_line.length - first_line_trimmed.length;
 			// assert: special_chars_count >= 0
 			if (special_chars_count === 0) {
 				// 第一行不含有特殊字元。
@@ -322,8 +325,9 @@ function module_code(library_namespace) {
 			}
 
 			// 標題 → 去除特殊字元後的標題。
-			title = title.replace(trim_start_title.PATTERN_special_chars, '');
-			title_start_index = first_line_used.indexOf(title);
+			var title_trimmed = title.replace(
+					trim_start_title.PATTERN_special_chars, '');
+			title_start_index = first_line_trimmed.indexOf(title_trimmed);
 			if (title_start_index === NOT_FOUND) {
 				// 第一行不包含去除特殊字元後的標題。
 				// 正文不以標題起始。
@@ -331,19 +335,18 @@ function module_code(library_namespace) {
 			}
 
 			full_title = first_line.slice(title_start_index, title_start_index
-					+ title.length + special_chars_count);
-			if (full_title.replace(trim_start_title.PATTERN_special_chars, '') !== title) {
+					+ title_trimmed.length + special_chars_count);
+			if (full_title.replace(trim_start_title.PATTERN_special_chars, '') !== title_trimmed) {
 				// 正文標題前後尚有特殊符號?
 				// e.g., first_line.slice(0, title_start_index)
-				// !== first_line_used.slice(0, title_start_index)
+				// !== first_line_trimmed.slice(0, title_start_index)
 				return text;
 			}
 
 			// 正文以標題加上特殊符號起始的情況。
-
-		} else {
-			// 正文以標題起始的一般情況。
 		}
+
+		// ----------------------------
 
 		/** {String}標題之前的內容。 */
 		var content_before_title = library_namespace.HTML_to_Unicode(first_line
@@ -356,17 +359,49 @@ function module_code(library_namespace) {
 		if (content_before_title)
 			return text;
 
+		// ----------------------------
+
+		// 正文以標題起始的一般情況。
+		var content_after_title = first_line.slice(title_start_index
+				+ (full_title || title).length);
+		// console.trace([ content_after_title ]);
+		if (content_after_title.includes('作者')) {
+			/**
+			 * <code>
+
+			https://www.piaotian.com/html/5/5982/3239153.html	随波逐流之一代军师 外传 清梵曲
+			&nbsp;&nbsp;&nbsp;&nbsp;清梵曲作者：加兰<br/><br/>
+
+			</code>
+			 */
+			return text;
+		}
+
+		if (content_after_title) {
+			console.trace([ full_title, title, content_after_title ]);
+			full_title = (full_title || title) + content_after_title;
+		}
+
+		// ----------------------------
+
 		if (full_title && chapter_data.title === title) {
 			library_namespace.log(library_namespace.display_align([
 			// @see gettext_config:{"id":"work_data.chapter_title"}
 			[ gettext('章節標題：'), title ],
-			//
+			// 第一行包含完整標題，改成完整標題。
 			[ '→', full_title ] ]));
-			chapter_data.title = full_title;
+			chapter_data.title = title = full_title;
 		}
 
-		return text.slice(title_start_index + title.length
-				+ special_chars_count);
+		if (false && title.includes('')) {
+			console.trace([ full_title, title, title_start_index, first_line,
+					content_before_title, content_after_title,
+					text.slice(title_start_index
+					//
+					+ (full_title || title).length).slice(0, 100) ]);
+		}
+
+		return text.slice(title_start_index + (full_title || title).length);
 	}
 
 	// text = CeL.work_crawler.trim_start_title(text, chapter_data);

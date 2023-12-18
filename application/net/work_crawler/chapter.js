@@ -1385,6 +1385,7 @@ function module_code(library_namespace) {
 						//
 						: chapter_URL) ]
 					} ]);
+					// console.trace(e);
 					_this.onerror(e, work_data);
 					typeof callback === 'function' && callback(work_data);
 					return Work_crawler.THROWED;

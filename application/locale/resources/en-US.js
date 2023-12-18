@@ -600,7 +600,7 @@
 	"\u6216\u6307\u5b9a \"chapter_filter=\u7ae0\u7bc0\u6a19\u984c\" \u50c5\u4e0b\u8f09\u67d0\u500b\u7ae0\u7bc0\u3002": "or set \"chapter_filter=chapter title\" to download specific chapter.",
 	"\u7121\u6cd5\u5132\u5b58\u4f5c\u54c1\u300a%1\u300b\u4e4b\u8cc7\u8a0a\u81f3\u6a94\u6848\uff01": "Cannot save work data of \u00ab%1\u00bb!",
 	"\u5275\u5efa\u4e26\u4f7f\u7528\u4f5c\u54c1\u7db2\u5740 RegExp\uff1a%1": "Create and use the work URL RegExp: %1",
-	"\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1\ud83c\udd94\uff1a%1": "Extract work id from the work URL: %1",
+	"\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1ID\uff1a%1": "Extract work id from the work URL: %1",
 	"\u7121\u6cd5\u81ea\u4f5c\u54c1\u7db2\u5740\u63d0\u53d6\u51fa\u4f5c\u54c1\u7de8\u865f\uff01\u4f5c\u54c1\u8cc7\u8a0a\uff1a%1": "Unable to extract work id from the work URL! Work information: %1",
 	"\u627e\u5230%1\u500b\u4f5c\u54c1\uff1a%2": "Found %1 works: %2",
 	"crawler.extract_work_id() \u4e0d\u61c9\u56de\u50b3 true\uff01\u8acb\u4fee\u6539\u5de5\u5177\u6a94\u7a0b\u5f0f\u78bc\uff01": "crawler.extract_work_id() should not return true! Please modify the program code!",
