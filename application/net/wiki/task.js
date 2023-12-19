@@ -1160,8 +1160,17 @@ function module_code(library_namespace) {
 				// console.trace(root_page_data);
 				// console.trace(JSON.stringify(redirects_data));
 				function register_redirect_list_via_mapper(original_list,
-						list_to_map) {
-					// console.trace(next[3].uselang + ': ' + list_to_map);
+						list_to_map, error) {
+					if (false) {
+						console.trace([ next[3].uselang, original_list,
+								list_to_map ]);
+					}
+					if (!Array.isArray(list_to_map)) {
+						library_namespace
+								.error('register_redirect_list_via_mapper: '
+										+ '無法繁簡轉換: ' + (error || '未知的錯誤'));
+						return;
+					}
 					list_to_map.forEach(function(map_from, index) {
 						// if (map_from in redirects_data) return;
 						var map_to
@@ -1175,14 +1184,22 @@ function module_code(library_namespace) {
 				// next[3] : options
 				next[3].uselang = 'zh-hant';
 				wiki_API.convert_Chinese(registered_page_list, function(
-						converted_hant) {
+						converted_hant, error) {
+					if (false) {
+						console.trace([ registered_page_list, converted_hant,
+								error ]);
+					}
 					register_redirect_list_via_mapper(registered_page_list,
-							converted_hant);
+							converted_hant, error);
 					next[3].uselang = 'zh-hans';
 					wiki_API.convert_Chinese(registered_page_list, function(
-							converted_hans) {
+							converted_hans, error) {
+						if (false) {
+							console.trace([ registered_page_list,
+									converted_hans, error ]);
+						}
 						register_redirect_list_via_mapper(registered_page_list,
-								converted_hans);
+								converted_hans, error);
 						_this.next(next[2], root_page_data);
 					}, next[3]);
 				}, next[3]);

@@ -1808,13 +1808,15 @@ function module_code(library_namespace) {
 				{
 					action : 'parse'
 				} ], function(data, error) {
-			if (error || !data) {
+			error = wiki_API.query.handle_error(data, error);
+			if (error) {
 				callback(undefined, error);
 				return;
 			}
+			// console.trace(data);
 			data = data.parse;
 			try {
-				// 罕見情況下，有可能 data === dundefined
+				// 罕見情況下，有可能 data === undefined
 				data = data.text['*']
 				// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
 				.replace(/<!--[\s\S]*?-->/g, '')
