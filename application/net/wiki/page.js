@@ -1840,7 +1840,7 @@ function module_code(library_namespace) {
 				return;
 			}
 			callback(data);
-		}, post_data);
+		}, post_data, options);
 	}
 
 	if (false) {
