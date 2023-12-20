@@ -1947,6 +1947,9 @@ function module_code(library_namespace) {
 			token += '\n';
 		}
 
+		if (options.post_processor)
+			token = options.post_processor(token);
+
 		parsed[parsed_index] = token;
 
 		// return changed
