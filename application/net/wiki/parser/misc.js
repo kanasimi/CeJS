@@ -1938,7 +1938,7 @@ function module_code(library_namespace) {
 		// prevent patch fieldsep ::= ‘,’ | ‘;’ below
 		// 必須是在富源乾不會被更動的代碼!
 		var MARK_as_object = '\0as_object';
-		// console.trace([ lua_code.slice(0, 800), lua_code.slice(-800) ]);
+		// console.trace(library_namespace.string_digest(lua_code, 800));
 
 		// e.g., parse
 		// https://raw.githubusercontent.com/wikimedia/mediawiki/master/includes/languages/data/ZhConversion.php
@@ -1948,8 +1948,7 @@ function module_code(library_namespace) {
 		// → {"A":"B","C":"D",}
 		function(all, inner) {
 			if (false) {
-				console.trace([ inner.length, inner.slice(0, 800),
-						inner.slice(-800) ]);
+				console.trace(library_namespace.string_digest(inner, 800));
 			}
 			inner = inner.replace(/("[^"]*")\s*=>\s*("[^"]*")/g, function(all,
 					from, to) {
@@ -2056,9 +2055,9 @@ function module_code(library_namespace) {
 		// --------------------------------------
 
 		// Recover MARK_as_object
-		// console.trace([ lua_code.slice(0, 800), lua_code.slice(-800) ]);
+		// console.trace(library_namespace.string_digest(lua_code, 800)));
 		lua_code = lua_code.replace(new RegExp(MARK_as_object, 'g'), '{');
-		// console.trace([ lua_code.slice(0, 800), lua_code.slice(-800) ]);
+		// console.trace(library_namespace.string_digest(lua_code, 800)));
 
 		// --------------------------------------
 

@@ -662,9 +662,15 @@ function module_code(library_namespace) {
 		// https://www.piaotia.com/html/12/12788/9021489.html	开局奖励一亿条命 第826章 逃得掉吗
 		<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;(本章完)<br/><br/>
 
+		// https://www.xxbiquke.net/74_74304/39344627.html	仙人只想躺着 第一百七十二章云间临神州，威仪万万里。
+		<p class="content_detail">
+		(本章完)
+		</p>
+
 		</code>
 		 */
-		text = text.replace(/\(本章完\)(?:<br[^<>]*>|\s)*$/, '');
+		text = text.replace(
+				/\(本章完\)(?:<br[^<>]*>|\s)*(<\/p>)?(?:<br[^<>]*>|\s)*$/, '$1');
 
 		return text;
 	}
@@ -993,7 +999,7 @@ function module_code(library_namespace) {
 		// console.trace(work_data.convert_options);
 
 		data.text = library_namespace.HTML_to_Unicode(
-		// 處理 HTML tags 以減少其對 this.convert_text_language() 的影響。
+		// 清理 HTML tags 以減少其對 this.convert_text_language() 的影響。
 		// TODO: <p> @ qidian.js
 		library_namespace.EPUB.normailize_contents(data.text
 		// remove all new-lines
@@ -1002,6 +1008,11 @@ function module_code(library_namespace) {
 		.replace(/\s*<br(?:[^\w<>][^<>]*)?>[\r\n]*/ig, '\n')
 		// .trim()
 		), true);
+
+		data.text = data.text
+		// 清除最後的 <p></p>
+		.replace(/(?:<(\w+)[^<>]*>\s*<\/\1>\s*)+$/g, '');
+
 		// console.log(data.text);
 
 		// return needing to wait language converted
@@ -1011,19 +1022,61 @@ function module_code(library_namespace) {
 				work_data.convert_options);
 		if (promise_of_language_convert) {
 			if (false) {
-				library_namespace.log('Convert      ' + part_title + '§'
-						+ chapter_title + ': ' + data.text.slice(0, 40)
-						+ '...(' + data.text.length + ')');
+				console.trace('Convert-1 ' + part_title + '§' + chapter_title
+						+ ': ' + chapter_data.url + '\n'
+						+ library_namespace.string_digest(data.text));
+				promise_of_language_convert.chapter_title = chapter_title;
+				console.log(promise_of_language_convert);
 			}
+			library_namespace.log_temporary({
+				T : [ this.convert_to_language === 'TW'
+				// gettext_config:{"id":"convert-simplified-chinese-to-traditional-chinese-«$1»"}
+				? '將簡體中文轉換成繁體中文：《%1》'
+				// gettext_config:{"id":"convert-traditional-chinese-to-simplified-chinese-«$1»"}
+				: '将繁体中文转换成简体中文：《%1》',
+				//
+				part_title ? part_title + '§' + chapter_title : chapter_title ]
+			});
+			process.title = gettext(this.convert_to_language === 'TW'
+			// gettext_config:{"id":"traditionalize-$1"}
+			? '繁化: %1'
+			// gettext_config:{"id":"simplify-$1"}
+			: '简化: %1', chapter_title) + ' @ ' + this.id;
 			return ebook.working_promise = ebook.working_promise
 			//
 			.then(function() {
-				return promise_of_language_convert.then(
+				if (false) {
+					console.trace('Convert-2 ' + part_title + '§'
+							+ chapter_title + ': ' + chapter_data.url + '\n'
+							+ library_namespace.string_digest(data.text));
+					console.log(promise_of_language_convert);
+				}
+
+				return promise_of_language_convert
+				/**
+				 * <code>
+				.then(function(text_list) {
+					console.trace('Convert-3 '
+					//
+					+ part_title + '§' + chapter_title
+					//
+					+ ': ' + chapter_data.url + '\n'
+					//
+					+ library_namespace.string_digest(data.text));
+					console.trace(text_list);
+				})
+				</code>
+				 */
+				.then(
 				// TODO: 這邊失敗，例如 timeout 的話，會直接跳到最後一章並且出現錯誤。
 				add_ebook_chapter_actual_work.bind(this, work_data, chapter_NO,
 						data, options));
 			}.bind(this));
 		} else {
+			if (false) {
+				console.trace('Add content ' + part_title + '§' + chapter_title
+						+ ': ' + library_namespace.string_digest(data.text));
+			}
 			// 將 ebook 相關作業納入 {Promise}，可保證先添加完章節資料、下載完資源再 pack_ebook()。
 			return ebook.working_promise = ebook.working_promise
 					.then(add_ebook_chapter_actual_work.bind(this, work_data,
@@ -1037,26 +1090,17 @@ function module_code(library_namespace) {
 
 		// @see epub_hans_to_hant.js
 		if (this.convert_to_language) {
+			if (false) {
+				console.trace('Get cache of ' + part_title + '§'
+						+ chapter_title + ': '
+						+ library_namespace.string_digest(data.text));
+			}
 			part_title = this.convert_text_language(part_title);
 			chapter_title = this.convert_text_language(chapter_title);
-			library_namespace.log_temporary({
-				T : [ this.convert_to_language === 'TW'
-				// gettext_config:{"id":"convert-simplified-chinese-to-traditional-chinese-«$1»"}
-				? '將簡體中文轉換成繁體中文：《%1》'
-				// gettext_config:{"id":"convert-traditional-chinese-to-simplified-chinese-«$1»"}
-				: '将繁体中文转换成简体中文：《%1》', chapter_title ]
-			});
-			process.title = gettext(this.convert_to_language === 'TW'
-			// gettext_config:{"id":"traditionalize-$1"}
-			? '繁化: %1'
-			// gettext_config:{"id":"simplify-$1"}
-			: '简化: %1', chapter_title) + ' @ ' + this.id;
-			data.original_text = data.text;
 			if (false) {
-				library_namespace.log('Get cache of ' + part_title + '§'
-						+ chapter_title + ': ' + data.text.slice(0, 40)
-						+ '...(' + data.text.length + ')');
+				console.trace('→ ' + part_title + '§' + chapter_title);
 			}
+			data.original_text = data.text;
 			data.text = this.convert_text_language(data.text)
 			// TODO: 把半形標點符號轉換為全形標點符號
 			.replace(/["'](?:zh-(?:cmn-)?|cmn-)?(?:Hans-)?CN["']/ig,

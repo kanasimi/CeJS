@@ -2564,7 +2564,17 @@ OS='UNIX'; // unknown
 
 
 		var max_log_length = 1000,
+		prepare_message__string_digest = function (message) {
+			return library_namespace.string_digest(message, {
+				slice : max_log_length,
+				ellipsis : '\n\n...\n\n'
+			});
+		};
 		prepare_message = function (message) {
+			if (library_namespace.string_digest) {
+				return (prepare_message = prepare_message__string_digest)(message);
+			}
+
 			message = String(message);
 			if (message.length > 2 * max_log_length)
 				message = message.slice(0, max_log_length) + '\n\n...\n\n' + message.slice(-max_log_length);

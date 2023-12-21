@@ -1432,8 +1432,8 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			// TODO: charset for post_data
 			to_form_data(post_data, function(data) {
-				// console.log(data.toString().slice(0,800));
-				// console.log('>> ' + data.toString().slice(-200));
+				// library_namespace.data.code.string_digest()
+				// console.log('>> ' + library_namespace.string_digest(data.toString(), 200));
 				options.form_data = to_form_data_generated;
 				get_URL_node(URL_to_fetch, onload, charset, data, options);
 			}, options.form_data);

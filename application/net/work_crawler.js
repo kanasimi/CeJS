@@ -270,10 +270,24 @@ function module_code(library_namespace) {
 		// console.trace(text_list.length + ' text to be converted.');
 		if (initializated) {
 			// 初始化後正常的程序。
-			var _promise = this.convert_text_language_using(text_list, options)
+			if (false) {
+				console.trace('Convert text:', library_namespace
+						.string_digest(text_list));
+			}
+			var _promise = this.convert_text_language_using(text_list, options), has_set_text;
+			// console.trace(_promise);
 			// assert: .convert_text_language_using() return thenable
+			_promise = _promise
+			//
 			.then(function set_text_list(converted_text_list) {
-				// console.trace(converted_text_list);
+				if (false) {
+					console.trace('Set converted cache:',
+					//
+					library_namespace.string_digest(text_list),
+					//
+					library_namespace.string_digest(converted_text_list));
+				}
+				has_set_text = true;
 				text_list.forEach(function(text, index) {
 					// free
 					delete _this.converted_text_cache[text].promise;
@@ -283,10 +297,18 @@ function module_code(library_namespace) {
 					= converted_text_list[index];
 				});
 				// console.trace(_this.converted_text_cache);
+				if (false) {
+					return [ text_list, converted_text_list ];
+				}
 			});
-			text_list.forEach(function(text) {
-				_this.converted_text_cache[text].promise = _promise;
-			});
+			if (!has_set_text) {
+				text_list.forEach(function(text) {
+					_this.converted_text_cache[text].promise = _promise;
+				});
+			}
+			if (false) {
+				console.trace(promise, _promise);
+			}
 			return promise ? promise.then(_promise) : _promise;
 		}
 
@@ -306,6 +328,9 @@ function module_code(library_namespace) {
 			= _this.convert_to_language === 'TW'
 			// library_namespace.extension.zh_conversion.CN_to_TW();
 			? library_namespace.CN_to_TW : library_namespace.TW_to_CN;
+			if (false) {
+				console.trace('cache_converted_text: 初始化完畢。');
+			}
 		}).then(cache_converted_text.bind(this, text_list, options));
 	}
 
@@ -333,7 +358,7 @@ function module_code(library_namespace) {
 				}
 				console.trace('Delete cache of '
 				//
-				+ options.text.slice(0, 40) + '...(' + options.text.length
+				+ library_namespace.string_digest(options.text)
 				//
 				+ ') requiring_thread_count='
 				//
@@ -347,8 +372,13 @@ function module_code(library_namespace) {
 			&& --this.converted_text_cache[options.text]
 			// 採用 .requiring_thread_count 以避免要求轉換相同文字，後來的取用時已被刪除。
 			// 若相同操作會呼叫兩次 cache_converted_text()，例如初始化，則此法會出問題。
-			.requiring_thread_count === 0)
+			.requiring_thread_count === 0) {
+				if (false) {
+					console.trace('clear_converted_text_cache: Free '
+							+ library_namespace.string_digest(options.text));
+				}
 				delete this.converted_text_cache[options.text];
+			}
 		} else {
 			// console.trace(options);
 			if (false) {
@@ -396,8 +426,8 @@ function module_code(library_namespace) {
 			return text;
 		}
 
-		console.log(this.converted_text_cache);
-		console.log(text);
+		// console.log(this.converted_text_cache);
+		console.log(library_namespace.string_digest(text, 200));
 		console.log(this);
 		throw new Error(
 		// 照理不該到這邊。

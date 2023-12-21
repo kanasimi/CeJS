@@ -2220,7 +2220,7 @@ function module_code(library_namespace) {
 									// wiki_API.is_page_data(next[1])
 									: next[1].title)) {
 				next[1] = this.last_page;
-			} else if (this.last_page.id && ('missing' in this.last_page)
+			} else if (this.last_page && this.last_page.id && ('missing' in this.last_page)
 					&& get_wikibase_key(this.last_page)
 					&& get_wikibase_key(this.last_page).title === next[1][1]) {
 				// 完全還沒設定過 structured data 的檔案是長這樣子:
@@ -3914,7 +3914,7 @@ function module_code(library_namespace) {
 			}
 
 			callback(data);
-		});
+		}, null, options);
 	};
 
 	// 未登錄/anonymous時的token
@@ -4352,7 +4352,7 @@ function module_code(library_namespace) {
 			if (typeof callback === 'function') {
 				callback.call(session, data);
 			}
-		});
+		}, null, session);
 	};
 
 	// --------------------------------------------------------------------------------------------

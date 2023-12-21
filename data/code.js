@@ -14,8 +14,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'data.code',
 
+	require : 'data.code.compatibility.'
 	// .set_bind()
-	require : 'data.native.',
+	+ '|data.native.',
 
 	// 設定不匯出的子函式。
 	// no_extend : '*',
@@ -716,11 +717,61 @@ function module_code(library_namespace) {
 	// var tag = CeL.ass_tag([ { color : 'EEFFEE' }, 'colored text' ]);
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+	/**
+	 * 字串摘要。
+	 * 
+	 * @param {String}string
+	 *            字串 / message / text
+	 * @param {Object|Number}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {String}字串摘要。
+	 */
+	function string_digest(string, options) {
+		if (typeof options === 'number' || typeof options === 'string'
+				&& options >= 1) {
+			options = {
+				slice : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
+		if (typeof string !== 'string') {
+			if (Array.isArray(string)) {
+				return string.map(function(text) {
+					return string_digest(text, options);
+				});
+			}
+
+			// String(string);
+			string = '' + string;
+		}
+
+		var trim_slice_length = options.slice >= 1 ? Math.floor(options.slice)
+				: 20;
+		/** {String}刪節符號 */
+		var ellipsis = options.ellipsis || '...';
+		if (string.length < 2 * trim_slice_length
+				+ (ellipsis + ' (' + trim_slice_length + ')').length) {
+			return string;
+		}
+
+		return string.slice(0, trim_slice_length) + ellipsis
+				+ string.slice(-trim_slice_length) + ' (' + string.length + ')';
+	}
+
+	_.string_digest = string_digest;
+
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// https://en.wikipedia.org/wiki/Tree_traversal
 	// traversal algorithm
 
 	// @see traversal_DOM_backward() @ CeL.interact.DOM
 	function traversal(start_node, action, options) {
+		TODO;
+
 		// no for_node action: just get {Array}list
 		action = function(node) {
 			return exit;

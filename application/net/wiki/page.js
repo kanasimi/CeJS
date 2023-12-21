@@ -1592,6 +1592,8 @@ function module_code(library_namespace) {
 	 * TODO:
 	 * https://www.mediawiki.org/w/api.php?action=help&modules=searchtranslations
 	 * 
+	 * https://www.mediawiki.org/wiki/Extension:Scribunto/Lua_reference_manual#Renaming_or_moving_modules
+	 * 
 	 * @example <code>
 
 	CeL.wiki.redirect_to('史記', function(redirect_data, page_data) {

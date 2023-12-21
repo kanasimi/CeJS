@@ -10,6 +10,8 @@
 </code>
  * 
  * @since 2019/10/11 拆分自 CeL.application.net.wiki
+ * 
+ * @see https://www.mediawiki.org/wiki/Structured_Discussions/Deprecation
  */
 
 // More examples: see /_test suite/test.js

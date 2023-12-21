@@ -1509,7 +1509,7 @@ function write_qqq_data(resources_path) {
 	}
 	// 把 metadata 放在最前面。
 	message_id_order.unshift("@metadata");
-	//console.trace(message_id_order.slice(-5));
+	//console.trace(CeL.string_digest(message_id_order));
 
 	let original_contents = CeL.read_file(resources_path + qqq_data_file_name);
 	const new_contents = JSON.stringify(sort_Object_by_order(qqq_file_data, message_id_order), null, '\t') + '\n';

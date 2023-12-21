@@ -292,8 +292,7 @@ function module_code(library_namespace) {
 
 				// console.log(chapter_list);
 				// console.log(JSON.stringify(chapter_list));
-				// console.log(chapter_list.slice(0, 20));
-				// console.log(chapter_list.slice(-20));
+				// console.log(library_namespace.string_digest(chapter_list));
 
 				// console.log(work_data.chapter_list);
 				work_data.chapter_list = chapter_list;
