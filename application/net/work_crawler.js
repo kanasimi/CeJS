@@ -235,7 +235,7 @@ function module_code(library_namespace) {
 		if (!Array.isArray(text_list))
 			text_list = [ text_list ];
 
-		var _this = this, promise;
+		var _this = this, promise_list = [];
 		text_list = text_list.filter(function(text) {
 			// @see function convert_text_language(text, options)
 			if (!text || !text.trim())
@@ -244,9 +244,9 @@ function module_code(library_namespace) {
 			if (text in _this.converted_text_cache) {
 				_this.converted_text_cache[text].requiring_thread_count++;
 				if (!_this.converted_text_cache[text][KEY_converted_text]) {
-					promise = promise ? promise
-							.then(_this.converted_text_cache[text].promise)
-							: _this.converted_text_cache[text].promise;
+					promise_list.push(
+					//
+					_this.converted_text_cache[text].promise);
 				}
 				// 先前已要求過要轉換這段文字。不需要再要求一次。
 				return false;
@@ -261,23 +261,25 @@ function module_code(library_namespace) {
 				return true;
 			}
 		});
-		// console.trace(initializated, text_list, promise);
+		// console.trace(initializated, text_list, promise_list);
 		if (text_list.length === 0) {
-			// !promise: Already cached all text needed.
-			return promise;
+			// !promise_list: Already cached all text needed.
+			return promise_list.length > 0 && Promise.all(promise_list);
 		}
 
-		// console.trace(text_list.length + ' text to be converted.');
+		if (false) {
+			console.trace(library_namespace.string_digest(text_list));
+		}
 		if (initializated) {
 			// 初始化後正常的程序。
 			if (false) {
 				console.trace('Convert text:', library_namespace
 						.string_digest(text_list));
 			}
-			var _promise = this.convert_text_language_using(text_list, options), has_set_text;
-			// console.trace(_promise);
+			var promise = this.convert_text_language_using(text_list, options);
+			// console.trace(promise);
 			// assert: .convert_text_language_using() return thenable
-			_promise = _promise
+			promise = promise
 			//
 			.then(function set_text_list(converted_text_list) {
 				if (false) {
@@ -287,7 +289,6 @@ function module_code(library_namespace) {
 					//
 					library_namespace.string_digest(converted_text_list));
 				}
-				has_set_text = true;
 				text_list.forEach(function(text, index) {
 					// free
 					delete _this.converted_text_cache[text].promise;
@@ -301,15 +302,14 @@ function module_code(library_namespace) {
 					return [ text_list, converted_text_list ];
 				}
 			});
-			if (!has_set_text) {
-				text_list.forEach(function(text) {
-					_this.converted_text_cache[text].promise = _promise;
-				});
-			}
+			text_list.forEach(function(text) {
+				_this.converted_text_cache[text].promise = promise;
+			});
+			promise_list.push(promise);
 			if (false) {
-				console.trace(promise, _promise);
+				console.trace(promise_list);
 			}
-			return promise ? promise.then(_promise) : _promise;
+			return Promise.all(promise_list);
 		}
 
 		// console.trace('cache_converted_text: 初始化 initialization');
@@ -356,15 +356,17 @@ function module_code(library_namespace) {
 					console.trace(this);
 					console.trace(options);
 				}
-				console.trace('Delete cache of '
+				console.trace('Free cache of '
 				//
 				+ library_namespace.string_digest(options.text)
 				//
 				+ ') requiring_thread_count='
 				//
-				+ this.converted_text_cache[options.text]
+				+ (this.converted_text_cache[options.text]
 				//
-				.requiring_thread_count);
+				&& this.converted_text_cache[options.text]
+				//
+				.requiring_thread_count));
 			}
 			// @see function cache_converted_text(text_list, options)
 			if (options.text && options.text.trim()
@@ -374,7 +376,7 @@ function module_code(library_namespace) {
 			// 若相同操作會呼叫兩次 cache_converted_text()，例如初始化，則此法會出問題。
 			.requiring_thread_count === 0) {
 				if (false) {
-					console.trace('clear_converted_text_cache: Free '
+					console.trace('clear_converted_text_cache: Delete '
 							+ library_namespace.string_digest(options.text));
 				}
 				delete this.converted_text_cache[options.text];
@@ -427,8 +429,8 @@ function module_code(library_namespace) {
 		}
 
 		// console.log(this.converted_text_cache);
-		console.log(library_namespace.string_digest(text, 200));
-		console.log(this);
+		console.trace(library_namespace.string_digest(text, 200));
+		console.trace(this);
 		throw new Error(
 		// 照理不該到這邊。
 		'You should run `this.cache_converted_text(text_list)` first!');

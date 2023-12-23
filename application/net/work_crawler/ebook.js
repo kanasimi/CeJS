@@ -1025,8 +1025,9 @@ function module_code(library_namespace) {
 				console.trace('Convert-1 ' + part_title + '§' + chapter_title
 						+ ': ' + chapter_data.url + '\n'
 						+ library_namespace.string_digest(data.text));
+				console.trace(library_namespace.string_digest(text_list));
 				promise_of_language_convert.chapter_title = chapter_title;
-				console.log(promise_of_language_convert);
+				console.trace(promise_of_language_convert);
 			}
 			library_namespace.log_temporary({
 				T : [ this.convert_to_language === 'TW'
@@ -1101,9 +1102,10 @@ function module_code(library_namespace) {
 				console.trace('→ ' + part_title + '§' + chapter_title);
 			}
 			data.original_text = data.text;
-			data.text = this.convert_text_language(data.text)
+			data.text = this.convert_text_language(data.text);
+			data.text = data.text.replace(
 			// TODO: 把半形標點符號轉換為全形標點符號
-			.replace(/["'](?:zh-(?:cmn-)?|cmn-)?(?:Hans-)?CN["']/ig,
+			/["'](?:zh-(?:cmn-)?|cmn-)?(?:Hans-)?CN["']/ig,
 			// "zh-TW"
 			'"zh-cmn-Hant-TW"');
 			this.clear_converted_text_cache({
