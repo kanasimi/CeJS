@@ -3437,7 +3437,7 @@
 克父克母	剋父剋母
 // 《我在修仙界长生不死》	又常言雷法至刚至阳最克邪魔， (~剋<COO>d:至 ~剋<role.type:ARGM-TMP>直至大战结束 ~剋<role.type:A0>雷法 ~剋<role.type:ARGM-ADV>最 ~剋<role.type:A1>邪魔 d:又+d:常+v:言+n:雷法+d:至+a:刚+d:至+n:阳+d:最+v:克+n:邪魔+wp:，)
 克邪魔	剋邪魔
-// 剋制 壓制 抑制 反制 制約
+// 剋制 壓制 抑制 反制 制約 遏制
 // 《请公子斩妖》	克制性极强。 (~剋制性<SBV>a:强 n:克制性+d:极+a:强+wp:。)
 克制性	剋制性
 // 《请公子斩妖》	不是正克制它吗？ (~剋制<COO>v:受 ~剋制<role.type:ARGM-ADV>不 ~剋制<role.type:ARGM-ADV>正 ~剋制<role.type:A1>它 ~剋制<role.type:ARGM-ADV>全部 ~剋制<role.type:ARGM-ADV>都 d:不+v:是+d:正+v:克制+r:它+u:吗+wp:？)

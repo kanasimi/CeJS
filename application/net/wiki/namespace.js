@@ -3254,23 +3254,24 @@ function module_code(library_namespace) {
 		if (!page_title)
 			return page_title;
 
-		var page_title_is_template;
-		if (Array.isArray(page_title) && page_title.type === 'transclusion') {
+		// var page_title_template_token;
+		if (Array.isArray(page_title)) {
+			if (page_title.type !== 'transclusion') {
+				return page_title.map(function(title) {
+					return this.redirect_target_of(title, options);
+				}, this);
+			}
+
 			// console.trace(page_title);
 			// treat `page_title` as template token
-			page_title_is_template = page_title;
-			page_title = this.to_namespace(page_title.name, 'Template');
+			// page_title_template_token = page_title;
+			page_title = page_title.page_title;
 		}
+
 		if (options && options.namespace) {
 			page_title = this.to_namespace(page_title, options.namespace);
 		}
 		page_title = this.normalize_title(page_title);
-
-		if (Array.isArray(page_title)) {
-			return page_title.map(function(title) {
-				return this.redirect_target_of(title, options);
-			}, this);
-		}
 
 		// console.trace(this.redirects_data);
 		// console.trace(page_title + '→' + this.redirects_data[page_title]);

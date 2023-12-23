@@ -380,12 +380,13 @@ function module_code(library_namespace) {
 		if (library_namespace.platform.nodejs) {
 			/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
 			wiki_API.wmflabs =
-			// inside
+			// inside Toolforge/Kubernetes
 			// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Kubernetes
 			library_namespace.env.TOOL_DATA_DIR
-			//
+			// 2023/12 將作業從 Grid Engine 遷移到 Kubernetes
+			// https://github.com/kanasimi/wikibot/issues/50
 			&& library_namespace.env.KUBERNETES_PORT
-
+			//
 			// https://wikitech.wikimedia.org/wiki/Help:Toolforge/FAQ#How_can_I_detect_if_I.27m_running_in_Cloud_VPS.3F_And_which_project_.28tools_or_toolsbeta.29.3F
 			|| require('fs').existsSync('/etc/wmflabs-project')
 			// e.g., 'tools-bastion-05'.

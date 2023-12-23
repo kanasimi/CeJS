@@ -631,6 +631,77 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// Merge the parameters of from_template_token to to_template_token.
+	// target_template_token, source_template_token
+	function merge_template_parameters(to_template_token, from_template_token,
+			options) {
+		if (!Array.isArray(to_template_token)
+				|| to_template_token.type !== 'transclusion'
+				|| !Array.isArray(from_template_token)
+				|| from_template_token.type !== 'transclusion') {
+			throw new Error(
+					'merge_template_parameters: Invalid template token!');
+			return;
+		}
+
+		// assert: 不動到 from_template_token。
+		var normalize_parameter = options && options.normalize_parameter;
+
+		// 紀錄有衝突的 parameter_name
+		var conflict_parameters = [], parameters_to_copy = [];
+		for ( var parameter_name in from_template_token.index_of) {
+			if (!(parameter_name in to_template_token.parameters)
+			// 複製 to_template_token 為空的 parameter 值。
+			|| !to_template_token.parameters[parameter_name]
+					&& (from_template_token.parameters[parameter_name]
+					// 警告: 對於數字 parameter 尚有bug。
+					|| library_namespace.is_digits(parameter_name))) {
+				parameters_to_copy.push(parameter_name);
+				continue;
+			}
+
+			var from_value = from_template_token.parameters[parameter_name];
+			var to_value = to_template_token.parameters[parameter_name];
+			if (normalize_parameter) {
+				from_value = normalize_parameter(from_value, parameter_name);
+				to_value = normalize_parameter(to_value, parameter_name);
+			}
+			if (from_value.toString() === to_value.toString()) {
+				// Skip the same values.
+				continue;
+			}
+
+			conflict_parameters.push(parameter_name);
+		}
+
+		// console.trace(conflict_parameters, parameters_to_copy);
+		if (conflict_parameters.length > 0)
+			return conflict_parameters;
+
+		// assert: 在這之前都不動到 to_template_token。
+
+		parameters_to_copy.forEach(function(parameter_name) {
+			var from_index = from_template_token.index_of[parameter_name];
+			var to_index = to_template_token.index_of[parameter_name];
+			if (!to_index) {
+				to_template_token.index_of[parameter_name]
+				// append. TODO: 依照兩個模板排出最適合的插入點
+				= to_index = to_template_token.length;
+			}
+			// else: 假如原先存在就採用原先的位置。
+
+			// 警告: 對於 object，這種複製方法，改變其一，兩者會一同改變。
+			to_template_token[to_index] = from_template_token[from_index];
+
+			to_template_token.parameters[parameter_name]
+			// 警告: 對於 object，這種複製方法，改變其一，兩者會一同改變。
+			= from_template_token.parameters[parameter_name];
+		});
+		// console.trace(to_template_token, to_template_token.length);
+	}
+
+	// ------------------------------------------------------------------------
+
 	// 模板名#後的內容會忽略。
 	// matched: [ , Template name ]
 	var TEMPLATE_NAME_PATTERN = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)[|}]/,
@@ -2201,6 +2272,7 @@ function module_code(library_namespace) {
 		template_object_to_wikitext : template_object_to_wikitext,
 		// CeL.wiki.parse.replace_parameter()
 		replace_parameter : replace_parameter,
+		merge_template_parameters : merge_template_parameters,
 
 		// wiki_API.parse.date()
 		date : parse_date,
