@@ -4693,6 +4693,17 @@ function test_wiki() {
 		token = CeL.wiki.parse('{{WPBS|1=\n{{TT}}\n}}');
 		assert(['{{WPBS|class=A|vital=yes|1=\n{{TT}}\n}}', CeL.wiki.parse.replace_parameter(token, { 'class': 'A', vital: 'yes' }, { value_only: true, force_add: true, before_parameter: 1, no_value_space: true }) === 2 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
 
+		wikitext = '{{t1|p1=1|p2=2|p4=}}'; parsed = CeL.wiki.parse(wikitext);
+		var parsed_2 = CeL.wiki.parse('{{ T1|p3=3|p4=4}}');
+		assert([false, !!CeL.wiki.parse.merge_template_parameters(parsed, parsed_2)], 'merge_template_parameters #1');
+		assert(['{{t1|p1=1|p2=2|p4=4|p3=3}}', parsed.toString()], 'merge_template_parameters #2');
+		parsed_2 = CeL.wiki.parse('{{ T1 |p4=3|p3=4}}');
+		assert(['p4,p3', CeL.wiki.parse.merge_template_parameters(parsed, parsed_2).join()], 'merge_template_parameters conflict #1');
+		assert(['{{t1|p1=1|p2=2|p4=4|p3=3}}', parsed.toString()], 'merge_template_parameters conflict #2');
+		parsed_2 = CeL.wiki.parse('{{ T1|p4=3|p5=5}}');
+		assert(['p4', CeL.wiki.parse.merge_template_parameters(parsed, parsed_2).join()], 'merge_template_parameters conflict #3');
+		assert(['{{t1|p1=1|p2=2|p4=4|p3=3}}', parsed.toString()], 'merge_template_parameters conflict #4');
+
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-7 days +9 hours}}}}'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{#parserfunctions:}} #1');
 		token = [];

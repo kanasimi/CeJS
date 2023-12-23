@@ -377,10 +377,17 @@ function module_code(library_namespace) {
 		// function setup_wmflabs()
 
 		// only for node.js.
-		// https://wikitech.wikimedia.org/wiki/Help:Toolforge/FAQ#How_can_I_detect_if_I.27m_running_in_Cloud_VPS.3F_And_which_project_.28tools_or_toolsbeta.29.3F
 		if (library_namespace.platform.nodejs) {
 			/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
-			wiki_API.wmflabs = require('fs').existsSync('/etc/wmflabs-project')
+			wiki_API.wmflabs =
+			// inside
+			// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Kubernetes
+			library_namespace.env.TOOL_DATA_DIR
+			//
+			&& library_namespace.env.KUBERNETES_PORT
+
+			// https://wikitech.wikimedia.org/wiki/Help:Toolforge/FAQ#How_can_I_detect_if_I.27m_running_in_Cloud_VPS.3F_And_which_project_.28tools_or_toolsbeta.29.3F
+			|| require('fs').existsSync('/etc/wmflabs-project')
 			// e.g., 'tools-bastion-05'.
 			// if use `process.env.INSTANCEPROJECT`,
 			// you may get 'tools' or 'tools-login'.
