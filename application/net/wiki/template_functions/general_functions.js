@@ -604,6 +604,12 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		'Episode table' : parse_template_Episode_table,
+		'Module:Episode list' : {
+			properties : {
+				// e.g., [[w:en:Law & Order: Special Victims Unit (season 1)]]
+				expand : expand_template_Episode_list
+			}
+		},
 		'Episode table/part' : {
 			properties : {
 				expand : expand_template_Episode_table__part

@@ -165,6 +165,7 @@ function module_code(library_namespace) {
 		// [[mw:Transclusion#Partial transclusion markup]]
 		.match(/<onlyinclude(\s[^<>]*)?>[\s\S]*?<\/onlyinclude>/g);
 		if (matched) {
+			// 只有被<onlyinclude>和</onlyinclude>包含的文字才出現在呼叫模板的頁面中，模板的其他內容不出現在呼叫模板的頁面中。
 			wikitext = matched.join('').replace(/<onlyinclude(\/|\s[^<>]*)?>/g,
 					'').replace(/<\/onlyinclude>/g, '');
 		}
