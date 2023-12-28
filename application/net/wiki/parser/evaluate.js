@@ -877,6 +877,11 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	var buggy_toLocaleString = (1234).toLocaleString('en') !== '1,234';
+	if (false && buggy_toLocaleString) {
+		library_namespace.warn('Number.prototype.toLocaleString() 有缺陷，{{FORMATNUM:}} 可能產生錯誤結果！');
+	}
+
 	var KEY_on_page_title_option = 'on_page_title';
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
@@ -1167,7 +1172,19 @@ function module_code(library_namespace) {
 			if (type === 'R' || type === 'NOSEP')
 				return number.replace(/,/g, '');
 			number = number.match(/^([\s\S]+?)(\..+)?$/);
-			return (+number[1]).toLocaleString('en') + (number[2] || '');
+			if (false && !buggy_toLocaleString)
+				return (+number[1]).toLocaleString('en') + (number[2] || '');
+			// digits
+			number[1] = number[1].chars('');
+			for (var index = number[1].length, numbers = 0; index > 0; index--) {
+				if (!/^\d$/.test(number[1][index])) {
+					numbers = 0;
+				} else if (++numbers === 3) {
+					number[1].splice(index, 0, ',');
+					numbers = 0;
+				}
+			}
+			return number[1].join('') + (number[2] || '');
 
 			// ----------------------------------------------------------------
 

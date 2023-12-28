@@ -4383,6 +4383,8 @@ function test_wiki() {
 		assert(['xyz', CeL.wiki.expand_transclusion('{{padright:xyz|2}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|stringlength}} #2');
 		assert(['x', CeL.wiki.expand_transclusion('{{padright:|1|xyz}}').toString()], 'wiki.expand_transclusion: {{padright:xyz|strlen|string}} #2');
 		assert(['987,654,321.654321', CeL.wiki.expand_transclusion('{{formatnum:987654321.654321}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #1');
+		assert(['0,987,654,321.6543210', CeL.wiki.expand_transclusion('{{formatnum:0987654321.6543210}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #1-1');
+		assert(['98,765,432.65432', CeL.wiki.expand_transclusion('{{formatnum:98765432.65432}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #1-2');
 		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:987,654,321.654321|R}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #2');
 		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:{{formatnum:987654321.654321}}|R}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #3');
 		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:987654321.654321 |NOSEP}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #4');

@@ -372,7 +372,9 @@ function module_code(library_namespace) {
 		var list_source = FC_configurations.list_source[type_name];
 		// console.trace([ FC_configurations, type_name, list_source ]);
 		if (!list_source) {
-			throw new Error('Unknown type: ' + options.type);
+			// library_namespace.error('get_FC_via_category: ' + error);
+			callback && callback(null, !options.ignore_missed && new Error('Unknown type: ' + options.type));
+			return;
 		}
 
 		// ----------------------------

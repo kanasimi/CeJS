@@ -4884,6 +4884,7 @@ function module_code(library_namespace) {
 			});
 			return product;
 		},
+		// TODO: use Object.fromEntries(array.map((e,i)=>[e,i]))
 		// TODO: Object.revert_key_value(array, get_key, hash)
 		//
 		// Array.prototype.to_hash()

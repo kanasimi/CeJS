@@ -1688,13 +1688,6 @@ function module_code(library_namespace) {
 		// const
 		var anchor_hash = Object.create(null), imprecise_anchor_count = 0;
 		function register_anchor(anchor, token, preserve_spaces) {
-			if (Array.isArray(anchor)) {
-				anchor.forEach(function(_anchor) {
-					register_anchor(_anchor, token, preserve_spaces);
-				});
-				return;
-			}
-
 			anchor = normalize_anchor(anchor, preserve_spaces);
 			if (!anchor) {
 				return;
@@ -1988,7 +1981,9 @@ function module_code(library_namespace) {
 
 					anchors = get_all_anchors(anchors, _options);
 					// console.trace(anchors);
-					register_anchor(anchors, template_token);
+					anchors.forEach(function(anchor) {
+						register_anchor(anchor, template_token);
+					});
 					if (template_token.type !== 'transclusion')
 						return;
 				}
@@ -2050,16 +2045,21 @@ function module_code(library_namespace) {
 			// e.g., [[w:en:Law & Order: Special Victims Unit (season 1)]]
 			var _promise = parsed.each('magic_word_function', function(
 					module_token, index, parent_token) {
+				function handle_anchors(anchors) {
+					anchors.forEach(function(anchor) {
+						register_anchor(anchor, module_token);
+					});
+				}
+
 				if (module_token.module_name === 'Episode list') {
 					// console.trace(module_token);
 					var anchors = get_all_anchors(module_token
 							.evaluate(options).toString(), options);
+
 					if (library_namespace.is_thenable(anchors)) {
-						return anchors.then(function(anchors) {
-							register_anchor(anchors, module_token);
-						});
+						return anchors.then(handle_anchors);
 					} else {
-						register_anchor(anchors, module_token);
+						handle_anchors(anchors);
 					}
 				}
 			});

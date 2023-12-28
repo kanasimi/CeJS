@@ -1489,7 +1489,7 @@ function module_code(library_namespace) {
 	var KEY_map_template_to_location = typeof Symbol === 'function' ? Symbol('REMOVE_TOKEN')
 			: '\0template_to_location';
 	// 警告: 使用這個功能必須先 wiki.register_redirects(
-	// CeL.wiki.setup_layout_elements.template_order_of_layout[CeL.wiki.site_name(wiki)].talk_page_lead
+	// CeL.wiki.setup_layout_elements.template_order_of_layout[CeL.wiki.site_name(wiki)]?.talk_page_lead
 	// )
 	// @see wikibot/routine/20200122.update_vital_articles.js
 	setup_layout_elements.template_order_of_layout = {
