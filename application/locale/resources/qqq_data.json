@@ -188,7 +188,7 @@
 		"scope": "system",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L136}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1035}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1037}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1041}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L978}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L136}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1037}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1039}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1043}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L980}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"c.-$1": {
@@ -813,7 +813,7 @@
 		"scope": "data.date.era: system",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3052}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1005}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1008}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3052}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1007}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1010}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"data-will-be-presented-at-next-calculation": {
@@ -1618,14 +1618,14 @@
 		"notes": "Loading message. e.g., Loading 20%...",
 		"scope": "system",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L981}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L983}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-bot-operation-is-completed-$1$-in-total": {
 		"message": "The bot operation is completed %1% in total",
 		"original_message_language_code": "en-US",
 		"notes": "Overall progress. 整體作業進度。用在編輯摘要時通常放在最後面，預防擠掉更重要的內容。; Repositories: {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1044}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3482}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L646}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1008}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L212}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1046}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3482}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L646}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1008}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L212}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"finished": {
@@ -1633,7 +1633,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1059}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3042}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3054}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1387}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1389}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1061}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3042}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3054}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1387}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1389}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-changes": {
@@ -1641,7 +1641,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1132}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1143}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3526}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1134}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1145}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3526}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-modified": {
@@ -1649,21 +1649,21 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1134}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3504}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L500}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1136}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3504}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L500}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-word(s)-in-this-chapter": {
 		"message": "本章共 %1 {{PLURAL:1|個字}}",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "本語句將使用在電子書每個章節標頭，請盡量精簡文句、減少空格使用。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1153}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1873}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1155}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1873}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"$1-word(s)-accumulated": {
 		"message": "累計 %1 {{PLURAL:1|個字}}",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "本語句將使用在電子書每個章節標頭，請盡量精簡文句、減少空格使用。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1160}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1880}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1162}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1880}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"to-chinese-numerals": {
@@ -1672,7 +1672,7 @@
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1195}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1219}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1197}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1221}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"astronomy": {
@@ -1680,7 +1680,7 @@
 		"notes": "Label for astronomical calculations",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L2878}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L2880}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"first-quarter": {

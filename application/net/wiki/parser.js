@@ -142,7 +142,7 @@ function module_code(library_namespace) {
 	/** {Object}prototype of {wiki page parser} */
 	page_parser.parser_prototype = {
 		// traversal_tokens()
-		// CeL.wiki.parser.parser_prototype.each.call(token_list,...)
+		// CeL.wiki.parser.parser_prototype.each.call(token_list,'Template:',(token,index,parent)=>{});
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_subtoken,
 		parse : parse_page,

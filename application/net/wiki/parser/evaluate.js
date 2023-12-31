@@ -879,10 +879,28 @@ function module_code(library_namespace) {
 
 	var buggy_toLocaleString = (1234).toLocaleString('en') !== '1,234';
 	if (false && buggy_toLocaleString) {
-		library_namespace.warn('Number.prototype.toLocaleString() 有缺陷，{{FORMATNUM:}} 可能產生錯誤結果！');
+		// e.g., node.js 0.10
+		library_namespace
+				.warn('Number.prototype.toLocaleString() 有缺陷，{{FORMATNUM:}} 可能產生錯誤結果！');
 	}
 
 	var KEY_on_page_title_option = 'on_page_title';
+
+	// 小數點, 千位分號
+	var THOUSANDS_SEPARATOR = {
+		de : '.',
+		fr : ' ',
+		en : ',',
+		zh : ',',
+		ISO : ' '
+	}, DECIMAL_SEPARATOR = {
+		de : ',',
+		fr : ',',
+		en : '.',
+		ja : '.',
+		zh : '.',
+		ISO : '.' || ','
+	};
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
@@ -1171,20 +1189,26 @@ function module_code(library_namespace) {
 			// TODO: 此為有缺陷的極精簡版。
 			if (type === 'R' || type === 'NOSEP')
 				return number.replace(/,/g, '');
-			number = number.match(/^([\s\S]+?)(\..+)?$/);
+			number = number.match(/^([\s\S]+?)\.(.+)?$/);
+			var thousands_separator = THOUSANDS_SEPARATOR[wiki_API.language]
+					|| THOUSANDS_SEPARATOR.ISO;
+			var decimal_separator = DECIMAL_SEPARATOR[wiki_API.language]
+					|| DECIMAL_SEPARATOR.ISO;
 			if (false && !buggy_toLocaleString)
-				return (+number[1]).toLocaleString('en') + (number[2] || '');
+				return (+number[1]).toLocaleString('en')
+						+ (number[2] ? decimal_separator + number[2] : '');
 			// digits
-			number[1] = number[1].chars('');
+			number[1] = number[1].chars();
 			for (var index = number[1].length, numbers = 0; index > 0; index--) {
 				if (!/^\d$/.test(number[1][index])) {
 					numbers = 0;
 				} else if (++numbers === 3) {
-					number[1].splice(index, 0, ',');
+					number[1].splice(index, 0, thousands_separator);
 					numbers = 0;
 				}
 			}
-			return number[1].join('') + (number[2] || '');
+			return number[1].join('')
+					+ (number[2] ? decimal_separator + number[2] : '');
 
 			// ----------------------------------------------------------------
 

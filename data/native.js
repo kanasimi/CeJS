@@ -1740,14 +1740,21 @@ function module_code(library_namespace) {
 
 	// @see cardinal_1()
 	function unique_sorted_Array(get_key) {
-		var latest_key, configured;
-		var unique_array = this.filter(function(element) {
+		if (this.length === 0)
+			return [];
+
+		var latest_key = this[0];
+		var unique_array = [ latest_key ];
+		if (get_key)
+			latest_key = get_key(latest_key);
+
+		for (var index = 1, length = this.length; index < length; index++) {
+			var element = this[index];
 			var key = get_key ? get_key(element) : element;
-			var is_different = configured ? !Object.is(latest_key, key)
-					: (configured = true);
+			if (!Object.is(latest_key, key))
+				unique_array.push(element);
 			latest_key = key;
-			return is_different;
-		});
+		}
 
 		return unique_array;
 	}

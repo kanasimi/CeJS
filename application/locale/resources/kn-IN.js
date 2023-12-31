@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2023.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2024.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"untranslated message count": "1000+",
 	"\u6642\u5340\uff1a": "\u0cb8\u0cae\u0caf \u0cb5\u0cb2\u0caf: ",

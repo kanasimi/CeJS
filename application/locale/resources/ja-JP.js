@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2023.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2024.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "\u30b9\u30da\u30a4\u30f3",
 	"Calendrier r\u00e9publicain": "\u30d5\u30e9\u30f3\u30b9\u9769\u547d\u66a6",

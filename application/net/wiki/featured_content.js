@@ -90,10 +90,10 @@ function module_code(library_namespace) {
 		zhwiki : {
 			// @see [[Category:特色内容]]
 			list_source : {
-				FA : '典范条目‎',
-				FL : '特色列表‎',
-				FP : '特色图片‎',
-				GA : '優良條目‎',
+				FA : '典范条目',
+				FL : '特色列表',
+				FP : '特色图片',
+				GA : '優良條目',
 			},
 			get_FC : /* get_zhwiki_FC_via_list_page */get_FC_via_category
 		},
@@ -116,9 +116,9 @@ function module_code(library_namespace) {
 				},
 				DGA : 'Delisted good articles',
 				FA : 'Featured articles',
-				FL : 'Featured lists‎',
-				FP : 'Featured pictures‎',
-				FT : 'Featured topics‎',
+				FL : 'Featured lists',
+				FP : 'Featured pictures',
+				FT : 'Featured topics',
 				GA : 'Good articles'
 			},
 			get_FC : get_FC_via_category
