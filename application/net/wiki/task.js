@@ -940,6 +940,13 @@ function module_code(library_namespace) {
 				next.splice(2, 0, undefined);
 			}
 
+			var redirects_data;
+			if (library_namespace.is_Object(next[1])) {
+				// temp
+				redirects_data = next[1];
+				next[1] = Object.values(next[1]);
+			}
+
 			// next[3] : options
 			next[3] = Object.assign({
 				// 取得定向的終點。
@@ -952,6 +959,11 @@ function module_code(library_namespace) {
 				// multiple pages
 				multi : Array.isArray(next[1]) && next[1].length > 1
 			}, next[3]);
+
+			if (next[3].update_page_name_hash === true && redirects_data) {
+				// wiki.register_redirects({key:'page_name'},callback,{update_page_name_hash:true});
+				next[3].update_page_name_hash = redirects_data;
+			}
 
 			// next[1]: page_title
 			if (next[3].namespace)
@@ -974,7 +986,7 @@ function module_code(library_namespace) {
 				break;
 			}
 
-			var redirects_data = next[3].register_target || this.redirects_data;
+			redirects_data = next[3].register_target || this.redirects_data;
 			if (next[3].reget) {
 			} else if (Array.isArray(next[1])) {
 				next[1] = next[1].filter(function(page_title) {
@@ -1140,6 +1152,22 @@ function module_code(library_namespace) {
 				}
 
 				// console.trace(redirects_data);
+
+				if (library_namespace.is_Object(next[3].update_page_name_hash)) {
+					var update_page_name_hash = next[3].update_page_name_hash;
+					for (var key in update_page_name_hash) {
+						var page_name = _this.to_namespace(update_page_name_hash[key], next[3].namespace);
+						if (typeof page_name !== 'string')
+							continue;
+						var need_remove_namespace = update_page_name_hash[key].length < page_name.length;
+						page_name = redirects_data[page_name];
+						if (!page_name)
+							continue;
+						if (need_remove_namespace)
+							page_name = _this.remove_namespace(page_name);
+						update_page_name_hash[key] = page_name;
+					}
+				}
 
 				if (false) {
 					console.trace([ next[3].no_languagevariants,
