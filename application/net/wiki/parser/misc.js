@@ -164,10 +164,11 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
-	var KEY_remove_parameter = {
+	var KEY_remove_parameter = replace_parameter.KEY_remove_parameter = {
 		remove_parameter : true
-	};
-	replace_parameter.KEY_remove_parameter = KEY_remove_parameter;
+	},
+	// 必須為可列舉的、不可能為模板名稱的數值 Must be an enumerable value
+	KEY_template_name = replace_parameter.KEY_template_name = '|template name';
 
 	function to_parameter_name_only(parameter_name_pairs) {
 		var config = Object.create(null);
@@ -211,7 +212,7 @@ function module_code(library_namespace) {
 	}
 
 	// @inner
-	function mode_space_of_parameters(template_token, parameter_name) {
+	function mode_space_of_parameters(template_token, index) {
 		if (false) {
 			template_token.forEach(function(parameter, index) {
 				if (index === 0)
@@ -221,7 +222,10 @@ function module_code(library_namespace) {
 			});
 		}
 
-		var index = template_token.index_of[parameter_name];
+		if (typeof index !== 'number' || !(index >= 0)) {
+			// treat index as parameter_name
+			index = template_token.index_of[parameter_name];
+		}
 		if (!(index >= 0)) {
 			// 不存在此 parameter name 可 replace。
 			return;
@@ -259,6 +263,11 @@ function module_code(library_namespace) {
 		this_parameter[3] || '' ];
 
 		return spaces;
+	}
+
+	function trim_parameter(parameter) {
+		parameter = parameter.toString();
+		return parameter.trim().replace(/\s+=\s+/, '=');
 	}
 
 	/**
@@ -356,10 +365,13 @@ function module_code(library_namespace) {
 	 *            要換成的屬性名稱加上賦值。 e.g., "parameter name = value" ||<br />
 	 *            {parameter_1 = value, parameter_2 = value} ||<br />
 	 *            function replace_to(value, parameter_name, template_token)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {ℕ⁰:Natural+0} count of templates successful replaced
 	 */
-	function replace_parameter(template_token, parameter_name, replace_to) {
+	function replace_parameter(template_token, parameter_name, replace_to,
+			options) {
 		function convert_replace_to(parameter_name) {
 			if (typeof replace_to === 'function') {
 				// function replace_to(value, parameter_name, template_token) {
@@ -372,8 +384,11 @@ function module_code(library_namespace) {
 		}
 
 		if (library_namespace.is_Object(parameter_name)) {
+			if (options) {
+				library_namespace.error('replace_parameter: Invalid usage!');
+			}
 			// treat `replace_to` as options
-			var options = library_namespace.setup_options(replace_to);
+			options = library_namespace.setup_options(replace_to);
 			// Replace parameter name only, preserve value.
 			if (options.parameter_name_only) {
 				parameter_name = to_parameter_name_only(parameter_name);
@@ -385,8 +400,9 @@ function module_code(library_namespace) {
 				if (convert_replace_to(replace_from) === undefined) {
 					continue;
 				}
-				var index = template_token.index_of[replace_from];
-				if (!(index >= 1)) {
+				var index = replace_from === KEY_template_name ? 0
+						: template_token.index_of[replace_from];
+				if (!(index >= 0)) {
 					// 不存在此 parameter name 可 replace。
 					if (options.value_only && options.force_add) {
 						// options.preserve_spacing
@@ -400,7 +416,8 @@ function module_code(library_namespace) {
 						// mode_parameter
 						|| Object.keys(template_token.parameters).pop())) {
 							spaces = mode_space_of_parameters(template_token,
-									key_of_spaces);
+							// assert: typeof key_of_spaces === 'string'
+							key_of_spaces);
 							// console.log(spaces);
 						}
 						replace_to = spaces && spaces[1] ? spaces[0]
@@ -445,16 +462,17 @@ function module_code(library_namespace) {
 				var skip_replacement = undefined;
 				if (options.value_only
 						&& (typeof replace_to === 'string' || typeof replace_to === 'number')) {
-					var this_parameter = template_token[template_token.index_of[replace_from]];
-					if (options.no_value_space) {
-						if (this_parameter[3]) {
-							this_parameter[3] = this_parameter[3].toString()
-									.trimStart();
-							if (!this_parameter[3])
-								this_parameter.splice(3, 1);
+					var this_parameter = template_token[index];
+					if (index === 0) {
+						// console.trace([ this_parameter, replace_to ]);
+						if (options.override_same_value ? this_parameter
+								.toString() !== replace_to.toString()
+								: this_parameter.toString().trim() !== replace_to
+										.toString().trim()) {
+							template_token[index] = replace_to;
+							operated_template_count++;
 						}
-						this_parameter[1] = this_parameter[1].toString()
-								.trimEnd();
+						continue;
 					}
 
 					var parameters = template_token.parameters;
@@ -467,17 +485,40 @@ function module_code(library_namespace) {
 						this_parameter[2] = this_parameter[2].toString()
 						// 留下註解之類。
 						.replace(parameters[replace_from], function(all) {
-							skip_replacement = 1;
-							return replace_to;
+							if (options.override_same_value
+							//
+							? all !== replace_to.toString()
+							//
+							: all.trim() !== replace_to.toString().trim()) {
+								// console.trace([ all, replace_to ]);
+								skip_replacement = 1;
+								return replace_to;
+							}
+
+							// console.trace([ all, replace_to ]);
+							skip_replacement = 0;
+							return all;
 						});
 					}
-					if (!skip_replacement)
+					if (!(skip_replacement >= 0)) {
 						this_parameter[2] = replace_to;
+						skip_replacement = 1;
+					}
 					if (parameters) {
 						// Also update parameters
 						parameters[replace_from] = replace_to;
 					}
-					skip_replacement = 1;
+
+					if (skip_replacement > 0 && options.no_value_space) {
+						if (this_parameter[3]) {
+							this_parameter[3] = this_parameter[3].toString()
+									.trimStart();
+							if (!this_parameter[3])
+								this_parameter.splice(3, 1);
+						}
+						this_parameter[1] = this_parameter[1].toString()
+								.trimEnd();
+					}
 
 					// @deprecated:
 					// replace_to = { [_replace_from] : replace_to };
@@ -488,7 +529,7 @@ function module_code(library_namespace) {
 				latest_OK_key = replace_from;
 				next_insert_index = index;
 				// console.trace([ replace_from, replace_to ]);
-				if (skip_replacement) {
+				if (skip_replacement >= 0) {
 					operated_template_count += skip_replacement;
 					continue;
 				}
@@ -500,8 +541,11 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
-		var index = template_token.index_of[parameter_name];
-		if (!(index >= 1)) {
+		options = library_namespace.setup_options(options);
+
+		var index = parameter_name === KEY_template_name ? 0
+				: template_token.index_of[parameter_name];
+		if (!(index >= 0)) {
 			// 不存在此 parameter name 可 replace。
 			return 0;
 		}
@@ -509,6 +553,7 @@ function module_code(library_namespace) {
 		if (convert_replace_to(parameter_name) === undefined) {
 			return 0;
 		}
+		// console.trace(index, replace_to);
 
 		if (replace_to === KEY_remove_parameter) {
 			if (isNaN(parameter_name)) {
@@ -529,7 +574,7 @@ function module_code(library_namespace) {
 		// --------------------------------------
 		// 判斷上下文使用的 spaces。
 
-		var spaces = mode_space_of_parameters(template_token, parameter_name);
+		var spaces = mode_space_of_parameters(template_token, index);
 		// console.trace(spaces);
 		// console.trace(replace_to);
 
@@ -561,6 +606,7 @@ function module_code(library_namespace) {
 		// assert: {String}replace_to
 		// console.trace(replace_to);
 
+		// 注意: 假如 numbered parameter 本來就沒有添上 1= 之類，那麼就算 .includes('=') 也不會再主動添加。
 		if (!spaces[1] && !isNaN(parameter_name)) {
 			var matched = replace_to.match(/^\s*(\d+)\s*=\s*([\s\S]*)$/);
 			if (matched && matched[1] == parameter_name
@@ -587,7 +633,12 @@ function module_code(library_namespace) {
 			return 0;
 		}
 
-		// TODO: 不處理僅添加空白字元的情況。
+		if (!options.override_same_value
+				&& template_token[index]
+				&& trim_parameter(template_token[index]) === trim_parameter(replace_to)) {
+			// 不處理僅添加空白字元的情況。
+			return 0;
+		}
 
 		// --------------------------------------
 		// a little check: parameter 的數字順序不應受影響。
@@ -606,7 +657,8 @@ function module_code(library_namespace) {
 			// NG: {{t|a|b}} → {{t|a=1|b}}
 			var matched = replace_to.match(PATERN_parameter_name);
 			if (!matched) {
-				if (index != parameter_name) {
+				if (parameter_name !== KEY_template_name
+						&& index != parameter_name) {
 					library_namespace
 							.warn('replace_parameter: Insert non-named parameter to ['
 									+ parameter_name

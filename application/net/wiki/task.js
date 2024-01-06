@@ -944,6 +944,9 @@ function module_code(library_namespace) {
 			if (library_namespace.is_Object(next[1])) {
 				// temp
 				redirects_data = next[1];
+				library_namespace
+						.info('wiki_API.prototype.next.register_redirects: '
+								+ '查詢傳入引數 Object 的 value 而非 key。');
 				next[1] = Object.values(next[1]);
 			}
 
@@ -1153,18 +1156,24 @@ function module_code(library_namespace) {
 
 				// console.trace(redirects_data);
 
-				if (library_namespace.is_Object(next[3].update_page_name_hash)) {
+				if (library_namespace.is_Object(
+				//
+				next[3].update_page_name_hash)) {
 					var update_page_name_hash = next[3].update_page_name_hash;
-					for (var key in update_page_name_hash) {
-						var page_name = _this.to_namespace(update_page_name_hash[key], next[3].namespace);
+					for ( var key in update_page_name_hash) {
+						var page_name = _this.to_namespace(
+								update_page_name_hash[key], next[3].namespace);
 						if (typeof page_name !== 'string')
 							continue;
-						var need_remove_namespace = update_page_name_hash[key].length < page_name.length;
 						page_name = redirects_data[page_name];
 						if (!page_name)
 							continue;
-						if (need_remove_namespace)
+						if (next[3].namespace
+								&& _this.is_namespace(
+										update_page_name_hash[key], 'main')) {
+							// need_remove_namespace
 							page_name = _this.remove_namespace(page_name);
+						}
 						update_page_name_hash[key] = page_name;
 					}
 				}
@@ -2248,7 +2257,8 @@ function module_code(library_namespace) {
 									// wiki_API.is_page_data(next[1])
 									: next[1].title)) {
 				next[1] = this.last_page;
-			} else if (this.last_page && this.last_page.id && ('missing' in this.last_page)
+			} else if (this.last_page && this.last_page.id
+					&& ('missing' in this.last_page)
 					&& get_wikibase_key(this.last_page)
 					&& get_wikibase_key(this.last_page).title === next[1][1]) {
 				// 完全還沒設定過 structured data 的檔案是長這樣子:

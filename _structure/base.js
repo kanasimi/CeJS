@@ -2067,18 +2067,20 @@ OS='UNIX'; // unknown
 		function () { };
 
 
+	// 對於早期環境，這時可能還沒有 Object.create(null)。
+	var constant_function_mapper = {};
 	_// JSDT:_module_
 	.
 	constant_function = function(value) {
 		value = String(value);
 
-		if (!(value in constant_function)
+		if (!(value in constant_function_mapper)
 			// true/false/Number/null/undefined/global variables only!
 			// && ((value in globalThis) || !isNaN(value))
 			) {
-			constant_function[value] = new Function('return(' + value + ')');
+			constant_function_mapper[value] = new Function('return(' + value + ')');
 		}
-		return constant_function[value];
+		return constant_function_mapper[value];
 	};
 
 	try {
