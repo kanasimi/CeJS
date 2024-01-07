@@ -489,6 +489,8 @@ function module_code(library_namespace) {
 			remove_ebook_directory : 'boolean',
 			// 當新獲取的檔案比較大時，覆寫舊的檔案。
 			overwrite_old_file : 'boolean',
+			// 隱藏電子書的章節資訊欄位。
+			hide_chapter_information : 'boolean',
 			vertical_writing : 'boolean|string',
 			// RTL_writing : 'boolean',
 			convert_to_language : 'string:TW;CN',

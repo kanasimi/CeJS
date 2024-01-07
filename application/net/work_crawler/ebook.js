@@ -256,7 +256,7 @@ function module_code(library_namespace) {
 	/** {RegExp}搜尋新行新段落用。 */
 	trim_start_title.PATTERN_new_line = /<br(?:[\s\/][^<>]*)?>|\n|<\/?p(?:\s[^<>]*)?>/i;
 
-	// 當文章內文以章節標題起始時，去除一開始章節標題的部分。
+	// 當文章內文以章節標題起始時，去除一開始重複的章節標題。
 	function trim_start_title(text, chapter_data) {
 		// const
 		var title;
@@ -935,13 +935,6 @@ function module_code(library_namespace) {
 		return work_data[this.KEY_EBOOK] = ebook;
 	}
 
-	// 找出段落開頭。
-	// '&nbsp;' 已經被 normailize_contents() @CeL.EPUB 轉換為 '&#160;'
-	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<\/?(?:br|p)(?:[^a-z][^<>]*)?>)(?:&#160;|[\s　]){4,}([^\s　\n&])/ig,
-	//
-	PATTERN_PARAGRAPH_START_JP = new RegExp(PATTERN_PARAGRAPH_START_CMN.source
-			.replace('{4,}', '{2,}'), PATTERN_PARAGRAPH_START_CMN.flags);
-
 	// 通常應該會被 parse_chapter_data() 呼叫。
 	function add_ebook_chapter(work_data, chapter_NO, data) {
 		var ebook = work_data && work_data[this.KEY_EBOOK];
@@ -1019,6 +1012,7 @@ function module_code(library_namespace) {
 		// return needing to wait language converted
 		var text_list = [ part_title, chapter_title, data.text ];
 		// console.trace(work_data.convert_options);
+		// 下載完畢後作繁簡轉換。
 		var promise_of_language_convert = this.cache_converted_text(text_list,
 				work_data.convert_options);
 		if (promise_of_language_convert) {
@@ -1086,6 +1080,51 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// 找出段落開頭。
+	// '&nbsp;' 已經被 normailize_contents() @CeL.EPUB 轉換為 '&#160;'
+	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<\/?(?:br|p)(?:[^a-z][^<>]*)?>)(?:&#160;|[\s　]){4,}([^\s　\n&])/ig,
+	//
+	PATTERN_PARAGRAPH_START_JP = new RegExp(PATTERN_PARAGRAPH_START_CMN.source
+			.replace('{4,}', '{2,}'), PATTERN_PARAGRAPH_START_CMN.flags);
+
+	// @inner only called by add_ebook_chapter_actual_work()
+	function handle_indentation(contents, PATTERN_PARAGRAPH_START, indent) {
+		// console.trace(contents);
+
+		// assert: /^\s*$/.test(indent)
+		if (indent) {
+			contents = contents.replace(PATTERN_PARAGRAPH_START, '$1' + indent
+					+ '$2');
+		}
+
+		// e.g., "<p>..."
+		if (!contents.startsWith('<')) {
+			var indent_hash = Object.create(null);
+			Array.from(contents.matchAll(/<(?:br)[^<>]*>(\s+)/g))
+			// 處理文章開頭的縮排/內縮。
+			.forEach(function(matched) {
+				if (!indent_hash[matched[1]])
+					indent_hash[matched[1]] = 1;
+				else
+					indent_hash[matched[1]]++;
+			});
+
+			var max_count = 0, majority_indent;
+			for ( var indent in indent_hash) {
+				if (max_count < indent_hash[indent]) {
+					max_count = indent_hash[indent];
+					majority_indent = indent;
+				}
+			}
+			// console.trace([ indent_hash, max_count, majority_indent ]);
+			if (majority_indent) {
+				contents = majority_indent + contents;
+			}
+		}
+
+		return contents;
+	}
+
 	// @inner only called by add_ebook_chapter(work_data, chapter_NO, data)
 	function add_ebook_chapter_actual_work(work_data, chapter_NO, data, options) {
 		var chapter_data = options.chapter_data, part_title = options.part_title, chapter_title = options.chapter_title;
@@ -1142,7 +1181,8 @@ function module_code(library_namespace) {
 			get_URL_options : Object.assign({
 				error_retry : this.MAX_ERROR_RETRY
 			}, this.get_URL_options),
-			words_so_far : work_data.words_so_far
+			words_so_far : work_data.words_so_far,
+			hide_chapter_information : this.hide_chapter_information
 		};
 
 		var _this = this;
@@ -1163,21 +1203,20 @@ function module_code(library_namespace) {
 			post_processor : function(contents) {
 				// console.log([ language, contents ]);
 				// 正規化小說章節文字。
-				if (language === 'ja') {
-					contents = contents.replace(PATTERN_PARAGRAPH_START_JP,
-					// 日本語では行頭から一文字の字下げをする。
-					'$1　$2');
-				} else if (language) {
-					// assert: language: "cmn" (中文)
-					// TODO: 下載完畢後作繁簡轉換。
-					// TODO: 處理內縮。
-					// TODO: 處理文章開頭的內縮。
-					contents = contents.replace(PATTERN_PARAGRAPH_START_CMN,
-					// 中文每段落開頭空兩個字。
-					'$1　　$2');
-				}
 
-				// TODO: 可去除一開始重複的章節標題。
+				// 處理縮排/內縮。
+				if (language === 'ja') {
+					contents = handle_indentation(contents,
+					// 日本語では行頭から一文字の字下げをする。
+					PATTERN_PARAGRAPH_START_JP, '　');
+				} else if (/^cmn/.test(language)) {
+					contents = handle_indentation(contents,
+					// 中文每段落開頭空兩個字。
+					PATTERN_PARAGRAPH_START_CMN, '　　');
+				} else {
+					library_namespace.warn('add_ebook_chapter_actual_work: '
+							+ 'Unknown language: ' + language);
+				}
 
 				if (typeof _this.contents_post_processor === 'function') {
 					contents = _this.contents_post_processor(contents,

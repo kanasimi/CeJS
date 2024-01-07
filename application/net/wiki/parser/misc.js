@@ -267,7 +267,7 @@ function module_code(library_namespace) {
 
 	function trim_parameter(parameter) {
 		parameter = parameter.toString();
-		return parameter.trim().replace(/\s+=\s+/, '=');
+		return parameter.trim().replace(/^([^={}]+)\s+=\s+/, '$1=');
 	}
 
 	/**
@@ -643,15 +643,19 @@ function module_code(library_namespace) {
 		// --------------------------------------
 		// a little check: parameter 的數字順序不應受影響。
 
-		var PATERN_parameter_name = /(?:^|\|)[\s\n]*([^=\s\n][\s\S]*?)=/;
-		if (index + 1 < template_token.length) {
-			// 後面沒有 parameter 了，影響較小。
+		var PATERN_parameter_name = /(?:^|\|)[\s\n]*([^={}\s\n][\s\S]*?)=/;
+		if (index === 0 || index + 1 < template_token.length) {
+			// index === 0: template name 無影響。
+			// index + 1 < template_token.length: 最末尾沒有 parameter 了，影響較小。
 		} else if (isNaN(parameter_name)) {
 			// TODO: NG: {{t|a=a|1}} → {{t|a|1}}
 			if (!PATERN_parameter_name.test(replace_to)) {
-				library_namespace
-						.warn('replace_parameter: Insert named parameter and disrupt the order of parameters? '
-								+ template_token);
+				library_namespace.warn('replace_parameter: '
+						+ 'Insert named parameter [' + index + '] '
+						+ JSON.stringify(parameter_name) + ' '
+						+ JSON.stringify(replace_to)
+						+ ' and disrupt the order of parameters? '
+						+ template_token);
 			}
 		} else {
 			// NG: {{t|a|b}} → {{t|a=1|b}}
@@ -659,15 +663,16 @@ function module_code(library_namespace) {
 			if (!matched) {
 				if (parameter_name !== KEY_template_name
 						&& index != parameter_name) {
-					library_namespace
-							.warn('replace_parameter: Insert non-named parameter to ['
-									+ parameter_name
-									+ '] and disrupt the order of parameters? '
-									+ template_token);
+					library_namespace.warn('replace_parameter: '
+							+ 'Insert non-named parameter to ['
+							+ parameter_name
+							+ '] and disrupt the order of parameters? '
+							+ template_token);
 				}
 			} else if (matched[1].trim() != parameter_name) {
 				library_namespace
-						.warn('replace_parameter: Insert numerical parameter name and disrupt the order of parameters? '
+						.warn('replace_parameter: '
+								+ 'Insert numerical parameter name and disrupt the order of parameters? '
 								+ template_token);
 			}
 		}

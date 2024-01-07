@@ -1815,7 +1815,10 @@ function module_code(library_namespace) {
 
 				html.push(
 				// 將作品資訊欄位置右。
-				'<div id="chapter_information" style="float:right;">');
+				'<div id="chapter_information" style="float:right;'
+				// 隱藏電子書的章節資訊欄位。
+				+ (item_data.hide_chapter_information ? 'display:none;' : '')
+						+ '">');
 
 				if (item_data.date) {
 					// 掲載日/掲載開始日, 最新投稿/最終投稿日
