@@ -1528,6 +1528,7 @@ function module_code(library_namespace) {
 		var layout_indices = Object.create(null);
 
 		var index = 0, BACKTRACKING_SPACES = Object.create(null);
+		// return 新設定
 		function set_index(layout_type, _index, force) {
 			if (_index === BACKTRACKING_SPACES) {
 				// 回溯上一個非空白的 token。
@@ -1585,8 +1586,8 @@ function module_code(library_namespace) {
 				.test(token.name)) {
 					// TODO: 若 [[w:zh:Template:DYKEntry/archive]]
 					// 這種自包含章節標題的模板放在首段，插入時會出錯。
-					set_index('hatnote_templates');
 					set_index('talk_page_lead');
+					set_index('hatnote_templates');
 				} else if (/^(?:Db-\w+)$|^(?:Proposed deletion|Article for deletion)/
 						.test(token.name)) {
 					set_index('deletion_templates');
@@ -1611,8 +1612,11 @@ function module_code(library_namespace) {
 					set_index('lead_section_end', BACKTRACKING_SPACES);
 					set_index('lead_templates_end', BACKTRACKING_SPACES);
 
-				} else if (set_index('maintenance_templates')) {
+				} else if ((set_index('talk_page_lead') ? 1 : 0)
+						+ (set_index('maintenance_templates') ? 1 : 0)
+						+ (set_index('hatnote_templates') ? 1 : 0)) {
 					// maintenance tag
+
 				} else if (layout_indices.content_end >= 0) {
 					set_index('footer');
 					if (/^(?:Succession|S-)$/.test(token.name)) {
@@ -1792,6 +1796,7 @@ function module_code(library_namespace) {
 		// 僅有當無法取得準確的 layout token 時，才會尋覽應插入之點，
 		// 並設定插入於 default_layout_order[layout_index] 之前。
 		layout_index;
+		// console.trace(location, layout_indices, parsed_index);
 
 		if (!(parsed_index >= 0)) {
 			layout_index = default_layout_order.indexOf(location);
@@ -1816,6 +1821,7 @@ function module_code(library_namespace) {
 					parsed_index = layout_indices.lead_section_end;
 				}
 			}
+			// console.trace(parsed_index);
 			if (!(parsed_index >= 0)) {
 				if (options.force_insert) {
 					// Nothing matched: Insert as the latest element

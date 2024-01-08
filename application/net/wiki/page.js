@@ -2262,6 +2262,12 @@ function module_code(library_namespace) {
 					// 截止期限。
 					= new Date(receive_time - delay_ms).toISOString();
 				}
+
+				if (session && !('has_flagged_revision' in session)
+						&& session.API_parameters['query+revisions']) {
+					session.has_flagged_revision = session.API_parameters['query+revisions'].parameter_Map
+							.get('prop').type.includes('flagged');
+				}
 			}
 
 			get_recent(function process_rows(rows) {
@@ -2593,6 +2599,10 @@ function module_code(library_namespace) {
 								// bot flag: ('bot' in row)
 								: 'ids|timestamp|content|user|flags|size'
 							};
+							if (session.has_flagged_revision) {
+								// 在有審核機制的 wiki project 中，獲取版本的審核資訊。
+								page_options.rvprop += '|flagged';
+							}
 							if (false) {
 								Object.assign(page_options, options.with_diff);
 							}
@@ -2678,6 +2688,21 @@ function module_code(library_namespace) {
 									// = new Date(revisions[0].timestamp);
 									= revisions[0].timestamp;
 									// last_query_revid = revisions[0].revid;
+								}
+
+								if (options.reviewed_only
+								//
+								&& session.has_flagged_revision
+								//
+								&& revisions && revisions[0]
+										&& !revisions[0].flagged) {
+									library_namespace.log(
+									// 在有審核機制的 wiki project 中，沒經過審核的版本。
+									'add_listener: ' + '跳過頁面未經審核的版本: '
+									//
+									+ wiki_API.title_link_of(page_data));
+									run_next();
+									return;
 								}
 
 								// assert: (row.is_new || revisions.length > 1)

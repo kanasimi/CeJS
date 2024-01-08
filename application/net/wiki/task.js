@@ -944,9 +944,11 @@ function module_code(library_namespace) {
 			if (library_namespace.is_Object(next[1])) {
 				// temp
 				redirects_data = next[1];
-				library_namespace
-						.info('wiki_API.prototype.next.register_redirects: '
-								+ '查詢傳入引數 Object 的 value 而非 key。');
+				if (!next[3].update_page_name_hash) {
+					library_namespace
+							.info('wiki_API.prototype.next.register_redirects: '
+									+ '查詢傳入引數 Object 的 value 而非 key。');
+				}
 				next[1] = Object.values(next[1]);
 			}
 

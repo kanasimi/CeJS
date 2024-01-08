@@ -2254,7 +2254,9 @@ function module_code(library_namespace) {
 					// || parameters[0].type = 'plain')
 					parameters.name = parameters[0].filter(function(t) {
 						return t.type !== 'comment';
-					}).join('');
+					}).join('')
+					// e.g., '{{t|{{p\n<!-- -->}}}}'
+					.trim();
 				}
 				// console.trace(parameters.name);
 				// 後面不允許空白。 must / *DEFAULTSORT:/
@@ -2325,16 +2327,11 @@ function module_code(library_namespace) {
 					// assert: !!matched === true
 
 				} else {
-					if ((Array.isArray(parameters[0]) ? parameters[0]
-							: [ parameters[0] ]).some(function(token, index,
-							list) {
-						if (typeof token === 'string') {
-							// {{t<!-- -->{|p}}
-							return PATTERN_invalid_page_name_characters
-									.test(index === list.length - 1 ? token
-									// e.g., '{{t\n |p}}'
-									.replace(/\s+$/, '') : token);
-						}
+					// 假如 parameter name 有特殊的 token 就不該視為 template。
+					// 警告: 這個方法可能將非模板當成模板。
+					if (PATTERN_invalid_page_name_characters.test((Array
+							.isArray(parameters[0]) ? parameters[0]
+							: [ parameters[0] ]).filter(function(token) {
 						return !(token.type in {
 							// incase:
 							// {{Wikipedia:削除依頼/ログ/{{今日}}}}
@@ -2346,10 +2343,11 @@ function module_code(library_namespace) {
 							// {{tl{{{1|}}}|p}}
 							parameter : true,
 
-							// allow {{tl<!-- t= -->}}
+							// allow {{tl<!-- t= -->}},
+							// {{template<!-- --> name}}
 							comment : true
 						});
-					})) {
+					}).join('').trim())) {
 						// console.log(parameters);
 
 						// e.g., `{{ {{tl|t}} | p }}` is invalid:
@@ -2358,7 +2356,6 @@ function module_code(library_namespace) {
 					}
 
 					// ------------------------------------
-
 					namespace = parameters.name.match(/^:(\s*:)?/);
 					if (namespace && namespace[1]) {
 						// e.g., {{::T}}
