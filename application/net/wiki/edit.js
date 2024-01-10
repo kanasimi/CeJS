@@ -1170,8 +1170,9 @@ function module_code(library_namespace) {
 						+ options.author + '}}' : options.author,
 				permission : options.permission,
 				other_versions : options.other_versions
-						|| options['other versions'],
+						|| options['other versions'] || '',
 				other_fields : options.other_fields || options['other fields']
+						|| ''
 			};
 			if (!structured_data.date)
 				structured_data.date = options.text.date;
@@ -1279,8 +1280,6 @@ function module_code(library_namespace) {
 		// TODO: check {{Information|permission=license}}
 		var post_data = wiki_API.extract_parameters(options, action);
 
-		post_data.token = token;
-
 		// One of the parameters "filekey", "file" and "url" is required.
 		if (false && file_path.includes('://')) {
 			post_data.url = file_path;
@@ -1312,6 +1311,8 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Manual:$wgFileExtensions
 		}
 
+		post_data.token = token;
+
 		if (!structured_data['media type']) {
 			var matched;
 			if (library_namespace.MIME_of) {
@@ -1326,6 +1327,7 @@ function module_code(library_namespace) {
 		}
 
 		var session = wiki_API.session_of_options(options);
+		// console.trace(session);
 		if (options.show_message && post_data.file.url) {
 			library_namespace.log(file_path + '\nUpload to → '
 					+ wiki_API.title_link_of(session.to_namespace(
@@ -1333,6 +1335,9 @@ function module_code(library_namespace) {
 					post_data.filename, 'File')));
 		}
 
+		if (session) {
+			// console.trace(session.token, post_data);
+		}
 		if (session && session.API_URL && options.check_media) {
 			// TODO: Skip exists file
 			// @see 20181016.import_earthquake_shakemap.js
@@ -1356,10 +1361,18 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// console.trace(post_data);
 		wiki_API.query(action, upload_callback.bind(null,
 		//
 		function check_structured_data(data, error) {
 			// console.trace([ data, error ]);
+			error = wiki_API.query.handle_error(data, error);
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error('wiki_API.upload: ' + error);
+				callback(data, error);
+				return;
+			}
 
 			if (!structured_data.date) {
 				structured_data.date = options.date;

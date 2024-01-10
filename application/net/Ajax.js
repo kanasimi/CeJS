@@ -306,7 +306,8 @@ function module_code(library_namespace) {
 	 */
 	function get_URL(URL_to_fetch, onload, charset, post_data, options) {
 		// 前導作業。
-		if (library_namespace.is_Object(charset)) {
+		if (library_namespace.is_Object(charset) && !options) {
+			options = post_data;
 			post_data = charset;
 			charset = null;
 		}
@@ -1418,7 +1419,8 @@ function module_code(library_namespace) {
 		get_URL_node_connections++;
 
 		// 前導作業。
-		if (library_namespace.is_Object(charset)) {
+		if (library_namespace.is_Object(charset) && !options) {
+			options = post_data;
 			post_data = charset;
 			charset = null;
 		}
@@ -1432,8 +1434,11 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			// TODO: charset for post_data
 			to_form_data(post_data, function(data) {
-				// library_namespace.data.code.string_digest()
-				// console.log('>> ' + library_namespace.string_digest(data.toString(), 200));
+				if (false) {
+					console.log('>> '
+					// library_namespace.data.code.string_digest()
+					+ library_namespace.string_digest(data.toString(), 200));
+				}
 				options.form_data = to_form_data_generated;
 				get_URL_node(URL_to_fetch, onload, charset, data, options);
 			}, options.form_data);
@@ -2426,7 +2431,7 @@ function module_code(library_namespace) {
 			if (false && options.form_data) {
 				// console.log('-'.repeat(79));
 				// console.log(_post_data.to_Array().content_length);
-				// console.log(_post_data);
+				// console.trace(_post_data);
 			}
 			Object.assign(URL_options_to_fetch.headers, {
 				'Content-Type' : options.headers
@@ -2491,7 +2496,8 @@ function module_code(library_namespace) {
 
 		if (post_data) {
 			var _post_data = post_data === FORCE_POST ? '' : post_data;
-			// console.log(_post_data);
+			// console.trace(URL_options_to_fetch);
+			// console.trace(_post_data);
 			if (options.form_data) {
 				(function write_to_request(data) {
 					if (Array.isArray(data)) {
@@ -2499,6 +2505,7 @@ function module_code(library_namespace) {
 							write_to_request(chunk);
 						})
 					} else {
+						// console.trace(data);
 						request.write(data);
 					}
 				})(_post_data.to_Array());

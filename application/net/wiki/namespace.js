@@ -618,7 +618,8 @@ function module_code(library_namespace) {
 				session.get_URL_options = {
 					// start_time : Date.now(),
 					// API_URL : session.API_URL,
-					agent : agent
+					agent : agent,
+					headers : Object.create(null)
 				};
 				if (false) {
 					// set User-Agent to use:
@@ -626,7 +627,7 @@ function module_code(library_namespace) {
 					wiki.get_URL_options.headers['User-Agent'] = library_namespace.get_URL.default_user_agent;
 				}
 			} else {
-				// e.g., using XMLHttpRequest @ WWW
+				// e.g., 老舊版本 or using XMLHttpRequest @ WWW
 				session.get_URL_options = {};
 			}
 
@@ -1007,6 +1008,11 @@ function module_code(library_namespace) {
 			language = 'multilingual';
 		} else {
 			project = is_guessing_language ? family : language + '.' + family;
+		}
+
+		if (is_guessing_language && session && session.language) {
+			language = session.language;
+			is_guessing_language = false;
 		}
 
 		// throw site;

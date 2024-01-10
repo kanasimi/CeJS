@@ -745,6 +745,7 @@ function module_code(library_namespace) {
 			// console.trace(session && session.running);
 		}
 
+		// console.trace(POST_data);
 		get_URL(action, XMLHttp_handler, null, POST_data, get_URL_options);
 	}
 

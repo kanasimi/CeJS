@@ -2699,7 +2699,7 @@ function module_code(library_namespace) {
 									library_namespace.log(
 									// 在有審核機制的 wiki project 中，沒經過審核的版本。
 									'add_listener: ' + '跳過頁面未經審核的版本: '
-									//
+									// 未經審核的版本對於未登入者來說是不可見的。
 									+ wiki_API.title_link_of(page_data));
 									run_next();
 									return;

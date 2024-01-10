@@ -1559,23 +1559,28 @@ function module_code(library_namespace) {
 			}
 		}
 
-		// as index = 0
-		set_index('page_begin');
-
 		// Only detects level 1 tokens
 		for (; index < parsed.length; index++) {
 			var token = parsed[index];
 			if (!token)
 				continue;
+			if (token.type === 'comment') {
+				// Skip comments
+				continue;
+			}
+
 			if (typeof token === 'string') {
 				if (!token.trim()) {
 					continue;
 				}
+				set_index('page_begin');
 				// treat as 正文 Article content, Lead section
 				// e.g., 首段即有內容。
 				set_index('content');
 				continue;
 			}
+
+			set_index('page_begin');
 
 			switch (token.type) {
 			case 'transclusion':
@@ -1612,9 +1617,7 @@ function module_code(library_namespace) {
 					set_index('lead_section_end', BACKTRACKING_SPACES);
 					set_index('lead_templates_end', BACKTRACKING_SPACES);
 
-				} else if ((set_index('talk_page_lead') ? 1 : 0)
-						+ (set_index('maintenance_templates') ? 1 : 0)
-						+ (set_index('hatnote_templates') ? 1 : 0)) {
+				} else if (set_index('maintenance_templates')) {
 					// maintenance tag
 
 				} else if (layout_indices.content_end >= 0) {
@@ -1644,21 +1647,19 @@ function module_code(library_namespace) {
 				set_index('lead_templates_end', BACKTRACKING_SPACES);
 				break;
 
-			case 'magic_word_function':
-				if (token.name === 'DEFAULTSORT')
-					set_index('DEFAULTSORT');
-				set_index('footer', BACKTRACKING_SPACES);
-				break;
-
 			case 'category':
 				// categories
 				set_index('footer', BACKTRACKING_SPACES);
 				set_index('categories');
 				break;
 
-			case 'comment':
-				// Skip comments
-				break;
+			case 'magic_word_function':
+				if (layout_indices.content >= 0 && token.name === 'DEFAULTSORT') {
+					set_index('DEFAULTSORT');
+					set_index('footer', BACKTRACKING_SPACES);
+					break;
+				}
+				// else: goto default
 
 			default:
 				// e.g. '''title''' is ...
@@ -1668,6 +1669,13 @@ function module_code(library_namespace) {
 				delete layout_indices.footer;
 			}
 		}
+
+		set_index('page_begin');
+
+		if (!(layout_indices.lead_section_end >= 0)) {
+			set_index('lead_section_end', BACKTRACKING_SPACES);
+		}
+
 		// 到這邊依然未設定 'content'，可能是像僅有 hatnote_templates 的 talk page。
 		set_index('content');
 
@@ -1677,13 +1685,21 @@ function module_code(library_namespace) {
 		set_index('footer');
 		set_index('page_end');
 
-		if (!('lead_section_end' in layout_indices)) {
-			set_index('lead_section_end', BACKTRACKING_SPACES);
-		}
-
-		index = layout_indices['content'];
+		index = layout_indices.content;
 		// 添加在首段文字或首個 section_title 前，最後一個 hatnote template 後。
 		set_index('lead_templates_end', BACKTRACKING_SPACES);
+
+		index = layout_indices.short_description >= 0 ? layout_indices.short_description
+				: layout_indices.page_begin;
+		// assert: layout_indices.lead_section_end >=0
+		// && layout_indices.content >=0
+		var hatnote_templates_index = Math.min(layout_indices.lead_section_end,
+				layout_indices.content);
+		// 保證這些 lead section 的 elements 全都在 lead_section_end 前。
+		if (!(layout_indices.hatnote_templates <= hatnote_templates_index))
+			set_index('hatnote_templates', index, true);
+		if (!(layout_indices.talk_page_lead <= hatnote_templates_index))
+			set_index('talk_page_lead', index, true);
 
 		// console.trace(layout_indices);
 		return parsed.layout_indices = layout_indices;
@@ -1864,8 +1880,9 @@ function module_code(library_namespace) {
 		if (insert_after_templates) {
 			// console.trace(!!session, location, parsed_index, parsed.length);
 			for (var _index = parsed_index; _index < parsed.length; _index++) {
-				if (parsed[_index].type === 'section_title') {
-					// 這些 layout templates 通常不會跨越章節。
+				if (!parsed[_index]
+				// 這些 layout templates 通常是根節點且不會跨越章節。
+				|| parsed[_index].type === 'section_title') {
 					break;
 				}
 				if (false && parsed[_index].type === 'transclusion') {

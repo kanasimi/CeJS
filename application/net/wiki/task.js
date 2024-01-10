@@ -4130,7 +4130,7 @@ function module_code(library_namespace) {
 			// reset query limit for login as bot.
 			delete session.slow_query_limit;
 
-			// console.log(JSON.stringify(data));
+			// console.trace(JSON.stringify(data));
 			if (data && data.warnings) {
 				// console.log(JSON.stringify(data.warnings));
 			}
@@ -4373,6 +4373,7 @@ function module_code(library_namespace) {
 	};
 
 	var copy_login_options = {
+		language : 'string',
 		preserve_password : 'boolean'
 	};
 

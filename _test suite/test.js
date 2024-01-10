@@ -5293,6 +5293,13 @@ function test_wiki() {
 			type: 'property'
 		});
 
+		var commonswiki = new CeL.wiki(null, null, 'commons');
+		assert(['commonswiki', CeL.wiki.site_name(commonswiki)], 'CeL.wiki.site_name(commonswiki) #1');
+		//console.trace(CeL.wiki.site_name(commonswiki, { get_all_properties: true }));
+		commonswiki.run(function () {
+			assert(['commonswiki', CeL.wiki.site_name(commonswiki)], 'CeL.wiki.site_name(commonswiki) #2');
+		});
+
 	}, function (recorder, error_count, test_name) {
 		console.log('CeL.wiki: asynchronous functions: ' + error_count + ' errors');
 		all_error_count += error_count;
