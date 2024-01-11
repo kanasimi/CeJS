@@ -1559,11 +1559,17 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// e.g., for talk page "\n\n==t==\n...",
+		// 插入hatnote應為 "{{h}}\n\n==t==\n..."
+		// 而非 "\n\n{{h}}\n==t==\n..."
+		set_index('page_begin');
+
 		// Only detects level 1 tokens
 		for (; index < parsed.length; index++) {
 			var token = parsed[index];
 			if (!token)
 				continue;
+
 			if (token.type === 'comment') {
 				// Skip comments
 				continue;
@@ -1670,7 +1676,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		set_index('page_begin');
+		// set_index('page_begin');
 
 		if (!(layout_indices.lead_section_end >= 0)) {
 			set_index('lead_section_end', BACKTRACKING_SPACES);

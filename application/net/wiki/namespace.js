@@ -1170,6 +1170,7 @@ function module_code(library_namespace) {
 					// console.trace(arguments);
 				} else {
 					list.push(is_page_title === false
+					// main article space
 					// is_page_title === false 亦即
 					// options.is_namespace === true
 					&& _n !== 'main' ? undefined : 0);

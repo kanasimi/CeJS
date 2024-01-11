@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "Calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "5",
+	"untranslated message count": "4",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -1101,6 +1101,7 @@
 	"\u4e0d\u518d\u7dad\u8b77": "D\u00e9sormais plus maintenu",
 	"download_options.chapter_NO_range": "T\u00e9l\u00e9charger cette place de num\u00e9ros de chapitres. Par exemple, \u00ab\u202f20-30,50-60\u202f\u00bb.",
 	"download_options.directory_name_pattern": "Personnalise le mod\u00e8le de nom de r\u00e9pertoire du travail. Par d\u00e9faut\u202f: \u00ab\u202f${id_title}${directory_name_extension}\u202f\u00bb. \u00ab\u202f${title}\u202f\u00bb indiquera uniquement le titre de l\u2019\u0153uvre en tant que r\u00e9pertoire de travail, \u00ab\u202f${id}\u202f\u00bb indiquera uniquement l\u2019identifiant de l\u2019\u0153uvre en tant que r\u00e9pertoire de travail.",
+	"download_options.hide_chapter_information": "Masquer le champ d\u2019information du chapitre de l\u2019ebook.",
 	"download_options.acceptable_types": "Types d\u2019images acceptables (extensions). S\u00e9par\u00e9 par des barres verticales \u00ab\u202f|\u202f\u00bb, par exemple \u00ab\u202fwebp|jpg|jpeg|png\u202f\u00bb. Aucun param\u00e8tre ne sera v\u00e9rifi\u00e9. Entrez \u00ab\u202fimages\u00bb pour accepter tous les types d\u2019image. Si l\u2019image t\u00e9l\u00e9charg\u00e9e ne fait pas partie des types sp\u00e9cifi\u00e9s, cela sera consid\u00e9r\u00e9 comme une erreur. Cet outil ne peut t\u00e9l\u00e9charger que certains types d\u2019images. Cette option ne sert qu\u2019\u00e0 v\u00e9rifier les images, pas \u00e0 s\u00e9lectionner les types d\u2019images que vous voulez t\u00e9l\u00e9charger.",
 	"download_options.allow_EOI_error": "Lorsque l\u2019image n\u2019a aucune balise EOI (fin d\u2019image) ou si une non-image est d\u00e9tect\u00e9e, le fichier est encore stock\u00e9 malgr\u00e9 tout.",
 	"download_options.archive_all_good_images_only": "Compresser le fichier d\u2019image sans aucune erreur.",

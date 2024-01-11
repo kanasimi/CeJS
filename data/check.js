@@ -336,7 +336,9 @@ function module_code(library_namespace) {
 
 			lastIndex -= family_list.pop().length;
 		} else if (family_list.length === 0) {
-			family_list.push(name.slice(0, 1));
+			family_list.push(
+			// name.slice(0, 1)
+			String.fromCodePoint(name.codePointAt(0)));
 			lastIndex++;
 		}
 
