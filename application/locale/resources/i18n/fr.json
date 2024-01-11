@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Ajeje Brazorf",
+			"Crochet.david",
 			"Gomoko",
 			"I'm mender",
 			"Kanashimi",
@@ -1112,6 +1113,7 @@
 	"no-longer-maintained": "Désormais plus maintenu",
 	"download_options.chapter_no_range": "Télécharger cette place de numéros de chapitres. Par exemple, « 20-30,50-60 ».",
 	"download_options.directory_name_pattern": "Personnalise le modèle de nom de répertoire du travail. Par défaut : « ${id_title}${directory_name_extension} ». « ${title} » indiquera uniquement le titre de l’œuvre en tant que répertoire de travail, « ${id} » indiquera uniquement l’identifiant de l’œuvre en tant que répertoire de travail.",
+	"download_options.hide_chapter_information": "Masquer le champ d’information du chapitre de l’ebook.",
 	"download_options.acceptable_types": "Types d’images acceptables (extensions). Séparé par des barres verticales « | », par exemple « webp|jpg|jpeg|png ». Aucun paramètre ne sera vérifié. Entrez « images» pour accepter tous les types d’image. Si l’image téléchargée ne fait pas partie des types spécifiés, cela sera considéré comme une erreur. Cet outil ne peut télécharger que certains types d’images. Cette option ne sert qu’à vérifier les images, pas à sélectionner les types d’images que vous voulez télécharger.",
 	"download_options.allow_eoi_error": "Lorsque l’image n’a aucune balise EOI (fin d’image) ou si une non-image est détectée, le fichier est encore stocké malgré tout.",
 	"download_options.archive_all_good_images_only": "Compresser le fichier d’image sans aucune erreur.",
