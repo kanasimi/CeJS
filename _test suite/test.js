@@ -4939,8 +4939,8 @@ function test_wiki() {
 		// from [[w:en:Talk:Change ringing]]
 		wikitext = '\n{{Article history|action1=PR}}\n{{WikiProject Percussion |class=C |importance=Mid}}\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		var WPBS_text = '{{WikiProject banner shell}}';
-		assert([parsed.insert_layout_token(WPBS_text), true], 'parsed.insert_layout_token() #1');
-		assert([parsed.toString(), wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject')], 'parsed.insert_layout_token() #2');
+		assert([parsed.insert_layout_element(WPBS_text), true], 'parsed.insert_layout_element() #1');
+		assert([parsed.toString(), wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject')], 'parsed.insert_layout_element() #2');
 
 		// recover
 		CeL.wiki.set_language('zh');
@@ -5060,8 +5060,8 @@ function test_wiki() {
 			});
 		});
 
-		enwiki.register_redirects(CeL.wiki.setup_layout_elements.template_order_of_layout[CeL.wiki.site_name(enwiki)].talk_page_lead, function test_insert_layout_token() {
-			var test_name = 'enwiki: insert_layout_token';
+		enwiki.register_redirects(CeL.wiki.setup_layout_elements.template_order_of_layout[CeL.wiki.site_name(enwiki)].talk_page_lead, function test_insert_layout_element() {
+			var test_name = 'enwiki: insert_layout_element';
 			_setup_test(test_name);
 
 			// from [[w:en:Talk:Change ringing]]
@@ -5069,8 +5069,8 @@ function test_wiki() {
 			var parsed = CeL.wiki.parser(wikitext, enwiki).parse();
 			var WPBS_template_name = 'WikiProject banner shell' && 'WPBS';
 			var WPBS_text = '{{' + WPBS_template_name + '}}';
-			assert([true, parsed.insert_layout_token(CeL.wiki.parse(CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/)))], 'enwiki: parsed.insert_layout_token() #1');
-			assert([wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject'), parsed.toString()], 'enwiki: parsed.insert_layout_token() #2');
+			assert([true, parsed.insert_layout_element(CeL.wiki.parse(CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/)))], 'enwiki: parsed.insert_layout_element() #1');
+			assert([wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject'), parsed.toString()], 'enwiki: parsed.insert_layout_element() #2');
 
 			_finish_test(test_name);
 		}, { namespace: 'Template', no_message: true });

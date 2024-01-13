@@ -314,7 +314,7 @@ function module_code(library_namespace) {
 			value = token.parameters[parameter_name];
 			if (!value)
 				continue;
-			value = wiki_API.parse.wiki_token_to_key(value);
+			value = wiki_API.parse.wiki_element_to_key(value);
 			// console.trace(value);
 			if (typeof value === 'string') {
 				value = value.replace(/_/g, ' ').trim();

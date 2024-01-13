@@ -40,7 +40,7 @@ function module_code(library_namespace) {
 	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
 	var PATTERN_BOT_NAME = wiki_API.PATTERN_BOT_NAME;
-	var for_each_subtoken = wiki_API.parser.parser_prototype.each;
+	var for_each_subelement = wiki_API.parser.parser_prototype.each;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -86,7 +86,7 @@ function module_code(library_namespace) {
 			plain : true,
 			tag_inner : true
 		}) {
-			for_each_subtoken.call(token, function(sub_token, index, parent) {
+			for_each_subelement.call(token, function(sub_token, index, parent) {
 				// console.trace(sub_token);
 				sub_token = preprocess_section_link_token(sub_token, options);
 				// console.trace(sub_token);
@@ -148,7 +148,7 @@ function module_code(library_namespace) {
 				token.tag_attributes = token.shift();
 				token.original_type = token.type;
 				token.type = 'plain';
-				token.toString = wiki_API.parse.wiki_token_toString[token.type];
+				token.toString = wiki_API.parse.wiki_element_toString[token.type];
 				return token;
 			}
 
@@ -226,14 +226,14 @@ function module_code(library_namespace) {
 			if (token.length > 2) {
 				token = token.slice(2);
 				token.type = 'plain';
-				// @see wiki_API.parse.wiki_token_toString.file, for
+				// @see wiki_API.parse.wiki_element_toString.file, for
 				// token.length > 2
 				token.toString = function() {
 					return this.join('|')
 				};
 				token = preprocess_section_link_tokens(token, options);
 			} else {
-				// 去掉最前頭的 ":"。 @see wiki_API.parse.wiki_token_toString
+				// 去掉最前頭的 ":"。 @see wiki_API.parse.wiki_element_toString
 				token = token[0].toString().replace(/^ *:?/, '') + token[1];
 			}
 			// console.log(token);
@@ -314,7 +314,7 @@ function module_code(library_namespace) {
 			// 去除粗體與斜體。
 			token.original_type = token.type;
 			token.type = 'plain';
-			token.toString = wiki_API.parse.wiki_token_toString[token.type];
+			token.toString = wiki_API.parse.wiki_element_toString[token.type];
 			return token;
 		}
 
@@ -573,9 +573,9 @@ function module_code(library_namespace) {
 		// TODO: for zhwiki, the anchor should NOT includes "-{", "}-"
 
 		// console.log(parsed_title);
-		for_each_subtoken.call(parsed_title, function(token, index, parent) {
+		for_each_subelement.call(parsed_title, function(token, index, parent) {
 			if (token.type === 'convert') {
-				// @see wiki_API.parse.wiki_token_toString.convert
+				// @see wiki_API.parse.wiki_element_toString.convert
 				// return token.join(';');
 				token.toString = function convert_for_recursion() {
 					var converted = this.converted;
@@ -583,7 +583,7 @@ function module_code(library_namespace) {
 						// e.g., get display_text of
 						// '==「-{XX-{zh-hans:纳; zh-hant:納}-克}-→-{XX-{奈}-克}-」=='
 						return section_link_START_CONVERT
-						// @see wiki_API.parse.wiki_token_toString.convert
+						// @see wiki_API.parse.wiki_element_toString.convert
 						+ this.join(';') + section_link_END_CONVERT;
 					}
 					if (Array.isArray(converted)) {
@@ -610,7 +610,7 @@ function module_code(library_namespace) {
 				token.type = token.original_type;
 				token.toString
 				//
-				= wiki_API.parse.wiki_token_toString[token.type];
+				= wiki_API.parse.wiki_element_toString[token.type];
 				// 保留 display_text 中的 ''', '', <b>, <i>, <span> 屬性。
 				if (token.type === 'tag') {
 					// 容許一些特定標籤能夠顯示格式: 會到這裡的應該都是一些被允許顯示格式的特定標籤。
@@ -654,7 +654,7 @@ function module_code(library_namespace) {
 		var link = [ options && options.page_title,
 		// Warning: anchor, display_text are with "&amp;",
 		// id is not with "&amp;".
-		// Warning: 這裡的網頁錨點沒包括 "#"，和 wiki_token_toString.link 不同。
+		// Warning: 這裡的網頁錨點沒包括 "#"，和 wiki_element_toString.link 不同。
 		anchor, display_text ];
 		// console.log(link);
 		// console.trace(parsed_title);
@@ -668,13 +668,13 @@ function module_code(library_namespace) {
 				link.tokens_maybe_handlable = parsed_title.tokens_maybe_handlable
 						.unique();
 				link.tokens_maybe_handlable.forEach(function(parsed) {
-					for_each_subtoken.call(parsed, function(token, index,
+					for_each_subelement.call(parsed, function(token, index,
 							parent) {
 						if (token.type === 'convert') {
 							token.toString
 							// recover .toString of token.type === 'convert'
 							// @see convert_for_recursion()
-							= wiki_API.parse.wiki_token_toString[token.type];
+							= wiki_API.parse.wiki_element_toString[token.type];
 						}
 					});
 				});
@@ -932,7 +932,7 @@ function module_code(library_namespace) {
 		if (!representative_image) {
 			parsed.each('file', function(token) {
 				representative_image = token;
-				return for_each_subtoken.exit;
+				return for_each_subelement.exit;
 			});
 		}
 
@@ -1169,7 +1169,7 @@ function module_code(library_namespace) {
 				// assert: parsed[range[0]] === '\n',
 				// is the tail '\n' of "==title== "
 				range : range,
-				each : for_each_subtoken,
+				each : for_each_subelement,
 				replace_by : replace_section_by,
 				toString : _this.toString
 			});
@@ -1188,7 +1188,7 @@ function module_code(library_namespace) {
 		// default: level 2. 僅處理階級2的章節標題。
 		|| 2;
 
-		// get topics / section title / stanza title using for_each_subtoken()
+		// get topics / section title / stanza title using for_each_subelement()
 		// 讀取每一個章節的資料: 標題,內容
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
 		// TODO: 可以讀取含入的子頁面
@@ -1284,7 +1284,7 @@ function module_code(library_namespace) {
 
 			modify : false
 		},
-		// options.for_each_subtoken_options
+		// options.for_each_subelement_options
 		options));
 		// add the last section
 		add_root_section(this.length);
@@ -1503,7 +1503,7 @@ function module_code(library_namespace) {
 				return level_filter === section_title.level;
 			};
 
-			// TODO: return (result === for_each_subtoken.remove_token)
+			// TODO: return (result === for_each_subelement.remove_token)
 			// TODO: move section to another page
 			if (library_namespace.is_async_function(for_section)) {
 				// console.log(all_root_section_list);
@@ -1535,7 +1535,7 @@ function module_code(library_namespace) {
 				all_root_section_list.some(function(section) {
 					// return parsed.each.exit;
 					return section_filter(section)
-							&& (for_each_subtoken.exit ===
+							&& (for_each_subelement.exit ===
 							// exit if the result calls exit
 							for_section.apply(this, arguments));
 				}, this);
@@ -1747,22 +1747,22 @@ function module_code(library_namespace) {
 			// 忽略 <ref> 之類非固定的元素。不深入解開 <ref> 內模板可節省許多時間。
 			if (options.ignore_variable_anchors) {
 				var first_imprecise_token = undefined;
-				for_each_subtoken.call(section_title_token, function(token,
+				for_each_subelement.call(section_title_token, function(token,
 						index, parent) {
 					// console.trace(sub_token);
 					if (token.tag === 'ref') {
 						first_imprecise_token = token;
-						return for_each_subtoken.exit;
+						return for_each_subelement.exit;
 					}
 					if (false && token.type === 'transclusion'
 							&& /^Cite \w+/.test(template_token.name)) {
 						first_imprecise_token = token;
-						return for_each_subtoken.exit;
+						return for_each_subelement.exit;
 					}
 					// e.g., [https://url ]
 					if (token.type === 'external_link' && !token[2]) {
 						first_imprecise_token = token;
-						return for_each_subtoken.exit;
+						return for_each_subelement.exit;
 					}
 				});
 				if (first_imprecise_token) {
@@ -1792,7 +1792,7 @@ function module_code(library_namespace) {
 								&& parsed[0].type === 'section_title');
 					}
 					section_title_link = wiki_API.section_link(parsed[0]
-					// @see wiki_token_toString.section_title @
+					// @see wiki_element_toString.section_title @
 					// CeL.application.net.wiki.parser.wikitext
 					.join(''), options);
 					if (false) {
@@ -2077,7 +2077,7 @@ function module_code(library_namespace) {
 
 				// 不放在 `parsed.each('tag'` 裡面，因為 table_cell 也能設定 id。
 				if (false) {
-					for_each_subtoken.call(tag_token, 'tag_attributes',
+					for_each_subelement.call(tag_token, 'tag_attributes',
 							parse_tag_attributes_anchors);
 				}
 
@@ -2132,7 +2132,7 @@ function module_code(library_namespace) {
 					}
 					// e.g., {{Wikicite|ref={{sfnref|...}} }} .expand() 之後，
 					// 解析 id="{{sfnref|...}}"
-					for_each_subtoken.call(anchor, 'transclusion', function(
+					for_each_subelement.call(anchor, 'transclusion', function(
 							template_token, index, parent) {
 						// replace by expanded text
 						if (template_token.expand) {

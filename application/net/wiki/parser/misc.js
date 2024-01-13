@@ -276,7 +276,7 @@ function module_code(library_namespace) {
 	 * modify_template()
 	 * 
 	 * WARNING: 本函數只保證 template_token.toString() 這個正確。若之後還要利用
-	 * template_token，應先執行 `CeL.wiki.inplace_reparse_token(template_token)`。
+	 * template_token，應先執行 `CeL.wiki.inplace_reparse_element(template_token)`。
 	 * 
 	 * WARNING: 若不改變 parameter name，只變更 value，<br />
 	 * 則應該使用 { value_only: true }，<br />

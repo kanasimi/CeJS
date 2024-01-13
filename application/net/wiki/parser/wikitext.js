@@ -25,7 +25,7 @@ https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.parser.wikitext',
-	// for_each_subtoken
+	// for_each_subelement
 	require : 'application.net.wiki.parser.',
 
 	// 設定不匯出的子函式。
@@ -177,7 +177,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Array}token
 	 * 
-	 * @see wiki_token_toString
+	 * @see wiki_element_toString
 	 */
 	function set_wiki_type(token, type, parent) {
 		// console.trace(token);
@@ -198,12 +198,15 @@ function module_code(library_namespace) {
 			token.is_atom = true;
 		}
 		// check
-		if (false && !wiki_token_toString[type]) {
+		if (false && !wiki_element_toString[type]) {
 			throw new Error('.toString() not exists for type [' + type + ']!');
 		}
 
-		token.toString = wiki_token_toString[type];
-		// Object.defineProperty(token, 'toString', wiki_token_toString[type]);
+		token.toString = wiki_element_toString[type];
+		if (false) {
+			Object.defineProperty(token, 'toString',
+					wiki_element_toString[type]);
+		}
 
 		if (false) {
 			var depth;
@@ -440,7 +443,7 @@ function module_code(library_namespace) {
 	var VALUE_converter_rule_error = 'converter-manual-rule-error';
 
 	/**
-	 * .toString() of wiki elements: wiki_token_toString[token.type]<br />
+	 * .toString() of wiki elements: wiki_element_toString[token.type]<br />
 	 * parse_wikitext() 將把 wikitext 解析為各 {Array} 組成之結構。當以 .toString() 結合時，將呼叫
 	 * .join() 組合各次元素。此處即為各 .toString() 之定義。<br />
 	 * 所有的 key (type) 皆為小寫。
@@ -449,7 +452,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see parse_wikitext()
 	 */
-	var wiki_token_toString = {
+	var wiki_element_toString = {
 		// internal/interwiki link : language links : category links, file,
 		// subst 替換引用, ... : title
 		// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki linking]],
@@ -684,7 +687,7 @@ function module_code(library_namespace) {
 		// section title / section name
 		// show all section titles:
 		// parser=CeL.wiki.parser(page_data);parser.each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
-		// @see for_each_subtoken()
+		// @see for_each_subelement()
 		// parser.each('plain',function(token){},{slice:[1,2]});
 		section_title : function(get_inner) {
 			// this.join(''): 必須與 wikitext 相同。見 parse_wikitext.title。
@@ -875,37 +878,23 @@ function module_code(library_namespace) {
 
 	// is_wiki_token(), is_token()
 	function is_parsed_element(value) {
-		// typeof token === 'string' ||
 		return Array.isArray(value) && value.type;
 	}
 
-	/**
-	 * token 為有意義的 token。
-	 * 
-	 * @see noncontent_type @ 20170515.signature_check.js
-	 */
-	function is_meaningful_element(token) {
-		if (token === undefined) {
-			// for array.filter(CeL.wiki.is_meaningful_element)
-			return false;
-		}
-
+	/** token為無意義的token。 */
+	function is_meaningless_element(token) {
 		if (typeof token === 'string')
-			return token && token.trim();
-
+			return !token.trim();
 		if (Array.isArray(token)) {
-			return !(token.type in {
+			return token.type in {
 				comment : true
-			});
+			};
 		}
-
-		// Including {Number}0, {Array}, null
-		return true;
 	}
 
 	// 可算 function preprocess_section_link_token(token, options) 的簡化版。
 	// 可能保留 "\n" 必須自己 .trim()。
-	function wiki_token_to_key(token) {
+	function wiki_element_to_key(token) {
 		if (!Array.isArray(token))
 			return token;
 
@@ -913,7 +902,7 @@ function module_code(library_namespace) {
 		// key token must accept '\n'. e.g., "key_ \n _key = value"
 		var _token = token.filter(function(t) {
 			if (t.type === 'plain')
-				t = wiki_token_to_key(t);
+				t = wiki_element_to_key(t);
 
 			if (!Array.isArray(t))
 				return t;
@@ -1822,7 +1811,7 @@ function module_code(library_namespace) {
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 				if (page_name.oddly === 'link_inside_file') {
-					// @see wiki_token_toString.link
+					// @see wiki_element_toString.link
 					if (parameters.length > 2)
 						parameters.splice(2, 0, parameters.pipe || '|');
 					parameters.unshift('[[');
@@ -2002,7 +1991,7 @@ function module_code(library_namespace) {
 				// console.log(matched);
 
 				// parse function name
-				matched.pfn = wiki_token_to_key(
+				matched.pfn = wiki_element_to_key(
 				//
 				parse_wikitext(matched[2], options, queue));
 				if (/^ *#/.test(matched.pfn)) {
@@ -2134,11 +2123,11 @@ function module_code(library_namespace) {
 						if (invoke_properties && _index === 1) {
 							invoke_properties.module_name
 							// token[1]: module name 模組名稱
-							= wiki_token_to_key(value, options);
+							= wiki_element_to_key(value, options);
 						} else if (invoke_properties && _index === 2) {
 							invoke_properties.function_name
 							// token[2]: lua function name 函式名稱
-							= wiki_token_to_key(value, options);
+							= wiki_element_to_key(value, options);
 						} else {
 							// 警告: 不該尋找下一個可用的 parameter serial。
 							// 無名parameters有自己一套計數，不因具名parameters而跳過。
@@ -2568,7 +2557,7 @@ function module_code(library_namespace) {
 					'tag_attributes');
 			// 注意: attribute_token.attributes 中的 template 都不包含
 			// template_token.expand() !
-			// 可利用 for_each_subtoken() 設定 template_token.expand()。
+			// 可利用 for_each_subelement() 設定 template_token.expand()。
 			attributes.attributes = extract_tag_attributes(attributes
 					.toString());
 			return attributes;
@@ -2777,7 +2766,7 @@ function module_code(library_namespace) {
 
 			// [ ... ]: 在 inner 為 Template 之類時，
 			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
-			// 但仍需要設定 type=tag_inner 以應 for_each_subtoken() 之需，因此多層[]包覆。
+			// 但仍需要設定 type=tag_inner 以應 for_each_subelement() 之需，因此多層[]包覆。
 			inner = _set_wiki_type(Array.isArray(inner)
 			// 僅有一個 plain 的話就直接採用其內容，減少多層嵌套。
 			&& inner.type === 'plain' ? inner : [ inner || '' ], 'tag_inner');
@@ -3090,7 +3079,7 @@ function module_code(library_namespace) {
 
 			queue.push(table_token);
 			// 因為 "\n" 在 wikitext parser 中為重要標記，可能是 initialized_fix 加入的，
-			// 因此 wiki_token_toString.table() 不包括開頭的 "\n"，並須 restore 之。
+			// 因此 wiki_element_toString.table() 不包括開頭的 "\n"，並須 restore 之。
 			return previous + '\n' + include_mark + (queue.length - 1)
 					+ end_mark + ending;
 		}
@@ -3975,8 +3964,8 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// CeL.wiki.inplace_reparse_token(template_token)
-	function inplace_reparse_token(token, options) {
+	// CeL.wiki.inplace_reparse_element(template_token)
+	function inplace_reparse_element(token, options) {
 		var session = wiki_API.session_of_options(options || token);
 		options = wiki_API.add_session_to_options(session, Object
 				.clone(options));
@@ -3994,8 +3983,8 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.*
 	Object.assign(parse_wikitext, {
-		wiki_token_toString : wiki_token_toString,
-		wiki_token_to_key : wiki_token_to_key,
+		wiki_element_toString : wiki_element_toString,
+		wiki_element_to_key : wiki_element_to_key,
 
 		set_wiki_type : set_wiki_type
 	});
@@ -4016,13 +4005,9 @@ function module_code(library_namespace) {
 		// Please use CeL.wiki.wikitext_to_plain_text() instead!
 		HTML_to_wikitext : HTML_to_wikitext,
 		// wikitext_to_plain_text : wikitext_to_plain_text,
-
-		// CeL.wiki.is_parsed_element()
 		is_parsed_element : is_parsed_element,
-		// CeL.wiki.is_meaningful_element()
-		is_meaningful_element : is_meaningful_element,
 
-		inplace_reparse_token : inplace_reparse_token,
+		inplace_reparse_element : inplace_reparse_element,
 		parse : parse_wikitext
 	});
 

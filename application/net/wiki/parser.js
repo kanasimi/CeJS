@@ -6,8 +6,8 @@
  * TODO:<code>
 
 parser 所有子頁面加入白名單 white-list
-parser for_each_subtoken() 所有node當前之level層級
-parser for_each_subtoken() 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
+parser for_each_subelement() 所有node當前之level層級
+parser for_each_subelement() 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
 
 </code>
  * 
@@ -150,7 +150,7 @@ function module_code(library_namespace) {
 		// traversal_tokens()
 		// CeL.wiki.parser.parser_prototype.each.call(token_list,'Template:',(token,index,parent)=>{});
 		// 在執行 .each() 之前，應該先執行 .parse()。
-		each : for_each_subtoken,
+		each : for_each_subelement,
 		parse : parse_page,
 		parse_references : parse_references,
 
@@ -158,7 +158,7 @@ function module_code(library_namespace) {
 		append_category : register_and_append_category,
 
 		analysis_layout_indices : analysis_layout_indices,
-		insert_layout_token : insert_layout_token,
+		insert_layout_element : insert_layout_element,
 
 		insert_before : insert_before,
 		// has_template
@@ -167,7 +167,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * {Object}alias name of type. The target MUST be one of
-	 * wiki_API.parse.wiki_token_toString
+	 * wiki_API.parse.wiki_element_toString
 	 */
 	page_parser.type_alias = {
 		wikilink : 'link',
@@ -402,7 +402,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}[type]
 	 *            欲搜尋之類型。 e.g., 'template'. see
-	 *            ((wiki_API.parse.wiki_token_toString)).<br />
+	 *            ((wiki_API.parse.wiki_element_toString)).<br />
 	 *            未指定: 處理所有節點。
 	 * @param {Function}processor
 	 *            執行特定作業: processor({Array|String|undefined}inside token list,
@@ -419,14 +419,14 @@ function module_code(library_namespace) {
 	 * 
 	 * @see page_parser.type_alias
 	 */
-	function for_each_subtoken(type, processor, modify_by_return, max_depth) {
+	function for_each_subelement(type, processor, modify_by_return, max_depth) {
 		if (!Array.isArray(this)) {
 			// console.trace(this);
 			return this;
 		}
 
 		if (typeof type === 'function' && max_depth === undefined) {
-			// for_each_subtoken(processor, modify_by_return, max_depth)
+			// for_each_subelement(processor, modify_by_return, max_depth)
 			// shift arguments.
 			max_depth = modify_by_return;
 			modify_by_return = processor;
@@ -435,7 +435,7 @@ function module_code(library_namespace) {
 		}
 
 		var options;
-		// for_each_subtoken(type, processor, options)
+		// for_each_subelement(type, processor, options)
 		if (max_depth === undefined && typeof modify_by_return === 'object') {
 			options = modify_by_return;
 			modify_by_return = options.modify;
@@ -448,7 +448,7 @@ function module_code(library_namespace) {
 
 		if (typeof modify_by_return === 'number' && modify_by_return > 0
 				&& max_depth === undefined) {
-			// for_each_subtoken(type, processor, max_depth)
+			// for_each_subelement(type, processor, max_depth)
 			// shift arguments.
 			max_depth = modify_by_return;
 			modify_by_return = undefined;
@@ -467,7 +467,7 @@ function module_code(library_namespace) {
 		var token_name;
 		if (type || type === '') {
 			if (typeof type !== 'string') {
-				library_namespace.warn('for_each_subtoken: Invalid type ['
+				library_namespace.warn('for_each_subelement: Invalid type ['
 						+ type + ']');
 				return;
 			}
@@ -490,8 +490,8 @@ function module_code(library_namespace) {
 			if (type in page_parser.type_alias) {
 				type = page_parser.type_alias[type];
 			}
-			if (!(type in wiki_API.parse.wiki_token_toString)) {
-				library_namespace.warn('for_each_subtoken: Unknown type ['
+			if (!(type in wiki_API.parse.wiki_element_toString)) {
+				library_namespace.warn('for_each_subelement: Unknown type ['
 						+ type + ']');
 			}
 		}
@@ -504,7 +504,7 @@ function module_code(library_namespace) {
 			// 第一層 start from ((slice))
 			slice = [ slice ];
 		} else if (slice && (!Array.isArray(slice) || slice.length > 2)) {
-			library_namespace.warn('for_each_subtoken: Invalid slice: '
+			library_namespace.warn('for_each_subelement: Invalid slice: '
 					+ JSON.stringify(slice));
 			slice = undefined;
 		}
@@ -594,7 +594,7 @@ function module_code(library_namespace) {
 					}
 
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
-					// for_each_subtoken(token, token_index, parent_of_token,
+					// for_each_subelement(token, token_index, parent_of_token,
 					// depth)
 					var result = processor(token, index, parent_token, depth);
 					// console.log(modify_by_return);
@@ -646,16 +646,16 @@ function module_code(library_namespace) {
 
 			function check_result(token, result) {
 				// assert: !promise || (promise is resolved)
-				if (result === for_each_subtoken.exit) {
+				if (result === for_each_subelement.exit) {
 					library_namespace.debug('Abort the operation', 3,
-							'for_each_subtoken');
+							'for_each_subelement');
 					// exit: 直接跳出。
 					exit = true;
 					return traversal_children();
 				}
 
 				// `return parsed.each.remove_token;`
-				if (result === for_each_subtoken.remove_token) {
+				if (result === for_each_subelement.remove_token) {
 					// 重新確認 index，預防中途做過了插入或者刪除操作。
 					var _index;
 					if (parent_token[index] !== token) {
@@ -680,7 +680,7 @@ function module_code(library_namespace) {
 							library_namespace.debug(
 									'將刪除可能被引用的 <ref>，並嘗試自動刪除所有引用。您仍須自行刪除非{{r|name}}型態的模板參考引用: '
 											+ token.toString(), 1,
-									'for_each_subtoken');
+									'for_each_subelement');
 							ref_list_to_remove.push(token.attributes.name);
 						}
 
@@ -721,7 +721,7 @@ function module_code(library_namespace) {
 				// depth-first search (DFS) 向下層巡覽，再進一步處理。
 				// 這樣最符合token在文本中的出現順序。
 				// Skip inner tokens, skip children.
-				if (result !== for_each_subtoken.skip_inner
+				if (result !== for_each_subelement.skip_inner
 				// is_atom: 不包含可 parse 之要素，不包含 text。
 				&& Array.isArray(token) && !token.is_atom
 				// 最起碼必須執行一次 `traversal_next_sibling()`。
@@ -783,32 +783,32 @@ function module_code(library_namespace) {
 			}
 
 			var result;
-			result = for_each_subtoken.call(this, 'tag_single', function(token,
-					index, parent) {
+			result = for_each_subelement.call(this, 'tag_single', function(
+					token, index, parent) {
 				if (token.tag === 'ref' && token.attributes
 				// 嘗試自動刪除所有引用。
 				&& ref_list_to_remove.includes(token.attributes.name)) {
 					library_namespace.debug('Also remove: ' + token.toString(),
-							3, 'for_each_subtoken');
-					return for_each_subtoken.remove_token;
+							3, 'for_each_subelement');
+					return for_each_subelement.remove_token;
 				}
 			});
 			check_if_result_is_thenable(result);
 
-			result = for_each_subtoken.call(this, 'transclusion',
+			result = for_each_subelement.call(this, 'transclusion',
 			// also remove {{r|name}}
 			function(token, index, parent) {
-				if (for_each_subtoken.ref_name_templates.includes(token.name)
+				if (for_each_subelement.ref_name_templates.includes(token.name)
 				// 嘗試自動刪除所有引用。
 				&& ref_list_to_remove.includes(token.parameters['1'])) {
 					if (token.parameters['2']) {
 						library_namespace
-								.warn('for_each_subtoken: Cannot remove: '
+								.warn('for_each_subelement: Cannot remove: '
 										+ token.toString());
 					} else {
 						library_namespace.debug('Also remove: '
-								+ token.toString(), 3, 'for_each_subtoken');
-						return for_each_subtoken.remove_token;
+								+ token.toString(), 3, 'for_each_subelement');
+						return for_each_subelement.remove_token;
 					}
 				}
 			});
@@ -857,19 +857,21 @@ function module_code(library_namespace) {
 		});
 	}
 
-	Object.assign(for_each_subtoken, {
+	Object.assign(for_each_subelement, {
 		// CeL.wiki.parser.parser_prototype.each.exit
-		// for_each_subtoken.exit: 直接跳出。
-		exit : typeof Symbol === 'function' ? Symbol('EXIT_for_each_subtoken')
-				: [ 'for_each_subtoken.exit: abort the operation' ],
+		// for_each_subelement.exit: 直接跳出。
+		exit : typeof Symbol === 'function'
+		//
+		? Symbol('EXIT_for_each_subelement')
+				: [ 'for_each_subelement.exit: abort the operation' ],
 		// CeL.wiki.parser.parser_prototype.each.skip_inner
-		// for_each_subtoken.skip_inner: Skip inner tokens, skip children.
+		// for_each_subelement.skip_inner: Skip inner tokens, skip children.
 		skip_inner : typeof Symbol === 'function' ? Symbol('SKIP_CHILDREN')
-				: [ 'for_each_subtoken.skip_inner: skip children' ],
+				: [ 'for_each_subelement.skip_inner: skip children' ],
 		// CeL.wiki.parser.parser_prototype.each.remove_token
-		// for_each_subtoken.remove_token: remove current children token
+		// for_each_subelement.remove_token: remove current children token
 		remove_token : typeof Symbol === 'function' ? Symbol('REMOVE_TOKEN')
-				: [ 'for_each_subtoken.skip_inner: remove current token' ],
+				: [ 'for_each_subelement.skip_inner: remove current token' ],
 		ref_name_templates : [ 'R' ]
 	});
 
@@ -912,17 +914,17 @@ function module_code(library_namespace) {
 	if (false) {
 		// re-generate token:
 		// Set token.index, token.parent first, and then
-		new_token = CeL.wiki.replace_token(token, token.toString(), options);
+		new_token = CeL.wiki.replace_element(token, token.toString(), options);
 	}
 
 	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用。
-	function replace_token(replace_from_token, replace_to, options) {
+	function replace_element(replace_from_token, replace_to, options) {
 		var index = replace_from_token.index;
 		var parent_token = replace_from_token.parent;
 
 		index = scan_token_index(replace_from_token, index, parent_token);
 		if (index === NOT_FOUND) {
-			library_namespace.error('replace_token: ' + 'Skip replace: '
+			library_namespace.error('replace_element: ' + 'Skip replace: '
 					+ replace_from_token + '→' + replace_to);
 			return;
 		}
@@ -943,11 +945,11 @@ function module_code(library_namespace) {
 	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用。
 	// 兩 token 都必須先有 .index, .parent!
 	// token.parent[token.index] === token
-	// @see options.add_index @ function for_each_subtoken()
+	// @see options.add_index @ function for_each_subelement()
 	// 注意: 這個交換純粹只操作於 page_data.parsed 上面，
 	// 不會改變其他參照，例如 page_data.parsed.reference_list!
 	// 通常一個頁面只能夠交換一次，交換兩次以上可能就會出現問題!
-	function switch_token(token_1, token_2) {
+	function switch_elements(token_1, token_2) {
 		// console.log([ token_1, token_2 ]);
 		token_1.parent[token_1.index] = token_2;
 		token_2.parent[token_2.index] = token_1;
@@ -1026,7 +1028,7 @@ function module_code(library_namespace) {
 			template_token.index = index;
 			template_token.parent = parent;
 			// Find the first matched.
-			return for_each_subtoken.exit;
+			return for_each_subelement.exit;
 		}, options);
 
 		return template_token;
@@ -1724,10 +1726,10 @@ function module_code(library_namespace) {
 
 	if (false) {
 		parsed = page_data.parse();
-		parsed.insert_layout_token('{{maintenance_template}}',
+		parsed.insert_layout_element('{{maintenance_template}}',
 				'maintenance_templates');
-		parsed.insert_layout_token('[[Category:category name]]');
-		parsed.insert_layout_token('{{DEFAULTSORT:sort key}}');
+		parsed.insert_layout_element('[[Category:category name]]');
+		parsed.insert_layout_element('{{DEFAULTSORT:sort key}}');
 		return parsed.toString();
 	}
 
@@ -1792,9 +1794,20 @@ function module_code(library_namespace) {
 		return template_to_location_hash[template_name];
 	}
 
+	/** @inner */
+	function get_index_of_location(location, options) {
+		;
+	}
+
+	/** @inner */
+	function get_index_of_template(location, options) {
+		;
+	}
+
 	// insert_navigate_template
 	// 注意: 這個操作之後再改變 token 可能無效!
-	function insert_layout_token(token, options) {
+	// TODO: resort token
+	function insert_layout_element(token, options) {
 		/** {String}layout_type */
 		var location;
 		if (typeof options === 'string') {
@@ -1862,7 +1875,7 @@ function module_code(library_namespace) {
 					parsed_index = parsed.length;
 				} else {
 					throw new Error(
-							'insert_layout_token: Cannot insert token as location: '
+							'insert_layout_element: Cannot insert token as location: '
 									+ location);
 				}
 			}
@@ -1936,7 +1949,7 @@ function module_code(library_namespace) {
 		if (!wiki_API.is_valid_parameters_value(token)) {
 			// e.g., token === undefined
 			return;
-			throw new Error('insert_layout_token: Invalid token ' + token);
+			throw new Error('insert_layout_element: Invalid token ' + token);
 		}
 
 		if (token.type === 'category') {
@@ -2218,7 +2231,7 @@ function module_code(library_namespace) {
 		}
 		function render_all_parameters(token) {
 			if (Array.isArray(token))
-				for_each_subtoken.call(token, 'parameter', render_parameter,
+				for_each_subelement.call(token, 'parameter', render_parameter,
 						true);
 		}
 		function render_result_of_parameter(name) {
@@ -2279,8 +2292,8 @@ function module_code(library_namespace) {
 				: 'page data',
 
 		scan_token_index : scan_token_index,
-		replace_token : replace_token,
-		switch_token : switch_token,
+		replace_element : replace_element,
+		switch_elements : switch_elements,
 
 		// parse_table(), parse_wikitable()
 		table_to_array : table_to_array,
