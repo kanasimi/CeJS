@@ -1081,6 +1081,8 @@ function module_code(library_namespace) {
 	/**
 	 * get NO of namespace
 	 * 
+	 * 注意: [[d:Q1]], [[en:T]] 之 namespace 亦為 0。須採 session.is_article() 測試。
+	 * 
 	 * @param {String|Integer}namespace
 	 *            namespace or page title
 	 * @param {Object}[options]
@@ -2536,6 +2538,7 @@ function module_code(library_namespace) {
 		return get_page_content.is_page_data(page_data) && page_data.pageid;
 	};
 
+	// CeL.wiki.content_of.revision(page_data, revision_index);
 	// return {Object}main revision (.revisions[0])
 	get_page_content.revision = function(page_data, revision_index) {
 		return wiki_API.is_page_data(page_data)
@@ -3942,6 +3945,16 @@ function module_code(library_namespace) {
 				}
 			return convert_page_title_to_namespace(page_title,
 					add_session_to_options(this, options));
+		},
+		// [[d:Q1]], [[en:T]] 之 namespace 亦為 0。
+		is_article : function is_article(page_title) {
+			page_title = this.normalize_title(page_title);
+			// session.is_namespace(page_title, 'main');
+			return this.is_namespace(page_title, 0)
+			// 光 .test(page_title)===true 還不夠
+			&& (!page_title.includes(':')
+			// this.configurations.interwiki_pattern.test('en')===true
+			|| !this.configurations.interwiki_pattern.test(page_title));
 		},
 		// wrappers
 		is_talk_namespace : function wiki_API_is_talk_namespace(namespace,

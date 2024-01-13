@@ -4721,6 +4721,9 @@ function test_wiki() {
 		assert(['{{  t | a=2|v =  3 }}', CeL.wiki.parse.replace_parameter(token, parameters, { value_only: true, no_value_space: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #18-5');
 		parameters[1] = CeL.wiki.parse('\n{{s|r=t}}\n{{q|r=t}}\n');
 		assert(['{{  t | a=2|v =  3 |1=\n{{s|r=t}}\n{{q|r=t}}\n}}', CeL.wiki.parse.replace_parameter(token, parameters, { value_only: true, no_value_space: true, force_add: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #18-6');
+		wikitext = '{{t|p=}}'; token = CeL.wiki.parse(wikitext);
+		assert([wikitext, CeL.wiki.parse.replace_parameter(token, { q: CeL.wiki.parse('<!-- -->') }, { value_only: true }) === 0 && token.toString()], 'wiki.parse.replace_parameter: #19-1');
+		assert(['{{t|p=<!--!-->}}', CeL.wiki.parse.replace_parameter(token, { p: CeL.wiki.parse('<!--!-->') }, { value_only: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #19-2');
 
 		wikitext = '{{t1|p1=1|p2=2|p4=}}'; parsed = CeL.wiki.parse(wikitext);
 		var parsed_2 = CeL.wiki.parse('{{ T1|p3=3|p4=4}}');
@@ -5066,8 +5069,8 @@ function test_wiki() {
 			var parsed = CeL.wiki.parser(wikitext, enwiki).parse();
 			var WPBS_template_name = 'WikiProject banner shell' && 'WPBS';
 			var WPBS_text = '{{' + WPBS_template_name + '}}';
-			assert([parsed.insert_layout_token(CeL.wiki.parse(CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/))), true], 'enwiki: parsed.insert_layout_token() #1');
-			assert([parsed.toString(), wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject')], 'enwiki: parsed.insert_layout_token() #2');
+			assert([true, parsed.insert_layout_token(CeL.wiki.parse(CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/)))], 'enwiki: parsed.insert_layout_token() #1');
+			assert([wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject'), parsed.toString()], 'enwiki: parsed.insert_layout_token() #2');
 
 			_finish_test(test_name);
 		}, { namespace: 'Template', no_message: true });

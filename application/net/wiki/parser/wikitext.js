@@ -873,8 +873,34 @@ function module_code(library_namespace) {
 		return array;
 	}
 
+	// is_wiki_token(), is_token()
 	function is_parsed_element(value) {
+		// typeof token === 'string' ||
 		return Array.isArray(value) && value.type;
+	}
+
+	/**
+	 * token 為有意義的 token。
+	 * 
+	 * @see noncontent_type @ 20170515.signature_check.js
+	 */
+	function is_meaningful_element(token) {
+		if (token === undefined) {
+			// for array.filter(CeL.wiki.is_meaningful_element)
+			return false;
+		}
+
+		if (typeof token === 'string')
+			return token && token.trim();
+
+		if (Array.isArray(token)) {
+			return !(token.type in {
+				comment : true
+			});
+		}
+
+		// Including {Number}0, {Array}, null
+		return true;
 	}
 
 	// 可算 function preprocess_section_link_token(token, options) 的簡化版。
@@ -1028,7 +1054,7 @@ function module_code(library_namespace) {
 		if (initialized_fix) {
 			// 初始化。
 			if (!wikitext.replace) {
-				if (Array.isArray(wikitext) && wikitext.type) {
+				if (is_parsed_element(wikitext)) {
 					library_namespace.debug('Treat [' + wikitext
 							+ '] as parsed token and return directly!', 3,
 							'parse_wikitext');
@@ -2385,11 +2411,21 @@ function module_code(library_namespace) {
 						parameters.name = wiki_API.remove_namespace(
 								parameters.name, options);
 					} else if (namespace === wiki_API.namespace.hash.main) {
-						parameters.page_title
-						// {{T}}嵌入[[Template:T]]
-						// {{Template:T}}嵌入[[Template:T]]
-						= wiki_API.to_namespace(parameters.name, 'Template',
-								options);
+						if (parameters.name.startsWith('/')
+								&& options.target_array
+								&& options.target_array.page
+								&& options.target_array.page.title) {
+							// e.g., "{{/topic list}}"
+							// → "base page title/topic list"
+							parameters.page_title = options.target_array.page.title
+									+ parameters.name;
+						} else {
+							parameters.page_title
+							// {{T}}嵌入[[Template:T]]
+							// {{Template:T}}嵌入[[Template:T]]
+							= wiki_API.to_namespace(parameters.name,
+									'Template', options);
+						}
 					} else {
 						// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
 						parameters.page_title = parameters.name;
@@ -3980,6 +4016,11 @@ function module_code(library_namespace) {
 		// Please use CeL.wiki.wikitext_to_plain_text() instead!
 		HTML_to_wikitext : HTML_to_wikitext,
 		// wikitext_to_plain_text : wikitext_to_plain_text,
+
+		// CeL.wiki.is_parsed_element()
+		is_parsed_element : is_parsed_element,
+		// CeL.wiki.is_meaningful_element()
+		is_meaningful_element : is_meaningful_element,
 
 		inplace_reparse_token : inplace_reparse_token,
 		parse : parse_wikitext

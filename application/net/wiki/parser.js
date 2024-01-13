@@ -84,6 +84,7 @@ function module_code(library_namespace) {
 	 * @returns {wiki page parser}
 	 */
 	function page_parser(wikitext, options) {
+		options = library_namespace.setup_options(options);
 		// console.log(wikitext);
 		// console.log(wiki_API.is_page_data(wikitext));
 		if (typeof wikitext === 'string' || wikitext === 0) {
@@ -91,13 +92,18 @@ function module_code(library_namespace) {
 		} else if (wiki_API.is_page_data(wikitext)) {
 			// 可以用 "CeL.wiki.parser(page_data).parse();" 來設置 parser。
 			var page_data = wikitext;
-			if (!page_data.parsed
-			// re-parse
-			|| options && (options.reparse || options.wikitext)) {
-				wikitext = options && options.wikitext
-						|| wiki_API.content_of(page_data, options || 0);
+			if (!page_data.parsed || options.wikitext
+					|| typeof options.revision_index === 'number'
+					// re-parse
+					|| options.reparse) {
+				wikitext = options
+						&& options.wikitext
+						|| wiki_API.content_of(page_data,
+								options.revision_index || 0);
 				// prevent wikitext === undefined (missing: '')
-				wikitext = wikitext ? [ wikitext ] : [];
+				wikitext = wikitext
+				// usinf this[0] @ parse_page(options)
+				? [ wikitext ] : [];
 				page_data.parsed = wikitext;
 				wikitext.page = page_data;
 			} else {
@@ -968,12 +974,17 @@ function module_code(library_namespace) {
 	 * @see wiki_API.parse()
 	 */
 	function parse_page(options) {
-		if (!this.parsed
-		// re-parse
-		|| options && (options.reparse || options.wikitext)) {
+		options = library_namespace.setup_options(options);
+		if (!this.parsed || options.wikitext
+				|| typeof options.revision_index === 'number'
+				// re-parse
+				|| options.reparse) {
 			// assert: this = [ {String} ]
 			// @see function page_parser(wikitext, options)
-			var parsed = options && options.wikitext || this[0];
+			var parsed = options.wikitext
+			// 指定要採用的版本。
+			|| typeof options.revision_index === 'number'
+					&& wiki_API.content_of(this.page, options) || this[0];
 			parsed = wiki_API.parse(parsed, Object.assign({
 				target_array : this
 			}, this.options, options));

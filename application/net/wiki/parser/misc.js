@@ -461,7 +461,11 @@ function module_code(library_namespace) {
 
 				var skip_replacement = undefined;
 				if (options.value_only
-						&& (typeof replace_to === 'string' || typeof replace_to === 'number')) {
+						// 預防有 KEY_remove_parameter 之類。
+						&& (typeof replace_to === 'string'
+								|| typeof replace_to === 'number'
+						// 允許輸入 token。
+						|| wiki_API.is_parsed_element(replace_to))) {
 					var this_parameter = template_token[index];
 					if (index === 0) {
 						// console.trace([ this_parameter, replace_to ]);
@@ -597,7 +601,7 @@ function module_code(library_namespace) {
 				+ spaces[2] : key + '=' + value;
 			});
 		}
-		if (Array.isArray(replace_to)) {
+		if (Array.isArray(replace_to) && !replace_to.type) {
 			replace_to = replace_to.join('|');
 		} else {
 			replace_to = replace_to.toString();
