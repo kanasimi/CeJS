@@ -4901,6 +4901,12 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #5');
 		wikitext = '{| class="wikitable"\n{{t\n|p\n}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #6');
+		wikitext = '{|\n|-\n|/a|b/\n|}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: table #7');
+		assert(['b/', parsed/* ← type: 'table' */[0]/* ← table_row */[0]/* ← table_cell */[1].toString()], 'wiki.parse: table #7-1');
+		wikitext = '{|\n|-\n|\n/a|b/\n|}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: table #7');
+		assert(['\n/a|b/', parsed/* ← type: 'table' */[0]/* ← table_row */[0]/* ← table_cell */[0].toString()], 'wiki.parse: table #7-1');
 
 		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> ';
 		assert(['id abc,id 123', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');
@@ -4972,20 +4978,22 @@ function test_wiki() {
 			assert(['zhwiki', CeL.wiki.site_name('zh', enwiki)], 'site_name(, enwiki) #1');
 			assert(['zhwiki', CeL.wiki.site_name('zh', CeL.wiki.add_session_to_options(enwiki))], 'site_name(, enwiki) #2');
 
-			assert(['2001: A Space Odyssey', enwiki.normalize_title('2001: A Space Odyssey')], 'wiki.normalize_title() #1');
-			assert(['2001: A Space Odyssey', enwiki.normalize_title(':2001: A Space Odyssey')], 'wiki.normalize_title() #2');
-			assert(['en:2001: A Space Odyssey', enwiki.normalize_title('en:2001: A Space Odyssey')], 'wiki.normalize_title() #3');
-			assert(['en:2001: A Space Odyssey', enwiki.normalize_title('EN:2001: A Space Odyssey')], 'wiki.normalize_title() #4');
-			assert(['w:2001: A Space Odyssey', enwiki.normalize_title('w:2001: A Space Odyssey')], 'wiki.normalize_title() #5');
-			assert(['w:2001: A Space Odyssey', enwiki.normalize_title('W:2001: A Space Odyssey')], 'wiki.normalize_title() #6');
-			assert(['w:en:2001: A Space Odyssey', enwiki.normalize_title('w:en:2001: A Space Odyssey')], 'wiki.normalize_title() #7');
-			assert(['w:en:2001: A Space Odyssey', enwiki.normalize_title('w:EN:2001: A Space Odyssey')], 'wiki.normalize_title() #8');
-			assert(['ArXiv', enwiki.normalize_title('arXiv')], 'wiki.normalize_title() #9');
+			assert(['2001: A Space Odyssey', enwiki.normalize_title('2001: A Space Odyssey')], 'enwiki.normalize_title() #1');
+			assert(['2001: A Space Odyssey', enwiki.normalize_title(':2001: A Space Odyssey')], 'enwiki.normalize_title() #2');
+			assert(['en:2001: A Space Odyssey', enwiki.normalize_title('en:2001: A Space Odyssey')], 'enwiki.normalize_title() #3');
+			assert(['en:2001: A Space Odyssey', enwiki.normalize_title('EN:2001: A Space Odyssey')], 'enwiki.normalize_title() #4');
+			assert(['w:2001: A Space Odyssey', enwiki.normalize_title('w:2001: A Space Odyssey')], 'enwiki.normalize_title() #5');
+			assert(['w:2001: A Space Odyssey', enwiki.normalize_title('W:2001: A Space Odyssey')], 'enwiki.normalize_title() #6');
+			assert(['w:en:2001: A Space Odyssey', enwiki.normalize_title('w:en:2001: A Space Odyssey')], 'enwiki.normalize_title() #7');
+			assert(['w:en:2001: A Space Odyssey', enwiki.normalize_title('w:EN:2001: A Space Odyssey')], 'enwiki.normalize_title() #8');
+			assert(['ArXiv', enwiki.normalize_title('arXiv')], 'enwiki.normalize_title() #9');
+			assert(['Velocity : Design : Comfort', enwiki.normalize_title('Velocity  : Design : Comfort')], 'enwiki.normalize_title() #10');
+			assert(['Talk:Velocity : Design : Comfort', enwiki.to_talk_page('Velocity  : Design : Comfort')], 'enwiki.to_talk_page #1');
 
-			assert(enwiki.is_namespace('2001: A Space Odyssey', 0), 'wiki.is_namespace() #1');
-			assert(enwiki.is_namespace('Talk:ABC', 'talk'), 'wiki.is_namespace() #2');
-			assert(!enwiki.is_namespace('Wikipedia', 'Wikipedia'), 'wiki.is_namespace() #3');
-			assert(!enwiki.is_namespace('File', 'file'), 'wiki.is_namespace() #4');
+			assert(enwiki.is_namespace('2001: A Space Odyssey', 0), 'enwiki.is_namespace() #1');
+			assert(enwiki.is_namespace('Talk:ABC', 'talk'), 'enwiki.is_namespace() #2');
+			assert(!enwiki.is_namespace('Wikipedia', 'Wikipedia'), 'enwiki.is_namespace() #3');
+			assert(!enwiki.is_namespace('File', 'file'), 'enwiki.is_namespace() #4');
 
 			var link = CeL.wiki.parse('[[Page title#anchor|display text]]');
 			assert(['[[Page title#anchor|display text]]', CeL.wiki.title_link_of(link)], 'CeL.wiki.title_link_of(link) #1');
@@ -5020,8 +5028,8 @@ function test_wiki() {
 
 		_setup_test('wiki: get_creation_Date and others');
 		enwiki.page('wikipedia:sandbox', function (page_data) {
-			assert(['Wikipedia:Sandbox', enwiki.title_of(page_data)], 'wiki.title_of() #1');
-			assert(['Abc', enwiki.title_of('abc')], 'wiki.title_of() #2');
+			assert(['Wikipedia:Sandbox', enwiki.title_of(page_data)], 'enwiki.title_of() #1');
+			assert(['Abc', enwiki.title_of('abc')], 'enwiki.title_of() #2');
 			// {Date}page_data.creation_Date
 			assert(['2002-12-20T21:50:14.000Z', page_data && page_data.creation_Date.toISOString()], 'get_creation_Date: [[Wikipedia:Sandbox]]');
 			_finish_test('wiki: get_creation_Date and others');
@@ -5094,8 +5102,8 @@ function test_wiki() {
 			var test_name = 'wiki: template_functions';
 			_setup_test(test_name);
 
-			assert(["Template:Tl", zhwiki.normalize_title('t:tl')], 'wiki.normalize_title() #1-1');
-			assert(["Wikipedia:小作品", zhwiki.normalize_title('WP:小作品')], 'wiki.normalize_title() #1-2');
+			assert(["Template:Tl", zhwiki.normalize_title('t:tl')], 'zhwiki.normalize_title() #1-1');
+			assert(["Wikipedia:小作品", zhwiki.normalize_title('WP:小作品')], 'zhwiki.normalize_title() #1-2');
 
 			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			var parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();

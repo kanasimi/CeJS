@@ -949,7 +949,7 @@ function module_code(library_namespace) {
 	// 注意: 這個交換純粹只操作於 page_data.parsed 上面，
 	// 不會改變其他參照，例如 page_data.parsed.reference_list!
 	// 通常一個頁面只能夠交換一次，交換兩次以上可能就會出現問題!
-	function switch_elements(token_1, token_2) {
+	function swap_elements(token_1, token_2) {
 		// console.log([ token_1, token_2 ]);
 		token_1.parent[token_1.index] = token_2;
 		token_2.parent[token_2.index] = token_1;
@@ -2293,7 +2293,7 @@ function module_code(library_namespace) {
 
 		scan_token_index : scan_token_index,
 		replace_element : replace_element,
-		switch_elements : switch_elements,
+		swap_elements : swap_elements,
 
 		// parse_table(), parse_wikitable()
 		table_to_array : table_to_array,

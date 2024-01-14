@@ -2870,7 +2870,8 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var PATTERN_table_cell_content = /^([^|]*)\|([\s\S]*)$/;
+				// table style 不可包含 "\n" 換行。
+				var PATTERN_table_cell_content = /^([^|\n]*)\|([\s\S]*)$/;
 				// cell attributes /
 				// cell style / format modifier (not displayed)
 				var table_cell_attributes = table_cell

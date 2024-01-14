@@ -1659,7 +1659,7 @@ function module_code(library_namespace) {
 		}
 		// TODO: "《茶花女》维基百科词条'''(法语)'''"
 		wikitext = wikitext
-		// 去除註解 comments。
+		// 去除註解。 Remove comments.
 		// e.g., "親会社<!-- リダイレクト先の「[[子会社]]」は、[[:en:Subsidiary]] とリンク -->"
 		// "ロイ・トーマス<!-- 曖昧さ回避ページ -->"
 		.replace(/<\!--[\s\S]*?-->/g, '')
@@ -1716,7 +1716,8 @@ function module_code(library_namespace) {
 	 * @returns {String}轉換過的文字。
 	 */
 	function upper_case_initial(words) {
-		words = String(words).trim();
+		// 用到 upper_case_initial() 的照理來說都是標題，不以空白字元開頭。
+		words = String(words).trimStart();
 
 		// method 1
 		return words.charAt(0).toUpperCase() + words.slice(1);
@@ -1795,6 +1796,7 @@ function module_code(library_namespace) {
 
 		// true === /^\s$/.test('\uFEFF')
 
+		// 去除註解。 Remove comments.
 		page_name = page_name.replace(/<!--[\s\S]*-->/g, '');
 
 		// [[A&quot;A]]→[[A"A]]
@@ -1920,16 +1922,19 @@ function module_code(library_namespace) {
 				return true;
 			}
 
-			section = use_underline ? section.replace(/[\s_]+$/, '') : section
-					.trimEnd();
-			if (!interwiki_pattern.test(section)) {
-				// e.g., [[Avatar: The Last Airbender]]
+			var language_code = section.replace(/[\s_]+$/, '');
+			if (false && /Velocity/i.test(section)) {
+				console.trace([ interwiki_pattern, section, language_code,
+						upper_case_initial(section) ]);
+			}
+			if (!interwiki_pattern.test(language_code)) {
+				// e.g., [[Velocity : Design : Comfort]]
 				page_name[index] = upper_case_initial(section);
 				return true;
 			}
 
-			// treat `section` as lang code
-			section = section.toLowerCase();
+			// treat `section` as language code, all lowercased
+			section = language_code.toLowerCase();
 			// lang code
 			has_language = true;
 			if (use_underline) {
@@ -1939,6 +1944,7 @@ function module_code(library_namespace) {
 			page_name[index] = section;
 		});
 
+		// console.trace(page_name);
 		return page_name.join(':');
 	}
 
