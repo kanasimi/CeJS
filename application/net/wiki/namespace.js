@@ -1720,6 +1720,7 @@ function module_code(library_namespace) {
 		words = String(words).trimStart();
 
 		// method 1
+		// TODO: check .charCodeAt()
 		return words.charAt(0).toUpperCase() + words.slice(1);
 
 		// method 2

@@ -756,8 +756,10 @@ function module_code(library_namespace) {
 
 			function run_for_each(error) {
 				// console.trace(error);
-				// console.trace([ options.abort_operation,
-				// options.for_each_page ]);
+				if (false) {
+					console.trace([ options.abort_operation,
+							options.for_each_page ]);
+				}
 				if (options.abort_operation
 						|| typeof options.for_each_page !== 'function') {
 					callback(pages, error);
@@ -1923,7 +1925,8 @@ function module_code(library_namespace) {
 						// 警告: 只要頁面存在於多個查詢到的分類中，就會多次執行。
 						if (options.for_each_page
 								&& options.for_each_page !== options.for_each_slice) {
-							options.for_each_page(page_data);
+							if (options.for_each_page(page_data) === wiki_API_list.exit)
+								options.abort_operation = true;
 						}
 					} catch (e) {
 						library_namespace.error(e);
