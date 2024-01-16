@@ -52,6 +52,26 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	wiki_API.get_task_id = function get_task_id(options) {
+		if (options.check_section)
+			return options.check_section;
+
+		var session = wiki_API.session_of_options(options);
+
+		var check_task_id;
+
+		if ((check_task_id = session.latest_task_configuration)
+				&& (check_task_id = check_task_id.configuration_page_title)
+				// e.g., 'User:Cewbot/log/20200122/configuration'
+				&& (check_task_id = check_task_id.match(/\/(\d{8})\//))) {
+			check_task_id = check_task_id[1];
+		}
+
+		return check_task_id;
+	};
+
+	var KEY_any_task = '*';
+
 	/**
 	 * check if need to stop / 檢查是否需要緊急停止作業 (Emergency shutoff-compliant).
 	 * 
@@ -84,6 +104,8 @@ function module_code(library_namespace) {
 			}
 		}
 
+		var session = wiki_API.session_of_options(options) || this;
+
 		/**
 		 * 緊急停止作業將檢測之頁面標題。 check title:<br />
 		 * 只檢查此緊急停止頁面。
@@ -92,9 +114,11 @@ function module_code(library_namespace) {
 		 */
 		var title = options.title;
 		if (typeof title === 'function') {
-			title = title(options.token);
+			title = title(options.token || session.token);
 		}
-		if (!title && !(title = wiki_API.check_stop.title(options.token))) {
+		if (!title
+				&& !(title = wiki_API.check_stop.title(options.token
+						|| session.token))) {
 			callback();
 			return;
 		}
@@ -104,8 +128,11 @@ function module_code(library_namespace) {
 			T : [ '檢查緊急停止頁面 %1', wiki_API.title_link_of(title) ]
 		}, 1, 'wiki_API.check_stop');
 
-		var session = options[KEY_SESSION] || this;
-		wiki_API.page([ session.API_URL, title ], function(page_data) {
+		// console.trace([ session.API_URL, title ]);
+		wiki_API.page([ session.API_URL, title ], function(page_data, error) {
+			if (error)
+				callback(page_data, error);
+
 			var content = wiki_API.content_of(page_data),
 			// default: NOT stopped
 			stopped = false, PATTERN;
@@ -122,7 +149,7 @@ function module_code(library_namespace) {
 				} ]);
 
 			} else if (typeof options.checker === 'function') {
-				// 以 options.checker 的回傳來設定是否stopped。
+				// 以 options.checker 的回傳來設定是否 stopped。
 				stopped = options.checker(content);
 				if (stopped) {
 					library_namespace.warn([ 'wiki_API.check_stop: ', {
@@ -143,10 +170,13 @@ function module_code(library_namespace) {
 				 * (new RegExp('\n==(.*?)' + '20150503' + '\\s*==\n')).test('\n== 停止作業:20150503 ==\n') === true
 				 * </code>
 				 */
-				&& new RegExp('\n==(.*?)'
+				&& new RegExp('(?:^|\n)==(.*?)'
 				//
 				+ options.check_section + '(.*?)==\n');
 			}
+
+			var check_task_id = wiki_API.get_task_id(options)
+					|| wiki_API.check_stop.KEY_any_task;
 
 			if (content) {
 				if (!library_namespace.is_RegExp(PATTERN)) {
@@ -157,6 +187,7 @@ function module_code(library_namespace) {
 				//
 				'wiki_API.check_stop: 採用 pattern: ' + PATTERN);
 				stopped = PATTERN.test(content, page_data);
+
 				if (stopped) {
 					library_namespace.warn([ 'wiki_API.check_stop: ', {
 						// gettext_config:{"id":"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation"}
@@ -167,9 +198,19 @@ function module_code(library_namespace) {
 				}
 			}
 
-			callback(stopped);
+			session.task_control_status[check_task_id] = {
+				latest_checked : Date.now(),
+				// stop editing
+				// editing stopped
+				stopped : stopped
+			};
+
+			// task_status
+			callback(session.task_control_status[check_task_id]);
 		}, options);
 	};
+
+	wiki_API.check_stop.KEY_any_task = KEY_any_task;
 
 	/**
 	 * default page title to check:<br />

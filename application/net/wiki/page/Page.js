@@ -130,12 +130,12 @@ function module_code(library_namespace) {
 	function Page__check_stop(options) {
 		// Copy from wiki_API.prototype.next.edit
 		var promise = new Promise(function executor(resolve, reject) {
-			var session = this[KEY_SESSION];
-			options.token = session.token;
-			wiki_API.check_stop(function(stopped) {
-				session.stopped = stopped;
-				resolve(stopped);
-			}, options);
+			wiki_API.check_stop(function(task_status, error) {
+				if (error)
+					reject(error);
+				else
+					resolve(task_status);
+			}, add_session_to_options(this, options));
 		}.bind(this));
 
 		return promise;
@@ -144,10 +144,15 @@ function module_code(library_namespace) {
 	function Page__edit(content, options) {
 		options = set_options_session.call(this, options);
 		var session = this[KEY_SESSION];
+		var check_task_id = wiki_API.get_task_id(wiki_API
+				.add_session_to_options(session, options))
+				|| wiki_API.check_stop.KEY_any_task;
 
 		// Copy from wiki_API.prototype.next.edit
 		var promise = new Promise(function executor(resolve, reject) {
-			if (session.stopped && !options.skip_stopped) {
+			if (session.task_control_status[check_task_id]
+					&& session.task_control_status[check_task_id].stopped
+					&& !options.skip_stopped) {
 				library_namespace.warn('Page__edit: 已停止作業，放棄編輯'
 						+ wiki_API.title_link_of(this) + '！');
 				reject(new Error('放棄編輯'));
@@ -186,7 +191,7 @@ function module_code(library_namespace) {
 			});
 		}.bind(this));
 
-		if (!('stopped' in session)) {
+		if (!session.task_control_status[check_task_id]) {
 			promise = Page__check_stop.call(this, options).then(promise);
 		}
 

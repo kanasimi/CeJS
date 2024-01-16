@@ -3899,6 +3899,7 @@ function module_code(library_namespace) {
 		|| wiki_API.is_wiki_API(options) && options);
 	}
 
+	// 設定正作業中之 wiki_API instance。
 	// CeL.wiki.add_session_to_options()
 	function add_session_to_options(session, options) {
 		// Warning: Will append to original options!!

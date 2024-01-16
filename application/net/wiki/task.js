@@ -1327,6 +1327,9 @@ function module_code(library_namespace) {
 			break;
 
 		case 'check':
+			// 警告: arguments 順序與 wiki_API.check_stop() 不同!
+			// session.check(options, callback);
+
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			next[1] = library_namespace.new_options(this.check_options,
 			// next[1]: options
@@ -1336,12 +1339,17 @@ function module_code(library_namespace) {
 				title : next[1]
 			} : next[1]);
 
-			// ('stopped' in this): 已經有 cache。
-			if (this.checking_now || ('stopped' in this)
+			var check_task_id = wiki_API.get_task_id(add_session_to_options(
+					this, next[1]))
+					|| wiki_API.check_stop.KEY_any_task;
+
+			if (this.checking_stop_now[check_task_id]
+			// 已有 cache，預設利用 cache。
+			|| this.task_control_status[check_task_id]
 			// force to check
 			&& !next[1].force) {
-				if (this.checking_now) {
-					library_namespace.debug('checking now...', 3,
+				if (this.checking_stop_now[check_task_id]) {
+					library_namespace.debug('checking stop now...', 3,
 							'wiki_API.prototype.next');
 				} else {
 					library_namespace.debug('Skip check_stop().', 1,
@@ -1349,31 +1357,39 @@ function module_code(library_namespace) {
 				}
 				// 在多執行緒的情況下，避免 `RangeError: Maximum call stack size exceeded`。
 				// next[2] : callback(...)
-				setTimeout(this.next.bind(this, next[2], this.stopped), 0);
+				setTimeout(this.next.bind(this, next[2],
+						this.task_control_status[check_task_id]), 0);
 
 			} else {
 				// 僅檢測一次。在多執行緒的情況下，可能遇上檢測多次的情況。
-				this.checking_now = next[1].title || true;
+				this.checking_stop_now[check_task_id] = next;
 
 				library_namespace.debug('以 .check_stop() 檢查與設定是否須停止編輯作業。', 1,
 						'wiki_API.prototype.next');
-				library_namespace
-						.debug('Using options to call check_stop(): '
-								+ JSON.stringify(next[1]), 2,
-								'wiki_API.prototype.next');
-				next[1].token = this.token;
-				// 正作業中之 wiki_API instance。
-				next[1][KEY_SESSION] = this;
-				wiki_API.check_stop(function(stopped) {
-					delete _this.checking_now;
-					library_namespace.debug('check_stop: ' + stopped, 1,
+				if (false) {
+					library_namespace.debug(
+							'Using options to call check_stop():', 2,
 							'wiki_API.prototype.next');
-					_this.stopped = stopped;
+					console.trace(next[1]);
+				}
+				wiki_API.check_stop(function(task_status, error) {
+					if (false) {
+						console.trace(_this.checking_stop_now[check_task_id],
+								task_status);
+					}
+					if (_this.checking_stop_now[check_task_id] === next)
+						delete _this.checking_stop_now[check_task_id];
+					if (error) {
+						library_namespace.error('check_stop: Error: ' + error);
+					} else {
+						library_namespace.debug('check_stop: ' + task_status,
+								1, 'wiki_API.prototype.next');
+					}
 					// next[2] : callback(...)
-					_this.next(next[2], stopped);
+					_this.next(next[2], task_status, error);
 				},
 				// next[1] : options
-				next[1]);
+				add_session_to_options(this, next[1]));
 			}
 			break;
 
@@ -1560,11 +1576,15 @@ function module_code(library_namespace) {
 				next[2].page_to_edit = wiki_API.VALUE_set_page_to_edit;
 			};
 
-			if (!('stopped' in this)) {
+			var check_task_id = wiki_API.get_task_id(add_session_to_options(
+					this, next[2]))
+					|| wiki_API.check_stop.KEY_any_task;
+
+			if (!this.task_control_status[check_task_id]) {
 				library_namespace.debug(
 						'edit: rollback, check if need stop 緊急停止.', 2,
 						'wiki_API.prototype.next');
-				this.actions.unshift([ 'check', null, function() {
+				this.actions.unshift([ 'check', next[2], function() {
 					library_namespace.debug(
 					//
 					'edit: recover next[2].page_to_edit: '
@@ -1578,9 +1598,13 @@ function module_code(library_namespace) {
 				break;
 			}
 
-			if (this.stopped && !next[2].skip_stopped) {
-				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯'
-						+ wiki_API.title_link_of(next[2].page_to_edit) + '！');
+			if (this.task_control_status[check_task_id]
+					&& this.task_control_status[check_task_id].stopped
+					&& !next[2].skip_stopped) {
+				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 '
+				// '編輯'
+				+ type + ' ' + wiki_API.title_link_of(next[2].page_to_edit)
+						+ '！');
 				// next[3] : callback
 				this.next(next[3], next[2].page_to_edit.title, '已停止作業');
 				break;
@@ -2439,15 +2463,20 @@ function module_code(library_namespace) {
 				}
 			}
 
+			var check_task_id = wiki_API.get_task_id(add_session_to_options(
+					this, next[2]))
+					|| wiki_API.check_stop.KEY_any_task;
+
 			// 保護/回退
-			if (this.stopped && !next[1].skip_stopped) {
+			if (this.task_control_status[check_task_id]
+					&& this.task_control_status[check_task_id].stopped
+					&& !next[1].skip_stopped) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 '
 				//
-				+ type + ' [['
+				+ type + ' ' + wiki_API.title_link_of(next[1].title
 				//
-				+ (next[1].title || next[1].pageid || this.last_page
-				//
-				&& this.last_page.title) + ']]！');
+				|| next[1].pageid || this.last_page && this.last_page.title)
+						+ '！');
 				// next[2] : callback
 				this.next(next[2], next[1], '已停止作業');
 
@@ -3375,6 +3404,7 @@ function module_code(library_namespace) {
 				}
 
 				Object.assign(work_options, options, {
+					check_section : check_task_id,
 					// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
 					page_to_edit : page
 				});
@@ -3556,7 +3586,11 @@ function module_code(library_namespace) {
 					count_summary = count_summary.toString()
 					// 手動剪掉非完結的標點符號。
 					.replace(/[,，、]$/, '');
-					if (session.stopped) {
+					if (!session.task_control_status[check_task_id]) {
+						library_namespace
+								.warn('wiki_API.work: No status of task id ['
+										+ check_task_id + ']');
+					} else if (session.task_control_status[check_task_id].stopped) {
 						messages
 						// gettext_config:{"id":"stopped-give-up-editing"}
 						.add(gettext("'''Stopped''', give up editing."));
@@ -3801,20 +3835,33 @@ function module_code(library_namespace) {
 		// 在個別頁面還採取 .multi 這個選項會造成錯誤。
 		delete single_page_options.multi;
 
-		if (!config.no_edit) {
-			var check_options = config.check_options;
-			if (!check_options && typeof config.log_to === 'string'
+		var check_task_id;
+		var check_options;
+		if (config.no_edit) {
+			check_task_id = wiki_API.check_stop.KEY_any_task;
+		} else {
+			check_options = config.check_options;
+			if (check_options) {
+				check_task_id = wiki_API.get_task_id(check_options);
+			} else if (typeof config.log_to === 'string'
 			// 若 log_to 以數字作結，自動將其當作 check section。
-			&& (check_options = config.log_to.match(/\d+$/))) {
+			&& (check_options = config.log_to.match(/\/(\d{8})$/))) {
+				check_task_id = check_options[1];
 				check_options = {
-					check_section : check_options[0]
+					check_section : check_task_id
+				};
+
+			} else if (check_options = wiki_API.get_task_id(this)) {
+				check_task_id = check_options;
+				check_options = {
+					check_section : check_task_id
 				};
 			}
-
-			if (check_options) {
-				// wiki_API.check_stop()
-				this.check(check_options);
-			}
+			if (check_options)
+				check_options.force = true;
+			if (!check_task_id)
+				check_task_id = wiki_API.check_stop.KEY_any_task;
+			// console.trace(config.no_edit, check_task_id, check_options);
 		}
 
 		// console.log(JSON.stringify(pages));
@@ -3888,7 +3935,16 @@ function module_code(library_namespace) {
 					console.trace('一次取得本 slice 所有頁面內容。'
 							+ [ maybe_nested_thread, session.running,
 									session.actions.length ]);
+
 				// console.trace(page_options);
+
+				if (check_options) {
+					// assert: !!config.no_edit === false
+					// console.trace(check_options);
+					// wiki_API.check_stop()
+					session.check(check_options);
+				}
+
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 
@@ -3900,6 +3956,14 @@ function module_code(library_namespace) {
 			library_namespace.debug('取得單一頁面之 (page contents 頁面內容)。', 2,
 					'wiki_API.work');
 			this_slice_size = 1;
+
+			if (check_options) {
+				// assert: !!config.no_edit === false
+				// console.trace(check_options);
+				// wiki_API.check_stop()
+				session.check(check_options);
+			}
+
 			this.page(target, main_work, page_options);
 		}
 	};

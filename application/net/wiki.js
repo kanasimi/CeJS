@@ -276,6 +276,11 @@ function module_code(library_namespace) {
 		// CeL.application.net.wiki.namespace
 		this.redirects_data = Object.create(null);
 
+		// @see wiki_API.check_stop()
+		this.task_control_status = Object.create(null);
+		// @see wiki_API.prototype.next
+		this.checking_stop_now = Object.create(null);
+
 		if (login_options.need_initialize) {
 			this.run_after_initializing = [];
 			// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
