@@ -2144,10 +2144,9 @@ function module_code(library_namespace) {
 					// preserve old properties
 					var toString = anchor.toString;
 					anchor = anchor.map(function(token) {
-						if (token.type === 'magic_word_function'
-						// && token.is_magic_word
-						&& token.name === 'ANCHORENCODE') {
-							return token[1];
+						if (token.type === 'magic_word_function') {
+							return wiki_API.evaluate_parser_function_token
+									.call(token, options).replace(/%20/g, ' ');
 						}
 						return token;
 					});

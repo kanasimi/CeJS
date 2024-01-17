@@ -4908,8 +4908,8 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #7');
 		assert(['\n/a|b/', parsed/* ← type: 'table' */[0]/* ← table_row */[0]/* ← table_cell */[0].toString()], 'wiki.parse: table #7-1');
 
-		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> ';
-		assert(['id abc,id 123', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');
+		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> <span id="{{anchorencode:A[[B]]}}">AB</span> ';
+		assert(['id abc,id 123,AB', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');
 		wikitext = '{{Episode table|anchor=Minisodes|episodes={{Episode list|EpisodeNumber=2|ProdCode=22}}{{Episode list|EpisodeNumber=3|ProdCode=33}}}}';
 		assert(['Minisodesep2,pc22,Minisodesep3,pc33', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #2');
 		// 包括 "\xa0" (&nbsp), "\u206F" 在目錄的網頁錨點中都會被轉為空白字元 "_"。
