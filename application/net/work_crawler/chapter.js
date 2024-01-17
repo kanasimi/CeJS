@@ -1425,7 +1425,7 @@ function module_code(library_namespace) {
 					if (!_this.need_create_ebook
 					// 雖然是漫畫，但是本章節沒有獲取到任何圖片時的警告。
 					&& (!chapter_data || !chapter_data.limited
-					// 圖片檔案會用其他方式手動下載。 .allow_empty_chapter
+					// 圖片檔案會用其他方式手動下載。 .allow_blanking_chapter
 					&& !chapter_data.images_downloaded)) {
 						if (!chapter_data.limited) {
 							// console.log(chapter_data);

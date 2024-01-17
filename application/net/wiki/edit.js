@@ -139,6 +139,7 @@ function module_code(library_namespace) {
 
 			if (!content) {
 				library_namespace.info([ 'wiki_API.check_stop: ', {
+					// or is empty
 					// gettext_config:{"id":"the-emergency-stop-page-was-not-found-($1)"}
 					T : [ 'The emergency stop page was not found (%1).',
 					//
@@ -730,13 +731,21 @@ function module_code(library_namespace) {
 		}
 
 		// data.trim()
-		if (!data && (!options || !options.allow_empty)) {
-			action = [ 'empty', gettext(typeof data === 'string'
-			// 內容被清空。白紙化。
-			// gettext_config:{"id":"content-is-empty"}
-			? 'Content is empty'
-			// gettext_config:{"id":"content-is-not-settled"}
-			: 'Content is not settled') ];
+		if (!data) {
+			if (options && options.allow_blanking) {
+				library_namespace.debug('Blanking page '
+				// 清空頁面 [[w:en:Wikipedia:Page blanking]]
+				+ wiki_API.title_link_of(title), 1, caller
+						|| 'wiki_API_edit.check_data');
+			} else {
+				action = [ 'Blanking page', gettext(typeof data === 'string'
+				// 內容被清空。白紙化。
+				// gettext_config:{"id":"content-is-empty"}
+				? 'Content is empty'
+				// gettext_config:{"id":"content-is-not-settled"}
+				: 'Content is not settled') ];
+				// console.trace(action);
+			}
 
 		} else if (Array.isArray(data) && data[0] === wiki_API_edit.cancel) {
 			action = data.slice(1);

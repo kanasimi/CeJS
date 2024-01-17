@@ -15,6 +15,8 @@ parser for_each_subelement() 提供 .previousSibling, .nextSibling, .parentNode 
  * @since 2021/12/14 18:53:43 拆分至 CeL.application.net.wiki.parser.wikitext,
  *        CeL.application.net.wiki.parser.section,
  *        CeL.application.net.wiki.parser.misc
+ * 
+ * @see https://github.com/earwig/mwparserfromhell
  */
 
 // More examples: see /_test suite/test.js

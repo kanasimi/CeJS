@@ -2117,8 +2117,8 @@ function module_code(library_namespace) {
 						}
 					}
 				} else if (data.length === 0) {
-					// 若是容許空內容，應該特別指定 options.allow_empty。
-					if (!options.allow_empty) {
+					// 若是容許空內容，應該特別指定 options.allow_blanking。
+					if (!options.allow_blanking) {
 						_onfail('EMPTY');
 						return;
 					}
@@ -2320,7 +2320,7 @@ function module_code(library_namespace) {
 				}
 
 				if (typeof onload === 'function') {
-					onload(result_Object, !data && !options.allow_empty);
+					onload(result_Object, !data && !options.allow_blanking);
 				}
 				// Release memory. 釋放被占用的記憶體.
 				data = null;
@@ -3151,8 +3151,8 @@ function module_code(library_namespace) {
 				}
 
 				if (!error && !options.preserve_newer
-				// 若是容許空內容，應該特別指定 options.allow_empty。
-				&& (data || options.allow_empty)) {
+				// 若是容許空內容，應該特別指定 options.allow_blanking。
+				&& (data || options.allow_blanking)) {
 					library_namespace.debug({
 						// gettext_config:{"id":"using-cached-data"}
 						T : 'Using cached data.'

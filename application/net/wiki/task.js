@@ -2945,8 +2945,8 @@ function module_code(library_namespace) {
 			tags : '',
 			// 設定寫入目標。一般為 debug、test 測試期間用。
 			write_to : '',
-			// Allow content to be emptied. 允許內容被清空。白紙化。
-			allow_empty : false,
+			// Allow blanking page. 允許內容被清空。白紙化。
+			allow_blanking : false,
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
 			// 對於大部分不會改變頁面的作業，能大幅加快速度。
 			skip_nochange : true,
@@ -3722,6 +3722,7 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.log('\nlog:<br />\n'
 							+ messages.join('<br />\n'));
+					// console.trace(messages.length);
 				}
 
 				// --------------------
@@ -3761,6 +3762,15 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				if (!config.no_message) {
+					session.run(function() {
+						library_namespace.log('wiki_API.work: '
+								// 已完成作業
+								+ '結束 .work() 作業'
+								+ (config.summary ? ' [' + config.summary + ']'
+										: '。'));
+					});
+				}
 				// run this at last.
 				// 在wiki_API.prototype.work()工作最後執行此config.last()。
 				// config.callback()
@@ -3772,16 +3782,6 @@ function module_code(library_namespace) {
 				if (typeof config.last === 'function') {
 					// last(error)
 					session.run(config.last.bind(log_options, error_to_return));
-				}
-
-				if (!config.no_message) {
-					session.run(function() {
-						library_namespace.log('wiki_API.work: '
-								// 已完成作業
-								+ '結束 .work() 作業'
-								+ (config.summary ? ' [' + config.summary + ']'
-										: '。'));
-					});
 				}
 			}
 
@@ -3881,6 +3881,7 @@ function module_code(library_namespace) {
 				// 執行完一批就刪除一批，以減少記憶體使用。
 				: target.splice(0, slice_size);
 				var max_size = max_slice_size(this, config, this_slice);
+				// console.trace(max_size);
 
 				if (false) {
 					console
@@ -3931,12 +3932,14 @@ function module_code(library_namespace) {
 				work_continue += this_slice_size;
 
 				// 假如想要全部轉換成 pageids，必須考量有些頁面可能沒有 pageid 的問題。
-				if (false)
+				if (false) {
 					console.trace('一次取得本 slice 所有頁面內容。'
 							+ [ maybe_nested_thread, session.running,
 									session.actions.length ]);
+				}
 
 				// console.trace(page_options);
+				// console.trace(check_options);
 
 				if (check_options) {
 					// assert: !!config.no_edit === false
@@ -3945,6 +3948,7 @@ function module_code(library_namespace) {
 					session.check(check_options);
 				}
 
+				// console.trace(this_slice.length);
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 
