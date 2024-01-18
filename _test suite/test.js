@@ -4382,6 +4382,13 @@ function test_wiki() {
 		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');
 
 		// [[Special:ExpandTemplates]]
+		assert(['A_B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A_B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #1');
+		assert(['A_B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #2');
+		assert(['A%20B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A%20B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #3');
+		assert(['A+B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A+B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #4');
+		assert(['A_b', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A [[_]] b}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #5');
+		assert(['A___B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A \n_B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #6');
+
 		assert(['STRING', CeL.wiki.expand_transclusion('{{uc:string}}').toString()], 'wiki.expand_transclusion: {{UC:}}');
 		assert(['string', CeL.wiki.expand_transclusion('{{lc:STRING}}').toString()], 'wiki.expand_transclusion: {{LC:}}');
 		assert(['String', CeL.wiki.expand_transclusion('{{UCFIRST:string}}').toString()], 'wiki.expand_transclusion: {{UCFIRST:}}');

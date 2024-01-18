@@ -1477,6 +1477,10 @@ function module_code(library_namespace) {
 	// ------------------------------------------
 
 	function is_talk_namespace(namespace, options) {
+		options = Object.assign({
+			// for wiki_API.namespace()
+			is_page_title : true
+		}, options);
 		// wiki_API.is_page_data(namespace, options) ||
 		// wiki_API.is_Page(namespace)
 		if (typeof namespace === 'object') {

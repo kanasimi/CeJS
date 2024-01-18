@@ -1485,8 +1485,9 @@ function module_code(library_namespace) {
 
 	var default_layout_order = [
 	// header
-	'page_begin', 'short_description', 'hatnote_templates', 'talk_page_lead',
-			'deletion_templates', 'protection_templates', 'dispute_templates',
+	'page_begin', 'redirect', 'redirect_end', 'short_description',
+			'hatnote_templates', 'talk_page_lead', 'deletion_templates',
+			'protection_templates', 'dispute_templates',
 			'maintenance_templates', 'infobox_templates',
 			//
 			'lead_templates_end', 'lead_section_end', 'content', 'content_end',
@@ -1579,6 +1580,25 @@ function module_code(library_namespace) {
 		// 而非 "\n\n{{h}}\n==t==\n..."
 		set_index('page_begin');
 
+		// assert: index === 0
+		if (parsed.length > 0) {
+			if (typeof parsed[0] === 'string' && !parsed[0].trim())
+				index++;
+			if (parsed[index]
+					&& wiki_API.parse.redirect(parsed[index].toString(),
+							options)) {
+				set_index('redirect');
+				if (typeof parsed[++index] === 'string'
+						&& !parsed[index].trim()
+						&& parsed[index].includes('\n')) {
+					++index;
+				}
+				set_index('redirect_end');
+			} else {
+				index = 0;
+			}
+		}
+
 		// Only detects level 1 tokens
 		for (; index < parsed.length; index++) {
 			var token = parsed[index];
@@ -1594,14 +1614,18 @@ function module_code(library_namespace) {
 				if (!token.trim()) {
 					continue;
 				}
-				set_index('page_begin');
+
+				// assert: `page_begin` has been set.
+				// set_index('page_begin');
+
 				// treat as 正文 Article content, Lead section
 				// e.g., 首段即有內容。
 				set_index('content');
 				continue;
 			}
 
-			set_index('page_begin');
+			// assert: `page_begin` has been set.
+			// set_index('page_begin');
 
 			switch (token.type) {
 			case 'transclusion':
@@ -1711,7 +1735,9 @@ function module_code(library_namespace) {
 		set_index('lead_templates_end', BACKTRACKING_SPACES);
 
 		index = layout_indices.short_description >= 0 ? layout_indices.short_description
-				: layout_indices.page_begin;
+				: layout_indices.redirect_end >= 0 ? layout_indices.redirect_end
+						: layout_indices.page_begin;
+
 		// assert: layout_indices.lead_section_end >=0
 		// && layout_indices.content >=0
 		var hatnote_templates_index = Math.min(layout_indices.lead_section_end,

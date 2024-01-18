@@ -1392,7 +1392,6 @@ function module_code(library_namespace) {
 	// CeL.wiki.parse.user.all === wiki_API.parse.user.all
 	parse_user.all = parse_all_user_links;
 
-	//
 	/**
 	 * redirect/重定向頁所符合的匹配模式。 Note that the redirect link must be explicit – it
 	 * cannot contain magic words, templates, etc.
@@ -1409,7 +1408,7 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /^[\s\n]*#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
+	var PATTERN_redirect_general = /^[\s\n]*#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊，或判斷頁面是否為重定向頁面。<br />
@@ -1437,13 +1436,15 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}page_data
 	 *            page data or wikitext to parse
+	 * @param {Object}options
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {String}title#section
 	 * @returns {Undefined}Not a redirect page.
 	 * 
 	 * @see all_revision_SQL: page_is_redirect
 	 */
-	function parse_redirect(page_data) {
+	function parse_redirect(page_data, options) {
 		var wikitext, is_page_data = wiki_API.is_page_data(page_data);
 		if (is_page_data) {
 			wikitext = wiki_API.content_of(page_data);
@@ -1466,7 +1467,27 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var matched = wikitext && wikitext.match(PATTERN_redirect);
+		var session = wiki_API.session_of_options(options);
+		var PATTERN_redirect;
+		if (session && !(PATTERN_redirect = session.PATTERN_redirect)
+				&& session.latest_site_configurations) {
+			session.latest_site_configurations.magicwords
+					.some(function(magicword) {
+						if (magicword.name !== 'redirect')
+							return;
+						PATTERN_redirect = new RegExp(
+								// PATTERN_redirect_template
+								/^[\s\n]*(?:redirect_word)\s*(?::\s*)?\[\[([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i.source
+										.replace('redirect_word',
+												magicword.aliases.join('|')),
+								'case-sensitive' in magicword ? '' : 'i');
+						return true;
+					});
+		}
+
+		// console.trace(PATTERN_redirect);
+		var matched = wikitext
+				&& wikitext.match(PATTERN_redirect || PATTERN_redirect_general);
 		if (matched) {
 			return matched[1].trim();
 		}

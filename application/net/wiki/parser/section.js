@@ -2146,7 +2146,8 @@ function module_code(library_namespace) {
 					anchor = anchor.map(function(token) {
 						if (token.type === 'magic_word_function') {
 							return wiki_API.evaluate_parser_function_token
-									.call(token, options).replace(/%20/g, ' ');
+							// e.g., "{{ANCHORENCODE:A [[B]]}}"
+							.call(token, options);
 						}
 						return token;
 					});
