@@ -262,11 +262,17 @@ function module_code(library_namespace) {
 							+ ",rule=" + rule + "}";
 				});
 			} else if ((matched = object
-					// e.g., Module:CGroup/C Module:CGroup/HalfLife
+					// e.g., [[Module:CGroup/C]], [[Module:CGroup/HalfLife]]
 					.match(/^(?:--.*\n)*[\s\n]*return\s+(require)\s*\(\s*(['"])([^\n]+?)\2\s*\)\s*;?/))
-					|| (matched = object
-							// e.g., Module:CGroup/Mythology
-							.match(/^(?:--.*\n)*[\s\n]*return\s+{\s*(name)\s*=\s*(['"])([^\n]+?)\2\s*}\s*;?/))) {
+					|| (matched = object.match(
+					// e.g., [[Module:CGroup/mw]], [[Module:CGroup/資訊科技]]
+					/^(?:--.*\n)*[\s\n]*return\s+(require)\s*(\[\[)\s*([^\n]+?)\s*\]\]\s*;?/
+					//
+					)) || (matched = object.match(
+					// e.g., [[Module:CGroup/Mythology]]
+					/^(?:--.*\n)*[\s\n]*return\s+{\s*(name)\s*=\s*(['"])([^\n]+?)\2\s*}\s*;?/
+					//
+					))) {
 				matched = (matched[1] === 'name' ? 'Module:CGroup/' : '')
 						+ matched[3];
 				library_namespace.info('parse_conversions: 公共轉換組模塊 '

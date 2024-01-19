@@ -3587,9 +3587,11 @@ function module_code(library_namespace) {
 					// 手動剪掉非完結的標點符號。
 					.replace(/[,，、]$/, '');
 					if (!session.task_control_status[check_task_id]) {
-						library_namespace
-								.warn('wiki_API.work: No status of task id ['
-										+ check_task_id + ']');
+						if (check_task_id !== wiki_API.check_stop.KEY_any_task) {
+							library_namespace.warn('wiki_API.work: '
+									+ 'No status of task id [' + check_task_id
+									+ ']');
+						}
 					} else if (session.task_control_status[check_task_id].stopped) {
 						messages
 						// gettext_config:{"id":"stopped-give-up-editing"}
