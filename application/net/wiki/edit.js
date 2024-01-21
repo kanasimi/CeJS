@@ -139,9 +139,11 @@ function module_code(library_namespace) {
 
 			if (!content) {
 				library_namespace.info([ 'wiki_API.check_stop: ', {
-					// or is empty
+					T : [ 'missing' in page_data
 					// gettext_config:{"id":"the-emergency-stop-page-was-not-found-($1)"}
-					T : [ 'The emergency stop page was not found (%1).',
+					? 'The emergency stop page was not found (%1).'
+					// gettext_config:{"id":"the-emergency-stop-page-is-empty-($1)"}
+					: 'The emergency stop page is empty (%1).',
 					//
 					wiki_API.title_link_of(title) ]
 				}, {

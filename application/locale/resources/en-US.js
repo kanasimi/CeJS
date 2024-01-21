@@ -306,6 +306,7 @@
 	"Comma-separator": ", ",
 	"\u6aa2\u67e5\u7dca\u6025\u505c\u6b62\u9801\u9762 %1": "Check the emergency stop page: %1",
 	"The emergency stop page was not found (%1).": "The emergency stop page was not found (%1).",
+	"The emergency stop page is empty (%1).": "The emergency stop page is empty (%1).",
 	"The operation will proceed as usual.": "The operation will proceed as usual.",
 	"\u5df2\u8a2d\u5b9a\u7dca\u6025\u505c\u6b62\u7de8\u8f2f\u4f5c\u696d\uff01": "Emergency stop edit has been set!",
 	"\u7dca\u6025\u505c\u6b62\u9801\u9762 %1 \u6709\u7559\u8a00\u8981\u505c\u6b62\u7de8\u8f2f\u4f5c\u696d\uff01": "There is a messages on the emergency stop page %1 to stop the editing operation!",

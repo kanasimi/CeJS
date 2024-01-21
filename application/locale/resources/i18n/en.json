@@ -304,6 +304,7 @@
 	"Comma-separator": ",&#32;",
 	"check-the-emergency-stop-page-$1": "Check the emergency stop page: %1",
 	"the-emergency-stop-page-was-not-found-($1)": "The emergency stop page was not found (%1).",
+	"the-emergency-stop-page-is-empty-($1)": "The emergency stop page is empty (%1).",
 	"the-operation-will-proceed-as-usual": "The operation will proceed as usual.",
 	"emergency-stop-edit-has-been-set": "Emergency stop edit has been set!",
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": "There is a messages on the emergency stop page %1 to stop the editing operation!",

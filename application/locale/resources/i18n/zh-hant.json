@@ -316,6 +316,7 @@
 	"Comma-separator": "、",
 	"check-the-emergency-stop-page-$1": "檢查緊急停止頁面 %1",
 	"the-emergency-stop-page-was-not-found-($1)": "未發現用來停止作業的頁面 %1。",
+	"the-emergency-stop-page-is-empty-($1)": "緊急停止頁面無內容 (%1)。",
 	"the-operation-will-proceed-as-usual": "作業如常。",
 	"emergency-stop-edit-has-been-set": "已設定緊急停止編輯作業！",
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": "緊急停止頁面 %1 有留言要停止編輯作業！",
