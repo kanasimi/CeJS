@@ -4727,10 +4727,17 @@ function test_wiki() {
 		parameters.a = 2;
 		assert(['{{  t | a=2|v =  3 }}', CeL.wiki.parse.replace_parameter(token, parameters, { value_only: true, no_value_space: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #18-5');
 		parameters[1] = CeL.wiki.parse('\n{{s|r=t}}\n{{q|r=t}}\n');
-		assert(['{{  t | a=2|v =  3 |1=\n{{s|r=t}}\n{{q|r=t}}\n}}', CeL.wiki.parse.replace_parameter(token, parameters, { value_only: true, no_value_space: true, force_add: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #18-6');
+		assert(['{{  t | a=2|v =  3 |\n{{s|r=t}}\n{{q|r=t}}\n}}', CeL.wiki.parse.replace_parameter(token, parameters, { value_only: true, no_value_space: true, force_add: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #18-6');
 		wikitext = '{{t|p=}}'; token = CeL.wiki.parse(wikitext);
 		assert([wikitext, CeL.wiki.parse.replace_parameter(token, { q: CeL.wiki.parse('<!-- -->') }, { value_only: true }) === 0 && token.toString()], 'wiki.parse.replace_parameter: #19-1');
 		assert(['{{t|p=<!--!-->}}', CeL.wiki.parse.replace_parameter(token, { p: CeL.wiki.parse('<!--!-->') }, { value_only: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #19-2');
+		wikitext = '{{t}}'; token = CeL.wiki.parse(wikitext);
+		assert(['{{t|1=5=6|\n<!-- 5=6 --> {{T|a=d}} {{= }}\n}}', CeL.wiki.parse.replace_parameter(token, { '1 ': '5=6', ' 2': CeL.wiki.parse('\n<!-- 5=6 --> {{T|a=d}} {{= }}\n') }, { value_only: true, force_add: true }) === 2 && token.toString()], 'wiki.parse.replace_parameter: #20-1');
+		wikitext = '{{t|a=2|}}'; token = CeL.wiki.parse(wikitext);
+		assert(['{{t|a=2|\n<!-- 5=6 --> {{T|a=d}} {{= }}\n}}', CeL.wiki.parse.replace_parameter(token, { ' 1 ': '\n<!-- 5=6 --> {{T|a=d}} {{= }}\n' }, { value_only: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #21-1');
+		assert(['{{t|a=2|1=5=6}}', CeL.wiki.parse.replace_parameter(token, { '1 ': CeL.wiki.parse('5=6') }, { value_only: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #21-2');
+		wikitext = '{{t}}'; token = CeL.wiki.parse(wikitext);
+		assert([wikitext, CeL.wiki.parse.replace_parameter(token, { 'a': KEY_remove_parameter }, { value_only: true, force_add: true }) === 0 && token.toString()], 'wiki.parse.replace_parameter: #21-1');
 
 		wikitext = '{{t1|p1=1|p2=2|p4=}}'; parsed = CeL.wiki.parse(wikitext);
 		var parsed_2 = CeL.wiki.parse('{{ T1|p3=3|p4=4}}');

@@ -2161,7 +2161,7 @@ function module_code(library_namespace) {
 				matched = token.splice(0, matched + 1);
 				token = _set_wiki_type([ matched,
 				//
-				matched.pop(), token ], 'plain');
+				matched.pop(), token ], 'plain'/* 'template_parameter' */);
 
 				// matched: [ key, value ]
 				// matched = token[1].match(/^([^=]*)=([\s\S]*)$/);

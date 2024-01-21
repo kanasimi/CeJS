@@ -270,6 +270,41 @@ function module_code(library_namespace) {
 		return parameter.trim().replace(/^([^={}]+)\s+=\s+/, '$1=');
 	}
 
+	// 可以省略數字參數名 numbered parameter / numeric parameter name。
+	// TODO: template 本身假如會產出 "a=b" 這樣的字串，恐怕會造成問題。
+	// https://www.mediawiki.org/wiki/Help:Templates#Numbered_parameters
+	function may_omit_numbered_parameter(parameter_value, options) {
+		if (!Array.isArray(parameter_value)) {
+			if (typeof parameter_value !== 'string')
+				return true;
+			parameter_value = wiki_API.parse(parameter_value);
+		}
+		if (!parameter_value)
+			return true;
+
+		// 包含模板、註解外的 "="，或前面的空白很重要，就不能省略數字指定 prefix。
+		if (Array.isArray(parameter_value)) {
+			if (parameter_value.type !== 'plain')
+				parameter_value = [ parameter_value ];
+			parameter_value = parameter_value.filter(function(token) {
+				// if (options.omit_numbered_parameters === 'lenient')
+				// 採用比較寬鬆的標準。
+				return !(token.type in {
+					parameter : true,
+					// e.g., {{=}}
+					magic_word_function : true,
+					transclusion : true,
+					comment : true
+				});
+			}).join('');
+		} else {
+			// assert: typeof parameter_value === 'string'
+		}
+
+		// console.trace(parameter_value);
+		return !parameter_value.includes('=');
+	}
+
 	/**
 	 * 將 wiki_API.parse === parse_wikitext() 獲得之 template_token 中的指定 parameter
 	 * 換成 replace_to。 replace_template_parameter(), set_parameter(),
@@ -397,6 +432,8 @@ function module_code(library_namespace) {
 			var operated_template_count = 0, latest_OK_key, key_of_spaces, spaces, next_insert_index;
 			for ( var replace_from in parameter_name) {
 				replace_to = parameter_name[replace_from];
+				if (typeof replace_from === 'string')
+					replace_from = replace_from.trim();
 				if (convert_replace_to(replace_from) === undefined) {
 					continue;
 				}
@@ -404,7 +441,8 @@ function module_code(library_namespace) {
 						: template_token.index_of[replace_from];
 				if (!(index >= 0)) {
 					// 不存在此 parameter name 可 replace。
-					if (options.value_only && options.force_add) {
+					if (replace_to !== KEY_remove_parameter
+							&& options.value_only && options.force_add) {
 						// options.preserve_spacing
 						if (!options.no_value_space
 						//
@@ -420,9 +458,20 @@ function module_code(library_namespace) {
 							key_of_spaces);
 							// console.log(spaces);
 						}
-						replace_to = spaces && spaces[1] ? spaces[0]
-								+ replace_from + spaces[1] + replace_to
-								+ spaces[2] : replace_from + '=' + replace_to;
+						// console.trace([ replace_from, replace_to ]);
+						if (spaces && spaces[1]) {
+							replace_to = spaces[0] + replace_from + spaces[1]
+									+ replace_to + spaces[2];
+						} else if (library_namespace.is_digits(replace_from)
+								&& may_omit_numbered_parameter(replace_to,
+										options)) {
+							library_namespace.debug(
+									'Auto remove numbered parameter: '
+											+ replace_from, 1,
+									'replace_parameter');
+						} else {
+							replace_to = replace_from + '=' + replace_to;
+						}
 						if (options.before_parameter
 								&& template_token.index_of[options.before_parameter]) {
 							// insert before parameter
@@ -508,6 +557,13 @@ function module_code(library_namespace) {
 						this_parameter[2] = replace_to;
 						skip_replacement = 1;
 					}
+
+					if (!may_omit_numbered_parameter(replace_to, options)
+							&& !this_parameter[1]) {
+						this_parameter[0] = replace_from;
+						this_parameter[1] = '=';
+					}
+
 					if (parameters) {
 						// Also update parameters
 						parameters[replace_from] = replace_to;
@@ -560,17 +616,17 @@ function module_code(library_namespace) {
 		// console.trace(index, replace_to);
 
 		if (replace_to === KEY_remove_parameter) {
-			if (isNaN(parameter_name)) {
-				// remove the parameter
-				template_token.splice(index, 1);
-				replace_to = wiki_API.parse(template_token.toString());
-				Object.clone(replace_to, false, template_token);
-			} else {
+			if (library_namespace.is_digits(parameter_name)) {
 				// For numeral parameter_name, just replace to empty value.
 				template_token[index] = '';
 				// Warning: this will NOT change .index_of , .parameters !
 				while (!template_token.at(-1))
 					template_token.pop();
+			} else {
+				// remove the parameter
+				template_token.splice(index, 1);
+				replace_to = wiki_API.parse(template_token.toString());
+				Object.clone(replace_to, false, template_token);
 			}
 			return 1;
 		}
@@ -610,17 +666,15 @@ function module_code(library_namespace) {
 		// assert: {String}replace_to
 		// console.trace(replace_to);
 
-		// 注意: 假如 numbered parameter 本來就沒有添上 1= 之類，那麼就算 .includes('=') 也不會再主動添加。
-		if (!spaces[1] && !isNaN(parameter_name)) {
+		// 注意: 假如 numbered parameter 本來就沒有添上 1= 之類，那麼就算 .includes('=')
+		// 也不會再主動添加。
+		if (!spaces[1] && library_namespace.is_digits(parameter_name)) {
 			var matched = replace_to.match(/^\s*(\d+)\s*=\s*([\s\S]*)$/);
 			if (matched && matched[1] == parameter_name
-			// 假如包含 "=" 就不能省略數字指定 prefix。
-			// TODO: template 本身假如會產出 "a=b" 這樣的字串，恐怕會造成問題。
-			&& !matched[2].replace(/{{ *= *(?:\|[^{}]*)?}}/g, '').includes('=')) {
+					&& may_omit_numbered_parameter(matched[2], options)) {
 				// e.g., replace [2] to non-named 'value' in {{t|1|2}}
-				library_namespace.debug('auto remove numbered parameter: '
-				// https://www.mediawiki.org/wiki/Help:Templates#Numbered_parameters
-				+ parameter_name, 3, 'replace_parameter');
+				library_namespace.debug('Auto remove numbered parameter: '
+						+ parameter_name, 1, 'replace_parameter');
 				// console.trace([ replace_to, matched ]);
 				replace_to = matched[2];
 			}
@@ -651,7 +705,7 @@ function module_code(library_namespace) {
 		if (index === 0 || index + 1 < template_token.length) {
 			// index === 0: template name 無影響。
 			// index + 1 < template_token.length: 最末尾沒有 parameter 了，影響較小。
-		} else if (isNaN(parameter_name)) {
+		} else if (!library_namespace.is_digits(parameter_name)) {
 			// TODO: NG: {{t|a=a|1}} → {{t|a|1}}
 			if (!PATERN_parameter_name.test(replace_to)) {
 				library_namespace.warn('replace_parameter: '
@@ -676,7 +730,7 @@ function module_code(library_namespace) {
 			} else if (matched[1].trim() != parameter_name) {
 				library_namespace
 						.warn('replace_parameter: '
-								+ 'Insert numerical parameter name and disrupt the order of parameters? '
+								+ 'Insert numbered parameter and disrupt the order of parameters? '
 								+ template_token);
 			}
 		}
