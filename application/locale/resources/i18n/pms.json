@@ -309,6 +309,7 @@
 	"Comma-separator": ",&#32;",
 	"check-the-emergency-stop-page-$1": "Controlé la pàgina ëd fërmada d'emergensa: %1",
 	"the-emergency-stop-page-was-not-found-($1)": "La pàgina ëd fërmada d'emergensa a l'é nen trovasse (%1).",
+	"the-emergency-stop-page-is-empty-($1)": "La pàgina ëd fërmada d'emergensa a l'é veuida (%1).",
 	"the-operation-will-proceed-as-usual": "L'operassion a andrà anans coma al sòlit.",
 	"emergency-stop-edit-has-been-set": "La modìfica ëd fërmada d'emergensa a l'é stàita definìa!",
 	"there-is-a-messages-on-the-emergency-stop-page-$1-to-stop-the-editing-operation": "A-i é un mëssagi ant la pàgina ëd fërmada d'emergensa %1 për fërmé l'operassion ëd modìfica!",
