@@ -925,7 +925,24 @@ function module_code(library_namespace) {
 			},
 			// next[3] : options
 			add_session_to_options(this, next[3]));
+
 			break;
+
+		case 'random_categorymembers':
+			// console.trace(next);
+			wiki_API.random_categorymembers(next[1], function() {
+				callback_result_relying_on_this
+				// next[2] : callback(pages, target, options)
+				= next[2].apply(_this, arguments);
+
+				_this.next(callback_result_relying_on_this);
+			},
+			// next[3] : options
+			add_session_to_options(this, next[3]));
+
+			break;
+
+		// ------------------------------------------------------
 
 		// case 'category_tree':
 		// @see wiki_API.prototype.category_tree @ application.net.wiki.list
@@ -2578,7 +2595,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see function wiki_API_prototype_methods()
 	 */
-	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|download|changecontentmodel|edit|upload|cache|listen|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|structured_data|edit_structured_data|query'
+	wiki_API.prototype.next.methods = 'query_API|siteinfo|page|tracking_revisions|parse|redirect_to|purge|check|copy_from|download|changecontentmodel|edit|upload|cache|listen|random_categorymembers|category_tree|register_redirects|search|remove|delete|move_page|move_to|protect|rollback|logout|run|run_async|set_URL|set_language|set_data|data|edit_data|merge_data|query_data|structured_data|edit_structured_data|query'
 			.split('|');
 
 	// ------------------------------------------------------------------------

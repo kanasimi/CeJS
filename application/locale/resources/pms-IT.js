@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Polid\u00e9 l'argistr",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Smon-e / st\u00ebrm\u00e9 l'argistr",
 	"Load failed": "Cariament fal\u00ec",
@@ -306,6 +306,7 @@
 	"Comma-separator": ", ",
 	"\u6aa2\u67e5\u7dca\u6025\u505c\u6b62\u9801\u9762 %1": "Control\u00e9 la p\u00e0gina \u00ebd f\u00ebrmada d'emergensa: %1",
 	"The emergency stop page was not found (%1).": "La p\u00e0gina \u00ebd f\u00ebrmada d'emergensa a l'\u00e9 nen trovasse (%1).",
+	"The emergency stop page is empty (%1).": "La p\u00e0gina \u00ebd f\u00ebrmada d'emergensa a l'\u00e9 veuida (%1).",
 	"The operation will proceed as usual.": "L'operassion a andr\u00e0 anans coma al s\u00f2lit.",
 	"\u5df2\u8a2d\u5b9a\u7dca\u6025\u505c\u6b62\u7de8\u8f2f\u4f5c\u696d\uff01": "La mod\u00ecfica \u00ebd f\u00ebrmada d'emergensa a l'\u00e9 st\u00e0ita defin\u00eca!",
 	"\u7dca\u6025\u505c\u6b62\u9801\u9762 %1 \u6709\u7559\u8a00\u8981\u505c\u6b62\u7de8\u8f2f\u4f5c\u696d\uff01": "A-i \u00e9 un m\u00ebssagi ant la p\u00e0gina \u00ebd f\u00ebrmada d'emergensa %1 p\u00ebr f\u00ebrm\u00e9 l'operassion \u00ebd mod\u00ecfica!",

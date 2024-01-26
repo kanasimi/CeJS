@@ -696,7 +696,7 @@ function module_code(library_namespace) {
 		// @see CeL.extract_literals()
 		//
 		// 採用 local variable，因為可能有 multithreading 的問題。
-		conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})(\|\d)?)/g;
+		conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\|\/]+)\/)?(?:([^%@\s\|\d]{1,3})|([^%@\|]+)@)?(\d{1,2})(\|[\|\d])?)/g;
 
 		while (matched = conversion_pattern.exec(converted_text)) {
 			if (matched[7]) {

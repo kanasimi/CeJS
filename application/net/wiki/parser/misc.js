@@ -578,6 +578,17 @@ function module_code(library_namespace) {
 						}
 						this_parameter[1] = this_parameter[1].toString()
 								.trimEnd();
+						// 避免
+						// https://en.wikipedia.org/w/index.php?title=Talk:Sasha_Allen_(The_Voice_21)&diff=prev&oldid=1198449816
+						if (!this_parameter.toString().includes('\n')) {
+							this_parameter.forEach(function(piece, index) {
+								if (typeof piece === 'string') {
+									this_parameter[index] = piece.replace(
+											/^\s{2,}/, ' ').replace(/\s{2,}$/,
+											' ');
+								}
+							});
+						}
 					}
 
 					// @deprecated:

@@ -664,7 +664,9 @@ function module_code(library_namespace) {
 				// 不包括 test2.wikipedia.org 之類。
 				&& !/^test|wik[it]/i.test(language_code)
 				// 排除 'Talk', 'User', 'Help', 'File', ...
-				&& !(session.configurations.namespace_pattern || get_namespace.pattern)
+				&& !(session.configurations
+				// ↑ session === wiki_API?
+				&& session.configurations.namespace_pattern || get_namespace.pattern)
 						.test(language_code)) {
 			if (language_code === 'simple') {
 				session.first_damain_name = language_code;
@@ -1053,7 +1055,9 @@ function module_code(library_namespace) {
 				API_URL : API_URL
 			};
 
-			if (session && session.configurations
+			if (session
+			// session === wiki_API?
+			&& session.configurations
 			// e.g., for Fandom sites
 			&& session.configurations.sitename) {
 				site.sitename = session.configurations.sitename;
@@ -1108,7 +1112,9 @@ function module_code(library_namespace) {
 		}
 		var session = session_of_options(options);
 		var namespace_hash = options.namespace_hash || session
-				&& session.configurations.namespace_hash || get_namespace.hash;
+		// session === wiki_API?
+		&& session.configurations && session.configurations.namespace_hash
+				|| get_namespace.hash;
 
 		if (Array.isArray(namespace)) {
 			namespace = namespace.join('|');
@@ -1185,7 +1191,8 @@ function module_code(library_namespace) {
 			list = list.unique();
 			if (options.get_name) {
 				var name_of_NO = options.name_of_NO || session
-						&& session.configurations.name_of_NO
+				// session === wiki_API?
+				&& session.configurations && session.configurations.name_of_NO
 						|| get_namespace.name_of_NO;
 				list = list.map(function(namespace_NO) {
 					return namespace_NO in name_of_NO
@@ -1360,7 +1367,9 @@ function module_code(library_namespace) {
 			return '';
 
 		var session = session_of_options(options);
-		if (NS === session && session.configurations.namespace_hash ? session.configurations.namespace_hash.wikipedia
+		if (NS === session
+		// session === wiki_API?
+		&& session.configurations && session.configurations.namespace_hash ? session.configurations.namespace_hash.wikipedia
 				: get_namespace.hash.wikipedia) {
 			if (session && session.family) {
 				return wiki_API.upper_case_initial(
@@ -1371,7 +1380,9 @@ function module_code(library_namespace) {
 			return 'Wikipedia';
 		}
 
-		var name_of_NO = session && session.configurations.name_of_NO
+		var name_of_NO = session
+		// session === wiki_API?
+		&& session.configurations && session.configurations.name_of_NO
 				|| wiki_API.namespace.name_of_NO;
 		return wiki_API.upper_case_initial(name_of_NO[NS]);
 	}
@@ -1410,7 +1421,8 @@ function module_code(library_namespace) {
 
 		var session = session_of_options(options);
 		var namespace_pattern = session
-				&& session.configurations.namespace_pattern
+		// session === wiki_API?
+		&& session.configurations && session.configurations.namespace_pattern
 				|| get_namespace.pattern;
 		var matched = page_title.match(namespace_pattern);
 		library_namespace.debug('Test ' + wiki_API.title_link_of(page_title)
@@ -1491,7 +1503,9 @@ function module_code(library_namespace) {
 			namespace = wiki_API.normalize_title(namespace, options)
 					.toLowerCase();
 			var session = session_of_options(options);
-			var name_of_NO = session && session.configurations.name_of_NO
+			var name_of_NO = session
+			// session === wiki_API?
+			&& session.configurations && session.configurations.name_of_NO
 					|| wiki_API.namespace.name_of_NO;
 			if (session) {
 				// assert: {Number|Undefined}namespace
@@ -1562,7 +1576,9 @@ function module_code(library_namespace) {
 			return page_title;
 		}
 
-		var name_of_NO = session && session.configurations.name_of_NO
+		var name_of_NO = session
+		// session === wiki_API?
+		&& session.configurations && session.configurations.name_of_NO
 				|| wiki_API.namespace.name_of_NO;
 		if (namespace >= 0) {
 			namespace = name_of_NO[namespace + 1];
@@ -1622,7 +1638,9 @@ function module_code(library_namespace) {
 		}
 
 		var session = session_of_options(options);
-		var name_of_NO = session && session.configurations.name_of_NO
+		var name_of_NO = session
+		// session === wiki_API?
+		&& session.configurations && session.configurations.name_of_NO
 				|| wiki_API.namespace.name_of_NO;
 		if (namespace > 0) {
 			namespace = name_of_NO[namespace - 1];
@@ -1862,9 +1880,10 @@ function module_code(library_namespace) {
 		var has_language;
 		var session = session_of_options(options);
 		var interwiki_pattern = session
-				&& session.configurations.interwiki_pattern
+		// session === wiki_API?
+		&& session.configurations && session.configurations.interwiki_pattern
 				|| /^[a-z][a-z_\-]+$/i;
-		var no_session_namespace_hash = !session
+		var no_session_namespace_hash = !session || !session.configurations
 				|| !session.configurations.namespace_hash;
 
 		var _options = Object.assign(Object.create(null), options, {
@@ -2317,7 +2336,9 @@ function module_code(library_namespace) {
 		var session = wiki_API.session_of_options(options);
 
 		// console.trace(session);
-		var namespace_hash = session && session.configurations.namespace_hash
+		var namespace_hash = session
+		// session === wiki_API?
+		&& session.configurations && session.configurations.namespace_hash
 				|| get_namespace.hash;
 
 		// is_api_and_title(page_data)
@@ -2344,7 +2365,9 @@ function module_code(library_namespace) {
 			// @see PATTERN_PROJECT_CODE_i
 			project_prefixed = /^ *[a-z]{2}[a-z\d\-]{0,14} *:/i.test(title)
 					// 排除 'Talk', 'User', 'Help', 'File', ...
-					&& !(session && session.configurations.namespace_pattern || get_namespace.pattern)
+					&& !(session && session.configurations
+					// ↑ session === wiki_API?
+					&& session.configurations.namespace_pattern || get_namespace.pattern)
 							.test(title);
 			// escape 具有特殊作用的 title。
 			need_escape = PATTERN_category_prefix.test(title)
@@ -3294,7 +3317,7 @@ function module_code(library_namespace) {
 		}
 		page_title = this.normalize_title(page_title);
 
-		// console.trace(this.redirects_data);
+		// console.trace(this.redirects_data, page_title);
 		// console.trace(page_title + '→' + this.redirects_data[page_title]);
 		page_title = this.redirects_data[page_title] || page_title;
 		return page_title;
@@ -3359,10 +3382,13 @@ function module_code(library_namespace) {
 			if (!template_name_to_test.normalized_template_name_Set) {
 				template_name_to_test.normalized_template_name_Set = new Set(
 				// normalize
-				session.redirect_target_of(template_name_to_test, options));
+				session.redirect_target_of ? session.redirect_target_of(
+						template_name_to_test, options) : template_name_to_test);
 				// console.trace(template_name_to_test.normalized_template_name_Set);
 			}
-			if (session) {
+			if (session
+			// session === wiki_API?
+			&& session.redirect_target_of) {
 				// normalize template name
 				template_token = session.redirect_target_of(template_token,
 						options);

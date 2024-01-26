@@ -1913,11 +1913,13 @@ function module_code(library_namespace) {
 
 		// console.trace(session.configurations);
 		var magic_words_hash = session
-				&& session.configurations.magic_words_hash
+		// session === wiki_API?
+		&& session.configurations && session.configurations.magic_words_hash
 				|| default_magic_words_hash;
 
 		var extensiontag_hash = session
-				&& session.configurations.extensiontag_hash
+		// session === wiki_API?
+		&& session.configurations && session.configurations.extensiontag_hash
 				|| wiki_extensiontags;
 
 		// or use ((PATTERN_transclusion))
@@ -3461,6 +3463,8 @@ function module_code(library_namespace) {
 		// 則雖無功用，但會當作一般文字顯示，而非註解。
 
 		var PATTERN_extensiontags = session
+		// session === wiki_API?
+		&& session.configurations
 				&& session.configurations.PATTERN_extensiontags
 				|| PATTERN_wiki_extensiontags;
 		// Add comments: <!-- ... -->
@@ -3627,6 +3631,8 @@ function module_code(library_namespace) {
 		// PATTERN_WIKI_TAG.lastIndex = 0;
 
 		var PATTERN_non_extensiontags = session
+		// session === wiki_API?
+		&& session.configurations
 				&& session.configurations.PATTERN_non_extensiontags
 				|| PATTERN_non_wiki_extensiontags;
 

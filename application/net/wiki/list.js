@@ -1337,7 +1337,7 @@ function module_code(library_namespace) {
 
 		// 對於太大的 {Array}target，會在 get_list() 中自行處理。
 
-		// console.trace(target);
+		// console.trace(target, options);
 		session[options.type](target,
 		// 注意: arguments 與 get_list() 之 callback 連動。
 		function wiki_API_list_callback(pages, error) {
@@ -1800,6 +1800,7 @@ function module_code(library_namespace) {
 			return session.to_namespace(root_category, NS_Category);
 		});
 
+		// categoryinfo needs 's'
 		if (options.cmtype) {
 			if (typeof options.cmtype === 'string')
 				options.cmtype = options.cmtype.split('|');
@@ -2185,6 +2186,7 @@ function module_code(library_namespace) {
 				// console.assert(cached_tree_list.depth === 0);
 				cached_tree_list.list_type = 'category_tree';
 				cached_tree_list.get_category_tree = get_category_tree;
+				// .flated_subcategories
 				cached_tree_list.flat_subcategories = tree_of_category;
 				return cached_tree_list;
 			});
@@ -2855,6 +2857,117 @@ function module_code(library_namespace) {
 		});
 		return Object.keys(name_hash).length;
 	};
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * 用於取得分散式列表。 Get decentralized list.
+	 * 
+	 * 注意: 本函數不保證遍歷所有頁面！應用於消除這個的情況。
+	 * 
+	 * 注意: noy yet tested
+	 */
+	function random_categorymembers(target, for_each_page, options) {
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+		options = library_namespace.new_options(options);
+
+		var pages_left = options.limit >= 1 ? options.limit : Infinity;
+		// batch_size
+		if (!(options.piece_size >= 1))
+			options.piece_size = 500;
+		options.type = 'categorymembers';
+
+		options.for_each_page = function(page_data) {
+			return for_each_page.apply(this, arguments);
+		};
+
+		var session = wiki_API.session_of_options(options);
+
+		function get_next_piece_SQL() {
+			// https://en.wikipedia.org/wiki/Wikipedia:Bots/Noticeboard#Flooding_watchlists
+			// https://quarry.wmcloud.org/query/79763
+			// await(await
+			// fetch('https://quarry.wmcloud.org/run/820666/output/0/json')).json()
+			wiki_API.SQL('SELECT page_namespace, page_title FROM categorylinks'
+					+ ' JOIN page ON page_id = cl_from WHERE cl_to = "'
+					+ session.remove_namespace(session.normalize_title(target))
+							.replace(/\s/g, '_')
+					+ '" ORDER BY page_random LIMIT '
+					+ Math.min(5000, pages_left), function callback(error,
+					rows, fields) {
+				if (error) {
+					if (options.callback) {
+						options.callback(rows, error);
+					}
+					return;
+				}
+				rows.forEach(function(row) {
+					row.title = wiki.to_namespace(row.page_title,
+							row.page_namespace);
+					for_each_page.call(this, row);
+				});
+
+				pages_left -= rows.length;
+				if (pages_left > 0) {
+					get_next_piece_SQL();
+				} else if (options.callback) {
+					options.callback();
+				}
+
+			}, wiki_API.site_name(session));
+		}
+
+		if (wiki_API.SQL) {
+			get_next_piece_SQL();
+			return;
+		}
+
+		// 依託於 CeL.wiki.list()
+		session.running = false;
+		if (session.actions.length > 0) {
+			library_namespace.warn('random_categorymembers: '
+					+ 'Yet tested case! session.actions.length > 0');
+		}
+
+		var A_code = 'A'.charCodeAt(0), code_diff = 'Z'.charCodeAt(0) - A_code
+				+ 1;
+		function random_alphabet_code() {
+			return A_code + code_diff * Math.random();
+		}
+
+		var latest_size;
+		function get_next_piece() {
+			if (!latest_size === 0) {
+				library_namespace.info('random_categorymembers: '
+						+ 'Try to get full list of ' + target + '.');
+				delete options.cmstartsortkeyprefix;
+			} else {
+				// https://phabricator.wikimedia.org/T74101
+				options.cmstartsortkeyprefix = String.fromCharCode(
+						random_alphabet_code(), random_alphabet_code(),
+						random_alphabet_code());
+			}
+			options.limit = Mathy.min(options.piece_size, pages_left);
+
+			// console.trace(target, options);
+			wiki_API_list(target, function(pages, target, options) {
+				latest_size = pages.length;
+				if (!options.get_list)
+					pages.truncate();
+				console.trace(latest_size, options.cmstartsortkeyprefix);
+				pages_left -= latest_size;
+				if (pages_left > 0) {
+					get_next_piece();
+				} else if (options.callback) {
+					options.callback();
+				}
+			}, options);
+		}
+
+		get_next_piece();
+	}
+
+	wiki_API.random_categorymembers = random_categorymembers;
 
 	// ------------------------------------------------------------------------
 

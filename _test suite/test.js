@@ -895,6 +895,16 @@ function test_locale() {
 		[['日本語', CeL.gettext.get_alias('jp')], 'gettext.get_alias(jp)'],
 	]);
 
+
+	all_error_count += CeL.test('locale - General test', [
+		[['1A2B', CeL.gettext("%1A%2B", 1, 2)], 'gettext() #1'],
+		[['2|=3/4', CeL.gettext("%2|=3/4", 1, 2)], 'gettext() #2'],
+		[['23/4', CeL.gettext("%2|3/4", 1, 2)], 'gettext() #3'],
+		[['2|3/4', CeL.gettext("%2||3/4", 1, 2)], 'gettext() #4'],
+		[['2|=3/4', CeL.gettext("%2|=3/4", 1, 2)], 'gettext() #5'],
+	]);
+
+
 	//	###usage 2014/2/5
 
 	//	for i18n: define gettext() user domain resources path / location.
@@ -4956,11 +4966,48 @@ function test_wiki() {
 
 		CeL.wiki.set_language('en');
 		assert([CeL.wiki.site_name(), 'enwiki'], 'CeL.wiki.site_name() after CeL.wiki.set_language("en")');
+
+		var template_wikitext_to_insert = '{{WikiProject banner shell}}';
+
 		// from [[w:en:Talk:Change ringing]]
 		wikitext = '\n{{Article history|action1=PR}}\n{{WikiProject Percussion |class=C |importance=Mid}}\n'; parsed = CeL.wiki.parser(wikitext).parse();
-		var WPBS_text = '{{WikiProject banner shell}}';
-		assert([parsed.insert_layout_element(WPBS_text), true], 'parsed.insert_layout_element() #1');
-		assert([parsed.toString(), wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject')], 'parsed.insert_layout_element() #2');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #1');
+		assert([parsed.toString(), wikitext.replace('{{WikiProject', template_wikitext_to_insert + '\n{{WikiProject')], 'parsed.insert_layout_element() #2');
+
+		wikitext = 'text\n==s==\nttt\n{{tlx|t}}\noo'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #3');
+		assert([parsed.toString(), template_wikitext_to_insert + '\n' + wikitext], 'parsed.insert_layout_element() #4');
+
+		wikitext = '==s==\nttt\n{{tlx|t}}\noo'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #5');
+		assert([parsed.toString(), template_wikitext_to_insert + '\n' + wikitext], 'parsed.insert_layout_element() #6');
+
+		wikitext = '{{Notice|text}}\n{{Archives}}\n==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #7');
+		assert([parsed.toString(), wikitext.replace('{{Archives}}', template_wikitext_to_insert + '\n' + '{{Archives}}')], 'parsed.insert_layout_element() #8');
+
+		template_wikitext_to_insert = '{{Authority control}}';
+
+		wikitext = '==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #9');
+		assert([parsed.toString(), wikitext + '\n' + template_wikitext_to_insert + '\n'], 'parsed.insert_layout_element() #10');
+
+		wikitext = '==s==\nttt\n{{DEFAULTSORT:A}}'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #11');
+		assert([parsed.toString(), wikitext.replace('{{DEFAULTSORT:A}}', template_wikitext_to_insert + '\n' + '{{DEFAULTSORT:A}}')], 'parsed.insert_layout_element() #12');
+
+		wikitext = '==s==\nttt\n[[Category:A]]'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #13');
+		assert([parsed.toString(), wikitext.replace('[[Category:A]]', template_wikitext_to_insert + '\n' + '[[Category:A]]')], 'parsed.insert_layout_element() #14');
+
+		wikitext = '==s==\nttt\n{{Sci-org-stub}}'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #15');
+		assert([parsed.toString(), wikitext.replace('{{Sci-org-stub}}', template_wikitext_to_insert + '\n' + '{{Sci-org-stub}}')], 'parsed.insert_layout_element() #16');
+
+		wikitext = '==See also==\n{{reflist}}\n{{Sci-org-stub}}'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #17');
+		assert([parsed.toString(), wikitext.replace('{{Sci-org-stub}}', template_wikitext_to_insert + '\n' + '{{Sci-org-stub}}')], 'parsed.insert_layout_element() #18');
+
 
 		// recover
 		CeL.wiki.set_language('zh');
@@ -5082,20 +5129,23 @@ function test_wiki() {
 			});
 		});
 
-		enwiki.register_redirects(CeL.wiki.setup_layout_elements.template_order_of_layout[CeL.wiki.site_name(enwiki)].talk_page_lead, function test_insert_layout_element() {
+		enwiki.setup_layout_element_to_insert('{{WPBS}}', function test_insert_layout_element() {
 			var test_name = 'enwiki: insert_layout_element';
 			_setup_test(test_name);
 
 			// from [[w:en:Talk:Change ringing]]
 			var wikitext = '\n{{ArticleHistory\n|action1=PR\n}}\n{{WikiProject Percussion|class=C|importance=Mid}}\n\n==A==\ntext';
 			var parsed = CeL.wiki.parser(wikitext, enwiki).parse();
-			var WPBS_template_name = 'WikiProject banner shell' && 'WPBS';
-			var WPBS_text = '{{' + WPBS_template_name + '}}';
-			assert([true, parsed.insert_layout_element(CeL.wiki.parse(CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/)))], 'enwiki: parsed.insert_layout_element() #1');
-			assert([wikitext.replace('{{WikiProject', WPBS_text + '\n{{WikiProject'), parsed.toString()], 'enwiki: parsed.insert_layout_element() #2');
+			var WPBS_template_name = 'WPBS';
+			assert(['Template:WikiProject banner shell', enwiki.redirect_target_of(WPBS_template_name, { namespace: 'Template' })], 'enwiki.redirect_target_of() #1');
+			var WPBS_template_wikitext = CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/);
+			assert(['talk_page_lead', CeL.wiki.get_location_of_template_element(WPBS_template_wikitext, enwiki)], 'CeL.wiki.get_location_of_template_element() #1');
+
+			assert([true, parsed.insert_layout_element(CeL.wiki.parse(WPBS_template_wikitext), CeL.wiki.add_session_to_options(enwiki))], 'enwiki: parsed.insert_layout_element() #1');
+			assert([wikitext.replace('{{WikiProject', WPBS_template_wikitext + '\n{{WikiProject'), parsed.toString()], 'enwiki: parsed.insert_layout_element() #2');
 
 			_finish_test(test_name);
-		}, { namespace: 'Template', no_message: true });
+		});
 
 
 		var jawiki = new CeL.wiki(null, null, 'ja');

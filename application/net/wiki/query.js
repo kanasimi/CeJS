@@ -387,7 +387,7 @@ function module_code(library_namespace) {
 
 		var original_action = action.toString();
 
-		// https://www.mediawiki.org/wiki/API:Data_formats
+		// [[mw:API:Data_formats]]
 		// 因不在 white-list 中，無法使用 CORS。
 		if (session && session.general_parameters) {
 			action.search_params.set_parameters(session.general_parameters);
@@ -645,7 +645,7 @@ function module_code(library_namespace) {
 			}
 
 			if (response && response.error
-			// https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
+			// [[mw:Manual:Maxlag parameter]]
 			&& (need_to_wait_error_code.has(response.error.code)
 			//
 			|| Array.isArray(response.error.messages)
@@ -653,10 +653,17 @@ function module_code(library_namespace) {
 			&& response.error.messages.some(function(message) {
 				return message.name === 'actionthrottledtext';
 			}))) {
-				var waiting = response.error.info
-				// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
-				.match(/([0-9.-]+) seconds? lagged/);
-				waiting = waiting && +waiting[1] * 1000 || edit_time_interval;
+				// new API version
+				var waiting = response.error.lag;
+				if (typeof waiting !== 'number') {
+					// old API version & new API version
+					waiting = response.error.info
+					// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
+					.match(/([0-9.-]+) seconds? lagged/);
+					waiting = waiting && +waiting[1] * 1000
+							|| edit_time_interval;
+				}
+				// assert: waiting > 0
 				// console.trace(response);
 				library_namespace.debug('The ' + response.error.code
 				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
@@ -780,8 +787,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {ℕ⁰:Natural+0}
 	 * 
-	 * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
-	 *      https://www.mediawiki.org/wiki/API:Etiquette 禮儀
+	 * @see [[mw:Manual:Maxlag parameter]], [[mw:API:Etiquette#The maxlag
+	 *      parameter]] 禮儀
 	 *      https://grafana.wikimedia.org/d/000000170/wikidata-edits
 	 */
 	wiki_API_query.default_maxlag = 5;
