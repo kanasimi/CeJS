@@ -1598,8 +1598,9 @@ function module_code(library_namespace) {
 			'S-start', 'Start box', 'Succession box', 'End box', 'S-end',
 			// navigation templates
 			'Navbox', 'Navboxes', 'Portal bar', 'Taxonbar',
-			// authority control template
-			'Authority control', 'Coord', 'Coord missing', 'DEFAULTSORT' ]
+			// authority control template "控製"也能引導到"控制"
+			'Authority control', '規範控製', '權威控製', 'Coord', 'Coord missing',
+					'DEFAULTSORT' ]
 		}
 	};
 
@@ -1637,10 +1638,11 @@ function module_code(library_namespace) {
 			}
 			if (single_layout_types.includes(layout_type)) {
 				library_namespace.error([ 'analysis_layout_indices: ', {
+					T : [
 					// gettext_config:{"id":"there-are-more-than-one-$1-in-$2"}
-					T : [ 'There are more than one %1 in %2',
+					'There are more than one %1 in %2', layout_type,
 					//
-					layout_type, wiki_API.title_link_of(parsed.page) ]
+					wiki_API.title_link_of(parsed.page || 'null page') ]
 				} ]);
 			}
 		}
@@ -1948,8 +1950,8 @@ function module_code(library_namespace) {
 				.redirect_target_of(token, options) : wiki_API.to_namespace(
 				token, options);
 		if (false) {
-			console.trace([ token, template_name,
-					template_to_location_hash[template_name] ]);
+			console.trace([ !!session, token, template_name,
+					template_to_location_hash[template_name], options ]);
 		}
 		return template_to_location_hash[template_name];
 	}
@@ -2215,37 +2217,130 @@ function module_code(library_namespace) {
 
 		// 避免重複插入。
 		if (token.type === 'transclusion') {
-			var has_layout_token = false;
+			var layout_element_list = [];
 			// 一個 layout template 只加一次。
 			parsed.each(token.page_title, function(template_token) {
 				// TODO: merge parameters
-				has_layout_token = template_token;
-				return parsed.each.exit;
+				layout_element_list.push(template_token);
 			});
-			// console.trace(session);
-			// console.trace(token, has_layout_token);
-			if (has_layout_token)
+			if (false) {
+				console.trace(session);
+				console.trace(token, layout_element_list.length,
+						layout_element_list, options.remove_duplicated);
+			}
+
+			if (layout_element_list.length > 1 && options.remove_duplicated) {
+				var main_token = undefined;
+				if (layout_element_list.some(function(template_token) {
+					if (template_token.name === token.name) {
+						main_token = template_token;
+						return true;
+					}
+				}) || layout_element_list.some(function(template_token) {
+					// 盡量不取 {{規范控製}} 這種。
+					if (/^[\w\s]+$/.test(template_token.name)) {
+						main_token = template_token;
+						return true;
+					}
+				})) {
+					var changed;
+					var old_wikitext = main_token.toString();
+					var conflict_parameters = wiki_API.parse
+							.merge_template_parameters(main_token, token);
+
+					if (!conflict_parameters
+							&& old_wikitext !== main_token.toString()) {
+						library_namespace.warn('insert_layout_element: '
+								+ wiki_API.title_link_of(parsed.page
+										|| 'null page') + ': 合併 ' + token
+								+ ' 入 main element ' + main_token);
+						changed = true;
+					}
+
+					parsed.each(token.page_title, function(template_token) {
+						if (template_token === main_token) {
+							return;
+						}
+
+						var conflict_parameters = wiki_API.parse
+								.merge_template_parameters(main_token,
+										template_token);
+						// console.trace(conflict_parameters);
+						if (!conflict_parameters) {
+							library_namespace.warn('insert_layout_element: '
+									+ wiki_API.title_link_of(parsed.page
+											|| 'null page') + ': Remove '
+									+ template_token);
+							changed = true;
+							return parsed.each.remove_token;
+						}
+					});
+
+					if (options.main_template_processor) {
+						options.main_template_processor(main_token);
+					}
+
+					return (changed || old_wikitext !== main_token.toString())
+							&& main_token;
+				}
+
+				library_namespace.warn('insert_layout_element: '
+						+ wiki_API.title_link_of(parsed.page || 'null page')
+						+ ' 有多個 ' + token + '，無法判別該取捨哪一個: '
+						+ layout_element_list);
+			}
+
+			if (layout_element_list.length > 0) {
+				var main_token = layout_element_list[0];
+				var old_wikitext = main_token.toString();
+				var conflict_parameters = wiki_API.parse
+						.merge_template_parameters(main_token, token);
+
+				if (options.main_template_processor) {
+					options.main_template_processor(main_token);
+				}
+
+				if (!conflict_parameters
+						&& old_wikitext !== main_token.toString()) {
+					library_namespace.warn('insert_layout_element: '
+							+ wiki_API
+									.title_link_of(parsed.page || 'null page')
+							+ ': 合併 ' + token + ' 入 ' + main_token);
+					return main_token;
+				}
+
+				library_namespace.warn('insert_layout_element: '
+						+ wiki_API.title_link_of(parsed.page || 'null page')
+						+ ' 已有 ' + main_token + '，不再插入 ' + token);
 				return;
+			}
 
 		} else if (token.type === 'category') {
-			var has_layout_token = false;
+			var layout_element_list = [];
 			// 一個 category 只加一次。
 			parsed.each('Category', function(category_token) {
 				if (token.name !== category_token.name) {
 					return;
 				}
 				if (token.sort_key && !category_token.sort_key) {
-					// 除非本來就有設定 sort key，否則設定成新的 sort key。
+					// merge sort_key: 除非本來就有設定 sort key，否則設定成新的 sort key。
 					category_token[2] = token.sort_key;
-					has_layout_token = 'changed';
+					layout_element_list.changed = true;
 				} else {
-					has_layout_token = category_token;
+					// TODO: options.remove_duplicated
+					layout_element_list.push(category_token);
 				}
 				return parsed.each.exit;
 			});
-			// console.trace(token, has_layout_token);
-			if (has_layout_token)
-				return has_layout_token === 'changed';
+			// console.trace(token, layout_element_list);
+			if (layout_element_list.changed)
+				return true;
+			if (layout_element_list.length > 0) {
+				library_namespace.warn('insert_layout_element: '
+						+ wiki_API.title_link_of(parsed.page || 'null page')
+						+ ' 已有 ' + layout_element_list[0] + '，不再插入 ' + token);
+				return;
+			}
 
 		} else if (parsed.toString().includes(token)) {
 			return;

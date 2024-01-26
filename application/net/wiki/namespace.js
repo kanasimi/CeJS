@@ -1791,9 +1791,21 @@ function module_code(library_namespace) {
 	 */
 	function normalize_page_name(page_name, options) {
 		if (Array.isArray(page_name)) {
-			return page_name.map(function(_page_name) {
-				return normalize_page_name(_page_name, options);
-			});
+			if (!page_name.type) {
+				return page_name.map(function(_page_name) {
+					return normalize_page_name(_page_name, options);
+				});
+			}
+
+			if (page_name.type === 'transclusion') {
+				page_name = page_name.page_title;
+			} else if (page_name.type === 'link') {
+				page_name = page_name[0].toString();
+			} else {
+				library_namespace.warn('Cannot treat ' + page_name
+						+ ' as page title!');
+				page_name = page_name[0].toString();
+			}
 		}
 
 		if (wiki_API.is_page_data(page_name)) {
@@ -3319,7 +3331,30 @@ function module_code(library_namespace) {
 
 		// console.trace(this.redirects_data, page_title);
 		// console.trace(page_title + '→' + this.redirects_data[page_title]);
-		page_title = this.redirects_data[page_title] || page_title;
+
+		if (this.redirects_data[page_title])
+			return this.redirects_data[page_title];
+
+		var pattern_hash = this.redirects_variants_patterns
+				&& this.redirects_variants_patterns[this.remove_namespace(
+						page_title).chars()[0]];
+		if (false) {
+			console.trace(pattern_hash, page_title, this.remove_namespace(
+					page_title).chars()[0]);
+		}
+		if (pattern_hash) {
+			var page_namespace = this.namespace(page_title);
+			for ( var pattern_id in pattern_hash) {
+				var pattern_data = pattern_hash[pattern_id];
+				if (page_namespace !== pattern_data[2])
+					continue;
+				var pattern = pattern_data[0];
+				if (pattern.test(page_title)) {
+					return pattern_data[1];
+				}
+			}
+		}
+
 		return page_title;
 	}
 

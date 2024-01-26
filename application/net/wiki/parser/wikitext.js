@@ -3624,6 +3624,86 @@ function module_code(library_namespace) {
 		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
 
 		// ----------------------------------------------------
+		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
+		// @see [[w:en:Help:Link#Http: and https:]]
+
+		// console.log('11: ' + JSON.stringify(wikitext));
+
+		// 在 transclusion 中不會被當作 bare / plain URL。
+		if (!options.inside_transclusion) {
+			wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+			//
+			function(all, previous, URL) {
+				all = _set_wiki_type(URL, 'url');
+				// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
+				// 因此需要測試 token.is_bare 以確定是否在 external link 內。
+				all.is_bare = true;
+				queue.push(all);
+				return previous + include_mark + (queue.length - 1) + end_mark;
+			});
+
+			// ----------------------------------------------------
+			// 處理 / parse list @ wikitext
+			// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
+			// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
+			// ** list 中的標籤跨行也會被截斷，因此 parse_list_line 要在 parse_HTML_tag 之前。
+
+			// 列表層級。 e.g., ['#','*','#',':']
+			var list_prefixes_now = [], list_now = [],
+			//
+			lines_without_style = [],
+			//
+			list_conversion = {
+				';' : DEFINITION_LIST,
+				':' : DEFINITION_LIST
+			};
+
+			// console.log('12: ' + JSON.stringify(wikitext));
+			// console.log(queue);
+
+			// list 不能跨行。
+			wikitext = wikitext.split('\n');
+			// e.g., for "<b>#ccc</b>"
+			var first_line = !initialized_fix && wikitext.shift();
+
+			wikitext.forEach(parse_list_line);
+			wikitext = lines_without_style;
+
+			// ----------------------------------------------------
+			// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
+			// @see [[w:en:Help:Wikitext#Horizontal rule]]
+			// Their use in Wikipedia articles is deprecated.
+			// They should never appear in regular article prose.
+
+			// reset
+			lines_without_style = [];
+
+			wikitext.forEach(parse_hr_tag);
+			wikitext = lines_without_style;
+
+			// ----------------------------------------------------
+			// parse preformatted text, HTML <pre> element: \n + space
+			// @seealso [[w:en:Help:Wikitext#Pre]]
+
+			// reset
+			lines_without_style = [];
+			// pre_list
+			list_now = null;
+
+			wikitext.forEach(parse_preformatted);
+			wikitext = lines_without_style;
+
+			// Release memory. 釋放被占用的記憶體。
+			lines_without_style = null;
+
+			if (!initialized_fix) {
+				// recover
+				wikitext.unshift(first_line);
+			}
+			wikitext = wikitext.join('\n');
+		}
+
+		// ----------------------------------------------------
 		// [[Help:HTML in wikitext]]
 
 		// <del>不採用 global variable，預防 multitasking 並行處理。</del>
@@ -3715,84 +3795,6 @@ function module_code(library_namespace) {
 			end_index = wikitext.indexOf('}}', pattern.lastIndex);
 
 			PATTERN_wikilink;
-		}
-
-		// ----------------------------------------------------
-		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
-		// @see [[w:en:Help:Link#Http: and https:]]
-
-		// console.log('11: ' + JSON.stringify(wikitext));
-
-		// 在 transclusion 中不會被當作 bare / plain URL。
-		if (!options.inside_transclusion) {
-			wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL,
-			//
-			function(all, previous, URL) {
-				all = _set_wiki_type(URL, 'url');
-				// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
-				// 因此需要測試 token.is_bare 以確定是否在 external link 內。
-				all.is_bare = true;
-				queue.push(all);
-				return previous + include_mark + (queue.length - 1) + end_mark;
-			});
-
-			// ----------------------------------------------------
-			// 處理 / parse list @ wikitext
-			// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
-			// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
-
-			// 列表層級。 e.g., ['#','*','#',':']
-			var list_prefixes_now = [], list_now = [],
-			//
-			lines_without_style = [],
-			//
-			list_conversion = {
-				';' : DEFINITION_LIST,
-				':' : DEFINITION_LIST
-			};
-
-			// console.log('12: ' + JSON.stringify(wikitext));
-			// console.log(queue);
-
-			wikitext = wikitext.split('\n');
-			// e.g., for "<b>#ccc</b>"
-			var first_line = !initialized_fix && wikitext.shift();
-
-			wikitext.forEach(parse_list_line);
-			wikitext = lines_without_style;
-
-			// ----------------------------------------------------
-			// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
-			// @see [[w:en:Help:Wikitext#Horizontal rule]]
-			// Their use in Wikipedia articles is deprecated.
-			// They should never appear in regular article prose.
-
-			// reset
-			lines_without_style = [];
-
-			wikitext.forEach(parse_hr_tag);
-			wikitext = lines_without_style;
-
-			// ----------------------------------------------------
-			// parse preformatted text, HTML <pre> element: \n + space
-			// @seealso [[w:en:Help:Wikitext#Pre]]
-
-			// reset
-			lines_without_style = [];
-			// pre_list
-			list_now = null;
-
-			wikitext.forEach(parse_preformatted);
-			wikitext = lines_without_style;
-
-			// Release memory. 釋放被占用的記憶體。
-			lines_without_style = null;
-
-			if (!initialized_fix) {
-				// recover
-				wikitext.unshift(first_line);
-			}
-			wikitext = wikitext.join('\n');
 		}
 
 		// ↑ parse sequence finished *EXCEPT FOR* paragraph
@@ -3977,7 +3979,8 @@ function module_code(library_namespace) {
 		options = wiki_API.add_session_to_options(session, Object
 				.clone(options));
 
-		var parsed = parse_wikitext(token.toString(), options);
+		var parsed = parse_wikitext(options.replace_by_wikitext
+				|| token.toString(), options);
 
 		token.truncate();
 

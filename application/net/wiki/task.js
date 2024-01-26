@@ -289,6 +289,8 @@ function module_code(library_namespace) {
 
 	/** 代表欲自動設定 options.page_to_edit */
 	wiki_API.VALUE_set_page_to_edit = true;
+	var KEY_first_char_list = typeof Symbol === 'function' ? Symbol('first_char_list')
+			: '\0first_char_list';
 
 	// @inner
 	function set_page_to_edit(options, page_data, error, page_title) {
@@ -1198,7 +1200,7 @@ function module_code(library_namespace) {
 				}
 
 				if (false) {
-					console.trace([ next[3].no_languagevariants,
+					console.trace([ next, next[3].no_languagevariants,
 							!_this.has_languagevariants ]);
 				}
 				if (next[3].no_languagevariants || !_this.has_languagevariants
@@ -1211,10 +1213,154 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				// --------------------------------------------------
+
 				// 處理 converttitles。
 				// console.trace('處理繁簡轉換問題: ' + registered_page_list);
 				// console.trace(root_page_data);
 				// console.trace(JSON.stringify(redirects_data));
+
+				// variants_of_target[register_target]
+				// = [ 相對應的 variant list 1, 相對應的 variant list 2, ... ]
+				// 相對應的 variant list = [ variants 1, variants 2 ]
+				var variants_of_target = Object.create(null);
+				var redirects_variants_patterns
+				// redirects_variants_patterns[first char] = pattern_hash
+				= _this.redirects_variants_patterns
+				// pattern_hash = { pattern_id: pattern_data, ... }
+				// pattern_data = [ {RegExp}pattern, redirects_to, namespace ]
+				|| (_this.redirects_variants_patterns = Object.create(null));
+
+				// {{規范控製}} → {{规范控制}} → {{Authority control}}
+				// 為解決 "控製"也能引導到"控制" 此類模板繁體名稱採用繁簡共通字，因此就算 wiki.convert_Chinese()
+				// 也不能獲得繁體字，但繁體字會自動 mapping 的問題；必須自行
+				// wiki.register_redirects(繁體字名稱)。
+				function register_variants_pattern() {
+					for ( var register_target in variants_of_target) {
+						variants_of_target[register_target].forEach(function(
+								variants_list) {
+							if (variants_list.length === 1) {
+								// 沒有任何變體。
+								return;
+							}
+
+							var char_list = variants_list.shift().chars()
+							//
+							.map(function(char) {
+								return [ char ];
+							});
+
+							if (variants_list.some(function(variant) {
+								variant = variant.chars();
+								// 兩個變體的長度不同。
+								if (char_list.length !== variant.length) {
+									return true;
+								}
+
+								variant.forEach(function(char, index) {
+									if (!char_list[index].includes(char)) {
+										char_list[index].push(char);
+									}
+								});
+
+							})) {
+								library_namespace.warn(
+								//
+								'register_variants_pattern: 跳過長度不同的變體 '
+										+ register_target + ' ← '
+										+ variants_list.join('|'));
+								return;
+							}
+
+							var pattern = char_list.map(function(chars) {
+								return chars.length === 1 ? chars : '['
+										+ chars.join('') + ']';
+							});
+							pattern = pattern.join('');
+
+							var pattern_hash;
+							char_list[_this.namespace(register_target, {
+								is_page_title : true,
+								get_name : true
+							}).length + 1].forEach(function(first_char) {
+								if (!redirects_variants_patterns[first_char]) {
+									if (!pattern_hash) {
+										pattern_hash = Object.create(null);
+										pattern_hash[KEY_first_char_list] = [];
+									}
+									pattern_hash[KEY_first_char_list]
+											.push(first_char);
+									redirects_variants_patterns[first_char]
+									// Initialization
+									= pattern_hash;
+
+								} else if (!pattern_hash) {
+									pattern_hash
+									// Copy
+									= redirects_variants_patterns[first_char];
+									// assert:
+									// pattern_hash[KEY_first_char_list].includes(first_char)
+
+								} else if (!pattern_hash !==
+								// merge
+								redirects_variants_patterns[first_char]) {
+									var first_char_list =
+									//
+									redirects_variants_patterns[first_char]
+									//
+									[KEY_first_char_list];
+									var old_first_char_list
+									//
+									= pattern_hash[KEY_first_char_list]
+									//
+									.filter(function(char) {
+										if (first_char_list.includes(char))
+											return;
+										first_char_list.push(char);
+										return true;
+									});
+									// assert:
+									// first_char_list.includes(first_char);
+									pattern_hash = Object.assign(
+									//
+									redirects_variants_patterns[first_char],
+									//
+									pattern_hash);
+									redirects_variants_patterns[first_char]
+									// recover
+									[KEY_first_char_list] = first_char_list;
+									// console.trace(old_first_char_list);
+									old_first_char_list.forEach(function(
+											first_char) {
+										redirects_variants_patterns[first_char]
+										//
+										= pattern_hash;
+									});
+								}
+
+								if (pattern_hash[pattern]
+								//
+								&& pattern_hash[pattern][1]
+								//
+								!== register_target) {
+									library_namespace.warn(
+									//
+									'register_variants_pattern: 相同變體重定向到不同頁面: '
+											+ pattern + ' → '
+											+ pattern_hash[pattern] + ', '
+											+ register_target);
+								}
+								pattern_hash[pattern] = [
+										new RegExp('^' + pattern + '$'
+										// , 'u'
+										), register_target,
+										_this.namespace(register_target) ];
+							});
+						});
+					}
+
+				}
+
 				function register_redirect_list_via_mapper(original_list,
 						list_to_map, error) {
 					if (false) {
@@ -1227,16 +1373,43 @@ function module_code(library_namespace) {
 										+ '無法繁簡轉換: ' + (error || '未知的錯誤'));
 						return;
 					}
+
+					if (/* check_char_variants */false) {
+						original_list = original_list.slice(1);
+						list_to_map = list_to_map.slice(1);
+					}
+
 					list_to_map.forEach(function(map_from, index) {
 						// if (map_from in redirects_data) return;
 						var map_to
 						//
 						= redirects_data[original_list[index]];
-						// console.log(map_from + ' → ' + map_to);
+
+						if (false) {
+							library_namespace
+									.log('register_redirect_list_via_mapper: ['
+											+ next[3].uselang + '] ' + map_from
+											+ ' → ' + map_to);
+						}
 						redirects_data[map_from] = map_to;
+
+						if (!variants_of_target[map_to])
+							variants_of_target[map_to] = [];
+						if (!variants_of_target[map_to][index]) {
+							variants_of_target[map_to][index] = [ map_from ];
+						} else if (!variants_of_target[map_to][index]
+								.includes(map_from)) {
+							variants_of_target[map_to][index].push(map_from);
+						}
 					});
+
 				}
 
+				if (/* check_char_variants */false) {
+					registered_page_list.unshift(registered_page_list.join('')
+					// 這些字元不該有變體。
+					.replace(/[\w\s:"']/g, '').chars().unique().join(','));
+				}
 				// next[3] : options
 				next[3].uselang = 'zh-hant';
 				wiki_API.convert_Chinese(registered_page_list, function(
@@ -1247,6 +1420,7 @@ function module_code(library_namespace) {
 					}
 					register_redirect_list_via_mapper(registered_page_list,
 							converted_hant, error);
+
 					next[3].uselang = 'zh-hans';
 					wiki_API.convert_Chinese(registered_page_list, function(
 							converted_hans, error) {
@@ -1256,6 +1430,9 @@ function module_code(library_namespace) {
 						}
 						register_redirect_list_via_mapper(registered_page_list,
 								converted_hans, error);
+
+						register_variants_pattern();
+
 						_this.next(next[2], root_page_data);
 					}, next[3]);
 				}, next[3]);

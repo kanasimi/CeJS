@@ -3477,9 +3477,11 @@ function test_wiki() {
 		wikitext = "[http://a.b/  disply text]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #2');
 		assert(['disply text', parsed[2].toString()], 'wiki.parse: external link #2-1');
+		// https://github.com/earwig/mwparserfromhell/issues/40
 		wikitext = "[http://a.b/''disply text'']"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #3');
-		assert(["''disply text''", parsed[2].toString()], 'wiki.parse: external link #3-1');
+		assert(["external_link", parsed.type], 'wiki.parse: external link #3-1');
+		assert(["''disply text''", parsed[2].toString()], 'wiki.parse: external link #3-2');
 		wikitext = "[http://a.b/''disply'' text]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #4');
 		assert(["''disply'' text", parsed[2].toString()], 'wiki.parse: external link #4-1');
@@ -4896,6 +4898,12 @@ function test_wiki() {
 		wikitext = '#i1\n#*i\n#i2'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #14');
 		assert([2, parsed[2].serial], 'wiki.parse: list #15');
+		wikitext = ':t<span style="color:red">red\nnormal\n:t<div style="color:red">red block\nnormal'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #16');
+		assert([':t<span style="color:red">red', parsed[0].toString()], 'wiki.parse: list #17');
+		wikitext = ':t<div style="color:red">red block\nnormal'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #18');
+		assert([':t<div style="color:red">red block', parsed[0].toString()], 'wiki.parse: list #19');
 
 		wikitext = 'a\n p\n  2\n {{t}}\n  [[a]]\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: pre #1');
@@ -4971,42 +4979,69 @@ function test_wiki() {
 
 		// from [[w:en:Talk:Change ringing]]
 		wikitext = '\n{{Article history|action1=PR}}\n{{WikiProject Percussion |class=C |importance=Mid}}\n'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #1');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #1');
 		assert([parsed.toString(), wikitext.replace('{{WikiProject', template_wikitext_to_insert + '\n{{WikiProject')], 'parsed.insert_layout_element() #2');
 
 		wikitext = 'text\n==s==\nttt\n{{tlx|t}}\noo'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #3');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #3');
 		assert([parsed.toString(), template_wikitext_to_insert + '\n' + wikitext], 'parsed.insert_layout_element() #4');
 
 		wikitext = '==s==\nttt\n{{tlx|t}}\noo'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #5');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #5');
 		assert([parsed.toString(), template_wikitext_to_insert + '\n' + wikitext], 'parsed.insert_layout_element() #6');
 
 		wikitext = '{{Notice|text}}\n{{Archives}}\n==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #7');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #7');
 		assert([parsed.toString(), wikitext.replace('{{Archives}}', template_wikitext_to_insert + '\n' + '{{Archives}}')], 'parsed.insert_layout_element() #8');
 
 		template_wikitext_to_insert = '{{Authority control}}';
 
 		wikitext = '==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #9');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #9');
 		assert([parsed.toString(), wikitext + '\n' + template_wikitext_to_insert + '\n'], 'parsed.insert_layout_element() #10');
 
 		wikitext = '==s==\nttt\n{{DEFAULTSORT:A}}'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #11');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #11');
 		assert([parsed.toString(), wikitext.replace('{{DEFAULTSORT:A}}', template_wikitext_to_insert + '\n' + '{{DEFAULTSORT:A}}')], 'parsed.insert_layout_element() #12');
 
 		wikitext = '==s==\nttt\n[[Category:A]]'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #13');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #13');
 		assert([parsed.toString(), wikitext.replace('[[Category:A]]', template_wikitext_to_insert + '\n' + '[[Category:A]]')], 'parsed.insert_layout_element() #14');
 
 		wikitext = '==s==\nttt\n{{Sci-org-stub}}'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #15');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #15');
 		assert([parsed.toString(), wikitext.replace('{{Sci-org-stub}}', template_wikitext_to_insert + '\n' + '{{Sci-org-stub}}')], 'parsed.insert_layout_element() #16');
 
 		wikitext = '==See also==\n{{reflist}}\n{{Sci-org-stub}}'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([parsed.insert_layout_element(template_wikitext_to_insert), true], 'parsed.insert_layout_element() #17');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #17');
 		assert([parsed.toString(), wikitext.replace('{{Sci-org-stub}}', template_wikitext_to_insert + '\n' + '{{Sci-org-stub}}')], 'parsed.insert_layout_element() #18');
+
+		wikitext = '==See also==\n{{Authority control}}\n'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([false, !!parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #19');
+		assert([parsed.toString(), wikitext], 'parsed.insert_layout_element() #20');
+
+		var template_to_insert = CeL.wiki.parse('{{Authority control|a=1}}');
+		wikitext = '==See also==\n{{Authority control}}\n'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([true, !!parsed.insert_layout_element(template_to_insert)], 'parsed.insert_layout_element() #21');
+		assert([parsed.toString(), wikitext.replace('{{Authority control}}', template_to_insert)], 'parsed.insert_layout_element() #22');
+
+		template_to_insert = CeL.wiki.parse('{{Authority control|a=1}}');
+		wikitext = '==See also==\n{{Authority control}}\n{{Authority_control|b=3}}\n'; parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([true, !!parsed.insert_layout_element(template_to_insert)], 'parsed.insert_layout_element() #23');
+		assert([parsed.toString(), wikitext.replace('{{Authority control}}', template_to_insert)], 'parsed.insert_layout_element() #24');
+
+		parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([true, !!parsed.insert_layout_element(template_to_insert, { remove_duplicated: true })], 'parsed.insert_layout_element() #25');
+		assert([parsed.toString(), '==See also==\n{{Authority control|a=1|b=3}}\n'], 'parsed.insert_layout_element() #26');
+
+		parsed = CeL.wiki.parser(wikitext).parse('');
+		assert([true, !!parsed.insert_layout_element(template_to_insert, {
+			remove_duplicated: true,
+			main_template_processor: function (template_token) {
+				CeL.wiki.parse.replace_parameter(template_token, CeL.wiki.parse.replace_parameter.KEY_template_name, ' ' + template_token.name.replace(/\s/g, '_') + '  ');
+			}
+		})], 'parsed.insert_layout_element() #27');
+		assert([parsed.toString(), '==See also==\n{{ Authority_control  |a=1|b=3}}\n'], 'parsed.insert_layout_element() #28');
 
 
 		// recover
@@ -5162,6 +5197,20 @@ function test_wiki() {
 
 
 		var zhwiki = new CeL.wiki(null, null, 'zh');
+
+		zhwiki.run(function () {
+			zhwiki.register_redirects(['template:Authority control', '模板:規範控製'], function test_register_redirects() {
+				var test_name = 'wiki: register_redirects';
+				_setup_test(test_name);
+
+				//console.trace(zhwiki.redirects_variants_patterns, zhwiki.has_languagevariants);
+				assert(zhwiki.is_template('權威控制', '规范控制'), 'zhwiki.is_template() #1');
+				assert(zhwiki.is_template('模板:規范控制', '規范控製'), 'zhwiki.is_template() #2');
+
+				_finish_test(test_name);
+			});
+		});
+
 		zhwiki.run(function test_template_functions() {
 			var test_name = 'wiki: template_functions';
 			_setup_test(test_name);
