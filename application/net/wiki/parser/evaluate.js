@@ -38,10 +38,16 @@ function module_code(library_namespace) {
 
 	// requiring
 	var wiki_API = library_namespace.application.net.wiki, for_each_subelement = wiki_API.parser.parser_prototype.each;
-	// @inner
-	var PATTERN_invalid_page_name_characters = wiki_API.PATTERN_invalid_page_name_characters;
 
 	// --------------------------------------------------------------------------------------------
+
+	function is_invalid_page_title(page_title_string) {
+		// e.g., "{{#ifexist: A#C | exists | doesn't exist }}"
+		page_title_string = page_title_string.replace(/#.*$/, '').trim();
+		return !page_title_string
+				|| wiki_API.PATTERN_invalid_page_name_characters
+						.test(page_title_string);
+	}
 
 	// 演算/轉換 wikitext 中的所有 {{{parameter}}}。
 	function convert_parameter(wikitext, parameters, options) {
@@ -534,7 +540,7 @@ function module_code(library_namespace) {
 			}
 			var page_title = token.page_title.toString();
 			// @see PATTERN_page_name @ CeL.application.net.wiki.namespace
-			if (PATTERN_invalid_page_name_characters.test(page_title)) {
+			if (is_invalid_page_title(page_title)) {
 				library_namespace.warn('expand_transclusion: Cannot expand '
 						+ token);
 				// Error.stackTraceLimit = Infinity;
@@ -905,7 +911,9 @@ function module_code(library_namespace) {
 
 	// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 	function evaluate_parser_function_token(options) {
-		var token = this, allow_promise = options && options.allow_promise;
+		var session = wiki_API.session_of_options(options);
+		var token = this, allow_promise = session && options
+				&& options.allow_promise;
 
 		function NYI() {
 			// delete token.expand;
@@ -977,7 +985,6 @@ function module_code(library_namespace) {
 						return for_each_subelement.remove_token;
 					});
 					if (as_key) {
-						var session = wiki_API.session_of_options(options);
 						var extensiontag_hash = session
 								&& session.configurations.extensiontag_hash
 								|| wiki_API.wiki_extensiontags;
@@ -1034,7 +1041,6 @@ function module_code(library_namespace) {
 		function get_interface_message(message_id) {
 			if (!message_id || !(message_id = String(message_id).trim()))
 				return message_id;
-			var session = wiki_API.session_of_options(options);
 			if (!session.interface_messages)
 				session.interface_messages = new Map;
 			if (session.interface_messages.has(message_id))
@@ -1104,7 +1110,6 @@ function module_code(library_namespace) {
 		}
 
 		function fullurl(is_localurl) {
-			var session = wiki_API.session_of_options(options);
 			var query = get_parameter_String(2);
 			var url = encodeURI(get_parameter_String(1));
 			url = query ? (session ? session.latest_site_configurations.general.script
@@ -1319,49 +1324,77 @@ function module_code(library_namespace) {
 
 		case '#ifexist':
 			var page_title = get_parameter_String(1, true);
-			if (!library_namespace.is_thenable(page_title)
-					&& PATTERN_invalid_page_name_characters.test(page_title)
-					&& !library_namespace.is_thenable(get_parameter_String(3,
-							true))) {
+
+			var return_parameter = function return_parameter(NO) {
+				var parameter_value = get_parameter_String(NO, true);
 				// e.g., `a|b {{#ifexist: a{{!}}b | exists | doesn't exist }}`
-				// return get_parameter_String(3, true);
-				return token.parameters[3] || '';
-			}
-			if (!allow_promise) {
-				return NYI();
-			}
-			var session = wiki_API.session_of_options(options);
-			if (!session) {
-				return NYI();
-			}
-			return Promise.resolve(page_title).then(function(page_title) {
-				if (PATTERN_invalid_page_name_characters.test(page_title)) {
-					return token.parameters[3] || '';
+				if (!library_namespace.is_thenable(parameter_value)) {
+					return parameter_value;
 				}
+				if (!allow_promise) {
+					return NYI();
+				}
+				return Promise.resolve(parameter_value);
+			};
+
+			var ifexist_return_by_page_data = function ifexist_return_by_page_data(
+					page_data) {
+				return return_parameter(!page_data
+				//
+				|| ('missing' in page_data)
+				//
+				|| ('invalid' in page_data) ? 3 : 2);
+			};
+
+			var check_page_existence_via_net = function check_page_existence_via_net(
+					page_title) {
 				return new Promise(function(resolve, reject) {
 					// console.trace([ page_title, token.toString() ]);
 					session.page(page_title, function(page_data, error) {
 						if (error) {
-							return token.parameters[3] || '';
 							// console.trace(error);
 							reject(error);
-							return;
+							return return_parameter(3);
 						}
 
 						// console.trace(page_data);
 						if (!page_data) {
 							console.error(token.toString());
 						}
-						resolve(token.parameters[!page_data
-						//
-						|| ('missing' in page_data)
-						//
-						|| ('invalid' in page_data) ? 3 : 2] || '');
+
+						resolve(ifexist_return_by_page_data(page_data));
 					}, /* ifexist_page_options */{
 						prop : ''
 					});
 				});
-			});
+			};
+
+			if (library_namespace.is_thenable(page_title)) {
+				if (!allow_promise) {
+					return NYI();
+				}
+				return Promise.resolve(page_title).then(function(page_title) {
+					if (is_invalid_page_title(page_title))
+						return get_parameter_String(3, true);
+					return check_page_existence_via_net(page_title);
+				});
+			}
+
+			if (is_invalid_page_title(page_title)) {
+				return return_parameter(3);
+			}
+
+			if (session && session.last_page
+			//
+			&& session.last_page.title === session.normalize_title(page_title)) {
+				return ifexist_return_by_page_data(session.last_page);
+			}
+
+			if (!allow_promise) {
+				return NYI();
+			}
+
+			return check_page_existence_via_net(page_title);
 
 			// ----------------------------------------------------------------
 

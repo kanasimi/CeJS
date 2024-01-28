@@ -524,6 +524,14 @@ function module_code(library_namespace) {
 		parameter : function() {
 			return '{{{' + this.join('|') + '}}}';
 		},
+		// template_parameter
+		parameter_unit : function() {
+			// [ parameter_name, " = ", parameter_value
+			// , [optional tail spaces] ]
+			return this.join('');
+			// assert: this[1] && this[1].includes('=')
+			// assert: this.parent && this.parent.type === 'transclusion'
+		},
 		// e.g., template
 		transclusion : function() {
 			return '{{' + this.join('|') + '}}';
@@ -920,6 +928,34 @@ function module_code(library_namespace) {
 		if (token.type === 'plain' && !has_no_string)
 			return _token.join('');
 		return set_wiki_type(_token, token.type);
+	}
+
+	function flat_plain_element(token, options) {
+		var element_list = set_wiki_type([], 'plain');
+
+		function add_subtoken(plain_token) {
+			plain_token.forEach(function(subtoken) {
+				if (subtoken.type === 'plain') {
+					add_subtoken(subtoken);
+
+				} else if (subtoken.type === 'tag_single'
+				// e.g., "</s>" only
+				&& subtoken.slash
+				// split new line
+				|| typeof subtoken === 'string' && !subtoken.startsWith('\n')
+						&& typeof element_list.at(-1) === 'string'
+						&& !element_list.at(-1).endsWith('\n')) {
+					// Warning: may need re-parse!
+					element_list[element_list.length - 1] += subtoken;
+				} else {
+					element_list.push(subtoken);
+				}
+			});
+		}
+
+		add_subtoken(token.type === 'plain' ? token : [ token ]);
+
+		return element_list
 	}
 
 	/**
@@ -2018,6 +2054,7 @@ function module_code(library_namespace) {
 			var parameter_serial = 1;
 			parameters = parameters.map(function(token, _index) {
 				// trimEnd() of value, will push spaces in token[3].
+				// tail blanks
 				var tail_spaces = token.match(/[\s\n]*$/)[0];
 				if (tail_spaces) {
 					token = token.slice(0, -tail_spaces.length);
@@ -2069,6 +2106,15 @@ function module_code(library_namespace) {
 					// e.g., "{{#time:n月j日|2020-09-15|{{PAGELANGUAGE}}}}"
 					token = _set_wiki_type([ token ], 'plain');
 				}
+				token = flat_plain_element(token);
+				token.forEach(function(subtoken, index) {
+					if (typeof subtoken !== 'string')
+						return;
+					subtoken = parse_wikitext(subtoken, Object.assign({
+						inside_transclusion : true
+					}, options), queue);
+					token[index] = subtoken;
+				});
 
 				// assert: Array.isArray(token) && token.type === 'plain'
 
@@ -2088,18 +2134,18 @@ function module_code(library_namespace) {
 				});
 
 				if (matched === undefined) {
-					if (token.length === 1) {
-						// assert: {String}token[0]
-						// console.trace(token);
-						token.unshift('', '');
-					} else {
-						// assert: token.length > 1
-						token = _set_wiki_type([ '', '', token ], 'plain');
-					}
-					// assert: token === [ '', '', value ]
+					// numbered parameter, positional parameter
 					if (tail_spaces) {
 						token.push(tail_spaces);
+					} else if (token.length === 1) {
+						// assert: {String}token[0]
+						// console.trace(token);
+						token = token[0];
 					}
+					token = _set_wiki_type([ '', '', token ],
+					//
+					'parameter_unit');
+					// assert: token === [ '', '', value ].type='parameter_unit'
 
 					var value = token[2];
 					if (Array.isArray(value) && value.some(function(t) {
@@ -2149,6 +2195,7 @@ function module_code(library_namespace) {
 					return token;
 				}
 
+				// named parameter
 				// extract parameter name
 				// https://www.mediawiki.org/wiki/Help:Templates#Named_parameters
 				// assert: parameter name should these characters
@@ -2163,7 +2210,7 @@ function module_code(library_namespace) {
 				matched = token.splice(0, matched + 1);
 				token = _set_wiki_type([ matched,
 				//
-				matched.pop(), token ], 'plain'/* 'template_parameter' */);
+				matched.pop(), token ], 'parameter_unit');
 
 				// matched: [ key, value ]
 				// matched = token[1].match(/^([^=]*)=([\s\S]*)$/);
@@ -2264,25 +2311,44 @@ function module_code(library_namespace) {
 
 				// console.trace(parameters[0]);
 				if (typeof parameters[0] === 'string') {
-					parameters.name = parameters[0];
+					parameters.name = matched = parameters[0];
 				} else {
 					// assert: Array.isArray(parameters[0]) &&
 					// (parameters[0].type === 'page_title'
 					// || parameters[0].type = 'plain')
-					parameters.name = parameters[0].filter(function(t) {
+
+					parameters.name = (parameters[0].type === 'plain' ? parameters[0]
+							: [ parameters[0] ]).filter(function(t) {
 						return t.type !== 'comment';
-					}).join('')
+					});
+
+					matched = parameters.name.filter(function(t) {
+						return typeof t === 'string';
+					}).join('');
+
+					parameters.name = parameters.name.join('')
 					// e.g., '{{t|{{p\n<!-- -->}}}}'
 					.trim();
 				}
 				// console.trace(parameters.name);
+				parameters.name = parameters.name
+				// e.g., "{{_}}"
+				.replace(/[_\s]+/, ' ')
 				// 後面不允許空白。 must / *DEFAULTSORT:/
-				parameters.name = parameters.name.trimStart();
-				if (!parameters.name) {
+				.trimStart();
+				if (!parameters.name
+				// e.g., '{{text| {{ {{_}} }} }}'
+				|| matched.includes('{{')) {
 					// e.g., '{{ |t}}'
 					// e.g., '{{ <!----> |t}}'
-					return all;
+					if (!previous)
+						return all;
+					queue.push(all.slice(previous.length));
+					return previous + include_mark + (queue.length - 1)
+							+ end_mark;
 				}
+
+				matched = undefined;
 
 				// whitespace between the opening braces and the "subst:"
 				// [^...]: incase `{{ {{UCFIRST:T}} | tl }}`
@@ -2344,6 +2410,23 @@ function module_code(library_namespace) {
 					// assert: !!matched === true
 
 				} else {
+					if ((parameters[0].type === 'plain' ? parameters[0]
+							: [ parameters[0] ]).some(function(t) {
+						return t.type in {
+							tag : true,
+							tag_single : true,
+							link : true
+						};
+					})) {
+						// parameters.has_invalid_type
+						// e.g., '{{[[t]]}}'
+						if (!previous)
+							return all;
+						queue.push(all.slice(previous.length));
+						return previous + include_mark + (queue.length - 1)
+								+ end_mark;
+					}
+
 					// 假如 parameter name 有特殊的 token 就不該視為 template。
 					// 警告: 這個方法可能將非模板當成模板。
 					if (PATTERN_invalid_page_name_characters.test((Array
@@ -3579,7 +3662,7 @@ function module_code(library_namespace) {
 
 		// 有些需要反覆解析。
 		// e.g., '{{{t|{{u}}}}}', '{{{q|{{w|{{{t|{{u}}}}}}}}}}'
-		while (true) {
+		while (!options.inside_transclusion) {
 			var original_wikitext = wikitext;
 
 			// {{{...}}} 需在 {{...}} 之前解析。

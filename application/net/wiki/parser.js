@@ -822,10 +822,11 @@ function module_code(library_namespace) {
 			// console.trace([ 'finish_up()', promise ]);
 			promise = promise.then(check_ref_list_to_remove).then(
 					overall_resolve, overall_reject);
-			if (false)
+			if (false) {
 				promise.then(function() {
 					console.trace([ '** finish_up()', promise ]);
 				});
+			}
 		}
 
 		if (options.use_global_index) {
@@ -1699,8 +1700,11 @@ function module_code(library_namespace) {
 			if (!token)
 				continue;
 
-			if (token.type === 'comment') {
-				// Skip comments
+			if (token.type in {
+				hr : true,
+				comment : true
+			}) {
+				// Skip comments, etc.
 				continue;
 			}
 
@@ -1912,6 +1916,10 @@ function module_code(library_namespace) {
 			return;
 
 		var session = wiki_API.session_of_options(options);
+		if (false && !session) {
+			library_namespace.warn('get_location_of_template_element: '
+					+ 'No session specified!');
+		}
 		var template_order_of_layout = get_template_order_of_layout(session);
 		// console.trace(template_order_of_layout);
 		if (!template_order_of_layout)
@@ -2041,7 +2049,6 @@ function module_code(library_namespace) {
 	 * @see wikibot/routine/20200122.update_vital_articles.js
 	 */
 	// insert_navigate_template
-	// 注意: 這個操作之後再改變 token 可能無效! 通常插入後需要重新 parse!
 	// TODO: resort token
 	function insert_layout_element(token, options) {
 		/**
@@ -2054,12 +2061,14 @@ function module_code(library_namespace) {
 			options = Object.create(null);
 			// options.location = location;
 		} else {
-			options = library_namespace.setup_options(options);
+			options = library_namespace.new_options(options);
 			location = options.location;
 		}
 
 		var parsed = this;
 		var session = wiki_API.session_of_options(parsed || options);
+		if (session)
+			wiki_API.add_session_to_options(session, options);
 
 		// Guess location
 		if (!location) {
@@ -2127,8 +2136,9 @@ function module_code(library_namespace) {
 				}
 			} else {
 				library_namespace.error('insert_layout_element: '
-						+ 'default_layout_order 未包含 ' + location + ' (' + token
-						+ ')');
+						+ wiki_API.site_name(session)
+						+ ' 之 default_layout_order 未包含 ' + location + ' ('
+						+ token + ')');
 			}
 			// console.trace(parsed_index);
 			if (!(parsed_index >= 0)) {
@@ -2170,26 +2180,34 @@ function module_code(library_namespace) {
 		}
 		if (insert_after_templates) {
 			// console.trace(!!session, location, parsed_index, parsed.length);
+			// 讓 parsed_index 排在所有應該排在前面的模板之後。
 			for (var _index = parsed_index; _index < parsed.length; _index++) {
-				if (!parsed[_index]
-				// 這些 layout templates 通常是根節點且不會跨越章節。
-				|| parsed[_index].type === 'section_title') {
+				var template_to_test = parsed[_index];
+				if (!template_to_test)
+					continue;
+				// 搜尋整個 lead section。這些 layout templates 通常是根節點且不會跨越章節。
+				if (template_to_test.type === 'section_title') {
+					// console.trace( template_to_test.toString() );
 					break;
 				}
-				if (false && parsed[_index].type === 'transclusion') {
+				if (false && template_to_test.type === 'transclusion') {
 					console.trace((session || wiki_API).is_template(
-							insert_after_templates, parsed[_index]),
-							parsed[_index], options);
+							insert_after_templates, template_to_test),
+							template_to_test, options);
 				}
-				if (parsed[_index].type === 'transclusion'
-						&& (session || wiki_API)
-								.is_template(insert_after_templates,
-										parsed[_index], options)) {
+				if (template_to_test.type === 'transclusion'
+						&& (session || wiki_API).is_template(
+								insert_after_templates, template_to_test,
+								options)) {
+					// console.trace([ template_to_test.toString() ]);
 					parsed_index = _index + 1;
 				}
 				// console.trace(parsed_index);
 			}
-			// console.trace([ parsed_index, parsed[parsed_index] ]);
+			if (false) {
+				console.trace([ parsed_index,
+						parsed.slice(parsed_index - 1, parsed_index + 1) ]);
+			}
 		}
 
 		// ----------------------------
@@ -2348,13 +2366,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 
-		if (token.type === 'transclusion'
-				&& (session || wiki_API).is_namespace(parsed.page, 'template')) {
-			// layout element 如刪除模板，通常不該被 include。
-			token = '<noinclude>' + token + '</noinclude>';
-		}
-
-		if (options.fine_tuning_layout) {
+		if (false && options.fine_tuning_layout) {
 			// 插入前最後替換。
 			token = options.fine_tuning_layout(token, parsed_index, parsed);
 			if (!token) {
@@ -2365,14 +2377,31 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (!/^\n/.test(token)) {
+		// 準備將 insert_token 插入到 parsed[parsed_index]。
+
+		var insert_token;
+
+		// 採用 .type === 'plain' 使之後再改變 token 亦可反映變化。
+		if (token.type === 'transclusion'
+				&& (session || wiki_API).is_namespace(parsed.page, 'template')) {
+			// layout element 如刪除模板，通常不該被 include。
+			insert_token = wiki_API.parse('<noinclude></noinclude>');
+			// assert: insert_token[1][0] === ''
+			insert_token[1][0] = token;
+			insert_token = wiki_API.parse.set_wiki_type([ insert_token ],
+					'plain');
+		} else {
+			insert_token = wiki_API.parse.set_wiki_type(token, 'plain');
+		}
+
+		if (!/^\n/.test(insert_token)) {
 			// 檢查前一個有東西的 token 是否以 "\n" 作結。
 			for (var index = parsed_index; index > 0;) {
 				var previous_token = parsed[--index];
 				if (previous_token) {
 					if (!/\n$/.test(previous_token)) {
 						// layout_token 應該都獨立成行，因此加個換行前綴。
-						token = '\n' + token;
+						insert_token.unshift('\n');
 					}
 					break;
 				}
@@ -2384,14 +2413,16 @@ function module_code(library_namespace) {
 		&& parsed[parsed_index]) {
 			// insert before the original token,
 			// instead of replace the original token.
-			if (!/\n$/.test(token) && !/^\n/.test(parsed[parsed_index]))
-				token += '\n';
-			token += parsed[parsed_index];
-		} else if (!/\n$/.test(token) && !/^\n/.test(parsed[parsed_index + 1])) {
-			token += '\n';
+			if (!/\n$/.test(insert_token) && !/^\n/.test(parsed[parsed_index]))
+				insert_token.push('\n');
+			insert_token.push(parsed[parsed_index]);
+		} else if (!/\n$/.test(insert_token)
+				&& !/^\n/.test(parsed[parsed_index + 1])) {
+			insert_token.push('\n');
 		}
 
-		parsed[parsed_index] = token;
+		// insert_token.inserted = true;
+		parsed[parsed_index] = insert_token;
 
 		// return changed
 		return true;

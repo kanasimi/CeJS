@@ -3644,9 +3644,8 @@ function test_wiki() {
 		// CeL.wiki.parser('[[Category:a]]').each('category', function(token) {console.log(token);});0;
 		wikitext = '{{ {{tl|t}} | p }}'; parsed = CeL.wiki.parse(wikitext);
 		assert(['transclusion', parsed.type], 'template in template name #1-1');
-		assert([' p', parsed[1][2]], 'template in template name #1-2');
-		assert([' ', parsed[1][3]], 'template in template name #1-3');
-		assert(['p', parsed.parameters[1]], 'template in template name #1-4');
+		assert([' p ', parsed[1][2].toString()], 'template in template name #1-2');
+		assert([' p ', parsed.parameters[1].toString()], 'template in template name #1-3');
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{今日}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert(['transclusion', parsed.type], 'template in template name #2-1');
 		assert(['transclusion', parsed[0][1].type], 'template in template name #2-2');
@@ -3818,6 +3817,69 @@ function test_wiki() {
 		wikitext = '{{\n <!-- --> t\nn \n<!-- -->}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #33');
 		assert(['plain', parsed.type], 'wiki.parse.transclusion #33-1');
+		// https://github.com/5j9/wikitextparser/blob/master/tests/test_spans.py
+		wikitext = '{{_}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #34');
+		assert([wikitext, parsed], 'wiki.parse.transclusion #34-1');
+		wikitext = '{{_|text}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #35');
+		assert([wikitext, parsed], 'wiki.parse.transclusion #35-1');
+		wikitext = '{{text| {{_}} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #36');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #36-1');
+		assert([' {{_}} ', parsed[1].toString()], 'wiki.parse.transclusion #36-2');
+		wikitext = '{{text| {{_|t}} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #37');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #37-1');
+		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #37-2');
+		assert([' {{_|t}} ', parsed[1].toString()], 'wiki.parse.transclusion #37-3');
+		wikitext = '{{ {{_|text}} | a }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #38');
+		assert(['plain', parsed.type], 'wiki.parse.transclusion #38-1');
+		wikitext = '{{text| {{ {{_}} }}  }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #39');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #39-1');
+		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #39-2');
+		var count = 0;
+		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'template', function (token) { count++; });
+		assert([0, count], 'wiki.parse.transclusion #39-3');
+
+		wikitext = '{{text| {{ {{<s> }} }} </s> }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #40');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #40-1');
+		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #40-2');
+		var matched = undefined;
+		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'tag', function (token) { matched = token; });
+		assert(['<s> }} }} </s>', matched && matched.toString()], 'wiki.parse.transclusion #40-3');
+
+		// TODO:
+		// "{{text| {{ {{<s title="{{s}}"> }} }} </s> }}"
+		// "{{text| {{ {{<s>}} </s> }}"
+		wikitext = '{{text| {{ {{<s>}} }}</s> }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #40');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #40-1');
+		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #40-2');
+		var matched = undefined;
+		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'tag', function (token) { matched = token; });
+		assert(['<s>}} }}</s>', matched && matched.toString()], 'wiki.parse.transclusion #40-3');
+
+		wikitext = '{{a{{_|text}} | a }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #43');
+		assert(['plain', parsed.type], 'wiki.parse.transclusion #43-1');
+		var count = 0;
+		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'transclusion', function (token) { count++; });
+		assert([0, count], 'wiki.parse.transclusion #43-2');
+
+		wikitext = '{{[[t]]}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #44');
+		assert(['plain', parsed.type], 'wiki.parse.transclusion #44-1');
+		assert(['link', parsed[1].type], 'wiki.parse.transclusion #44-2');
+
+		wikitext = '{{<s>t</s>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #45');
+		assert(['plain', parsed.type], 'wiki.parse.transclusion #45-1');
+		assert(['tag', parsed[1].type], 'wiki.parse.transclusion #45-2');
+
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -4979,69 +5041,74 @@ function test_wiki() {
 
 		// from [[w:en:Talk:Change ringing]]
 		wikitext = '\n{{Article history|action1=PR}}\n{{WikiProject Percussion |class=C |importance=Mid}}\n'; parsed = CeL.wiki.parser(wikitext).parse();
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #1');
-		assert([parsed.toString(), wikitext.replace('{{WikiProject', template_wikitext_to_insert + '\n{{WikiProject')], 'parsed.insert_layout_element() #2');
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #1-1');
+		assert([parsed.toString(), wikitext.replace('{{WikiProject', template_wikitext_to_insert + '\n{{WikiProject')], 'parsed.insert_layout_element() #1-2');
 
-		wikitext = 'text\n==s==\nttt\n{{tlx|t}}\noo'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #3');
-		assert([parsed.toString(), template_wikitext_to_insert + '\n' + wikitext], 'parsed.insert_layout_element() #4');
+		wikitext = 'text\n==s==\nttt\n{{tlx|t}}\noo'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #1-3');
+		assert([parsed.toString(), template_wikitext_to_insert + '\n' + wikitext], 'parsed.insert_layout_element() #1-4');
 
-		wikitext = '==s==\nttt\n{{tlx|t}}\noo'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #5');
-		assert([parsed.toString(), template_wikitext_to_insert + '\n' + wikitext], 'parsed.insert_layout_element() #6');
+		wikitext = '==s==\nttt\n{{tlx|t}}\noo'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #1-5');
+		assert([parsed.toString(), template_wikitext_to_insert + '\n' + wikitext], 'parsed.insert_layout_element() #1-6');
 
-		wikitext = '{{Notice|text}}\n{{Archives}}\n==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #7');
-		assert([parsed.toString(), wikitext.replace('{{Archives}}', template_wikitext_to_insert + '\n' + '{{Archives}}')], 'parsed.insert_layout_element() #8');
+		wikitext = '{{Notice|text}}\n{{Archives}}\n==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #1-7');
+		assert([parsed.toString(), wikitext.replace('{{Archives}}', template_wikitext_to_insert + '\n' + '{{Archives}}')], 'parsed.insert_layout_element() #1-8');
+
+		wikitext = '{{text|}}{{DYK talk}}\n{{Archives}}\n==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #1-9');
+		assert([parsed.toString(), wikitext.replace('{{Archives}}', template_wikitext_to_insert + '\n' + '{{Archives}}')], 'parsed.insert_layout_element() #1-10');
+
 
 		template_wikitext_to_insert = '{{Authority control}}';
 
-		wikitext = '==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #9');
-		assert([parsed.toString(), wikitext + '\n' + template_wikitext_to_insert + '\n'], 'parsed.insert_layout_element() #10');
+		wikitext = '==s==\nttt'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #2-1');
+		assert([parsed.toString(), wikitext + '\n' + template_wikitext_to_insert + '\n'], 'parsed.insert_layout_element() #2-2');
 
-		wikitext = '==s==\nttt\n{{DEFAULTSORT:A}}'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #11');
-		assert([parsed.toString(), wikitext.replace('{{DEFAULTSORT:A}}', template_wikitext_to_insert + '\n' + '{{DEFAULTSORT:A}}')], 'parsed.insert_layout_element() #12');
+		wikitext = '==s==\nttt\n{{DEFAULTSORT:A}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #2-3');
+		assert([parsed.toString(), wikitext.replace('{{DEFAULTSORT:A}}', template_wikitext_to_insert + '\n' + '{{DEFAULTSORT:A}}')], 'parsed.insert_layout_element() #2-4');
 
-		wikitext = '==s==\nttt\n[[Category:A]]'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #13');
-		assert([parsed.toString(), wikitext.replace('[[Category:A]]', template_wikitext_to_insert + '\n' + '[[Category:A]]')], 'parsed.insert_layout_element() #14');
+		wikitext = '==s==\nttt\n[[Category:A]]'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #2-5');
+		assert([parsed.toString(), wikitext.replace('[[Category:A]]', template_wikitext_to_insert + '\n' + '[[Category:A]]')], 'parsed.insert_layout_element() #2-6');
 
-		wikitext = '==s==\nttt\n{{Sci-org-stub}}'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #15');
-		assert([parsed.toString(), wikitext.replace('{{Sci-org-stub}}', template_wikitext_to_insert + '\n' + '{{Sci-org-stub}}')], 'parsed.insert_layout_element() #16');
+		wikitext = '==s==\nttt\n{{Sci-org-stub}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #2-7');
+		assert([parsed.toString(), wikitext.replace('{{Sci-org-stub}}', template_wikitext_to_insert + '\n' + '{{Sci-org-stub}}')], 'parsed.insert_layout_element() #2-8');
 
-		wikitext = '==See also==\n{{reflist}}\n{{Sci-org-stub}}'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #17');
-		assert([parsed.toString(), wikitext.replace('{{Sci-org-stub}}', template_wikitext_to_insert + '\n' + '{{Sci-org-stub}}')], 'parsed.insert_layout_element() #18');
+		wikitext = '==See also==\n{{reflist}}\n{{Sci-org-stub}}'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #2-9');
+		assert([parsed.toString(), wikitext.replace('{{Sci-org-stub}}', template_wikitext_to_insert + '\n' + '{{Sci-org-stub}}')], 'parsed.insert_layout_element() #2-10');
 
-		wikitext = '==See also==\n{{Authority control}}\n'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([false, !!parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #19');
-		assert([parsed.toString(), wikitext], 'parsed.insert_layout_element() #20');
+		wikitext = '==See also==\n{{Authority control}}\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([false, !!parsed.insert_layout_element(template_wikitext_to_insert)], 'parsed.insert_layout_element() #2-11');
+		assert([parsed.toString(), wikitext], 'parsed.insert_layout_element() #2-12');
 
 		var template_to_insert = CeL.wiki.parse('{{Authority control|a=1}}');
-		wikitext = '==See also==\n{{Authority control}}\n'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, !!parsed.insert_layout_element(template_to_insert)], 'parsed.insert_layout_element() #21');
-		assert([parsed.toString(), wikitext.replace('{{Authority control}}', template_to_insert)], 'parsed.insert_layout_element() #22');
+		wikitext = '==See also==\n{{Authority control}}\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, !!parsed.insert_layout_element(template_to_insert)], 'parsed.insert_layout_element() #2-13');
+		assert([parsed.toString(), wikitext.replace('{{Authority control}}', template_to_insert)], 'parsed.insert_layout_element() #2-14');
 
 		template_to_insert = CeL.wiki.parse('{{Authority control|a=1}}');
-		wikitext = '==See also==\n{{Authority control}}\n{{Authority_control|b=3}}\n'; parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, !!parsed.insert_layout_element(template_to_insert)], 'parsed.insert_layout_element() #23');
-		assert([parsed.toString(), wikitext.replace('{{Authority control}}', template_to_insert)], 'parsed.insert_layout_element() #24');
+		wikitext = '==See also==\n{{Authority control}}\n{{Authority_control|b=3}}\n'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, !!parsed.insert_layout_element(template_to_insert)], 'parsed.insert_layout_element() #2-15');
+		assert([parsed.toString(), wikitext.replace('{{Authority control}}', template_to_insert)], 'parsed.insert_layout_element() #2-16');
 
-		parsed = CeL.wiki.parser(wikitext).parse('');
-		assert([true, !!parsed.insert_layout_element(template_to_insert, { remove_duplicated: true })], 'parsed.insert_layout_element() #25');
-		assert([parsed.toString(), '==See also==\n{{Authority control|a=1|b=3}}\n'], 'parsed.insert_layout_element() #26');
+		parsed = CeL.wiki.parser(wikitext).parse();
+		assert([true, !!parsed.insert_layout_element(template_to_insert, { remove_duplicated: true })], 'parsed.insert_layout_element() #2-17');
+		assert([parsed.toString(), '==See also==\n{{Authority control|a=1|b=3}}\n'], 'parsed.insert_layout_element() #2-18');
 
-		parsed = CeL.wiki.parser(wikitext).parse('');
+		parsed = CeL.wiki.parser(wikitext).parse();
 		assert([true, !!parsed.insert_layout_element(template_to_insert, {
 			remove_duplicated: true,
 			main_template_processor: function (template_token) {
 				CeL.wiki.parse.replace_parameter(template_token, CeL.wiki.parse.replace_parameter.KEY_template_name, ' ' + template_token.name.replace(/\s/g, '_') + '  ');
 			}
-		})], 'parsed.insert_layout_element() #27');
-		assert([parsed.toString(), '==See also==\n{{ Authority_control  |a=1|b=3}}\n'], 'parsed.insert_layout_element() #28');
+		})], 'parsed.insert_layout_element() #2-19');
+		assert([parsed.toString(), '==See also==\n{{ Authority_control  |a=1|b=3}}\n'], 'parsed.insert_layout_element() #2-20');
 
 
 		// recover
@@ -5292,7 +5359,7 @@ function test_wiki() {
 			promise = promise.then(function () {
 				return CeL.wiki.expand_transclusion("ABC {{#ifexist: ABC | exists | doesn't exist }}, __NOT_EXIST_PAGE {{#ifexist: __NOT_EXIST_PAGE | exists | doesn't exist }}, A#C {{#ifexist: A#C | exists | doesn't exist }}, A[C {{#ifexist: A[C | exists | doesn't exist }}, a{|b {{#ifexist: a{{{!}}b | exists | doesn't exist }}", options);
 			}).then(function (parsed) {
-				assert(["ABC exists, __NOT_EXIST_PAGE doesn't exist, A#C doesn't exist, A[C doesn't exist, a{|b doesn't exist", parsed.toString()], 'CeL.wiki.expand_transclusion() {{#ifexist:}}');
+				assert(["ABC exists, __NOT_EXIST_PAGE doesn't exist, A#C exists, A[C doesn't exist, a{|b doesn't exist", parsed.toString()], 'CeL.wiki.expand_transclusion(zhwiki) {{#ifexist:}}');
 			});
 
 			promise = promise.then(function () {
