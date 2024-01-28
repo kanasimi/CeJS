@@ -310,9 +310,16 @@ function module_code(library_namespace) {
 			return '';
 		}
 
-		if (token.type === 'bold' || token.type === 'italic') {
+		if (token.type in {
+			italic : true,
+			bold : true
+		}) {
 			// 去除粗體與斜體。
 			token.original_type = token.type;
+			// assert: token.length === 2 || token.length === 3
+			if (token[2])
+				token.end_mark = token.pop();
+			token.start_mark = token.shift();
 			token.type = 'plain';
 			token.toString = wiki_API.parse.wiki_element_toString[token.type];
 			return token;
@@ -615,6 +622,11 @@ function module_code(library_namespace) {
 				if (token.type === 'tag') {
 					// 容許一些特定標籤能夠顯示格式: 會到這裡的應該都是一些被允許顯示格式的特定標籤。
 					token.unshift(token.tag_attributes);
+				} else {
+					if (token.start_mark)
+						token.unshift(token.start_mark);
+					if (token.end_mark)
+						token.push(token.end_mark);
 				}
 			} else if (token.type === 'tag' || token.type === 'tag_single') {
 				parent[index] = token.toString().replace(/</g, '&lt;').replace(

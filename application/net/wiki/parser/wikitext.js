@@ -343,7 +343,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=protocols&utf8&format=json
 	 */
-	var PATTERN_external_link_global = /\[((?:https?:|ftps?:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:([^\S\r\n]+)([^\]]*))?\]/ig,
+	var PATTERN_external_link_global = /\[((?:(?:https?:|ftps?:)?\/\/|mailto:[^:@]+@)[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:([^\S\r\n]+)([^\]]*))?\]/ig,
 
 	// 若包含 br|hr| 會導致 "aa<br>\nbb</br>\ncc" 解析錯誤！
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
@@ -685,11 +685,15 @@ function module_code(library_namespace) {
 		},
 		// italic type
 		italic : function() {
-			return "''" + this.join('') + (this.no_end ? '' : "''");
+			// assert: this.length === 3 || this.length === 2
+			// [ start_mark(''), content, end_mark('') ]
+			return this.join('');
 		},
 		// emphasis
 		bold : function() {
-			return "'''" + this.join('') + (this.no_end ? '' : "'''");
+			// assert: this.length === 3 || this.length === 2
+			// [ start_mark('''), content, end_mark(''') ]
+			return this.join('');
 		},
 
 		// section title / section name
@@ -1543,12 +1547,22 @@ function module_code(library_namespace) {
 				anchor = parse_wikitext(anchor, options, queue);
 			}
 
+			if (!anchor) {
+				matched = wiki_API.normalize_title(page_name.toString(),
+						options);
+				if (!matched) {
+					// console.trace(page_name);
+					// e.g., [[_]]
+					return all_link;
+				}
+			}
+
 			// [ page_name, section_title / #anchor 網頁錨點, display_text ]
 			var parameters = [ page_name, anchor ];
 			if (false) {
 				// page_title, full_page_name, {{FULLPAGENAME}}:
 				// `{{NAMESPACE}}:{{PAGENAME}}`
-				parameters.page_name = wiki_API.normalize_title(page_name);
+				parameters.page_name = matched;
 			}
 
 			// assert: 'a'.match(/(b)?/)[1]===undefined
@@ -1800,11 +1814,12 @@ function module_code(library_namespace) {
 					if (file_matched) {
 						parameters.name
 						// set file name without "File:"
-						= wiki_API.normalize_title(file_matched[2]);
+						= wiki_API.normalize_title(file_matched[2], options);
 					} else if (category_matched) {
 						parameters.name
 						// set category name without "Category:"
-						= wiki_API.normalize_title(category_matched[1]);
+						= wiki_API
+								.normalize_title(category_matched[1], options);
 					}
 				} else {
 					parameters.is_link = true;
@@ -2311,34 +2326,28 @@ function module_code(library_namespace) {
 
 				// console.trace(parameters[0]);
 				if (typeof parameters[0] === 'string') {
-					parameters.name = matched = parameters[0];
 				} else {
 					// assert: Array.isArray(parameters[0]) &&
 					// (parameters[0].type === 'page_title'
 					// || parameters[0].type = 'plain')
-
-					parameters.name = (parameters[0].type === 'plain' ? parameters[0]
-							: [ parameters[0] ]).filter(function(t) {
-						return t.type !== 'comment';
-					});
-
-					matched = parameters.name.filter(function(t) {
-						return typeof t === 'string';
-					}).join('');
-
-					parameters.name = parameters.name.join('')
-					// e.g., '{{t|{{p\n<!-- -->}}}}'
-					.trim();
 				}
-				// console.trace(parameters.name);
-				parameters.name = parameters.name
+
+				// e.g., '{{t|{{p\n<!-- -->}}}}'
 				// e.g., "{{_}}"
-				.replace(/[_\s]+/, ' ')
-				// 後面不允許空白。 must / *DEFAULTSORT:/
-				.trimStart();
-				if (!parameters.name
+				parameters.name = wiki_API.normalize_title(parameters[0]
+						.toString(), Object.assign({
+					preserve_head_colon : true,
+					no_convert_interface_message : true
+				}, options));
+				// console.trace(parameters.name, parameters[0],
+				// parameters[0].toString());
+				if (!parameters.name.replace(/^:+/, '')
 				// e.g., '{{text| {{ {{_}} }} }}'
-				|| matched.includes('{{')) {
+				|| (parameters[0].type === 'plain' ? parameters[0]
+				//
+				: [ parameters[0] ]).filter(function(t) {
+					return typeof t === 'string';
+				}).join('').includes('{{')) {
 					// e.g., '{{ |t}}'
 					// e.g., '{{ <!----> |t}}'
 					if (!previous)
@@ -2347,8 +2356,6 @@ function module_code(library_namespace) {
 					return previous + include_mark + (queue.length - 1)
 							+ end_mark;
 				}
-
-				matched = undefined;
 
 				// whitespace between the opening braces and the "subst:"
 				// [^...]: incase `{{ {{UCFIRST:T}} | tl }}`
@@ -2456,28 +2463,32 @@ function module_code(library_namespace) {
 					}
 
 					// ------------------------------------
-					namespace = parameters.name.match(/^:(\s*:)?/);
-					if (namespace && namespace[1]) {
-						// e.g., {{::T}}
-						return all;
-					}
-					// 正規化 template name。
-					// 'ab/cd' → 'Ab/cd'
-					parameters.name = wiki_API.normalize_title(parameters.name,
-							options);
-					// console.log(parameters.name);
+					namespace = parameters.name.match(/^:([\s_]*:)?/);
+					if (namespace) {
+						if (namespace[1]) {
+							// e.g., {{::T}}
+							return all;
+						}
+						// 正規化 template name。
+						// ':ab/cd' → 'Ab/cd'
+						parameters.name = wiki_API.normalize_title(
+								parameters.name, options);
+						// parameters.page_title = parameters.name;
 
-					// parameters.name: template without "Template:" prefix.
-					// parameters.page_title (.page_name): page title with
-					// "Template:" prefix.
-
-					if (!namespace) {
+					} else {
 						namespace = wiki_API.namespace(parameters.name,
 						// {{:T}}嵌入[[T]]
 						Object.assign({
 							is_page_title : true
 						}, options));
 					}
+
+					// console.log(parameters.name);
+
+					// parameters.name: template without "Template:" prefix.
+					// parameters.page_title (.page_name): page title with
+					// "Template:" prefix.
+
 					// wiki_API.namespace.hash using lower case
 					if (namespace === wiki_API.namespace.hash.template) {
 						// e.g., {{Template:name|...}}
@@ -2493,6 +2504,8 @@ function module_code(library_namespace) {
 							// → "base page title/topic list"
 							parameters.page_title = options.target_array.page.title
 									+ parameters.name;
+						} else if (/^[\s_]*:/.test(parameters[0])) {
+							parameters.page_title = parameters.name;
 						} else {
 							parameters.page_title
 							// {{T}}嵌入[[Template:T]]
@@ -3185,8 +3198,9 @@ function module_code(library_namespace) {
 			return include_mark + (queue.length - 1) + end_mark;
 		}
 
-		function parse_apostrophe_type(all, apostrophes, parameters, ending) {
-			// console.log([ all, apostrophes, parameters, ending ]);
+		function parse_apostrophe_type(all, /* start_mark */apostrophes,
+				parameters, /* end_mark */ending) {
+			// console.trace([ all, apostrophes, parameters, ending ]);
 			var index = parameters.lastIndexOf(apostrophes), previous = '';
 			if (index !== NOT_FOUND) {
 				previous = apostrophes + parameters.slice(0, index);
@@ -3203,25 +3217,32 @@ function module_code(library_namespace) {
 				// e.g., "'''''''t'''''''"
 				return all;
 			}
+
 			if (apostrophes === "'''''") {
 				// e.g., "''''''t''''''"
-				parameters = _set_wiki_type(parameters, 'bold');
-				if (apostrophes !== ending)
-					parameters.no_end = true;
-				parameters = [ parameters ];
+				parameters = _set_wiki_type([ "'''", parameters ], 'bold');
+				if (apostrophes === ending) {
+					parameters.push("'''");
+					ending = "''";
+				} else {
+					// assert: ending === '' || ending === '\n'
+					// console.trace([ apostrophes, ending ]);
+				}
+				apostrophes = "''";
 				type = 'italic';
 			} else {
 				type = apostrophes === "''" ? 'italic' : 'bold';
 			}
-			parameters = _set_wiki_type(parameters, type);
+			parameters = _set_wiki_type([ apostrophes, parameters ], type);
 			var following;
 			if (apostrophes === ending) {
+				parameters.push(ending);
 				following = '';
 			} else {
 				following = ending;
 				// assert: ending === '' || ending === '\n'
-				parameters.no_end = true;
 			}
+
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark
 					+ following;
@@ -3653,6 +3674,7 @@ function module_code(library_namespace) {
 		// external link
 		// [http://... ...]
 		// TODO: [{{URL template}} ...]
+		// TODO: [<!-- --><!-- -->ht<!-- -->tp://... ...]
 		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
 				parse_external_link);
 
@@ -3836,16 +3858,47 @@ function module_code(library_namespace) {
 		// or use ((PATTERN_link))
 		PATTERN_wikilink_global, parse_wikilink);
 
+		// TODO:
+		// ''A'B''' → <i>A'B'</i>
+		// '''''''''' → '''''<i><b>
+		// ''''g''''''t → '<b>g'</b><i>t
+		// ''''g''''''t''' → ''<i>g'</i><b>t</b>
+
 		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
 		// ''~'' 不能跨行！
 		wikitext = wikitext.replace_till_stable(
-				/('''''|'''?)([^'\n].*?'*)(\1)/g, parse_apostrophe_type);
+		// PATTERN_apostrophe_with_tail
+		/('''''|'''?)([^'\n].*?'*)(\1)/g, parse_apostrophe_type);
 		// \n, $ 都會截斷 italic, bold
 		// <tag> 不會截斷 italic, bold
 		wikitext = wikitext.replace_till_stable(
-		// '\n': initialized_fix[1]
-		/('''''|'''?)([^'\n].*?)(\n|$)/g, parse_apostrophe_type);
+		// PATTERN_apostrophe_without_tail
+		// '\n': from initialized_fix[1]
+		/('''''|'''?)([^'\n].*?'*)(\n|$)/g, parse_apostrophe_type);
 		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
+
+		// TODO:
+		// "'<!---->''bold'<!---->'<!----><!---->'" → <b>bold</b>
+		// ''A'B''<!---->' → <i>A'B'</i>
+		if (false) {
+			var PATTERN_apostrophe = new RegExp(
+					/('(?:(?:include_mark\d+end_mark)*')+)(.*)('(?:(?:include_mark\d+end_mark)*')+|\n|$)/.source
+							.replace(/include_mark/g, include_mark).replace(
+									/end_mark/g, end_mark), 'g');
+			wikitext
+					.replace_till_stable(
+							PATTERN_apostrophe,
+							function new_parse_apostrophe_type(all, /* start_mark */
+							apostrophes, parameters, /* end_mark */ending) {
+								console.trace([ all, apostrophes, parameters,
+										ending ]);
+								// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+								apostrophes = parse_wikitext(apostrophes,
+										options, queue);
+								ending = parse_wikitext(ending, options, queue);
+								// TODO;
+							});
+		}
 
 		// ~~~, ~~~~, ~~~~~: 不應該出現
 

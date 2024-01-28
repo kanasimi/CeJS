@@ -889,7 +889,7 @@ function module_code(library_namespace) {
 		// assert: !content || typeof content === 'string'
 
 		if (typeof content === 'string') {
-			content = content.replace(/<!--[\s\S]*-->/g, '').replace(
+			content = content.replace(/<!--[\s\S]*?-->/g, '').replace(
 					/<nowiki\s*>[\s\S]*<\/nowiki>/g, '');
 		}
 		if (!content)

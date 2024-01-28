@@ -3494,6 +3494,9 @@ function test_wiki() {
 		wikitext = "[https://a.b <a>a</a><!-- -->]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #7');
 		assert(["<a>a</a>", parsed[2][0]], 'wiki.parse: external link #7-1');
+		wikitext = "[mailto:info@example.org?Subject=URL%20Encoded%20Subject&body=Body%20Textinfo]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #8');
+		assert(["external_link", parsed.type], 'wiki.parse: external link #8-1');
 
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #1');
@@ -3743,8 +3746,10 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #11');
 		assert(['Tl', parsed.page_title], 'wiki.parse.transclusion #11-1');
 		wikitext = '{{::tl|t}}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #12');
-		assert(['{{::tl|t}}', parsed], 'wiki.parse.transclusion #12-1');
+		assert([wikitext, parsed], 'wiki.parse.transclusion #12-1');
+		wikitext = '{{w:tl|t}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #12-2');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #12-2');
 		wikitext = '{{ {{UCFIRST:T}} | tl }}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #13');
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #13-1');
@@ -3951,13 +3956,28 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		wikitext = '[[T{{\n! \n}}t{{ ! }}l]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['t{{ ! }}l', parsed[0][2].toString()], 'wikilink: display_text');
+		assert(['t{{ ! }}l', parsed[0][2].toString()], 'wiki.parse: wikilink: display_text');
 		wikitext = '[[T{{ \n!\n }}t{{ \n!}}l]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['t{{ \n!}}l', parsed[0][2].toString()], 'wikilink: display_text');
+		assert(['t{{ \n!}}l', parsed[0][2].toString()], 'wiki.parse: wikilink: display_text');
 		wikitext = '[[a\ta]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
-		assert([wikitext, parsed], 'invalid wikilink: No \\t allowed. Using preview to check.');
+		assert([wikitext, parsed], 'wiki.parse: invalid wikilink: No \\t allowed. Using preview to check.');
+		wikitext = '[[|a]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert([wikitext, parsed], 'wiki.parse: invalid wikilink');
+		wikitext = '[[ |a]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert([wikitext, parsed], 'wiki.parse: invalid wikilink');
+		wikitext = '[[_|a]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert([wikitext, parsed], 'wiki.parse: invalid wikilink');
+		wikitext = '[[_]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert([wikitext, parsed], 'wiki.parse: invalid wikilink');
+		wikitext = '[[<!-- -->_|a]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['plain', parsed.type], 'wiki.parse: invalid wikilink');
 
 		wikitext = '--{{unsigned|user}}--'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -4017,16 +4037,19 @@ function test_wiki() {
 		wikitext = '== ==[[aa]]== ==\ntext\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert([' ==', parsed[0][0]]);
+		wikitext = "''A'B''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['italic', parsed[0].type], "'' italic's ''");
 		wikitext = "'''''Italic and bold formatting'''''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['italic', parsed[0].type], "'''''t''''' will render as <i><b>t</b></i>");
-		assert(['bold', parsed[0][0].type]);
+		assert(['bold', parsed[0][1].type]);
 		wikitext = "'''''''t'''''''"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(["''", parsed[0]]);
 		assert(['italic', parsed[1].type], "'''''''t''''''' will render as ''<i><b>t''</b></i>");
-		assert(['bold', parsed[1][0].type]);
-		assert(["t''", parsed[1][0][0]]);
+		assert(['bold', parsed[1][1].type]);
+		assert(["t''", parsed[1][1][1]]);
 		wikitext = "'''b"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: bold without ending #1');
 		assert(['bold', parsed.type], 'wiki.parse: bold without ending-1 #1');
@@ -4138,9 +4161,9 @@ function test_wiki() {
 		wikitext = "{|\n|<s>S||'''B</s>\n|}"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #14');
 		assert(['table', parsed.type], 'wiki.parse: HTML tag #14-1');
-		assert(['tag', parsed[0][0][0].type], 'wiki.parse: HTML tag #14-2');
-		assert(['bold', parsed[0][1][0].type], 'wiki.parse: HTML tag #14-3');
-		assert(['s', parsed[0][1][0][1].tag], 'wiki.parse: HTML tag #14-4: invalid end tag');
+		assert(['tag', parsed[0][0]/* ← table_cell */[0].type], 'wiki.parse: HTML tag #14-2');
+		assert(['bold', parsed[0][1]/* ← table_cell */[0].type], 'wiki.parse: HTML tag #14-3');
+		assert(['s', parsed[0][1]/* ← table_cell */[0][1][1].tag], 'wiki.parse: HTML tag #14-4: invalid end tag');
 		wikitext = "<s>S<s>_</s>T</s>"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag #15');
 		assert(['s', parsed.tag], 'wiki.parse: HTML tag #15-1');
@@ -4420,12 +4443,19 @@ function test_wiki() {
 		wikitext = '{{UC:A{}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #8');
 		assert(['magic_word_function', parsed.type], 'wiki.parse: {{invalid}} #8-1');
-		wikitext = "{{DISPLAYTITLE:List of ''Cars'' characters}}"; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #9');
-		assert(['magic_word_function', parsed.type], 'wiki.parse: {{invalid}} #9-1');
 		wikitext = '{{tl<nowiki />|t}}{{tl|t}}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #10');
-		assert(['transclusion', parsed.at(-1).type], 'wiki.parse: {{invalid}} #10-1');
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{invalid}} #9');
+		assert(['transclusion', parsed.at(-1).type], 'wiki.parse: {{invalid}} #9-1');
+
+		wikitext = "{{DISPLAYTITLE:List of ''Cars'' characters}}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{DISPLAYTITLE:}} #1');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: {{DISPLAYTITLE:}} #1-1');
+		wikitext = "{{int:dot-separator}}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{int:}} #1');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: {{int:}} #1-1');
+		wikitext = "{{<!-- -->in<!-- -->t:dot-separator}}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{int:}} #2');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: {{int:}} #2-1');
 
 		wikitext = '{{t|p=<gallery>\na.png|text\n</gallery>}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{t|<gallery>}} #1');
@@ -4461,7 +4491,9 @@ function test_wiki() {
 		assert(['A%20B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A%20B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #3');
 		assert(['A+B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A+B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #4');
 		assert(['A_b', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A [[_]] b}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #5');
-		assert(['A___B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A \n_B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #6');
+		assert(['A_b', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A [[ ]] b}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #6');
+		assert(['A___B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A [[ \n ]] B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #7');
+		assert(['A___B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A \n_B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #8');
 
 		assert(['STRING', CeL.wiki.expand_transclusion('{{uc:string}}').toString()], 'wiki.expand_transclusion: {{UC:}}');
 		assert(['string', CeL.wiki.expand_transclusion('{{lc:STRING}}').toString()], 'wiki.expand_transclusion: {{LC:}}');
@@ -4891,7 +4923,6 @@ function test_wiki() {
 
 		// [[n:zh:Special:Permalink/121433]]
 		wikitext = "   <> >< <title> '''<试>'''  ''ii'' <i>iii</i> <b>bbb</b>   [[File:YesCheck_BlueLinear.svg|20px]] [[:Category:中国]] & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos; <nowiki>  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos;  '''bbb''' <b>bbb</b> <i>iii</i> <ref /> {{VOA}} {{tl|VOA}}</nowiki> '''[[abc]]'''  <b>[[w:abc]]</b>  '''<i>[[w :  123   #  cba]]</i>''' [[ABC|ab'c]] [[ABC|ab''c'']] __NOINDEX__ ____  ___ __ __  _ {{tl|VOA}} [[template:VOA]] [https://zh.wikipedia.org zh''wiki''] __TOC__ -{}- C-{樂}-D A-{  这  }-B  '''<nowiki>''< nowiki>''</nowiki>'''  <span style=\"color:green\">green</span>    ";
-		// console.log(JSON.stringify(link+''));
 		// console.log(JSON.stringify(CeL.wiki.section_link(wikitext).toString()));
 		assert(["[[#%3C%3E %3E%3C %3Ctitle%3E %3C试%3E ii iii bbb Category:中国 &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; '''bbb''' %3Cb%3Ebbb%3C/b%3E %3Ci%3Eiii%3C/i%3E %3Cref /%3E %7B%7BVOA%7D%7D %7B%7Btl%7CVOA%7D%7D abc w:abc w : 123 # cba ab'c abc %7B%7BVOA%7D%7D template:VOA zhwiki -%7B%7D- C-%7B樂%7D-D A-%7B 这 %7D-B ''%3C nowiki%3E'' green|&lt;&gt; &gt;&lt; &lt;title&gt; '''&lt;试&gt;''' ''ii'' <i>iii</i> <b>bbb</b> Category:中国 &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &apos;&apos;&apos;bbb&apos;&apos;&apos; &lt;b&gt;bbb&lt;/b&gt; &lt;i&gt;iii&lt;/i&gt; &lt;ref /&gt; &#123;&#123;VOA&#125;&#125; &#123;&#123;tl&#124;VOA&#125;&#125; '''abc''' <b>w:abc</b> '''<i>w : 123 # cba</i>''' ab&apos;c ab''c'' ____ ___ __ __ _ &#123;&#123;VOA&#125;&#125; template:VOA zh''wiki'' -{}- C-{樂}-D A-{ 这 }-B '''&apos;&apos;&lt; nowiki&gt;&apos;&apos;''' <span style=\"color:green\">green</span>]]", CeL.wiki.section_link(wikitext).toString()], 'wiki.section_link #1-1');
 		// [[w:zh:Special:Permalink/46747219]]

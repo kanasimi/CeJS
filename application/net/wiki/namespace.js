@@ -1832,7 +1832,7 @@ function module_code(library_namespace) {
 		// true === /^\s$/.test('\uFEFF')
 
 		// 去除註解。 Remove comments.
-		page_name = page_name.replace(/<!--[\s\S]*-->/g, '');
+		page_name = page_name.replace(/<!--[\s\S]*?-->/g, '');
 
 		// [[A&quot;A]]→[[A"A]]
 		// fix "&#39;". 由於裡面包含"#"，所以必須在 PATTERN_anchor_of_page_title 之前處理。
@@ -1867,8 +1867,9 @@ function module_code(library_namespace) {
 		.replace(/[\u200E\u200F]/g, '')
 
 		.trimEnd()
-		// 去除開頭的 ":"。 /\s/.test('\u3000')===true
-		.replace(/^[:\s_]+/, '')
+
+		// 去除開頭的冒號 ":"。 /\s/.test('\u3000')===true
+		.replace(options.preserve_head_colon ? /^[\s_]+/ : /^[:\s_]+/, '')
 
 		// 無論是中日文、英文的維基百科，所有的 '\u3000' 都會被轉成空白字元 /[ _]/。
 		.replace(/　/g, ' ')
@@ -1877,7 +1878,7 @@ function module_code(library_namespace) {
 		.replace(/([ _]){2,}/g, '$1');
 
 		// {{int:MediaWiki page name}}
-		if (/^int:.+/i.test(page_name)) {
+		if (!options.no_convert_interface_message && /^int:.+/i.test(page_name)) {
 			// 4 === 'int:'.length
 			page_name = 'MediaWiki:' + page_name.slice(4).trimStart();
 		}

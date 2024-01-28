@@ -1039,6 +1039,7 @@ function module_code(library_namespace) {
 		}
 
 		function get_interface_message(message_id) {
+			// console.trace(message_id);
 			if (!message_id || !(message_id = String(message_id).trim()))
 				return message_id;
 			if (!session.interface_messages)
@@ -1453,6 +1454,8 @@ function module_code(library_namespace) {
 			//
 			.map(function(piece, index, list) {
 				piece = piece
+				// Invalid chars
+				.replace(/[\[\]]/g, '')
 				// 多空格會被轉成單一 "_"。
 				.replace(/[\s_]+/g, '_');
 				if (false && index !== list.length - 1) {
@@ -1656,6 +1659,7 @@ function module_code(library_namespace) {
 	function Yesno(value, default_value) {
 		if (value === undefined)
 			return;
+		value = String(value).trim();
 		if (/^(?:[nf否关關]|no|false|off)$/i.test(value))
 			return false;
 		if (/^(?:[yt是开開]|yes|true|on)$/i.test(value))
