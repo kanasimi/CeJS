@@ -336,12 +336,17 @@ function module_code(library_namespace) {
 		// console.trace([ action, options ]);
 
 		var session = wiki_API.session_of_options(options);
-		if (isNaN(action.search_params.maxlag)) {
+		if (!/^-?\d+$/.test(action.search_params.maxlag)) {
+			if (action.search_params.maxlag) {
+				library_namespace
+						.warn('wiki_API_query: Invalid maxlag, use default: '
+								+ action.search_params.maxlag);
+			}
 			// respect maxlag
 			var maxlag = !isNaN(options.maxlag) ? options.maxlag : session
 					&& !isNaN(session.maxlag) ? session.maxlag
 					: wiki_API_query.default_maxlag;
-			if (maxlag >= 0)
+			if (/^-?\d+$/.test(maxlag))
 				action.search_params.maxlag = maxlag;
 		}
 
@@ -810,6 +815,9 @@ function module_code(library_namespace) {
 	// @see [[w:ja:Wikipedia:Bot#大量の件数を処置する場合の手続き]]
 	// CeL.wiki.query.default_edit_time_interval = 0;
 	// wiki_session.edit_time_interval = 0;
+
+	// Only for test.
+	// delete CeL.wiki.query.default_maxlag;
 
 	// local rule
 	// @see function setup_API_language()

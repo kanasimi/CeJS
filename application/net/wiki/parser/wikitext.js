@@ -3207,18 +3207,29 @@ function module_code(library_namespace) {
 				parameters = parameters.slice(index + apostrophes.length);
 			}
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			parameters = parse_wikitext(parameters, options, queue);
+			parameters = parse_wikitext(parameters, Object.assign(
+					{
+						inside_italic : apostrophes === "''"
+								|| apostrophes === "'''''",
+						inside_bold : apostrophes === "'''"
+								|| apostrophes === "'''''",
+					}, options), queue);
 			// console.log(parameters);
 			// 注意: parameters.length 可能大於1
 			var type = parameters && parameters.type;
 			if (apostrophes !== ending
 			// 這樣下面 `_set_wiki_type(parameters, type)` 時會出錯。
-			&& (type === 'bold' || type === 'italic')) {
+			&& (type === 'bold' || type === 'italic'
+			// TODO: or has children as the same type
+			)) {
 				// e.g., "'''''''t'''''''"
+				// console.trace(JSON.stringify(all));
 				return all;
 			}
 
 			if (apostrophes === "'''''") {
+				if (options.inside_bold && type === 'bold')
+					return all;
 				// e.g., "''''''t''''''"
 				parameters = _set_wiki_type([ "'''", parameters ], 'bold');
 				if (apostrophes === ending) {
@@ -3232,6 +3243,11 @@ function module_code(library_namespace) {
 				type = 'italic';
 			} else {
 				type = apostrophes === "''" ? 'italic' : 'bold';
+				if (options.inside_bold && type === 'bold')
+					return all;
+				// e.g., "'''''''t'''''''"
+				if (options.inside_italic && type === 'italic')
+					return all;
 			}
 			parameters = _set_wiki_type([ apostrophes, parameters ], type);
 			var following;
@@ -3859,13 +3875,27 @@ function module_code(library_namespace) {
 		PATTERN_wikilink_global, parse_wikilink);
 
 		// TODO:
-		// ''A'B''' → <i>A'B'</i>
-		// '''''''''' → '''''<i><b>
+
 		// ''''g''''''t → '<b>g'</b><i>t
+		// ''''g''''''t' → '<b>g'</b><i>t'
+		// ''''g''''''t'' → '<b>g'</b><i>t</i>
 		// ''''g''''''t''' → ''<i>g'</i><b>t</b>
+
+		// '''a''b''' → <b>a<i>b</i></b>
+		// ''a''b''' → <i>a</i>b<b>
+
+		// '''''c'''a''b''''' → <b><i>c'</i>a<i>b</i></b>
+
+		// ''t'''''''l''' → <i>t''</i><b>l</b>
+
+		// '''a''i'''u → <b>a<i>i</b>u
+		// ''a'''i''u → <i>a<b>i</i>u
 
 		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
 		// ''~'' 不能跨行！
+		wikitext = wikitext.replace_till_stable(
+		//
+		/('''''|''')((?:[^'\n]'?)+)(\1)(?=[^']|$)/g, parse_apostrophe_type);
 		wikitext = wikitext.replace_till_stable(
 		// PATTERN_apostrophe_with_tail
 		/('''''|'''?)([^'\n].*?'*)(\1)/g, parse_apostrophe_type);
@@ -3874,30 +3904,136 @@ function module_code(library_namespace) {
 		wikitext = wikitext.replace_till_stable(
 		// PATTERN_apostrophe_without_tail
 		// '\n': from initialized_fix[1]
-		/('''''|'''?)([^'\n].*?'*)(\n|$)/g, parse_apostrophe_type);
+		/('''''|'''?)([^'\n]*)(\n|$)/g, parse_apostrophe_type);
 		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
 
 		// TODO:
 		// "'<!---->''bold'<!---->'<!----><!---->'" → <b>bold</b>
 		// ''A'B''<!---->' → <i>A'B'</i>
+
+		function new_parse_apostrophe_type(all, /* start_mark */
+		apostrophes, parameters, /* end_mark */ending) {
+			// console.trace([ all, apostrophes, parameters, ending ]);
+
+			var matched = ending.match(PATTERN_apostrophe_ending);
+			if (matched) {
+				// "''''g''''''t'''".match(/(''+)(.*)(''+|\n|$)/)
+				// parameters="g''''''t'''"
+				// ending=''
+				ending = matched[0] + ending;
+				parameters = parameters.slice(0, -matched[0].length);
+			}
+			console.trace([ all, apostrophes, parameters, ending ]);
+
+			var following = '', type;
+			if (ending.includes(include_mark)) {
+				var apostrophe_count = 0;
+				while (matched = ending.match(PATTERN_apostrophe_ending_piece)) {
+					var ending_piece;
+					if (matched[2]
+							|| !Array.isArray(ending_piece = parse_wikitext(
+									matched[0], options, queue))
+							|| ending_piece.type !== 'plain'
+							|| ending_piece[0] !== "'"
+							|| !(ending_piece.length >= 2)) {
+						throw new Error(
+								'new_parse_apostrophe_type: Invalid ending piece: '
+										+ ending_piece);
+					}
+
+					var has_invalid_element = false;
+					for (var index = 1; index < ending_piece.length; index++) {
+						var element = ending_piece[index];
+						if (element.type !== 'comment') {
+							has_invalid_element = true;
+							break;
+						}
+					}
+
+					if (has_invalid_element) {
+						// e.g., "''<s></s>'"
+						// 回吐。
+						following = matched[0] + following;
+						ending = ending.slice(0, matched[0].length);
+						// reset
+						apostrophe_count = 0;
+					} else if (++apostrophe_count === 3) {
+						break;
+					}
+				}
+
+				type = apostrophe_count > 2 ? 'bold' : 'italic';
+			} else {
+				if (!/^''+$/.test(ending)) {
+					throw new Error(
+							'new_parse_apostrophe_type: Invalid ending: '
+									+ ending);
+				}
+				type = ending.length > 2 ? 'bold' : 'italic';
+			}
+
+			apostrophes += parameters;
+			parameters = '';
+			var apostrophe_count = 0;
+			// 回溯。
+			while (matched = apostrophes.match(PATTERN_apostrophe_ending_piece)) {
+				if (!matched[2]) {
+					var ending_piece = parse_wikitext(matched[0], options,
+							queue);
+					if (!Array.isArray(ending_piece)
+							|| ending_piece.type !== 'plain'
+							|| ending_piece[0] !== "'"
+							|| !(ending_piece.length >= 2)) {
+						throw new Error(
+								'new_parse_apostrophe_type: Invalid parameter ending piece: '
+										+ ending_piece);
+					}
+
+					var has_invalid_element = false;
+					for (var index = 1; index < ending_piece.length; index++) {
+						var element = ending_piece[index];
+						if (element.type !== 'comment') {
+							has_invalid_element = true;
+							break;
+						}
+					}
+
+					if (has_invalid_element) {
+					} else if (++apostrophe_count === 3) {
+						break;
+					} else {
+						continue;
+					}
+				}
+
+				// 回吐。
+				parameters = matched[0] + parameters;
+				apostrophes = apostrophes.slice(0, matched[0].length);
+				// reset
+				apostrophe_count = 0;
+			}
+
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			apostrophes = parse_wikitext(apostrophes, options, queue);
+			// TODO;
+		}
+
 		if (false) {
 			var PATTERN_apostrophe = new RegExp(
 					/('(?:(?:include_mark\d+end_mark)*')+)(.*)('(?:(?:include_mark\d+end_mark)*')+|\n|$)/.source
 							.replace(/include_mark/g, include_mark).replace(
 									/end_mark/g, end_mark), 'g');
-			wikitext
-					.replace_till_stable(
-							PATTERN_apostrophe,
-							function new_parse_apostrophe_type(all, /* start_mark */
-							apostrophes, parameters, /* end_mark */ending) {
-								console.trace([ all, apostrophes, parameters,
-										ending ]);
-								// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-								apostrophes = parse_wikitext(apostrophes,
-										options, queue);
-								ending = parse_wikitext(ending, options, queue);
-								// TODO;
-							});
+			var PATTERN_apostrophe_ending = new RegExp(
+					/(?:'(?:include_mark\d+end_mark)*)+$/.source.replace(
+							/include_mark/g, include_mark).replace(/end_mark/g,
+							end_mark));
+			// [ ending_piece, elements, plain text ]
+			var PATTERN_apostrophe_ending_piece = new RegExp(
+					/'((?:include_mark\d+end_mark)*)([^'include_markend_mark]*)$/.source
+							.replace(/include_mark/g, include_mark).replace(
+									/end_mark/g, end_mark));
+			wikitext.replace_till_stable(PATTERN_apostrophe,
+					new_parse_apostrophe_type);
 		}
 
 		// ~~~, ~~~~, ~~~~~: 不應該出現

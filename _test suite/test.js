@@ -4037,13 +4037,52 @@ function test_wiki() {
 		wikitext = '== ==[[aa]]== ==\ntext\n'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert([' ==', parsed[0][0]]);
+
 		wikitext = "''A'B''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['italic', parsed[0].type], "'' italic's ''");
+		// ''A'B''' → <i>A'B'</i>
+		wikitext = "''A'B'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['italic', parsed[0].type], "'' italic's ''");
+		// '''''t''''' → <i><b>t</b></i>
 		wikitext = "'''''Italic and bold formatting'''''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['italic', parsed[0].type], "'''''t''''' will render as <i><b>t</b></i>");
 		assert(['bold', parsed[0][1].type]);
+		wikitext = "''Italic'''Italic and bold formatting'''Italic''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['italic', parsed[0].type], "'' '''t''' '' will render as <i><b>t</b></i>");
+		assert(['bold', parsed[0][1][1].type], "'' '''t''' '' will render as <i><b>t</b></i> #2");
+		wikitext = "''i'''ib'''i'''ib'''i''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['italic', parsed[0].type], "'' '''t''' ... '' will render as <i><b>t</b></i>");
+		assert(['bold', parsed[0][1][1].type], "'' '''t''' ... '' will render as <i><b>t</b></i> #2");
+		assert(['bold', parsed[0][1][3].type], "'' '''t''' ... '' will render as <i><b>t</b></i> #3");
+		wikitext = "'''bold''Italic and bold formatting''bold'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['bold', parsed[0].type], "''' ''t'' ''' will render as <b><i>t</i></b>");
+		assert(['italic', parsed[0][1][1].type], "''' ''t'' ''' will render as <b><i>t</i></b> #2");
+		wikitext = "'''b''ib''b''ib''b'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['bold', parsed[0].type], "''' ''t'' ... ''' will render as <b><i>t</i></b>");
+		assert(['italic', parsed[0][1][1].type], "''' ''t'' ... ''' will render as <b><i>t</i></b> #2");
+		assert(['italic', parsed[0][1][3].type], "''' ''t'' ... ''' will render as <b><i>t</i></b> #3");
+
+		// TODO: ''i'''''b'''''i'''''b''''''i
+		wikitext = "''i'''''b'''''i'''''b'''n"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['italic', parsed[0].type], "TODO: still buggy");
+		wikitext = "'''b'''''i'''''b'''''i''n"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['bold', parsed[0].type], "TODO: still buggy");
+		wikitext = "'''b''''''b''''''b'''n"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['bold', parsed[0].type], "TODO: still buggy");
+		wikitext = "''i''''i''''i''''i''n"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['italic', parsed[0].type], "TODO: still buggy");
+		
 		wikitext = "'''''''t'''''''"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(["''", parsed[0]]);
@@ -4064,6 +4103,13 @@ function test_wiki() {
 		assert(['italic', parsed[0].type], 'wiki.parse: bold-italic without ending #2-1');
 		wikitext = "a '''''b''''' c's ''d'' e ''f'' g ''h''."; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		// '''''''''' → '''''<i><b>
+		wikitext = "''''''''''"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['plain', parsed.type], 'wiki.parse: bold-italic');
+		assert(["'''''", parsed[0]], 'wiki.parse: bold-italic');
+		assert(["italic", parsed[1].type], 'wiki.parse: bold-italic');
+
 		wikitext = 'a[[t|\'\'\' <span>T</span>\'\'\']].'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = '<nowiki>-{ </nowiki> a <nowiki>}-</nowiki>'; parsed = CeL.wiki.parser(wikitext).parse();

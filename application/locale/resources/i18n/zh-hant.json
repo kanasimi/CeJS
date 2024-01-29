@@ -352,7 +352,7 @@
 	"the-configuration-page-$1-has-been-modified.-re-parse": "設定頁面 %1 已變更。重新解析……",
 	"wait-$1-to-apply-the-settings": "等待 %1 以應用設定。",
 	"wikitext-parser-checking-$1": "測試 wikitext 解析器：%1",
-	"there-are-more-than-one-$1-in-$2": "於%1有多於一個%2",
+	"there-are-more-than-one-$1-in-$2": "於%2有多於一個%1",
 	"it-seems-that-the-token-is-lost": "似乎丟失了令牌。",
 	"too-many-badtoken-errors!-please-re-execute-the-program": "太多 badtoken 錯誤！請重新執行程序！",
 	"not-using-node.js": "非使用 node.js！",
