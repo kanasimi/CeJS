@@ -2793,20 +2793,20 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L332}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1531}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L418}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L423}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L427}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L876}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L940}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L979}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1002}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1009}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L338}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1531}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L418}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L423}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L427}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L876}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L940}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L979}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1002}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1009}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3048}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3058}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3081}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3091}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2814,14 +2814,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3161}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3171}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3744}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3754}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2933,7 +2933,7 @@
 		"message": "There are more than one %1 in %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: layout type, %2: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1644}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1645}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {

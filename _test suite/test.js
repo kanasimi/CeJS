@@ -3497,6 +3497,13 @@ function test_wiki() {
 		wikitext = "[mailto:info@example.org?Subject=URL%20Encoded%20Subject&body=Body%20Textinfo]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #8');
 		assert(["external_link", parsed.type], 'wiki.parse: external link #8-1');
+		// TODO: '[[http://example.com foo bar]]'
+		// "https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/"
+		// "{{t0|urn:0{{t1|urn:1}}}}"
+		// "http://example.com/foo{{!}}bar"
+		// "http://example.com{{dead link}}"
+		// @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+		// @see https://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
 
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #1');
@@ -3848,6 +3855,13 @@ function test_wiki() {
 		var count = 0;
 		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'template', function (token) { count++; });
 		assert([0, count], 'wiki.parse.transclusion #39-3');
+		wikitext = '{{text#anchor|TEXT}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #40');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #40-1');
+		assert(['Template:Text', parsed.page_title], 'wiki.parse.transclusion #40-2');
+		wikitext = '{{Template:}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41');
+		assert([wikitext, parsed], 'wiki.parse.transclusion #40-1');
 
 		wikitext = '{{text| {{ {{<s> }} }} </s> }}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #40');
@@ -4040,11 +4054,17 @@ function test_wiki() {
 
 		wikitext = "''A'B''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['italic', parsed[0].type], "'' italic's ''");
+		assert(['italic', parsed[0].type], "'' italic ''");
 		// ''A'B''' → <i>A'B'</i>
 		wikitext = "''A'B'''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['italic', parsed[0].type], "'' italic's ''");
+		assert(['italic', parsed[0].type], "'' italic ''");
+		wikitext = "'''A'B'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['bold', parsed[0].type], "''' bold '''");
+		wikitext = "'''b''bi'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['bold', parsed[0].type], "''' bold '''");
 		// '''''t''''' → <i><b>t</b></i>
 		wikitext = "'''''Italic and bold formatting'''''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -4069,20 +4089,28 @@ function test_wiki() {
 		assert(['italic', parsed[0][1][1].type], "''' ''t'' ... ''' will render as <b><i>t</i></b> #2");
 		assert(['italic', parsed[0][1][3].type], "''' ''t'' ... ''' will render as <b><i>t</i></b> #3");
 
-		// TODO: ''i'''''b'''''i'''''b''''''i
 		wikitext = "''i'''''b'''''i'''''b'''n"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['italic', parsed[0].type], "TODO: still buggy");
+		assert(["''i''", parsed[0].toString()], "連續的 '' #1");
+		assert(["'''b'''", parsed[1].toString()], "連續的 '' #1-2");
 		wikitext = "'''b'''''i'''''b'''''i''n"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['bold', parsed[0].type], "TODO: still buggy");
+		assert(["'''b'''", parsed[0].toString()], "連續的 '' #2");
+		assert(["''i''", parsed[1].toString()], "連續的 '' #2-2");
 		wikitext = "'''b''''''b''''''b'''n"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['bold', parsed[0].type], "TODO: still buggy");
+		assert(["'''b''''", parsed[0].toString()], "連續的 '' #3");
+		assert(["''b'''", parsed[1].toString()], "連續的 '' #3-2");
 		wikitext = "''i''''i''''i''''i''n"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['italic', parsed[0].type], "TODO: still buggy");
-		
+		assert(["''i''''i''''i''''i''", parsed[0].toString()], "連續的 '' #4");
+		assert(["n", parsed[1].toString()], "連續的 '' #4-2");
+		assert(["bold", parsed[1].type], "連續的 '' #4-3");
+		wikitext = "''i'''''b'''''i'''''b''''''n"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(["''i''", parsed[0].toString()], "連續的 '' #5");
+		assert(["'''b'''", parsed[1].toString()], "連續的 '' #5-2");
+
 		wikitext = "'''''''t'''''''"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(["''", parsed[0]]);
@@ -4109,6 +4137,10 @@ function test_wiki() {
 		assert(['plain', parsed.type], 'wiki.parse: bold-italic');
 		assert(["'''''", parsed[0]], 'wiki.parse: bold-italic');
 		assert(["italic", parsed[1].type], 'wiki.parse: bold-italic');
+
+		wikitext = "'<!---->''bold'<!---->'<!----><!---->'"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['bold', parsed[0].type], "''' bold ''<!---->'");
 
 		wikitext = 'a[[t|\'\'\' <span>T</span>\'\'\']].'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -4890,6 +4922,9 @@ function test_wiki() {
 		assert(['{{t|a=2|1=5=6}}', CeL.wiki.parse.replace_parameter(token, { '1 ': CeL.wiki.parse('5=6') }, { value_only: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #21-2');
 		wikitext = '{{t}}'; token = CeL.wiki.parse(wikitext);
 		assert([wikitext, CeL.wiki.parse.replace_parameter(token, { 'a': KEY_remove_parameter }, { value_only: true, force_add: true }) === 0 && token.toString()], 'wiki.parse.replace_parameter: #21-1');
+		// https://github.com/5j9/wikitextparser/blob/master/tests/test_template.py
+		wikitext = '{{t\n  | p1   = v1\n  | p22  = v2\n}}'; token = CeL.wiki.parse(wikitext);
+		assert(['{{t\n  | p1   = v1\n  | p22  = v2\n| z  = z\n}}', CeL.wiki.parse.replace_parameter(token, { z: 'z' }, { value_only: true, force_add: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #22-1');
 
 		wikitext = '{{t1|p1=1|p2=2|p4=}}'; parsed = CeL.wiki.parse(wikitext);
 		var parsed_2 = CeL.wiki.parse('{{ T1|p3=3|p4=4}}');

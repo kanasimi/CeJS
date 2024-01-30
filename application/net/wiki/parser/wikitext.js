@@ -685,14 +685,20 @@ function module_code(library_namespace) {
 		},
 		// italic type
 		italic : function() {
+			// this: [ start_mark(''), content, end_mark('') ]
+			// @see KEY_apostrophe_element_content
+			// Warning: (0 in this), (2 in this) 可能為 false!
+			// Warning: this[0], this[2] 可能為 {Array}!
 			// assert: this.length === 3 || this.length === 2
-			// [ start_mark(''), content, end_mark('') ]
 			return this.join('');
 		},
 		// emphasis
 		bold : function() {
+			// this: [ start_mark('''), content, end_mark(''') ]
+			// @see KEY_apostrophe_element_content
+			// Warning: (0 in this), (2 in this) 可能為 false!
+			// Warning: this[0], this[2] 可能為 {Array}!
 			// assert: this.length === 3 || this.length === 2
-			// [ start_mark('''), content, end_mark(''') ]
 			return this.join('');
 		},
 
@@ -962,6 +968,21 @@ function module_code(library_namespace) {
 		return element_list
 	}
 
+	var KEY_apostrophe_element_start_quote = 0, KEY_apostrophe_element_content = 1, KEY_apostrophe_element_end_quote = 2,
+	//
+	default_include_mark = '\x00', default_end_mark = '\x01',
+	// \n, $ 都會截斷 italic, bold
+	// <tag> 不會截斷 italic, bold
+	template_PATTERN_text_apostrophe_unit = /([^'\n]*(?:'[^'\n]+)*?)('(?:(?:include_mark\d+end_mark)*')+|\n|$)/.source,
+	// [ all, text, apostrophes(''+) ]
+	default_PATTERN_text_apostrophe_unit = new RegExp(
+			template_PATTERN_text_apostrophe_unit.replace(/include_mark/g,
+					library_namespace.to_RegExp_pattern(default_include_mark))
+					.replace(
+							/end_mark/g,
+							library_namespace
+									.to_RegExp_pattern(default_end_mark)), 'g');
+
 	/**
 	 * parse The MediaWiki markup language (wikitext / wikicode). 解析維基語法。
 	 * 維基語法解析器
@@ -1060,13 +1081,22 @@ function module_code(library_namespace) {
 		 * 
 		 * @type {String}
 		 */
-		include_mark = options.include_mark || '\x00',
+		include_mark = options.include_mark || default_include_mark,
 		/**
 		 * {String}結束之特殊標記。 end of include_mark. 不可為數字 (\d) 或
 		 * include_mark，不包含會被解析的字元如 /;/。應為 wikitext 所不容許之字元。<br />
 		 * e.g., '\x01' === '\u0001'.<br />
 		 */
-		end_mark = options.end_mark || '\x01',
+		end_mark = options.end_mark || default_end_mark,
+		//
+		PATTERN_text_apostrophe_unit = include_mark === default_include_mark
+				&& end_mark === default_end_mark ? default_PATTERN_text_apostrophe_unit
+				: new RegExp(template_PATTERN_text_apostrophe_unit.replace(
+						/include_mark/g,
+						library_namespace.to_RegExp_pattern(include_mark))
+						.replace(/end_mark/g,
+								library_namespace.to_RegExp_pattern(end_mark)),
+						'g'),
 		/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
 		normalize = options.normalize,
 		/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
@@ -1418,6 +1448,7 @@ function module_code(library_namespace) {
 
 		// TODO: 緊接在連結後面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分。
 		// https://phabricator.wikimedia.org/T263266
+		// TODO: "[<!--1-->[t|x]<!--2--><!--2-->]"
 		function parse_wikilink(all_link, page_and_anchor, page_name, anchor,
 				pipe_separator, display_text) {
 			// 自 end_mark 向前回溯。
@@ -2027,9 +2058,9 @@ function module_code(library_namespace) {
 			var matched = parameters[0]
 			/**
 			 * <code>
-
+			
 			{{<!-- -->#<!-- -->in<!-- -->{{#if:1|voke}}<!-- -->:IP<!-- -->Address|is<!-- -->{{#if:1|Ip}}|8.8.8.8}}
-
+			
 			</code>
 			 */
 			.match(/^([\s\n]*([^:]+):)([\s\S]*)$/i);
@@ -2339,9 +2370,18 @@ function module_code(library_namespace) {
 					preserve_head_colon : true,
 					no_convert_interface_message : true
 				}, options));
-				// console.trace(parameters.name, parameters[0],
-				// parameters[0].toString());
+				if (false) {
+					parameters.name = wiki_API.remove_namespace(
+							parameters.name, options);
+				}
+				if (false) {
+					console.trace(parameters.name, parameters[0], parameters[0]
+							.toString());
+				}
+
 				if (!parameters.name.replace(/^:+/, '')
+				// e.g., input {{Template:}}
+				|| !wiki_API.remove_namespace(parameters.name, options)
 				// e.g., '{{text| {{ {{_}} }} }}'
 				|| (parameters[0].type === 'plain' ? parameters[0]
 				//
@@ -2454,7 +2494,9 @@ function module_code(library_namespace) {
 							// {{template<!-- --> name}}
 							comment : true
 						});
-					}).join('').trim())) {
+					}).join('')
+					// e.g., {{text#anchor|TEXT}}
+					.replace(/#.*$/, '').trim())) {
 						// console.log(parameters);
 
 						// e.g., `{{ {{tl|t}} | p }}` is invalid:
@@ -3198,70 +3240,500 @@ function module_code(library_namespace) {
 			return include_mark + (queue.length - 1) + end_mark;
 		}
 
-		function parse_apostrophe_type(all, /* start_mark */apostrophes,
-				parameters, /* end_mark */ending) {
-			// console.trace([ all, apostrophes, parameters, ending ]);
-			var index = parameters.lastIndexOf(apostrophes), previous = '';
-			if (index !== NOT_FOUND) {
-				previous = apostrophes + parameters.slice(0, index);
-				parameters = parameters.slice(index + apostrophes.length);
-			}
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			parameters = parse_wikitext(parameters, Object.assign(
-					{
-						inside_italic : apostrophes === "''"
-								|| apostrophes === "'''''",
-						inside_bold : apostrophes === "'''"
-								|| apostrophes === "'''''",
-					}, options), queue);
-			// console.log(parameters);
-			// 注意: parameters.length 可能大於1
-			var type = parameters && parameters.type;
-			if (apostrophes !== ending
-			// 這樣下面 `_set_wiki_type(parameters, type)` 時會出錯。
-			&& (type === 'bold' || type === 'italic'
-			// TODO: or has children as the same type
-			)) {
-				// e.g., "'''''''t'''''''"
-				// console.trace(JSON.stringify(all));
-				return all;
-			}
+		/**
+		 * <code>
 
-			if (apostrophes === "'''''") {
-				if (options.inside_bold && type === 'bold')
-					return all;
-				// e.g., "''''''t''''''"
-				parameters = _set_wiki_type([ "'''", parameters ], 'bold');
-				if (apostrophes === ending) {
-					parameters.push("'''");
-					ending = "''";
-				} else {
-					// assert: ending === '' || ending === '\n'
-					// console.trace([ apostrophes, ending ]);
+		''i''
+		 i  i
+
+		'''b'''
+		+b  +b
+
+		'''''bi'''''
+		 b i    b i
+		 +i+b   -b-i
+
+		'''b''bi'''
+		     i
+		 +b +i +b
+
+		'''i''t
+		     i
+		  i
+		 +i -i
+
+		''i'''t
+		 i
+		     i
+		+i  -i
+
+		''i'''t''i
+		 i      i
+		+i  +b -i
+
+		''i'''t'''i
+		 i
+		     b   b
+		+i  +b  -b
+
+		''i''''t'''i
+		 i
+		+i  +b   -b
+
+		''i'''t''''i
+		 i
+		     b   b
+		+i  +b  -b
+
+		''i''''t''''i
+		 i
+		     b    b
+		+i  +b   -b
+
+		''i'''o'''''t''''t'''i
+		 i       b i
+		               b    b
+		+i  +b  -i-b  +b   -b
+
+		''i'''b''i'''t
+		 i      i
+		+i  +b -i  -b
+
+		'''b''i'''i''t
+		     i      i
+		+b  +i  -b -i
+
+
+		''i'''t''i''t
+		 i      i  i
+		+i  -i +i -i
+
+		'''t''i'''i'''t
+		    i
+		         b   b
+		 +i -i  +b  -b
+
+
+		''i''''t''''i
+		 i
+		     b   b
+		+i  +b  -b
+
+		''i''''t''''i''t
+		 i            i
+		     b    b
+		+i  +b   -b  -i
+
+		''i''''t''''i''''t
+		 i
+		+i  -i   +b  -b
+
+		''i''''t''''i'''''t
+		 i            b i
+		+i  +b   -b  -i+b
+
+
+		''i'''T''b''t'''t
+		 i      i  i
+		+i  +b -i +i -b
+
+		'''b''''t
+
+		+b  -b
+
+		'''b''''t''i
+		          i
+		+b  -b   +i
+
+		'''b''''t'''i
+		'''b''''t''''i
+
+		+b  -b  +b
+
+
+		'''b''''t'''''i
+		'''b''''t''''''i
+		          b i
+		+i   +b  -i-b
+
+		'''b'''t'''''i
+		'''b'''t''''''i
+		          b i
+		 +i  +b  -i-b
+
+		'''''bi''''t''''t
+		''''''bi''''t''''t
+		 b i
+		+i+b   -i   -b
+
+
+
+		''''a''''''a''''''a''''''a''''''a''''''a''''''g
+		''''a''''''a''''''a''''''a''''''a''''''a'''''g
+		       b i    b i    b i    b i    b i    b i
+		 +b   -b+i   -i+b   -b+i   -i+b   -b+i   -i+b
+
+
+		''''a''''''a''''''a''''''a''''''a''''''a''''g
+		''''a''''''a''''''a''''''a''''''a''''''a'''g
+		       b i    b i    b i    b i    b i   
+		  +i  -i+b   -b+i   -i+b   -b+i   -i+b   -b
+
+
+		''''a''''''a''''''a''''''a''''''a''''''a''g
+		       b i    b i    b i    b i    b i   i
+		 +b   -b+i   -i+b   -b+i   -i+b   -b+i  -i
+
+
+
+		''''i''t
+		      i
+		  +i -i
+
+
+		''''b'''t
+
+		+b  -b
+
+
+		''''''''''
+			   b i
+			  +b+i
+
+
+		''''g''''''t'''y → ''<i>g'</i><b>t</b>y
+		       b i
+		  +i  -i+b  -b
+
+		''''g''''''t''y → '<b>g'</b><i>t</i>y
+		       b i   i
+		  +b  -b+i  -i
+
+		''''g''''''t'y → '<b>g'</b><i>t'y
+		''''g''''''t → '<b>g'</b><i>t
+		      b i
+		 +b  -b+i
+
+
+		''i'''bi'''i'''bi'''i'''bi'''''t
+		 i                         b i
+		+i  +b   -b  +b  -b  +b   -b-i
+
+
+		''i'''o'''''t''''t'''i
+		 i       b i
+		+i  +b  -b-i  +b  -b
+
+
+		''A'B'''
+		 i
+		+i    -i
+
+		''A'B'''
+		 i
+		+i   -i
+
+		''i'''ib'''i'''ib'''i''t
+		 i                    i
+		+i  +b  -b   +b  -b  -i
+
+
+		'''b''bi'''i''
+		     i       i
+		 b       b
+		+b  +i  -b  -i
+
+
+
+		'''a''b''' → <b>a<i>b</i></b>
+		''a''b''' → <i>a</i>b<b>
+
+		'''a''i'''u → <b>a<i>i</b>u
+		''a'''i''u → <i>a<b>i</i>u
+
+		'''''c'''a''b''''' → <b><i>c'</i>a<i>b</i></b>
+
+		''t'''''''l''' → <i>t''</i><b>l</b>
+
+		'<!---->''bold'<!---->'<!----><!---->' → <b>bold</b>
+		''A'B''<!---->' → <i>A'B'</i>
+
+		''A'B''<!---->'
+		 i
+		+i   -i
+
+
+
+		</code>
+		 */
+
+		function split_text_apostrophe_unit(wikitext) {
+			if (!wikitext.includes("'"))
+				return wikitext;
+
+			var unit_list = [];
+			/** 交換i(switch_italic)個數 */
+			var italic_pre_count = 0,
+			/** 剩下尚未設定個數-交換b(switch_bold)之個數 */
+			left_minus_bold = 0;
+
+			// reset
+			PATTERN_text_apostrophe_unit.lastIndex = 0;
+
+			while (true) {
+				var unit = PATTERN_text_apostrophe_unit.exec(wikitext);
+
+				unit.shift();
+				if (!unit[1].startsWith("'")) {
+					// assert: 最後一個。 unit[1] === '\n' || unit[1] === ''
+					unit_list.push(unit);
+					break;
 				}
-				apostrophes = "''";
-				type = 'italic';
-			} else {
-				type = apostrophes === "''" ? 'italic' : 'bold';
-				if (options.inside_bold && type === 'bold')
-					return all;
-				// e.g., "'''''''t'''''''"
-				if (options.inside_italic && type === 'italic')
-					return all;
-			}
-			parameters = _set_wiki_type([ apostrophes, parameters ], type);
-			var following;
-			if (apostrophes === ending) {
-				parameters.push(ending);
-				following = '';
-			} else {
-				following = ending;
-				// assert: ending === '' || ending === '\n'
+
+				// assert: unit[0] && unit[1]
+
+				var apostrophe_list = unit[1].split("'");
+				// assert: apostrophe_list[0] === ''
+
+				// 1: 第一個 unit[1][0] 必為合規的 "'"，可跳過。
+				var apostrophe_count = 1;
+				unit[1] = [ "'" ];
+				// 檢查本 apostrophe piece 是否全是註解。
+				// index = 1: 第一個 unit[1][0] 必為合規的 "'"，可跳過。
+				// apostrophe_list.length - 1: 最後一個必為 ""，可跳過。
+				for (var index = 1, length = apostrophe_list.length - 1; index < length; index++) {
+					var pieces_to_check = apostrophe_list[index].split(
+							include_mark).slice(1);
+					if (pieces_to_check.length === 0
+					//
+					|| pieces_to_check.every(function(piece) {
+						var token = queue[piece.slice(0, piece
+						//
+						.indexOf(end_mark))];
+						return token && token.type === 'comment';
+					})) {
+						unit[1].push(apostrophe_list[index] + "'");
+						apostrophe_count++;
+						continue;
+					}
+
+					// 本 apostrophe piece 包含非註解，不能算 "'"。
+					if (apostrophe_count < 2) {
+						// 把前面的全部搬到 unit[0]。但是必須去掉末尾的 "'"。
+						unit[0] += unit[1].join('').slice(0, -1);
+						// 重新計算。
+						apostrophe_count = 1;
+						unit[1] = [ "'" ];
+						continue;
+					}
+
+					// 從這個 apostrophe piece 開始算作下一個 apostrophe_unit。
+					PATTERN_text_apostrophe_unit.lastIndex -= apostrophe_list
+							.slice(index).join("'").length;
+					break;
+				}
+
+				// '{2}:交換i
+				// '{3,4}:交換b or i 擇一
+				// '{5,}:交換i and b
+
+				// 標記 switch_italic & switch_bold:
+				if (unit[1].length === 2) {
+					// '{2}: 標記 switch_italic
+					unit.switch_italic = true;
+					italic_pre_count++;
+				} else if (unit[1].length >= 5) {
+					// '{5,}: 標記 switch_italic and switch_bold
+					unit.switch_italic = unit.switch_bold = true;
+					italic_pre_count++;
+					left_minus_bold--;
+				} else {
+					// assert: unit[1].length === 3 || unit[1].length === 4
+					left_minus_bold++;
+				}
+				unit_list.push(unit);
 			}
 
-			queue.push(parameters);
-			return previous + include_mark + (queue.length - 1) + end_mark
-					+ following;
+			// --------------------------------------------
+
+			// 標記i: 假如交換i為奇數個，(剩下尚未設定個數-b之個數)為奇數，則將第一個剩下的填i，盡量讓i閉合。
+			if (italic_pre_count % 2 === 1 && left_minus_bold % 2 === 1) {
+				// unit_list.length - 1: 跳過最後一個 unit
+				for (var index = 0; index < unit_list.length - 1; index++) {
+					var unit = unit_list[index];
+					if (!unit.switch_italic && !unit.switch_bold) {
+						// assert: unit[1].length === 3 || unit[1].length === 4
+						unit.switch_italic = true;
+						break;
+					}
+				}
+			}
+
+			// --------------------------------------------
+
+			var wikitext = '';
+			var tokens_to_resolve = [];
+			for (var index = 0, this_token = undefined; index < unit_list.length; index++) {
+				var unit = unit_list[index], switch_italic = unit.switch_italic, switch_bold = unit.switch_bold;
+				if (!switch_italic && !switch_bold) {
+					// assert: unit[1].length === 3 || unit[1].length === 4
+					// 標記b: 其他未設定的都填b
+					switch_bold = true;
+				}
+
+				// assert: switch_italic === true || switch_bold === true
+
+				if (index < unit_list.length - 1) {
+					/** 多出的長度，應該算做普通文字的長度。 */
+					var extra_length = unit[1].length
+							- (switch_bold ? switch_italic ? 5 : 3 : 2);
+					// assert: extra_length >= 0
+					if (extra_length > 0) {
+						unit[0] += unit[1].slice(0, extra_length).join('');
+						unit[1] = unit[1].slice(extra_length);
+					} else {
+						// 去掉 .switch_italic, .switch_bold 等屬性。
+						// unit[1] = unit[1].slice();
+					}
+				}
+
+				if (unit[0]) {
+					if (this_token) {
+						this_token[KEY_apostrophe_element_content] += unit[0];
+					} else {
+						wikitext += unit[0];
+					}
+				}
+
+				if (index === unit_list.length - 1) {
+					wikitext += unit[1];
+					break;
+				}
+
+				var need_create_next_token = null;
+				while (this_token) {
+					if (this_token.type === 'italic') {
+
+						if (switch_italic) {
+							// this_token[KEY_apostrophe_element_end_quote] =
+							this_token.push(unit[1].slice(0, 2));
+							unit[1] = unit[1].slice(2);
+							this_token = this_token.apostrophe_parent;
+							switch_italic = false;
+
+						} else if (switch_bold && this_token.apostrophe_parent) {
+							// assert:
+							// this_token.apostrophe_parent.type === 'bold'
+
+							// e.g., "'''b''bi'''i''"
+							// ________________⭡
+
+							// assert: !!need_create_next_token === false;
+							need_create_next_token = this_token;
+							this_token = this_token.apostrophe_parent;
+						} else {
+							break;
+						}
+
+					} else {
+						// assert: this_token.type === 'bold'
+						if (switch_bold) {
+							// this_token[KEY_apostrophe_element_end_quote] =
+							this_token.push(unit[1].slice(0, 3));
+							unit[1] = unit[1].slice(3);
+							this_token = this_token.apostrophe_parent;
+							switch_bold = false;
+
+						} else if (switch_italic
+								&& this_token.apostrophe_parent) {
+							// assert:
+							// this_token.apostrophe_parent.type === 'italic'
+
+							// e.g., "''i'''bi''b'''"
+							// ________________⭡
+
+							// assert: !!need_create_next_token === false;
+							need_create_next_token = this_token;
+							this_token = this_token.apostrophe_parent;
+						} else {
+							break;
+						}
+					}
+				}
+
+				if (need_create_next_token) {
+					// assert: this_token === undefined
+					// without start quote
+					this_token = _set_wiki_type([ , '' ],
+							need_create_next_token.type);
+					need_create_next_token.following_content = this_token;
+					this_token.previous_content = need_create_next_token;
+					queue.push(this_token);
+					wikitext += include_mark + (queue.length - 1) + end_mark;
+				}
+
+				// assert: 皆為重新開始 quote，沒有結束的。
+
+				// MediaWiki 把 <b> 放在 <i> 中: <i><b></b></i>
+				if (switch_italic) {
+					// assert: !this_token || this_token.type === 'bold'
+					// assert: unit[1].length === 2 || unit[1].length === 5
+					var token = _set_wiki_type([ unit[1].slice(0, 2), '' ],
+							'italic');
+					// if (switch_bold)
+					unit[1] = unit[1].slice(2);
+					tokens_to_resolve.push(token);
+					queue.push(token);
+					var mark = include_mark + (queue.length - 1) + end_mark;
+					if (this_token) {
+						token.apostrophe_parent = this_token;
+						this_token[KEY_apostrophe_element_content] += mark;
+					} else {
+						wikitext += mark;
+					}
+					this_token = token;
+				}
+
+				if (switch_bold) {
+					// assert: !this_token || this_token.type === 'italic'
+					// assert: unit[1].length === 3
+					var token = _set_wiki_type([ unit[1], '' ], 'bold');
+					// needless
+					// unit[1] = unit[1].slice(3);
+					tokens_to_resolve.push(token);
+					queue.push(token);
+					var mark = include_mark + (queue.length - 1) + end_mark;
+					if (this_token) {
+						token.apostrophe_parent = this_token;
+						this_token[KEY_apostrophe_element_content] += mark;
+					} else {
+						wikitext += mark;
+					}
+					this_token = token;
+				}
+			}
+
+			tokens_to_resolve.forEach(function(token) {
+				if (token[0])
+					token[0] = token[0].join('');
+				if (token[2])
+					token[2] = token[2].join('');
+				token.forEach(function(subtoken, index) {
+					// token[0], token[2] 已處理
+					if (false && Array.isArray(subtoken))
+						subtoken = token[index] = subtoken.join('');
+					if (subtoken.includes(include_mark)) {
+						token[index] = parse_wikitext(subtoken,
+						// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+						Object.assign(Object.clone(options), {
+							// 避免如 "''A'B''<!---->'" 出現錯誤。
+							inside_apostrophe : true
+						}), queue);
+					}
+				});
+			});
+
+			return wikitext;
 		}
 
 		function parse_section(all, previous, section_level, parameters,
@@ -3874,166 +4346,12 @@ function module_code(library_namespace) {
 		// or use ((PATTERN_link))
 		PATTERN_wikilink_global, parse_wikilink);
 
-		// TODO:
+		// '''~''' ''~'' 不能跨行，且須在 parse_transclusion(), parse_table() 之後解析！
+		// 注意: '''{{font color}}''', '''{{tsl}}''', '''{{text}}'''
 
-		// ''''g''''''t → '<b>g'</b><i>t
-		// ''''g''''''t' → '<b>g'</b><i>t'
-		// ''''g''''''t'' → '<b>g'</b><i>t</i>
-		// ''''g''''''t''' → ''<i>g'</i><b>t</b>
-
-		// '''a''b''' → <b>a<i>b</i></b>
-		// ''a''b''' → <i>a</i>b<b>
-
-		// '''''c'''a''b''''' → <b><i>c'</i>a<i>b</i></b>
-
-		// ''t'''''''l''' → <i>t''</i><b>l</b>
-
-		// '''a''i'''u → <b>a<i>i</b>u
-		// ''a'''i''u → <i>a<b>i</i>u
-
-		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
-		// ''~'' 不能跨行！
-		wikitext = wikitext.replace_till_stable(
-		//
-		/('''''|''')((?:[^'\n]'?)+)(\1)(?=[^']|$)/g, parse_apostrophe_type);
-		wikitext = wikitext.replace_till_stable(
-		// PATTERN_apostrophe_with_tail
-		/('''''|'''?)([^'\n].*?'*)(\1)/g, parse_apostrophe_type);
-		// \n, $ 都會截斷 italic, bold
-		// <tag> 不會截斷 italic, bold
-		wikitext = wikitext.replace_till_stable(
-		// PATTERN_apostrophe_without_tail
-		// '\n': from initialized_fix[1]
-		/('''''|'''?)([^'\n]*)(\n|$)/g, parse_apostrophe_type);
-		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
-
-		// TODO:
-		// "'<!---->''bold'<!---->'<!----><!---->'" → <b>bold</b>
-		// ''A'B''<!---->' → <i>A'B'</i>
-
-		function new_parse_apostrophe_type(all, /* start_mark */
-		apostrophes, parameters, /* end_mark */ending) {
-			// console.trace([ all, apostrophes, parameters, ending ]);
-
-			var matched = ending.match(PATTERN_apostrophe_ending);
-			if (matched) {
-				// "''''g''''''t'''".match(/(''+)(.*)(''+|\n|$)/)
-				// parameters="g''''''t'''"
-				// ending=''
-				ending = matched[0] + ending;
-				parameters = parameters.slice(0, -matched[0].length);
-			}
-			console.trace([ all, apostrophes, parameters, ending ]);
-
-			var following = '', type;
-			if (ending.includes(include_mark)) {
-				var apostrophe_count = 0;
-				while (matched = ending.match(PATTERN_apostrophe_ending_piece)) {
-					var ending_piece;
-					if (matched[2]
-							|| !Array.isArray(ending_piece = parse_wikitext(
-									matched[0], options, queue))
-							|| ending_piece.type !== 'plain'
-							|| ending_piece[0] !== "'"
-							|| !(ending_piece.length >= 2)) {
-						throw new Error(
-								'new_parse_apostrophe_type: Invalid ending piece: '
-										+ ending_piece);
-					}
-
-					var has_invalid_element = false;
-					for (var index = 1; index < ending_piece.length; index++) {
-						var element = ending_piece[index];
-						if (element.type !== 'comment') {
-							has_invalid_element = true;
-							break;
-						}
-					}
-
-					if (has_invalid_element) {
-						// e.g., "''<s></s>'"
-						// 回吐。
-						following = matched[0] + following;
-						ending = ending.slice(0, matched[0].length);
-						// reset
-						apostrophe_count = 0;
-					} else if (++apostrophe_count === 3) {
-						break;
-					}
-				}
-
-				type = apostrophe_count > 2 ? 'bold' : 'italic';
-			} else {
-				if (!/^''+$/.test(ending)) {
-					throw new Error(
-							'new_parse_apostrophe_type: Invalid ending: '
-									+ ending);
-				}
-				type = ending.length > 2 ? 'bold' : 'italic';
-			}
-
-			apostrophes += parameters;
-			parameters = '';
-			var apostrophe_count = 0;
-			// 回溯。
-			while (matched = apostrophes.match(PATTERN_apostrophe_ending_piece)) {
-				if (!matched[2]) {
-					var ending_piece = parse_wikitext(matched[0], options,
-							queue);
-					if (!Array.isArray(ending_piece)
-							|| ending_piece.type !== 'plain'
-							|| ending_piece[0] !== "'"
-							|| !(ending_piece.length >= 2)) {
-						throw new Error(
-								'new_parse_apostrophe_type: Invalid parameter ending piece: '
-										+ ending_piece);
-					}
-
-					var has_invalid_element = false;
-					for (var index = 1; index < ending_piece.length; index++) {
-						var element = ending_piece[index];
-						if (element.type !== 'comment') {
-							has_invalid_element = true;
-							break;
-						}
-					}
-
-					if (has_invalid_element) {
-					} else if (++apostrophe_count === 3) {
-						break;
-					} else {
-						continue;
-					}
-				}
-
-				// 回吐。
-				parameters = matched[0] + parameters;
-				apostrophes = apostrophes.slice(0, matched[0].length);
-				// reset
-				apostrophe_count = 0;
-			}
-
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			apostrophes = parse_wikitext(apostrophes, options, queue);
-			// TODO;
-		}
-
-		if (false) {
-			var PATTERN_apostrophe = new RegExp(
-					/('(?:(?:include_mark\d+end_mark)*')+)(.*)('(?:(?:include_mark\d+end_mark)*')+|\n|$)/.source
-							.replace(/include_mark/g, include_mark).replace(
-									/end_mark/g, end_mark), 'g');
-			var PATTERN_apostrophe_ending = new RegExp(
-					/(?:'(?:include_mark\d+end_mark)*)+$/.source.replace(
-							/include_mark/g, include_mark).replace(/end_mark/g,
-							end_mark));
-			// [ ending_piece, elements, plain text ]
-			var PATTERN_apostrophe_ending_piece = new RegExp(
-					/'((?:include_mark\d+end_mark)*)([^'include_markend_mark]*)$/.source
-							.replace(/include_mark/g, include_mark).replace(
-									/end_mark/g, end_mark));
-			wikitext.replace_till_stable(PATTERN_apostrophe,
-					new_parse_apostrophe_type);
+		if (!options.inside_apostrophe) {
+			wikitext = wikitext.split('\n').map(split_text_apostrophe_unit)
+					.join('\n');
 		}
 
 		// ~~~, ~~~~, ~~~~~: 不應該出現

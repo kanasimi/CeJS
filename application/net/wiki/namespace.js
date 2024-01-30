@@ -114,6 +114,12 @@ function module_code(library_namespace) {
 	 * 
 	 * matched: [ URL ]
 	 * 
+	 * TODO: "https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/",
+	 * "{{t0|urn:0{{t1|urn:1}}}}"
+	 * 
+	 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+	 *      https://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
+	 * 
 	 * @type {RegExp}
 	 * 
 	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
@@ -1424,6 +1430,10 @@ function module_code(library_namespace) {
 		// session === wiki_API?
 		&& session.configurations && session.configurations.namespace_pattern
 				|| get_namespace.pattern;
+		if (page_title.endsWith(':')) {
+			// e.g., input "Template:"
+			page_title += ' ';
+		}
 		var matched = page_title.match(namespace_pattern);
 		library_namespace.debug('Test ' + wiki_API.title_link_of(page_title)
 				+ ', get [' + matched + '] using pattern ' + namespace_pattern,

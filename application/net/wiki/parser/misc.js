@@ -224,7 +224,7 @@ function module_code(library_namespace) {
 
 		if (typeof index !== 'number' || !(index >= 0)) {
 			// treat index as parameter_name
-			index = template_token.index_of[parameter_name];
+			index = template_token.index_of[index];
 		}
 		if (!(index >= 0)) {
 			// 不存在此 parameter name 可 replace。
@@ -2010,6 +2010,7 @@ function module_code(library_namespace) {
 			: !section && /\([^()]+\)$/.test(title)
 			// e.g., [[title (type)]] → [[title (type)|title]]
 			// 在 <gallery> 中，"[[title (type)|]]" 無效，因此需要明確指定。
+			// [[w:en:Help:Pipe trick#Where it doesn't work]]
 			? '|' + title.replace(/\s*\([^()]+\)$/, '') : '');
 
 			if (need_add_quote) {
