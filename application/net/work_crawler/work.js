@@ -783,6 +783,7 @@ function module_code(library_namespace) {
 		var _this = this,
 		// this.work_URL 中不應對 work_id 採取額外處理，例如 `work_id | 0`，
 		// 否則會造成 extract_work_id_from_URL 出錯。
+		/** {String}作品資訊頁面之URL */
 		work_URL = this.full_URL(this.work_URL, work_id), work_data;
 		library_namespace.debug('work_URL: ' + work_URL, 2, 'get_work_data');
 		// console.log(work_URL);
@@ -1258,6 +1259,13 @@ function module_code(library_namespace) {
 				}
 			}
 
+			fetch_chapter_list_data();
+		}
+
+		// ----------------------------------------------------------
+
+		function fetch_chapter_list_data(chapter_list_URL) {
+
 			if (!_this.chapter_list_URL) {
 				pre_process_chapter_list_data(XMLHttp);
 				return;
@@ -1270,13 +1278,13 @@ function module_code(library_namespace) {
 			chapter_list_URL : function(work_id, work_data) { return [ 'url', { post_data } ]; },
 			 </code>
 			 */
-			work_data.chapter_list_URL = work_URL = _this.full_URL(
+			chapter_list_URL = work_data.chapter_list_URL = _this.full_URL(
 					_this.chapter_list_URL, work_id, work_data);
-			// console.trace(work_URL);
+			// console.trace(chapter_list_URL);
 			var post_data = null;
-			if (Array.isArray(work_URL)) {
-				post_data = work_URL[1];
-				work_URL = _this.full_URL(work_URL[0]);
+			if (Array.isArray(chapter_list_URL)) {
+				post_data = chapter_list_URL[1];
+				chapter_list_URL = _this.full_URL(chapter_list_URL[0]);
 			}
 
 			// this.reget_chapter 要在 function process_chapter_list_data(html)
@@ -1284,8 +1292,8 @@ function module_code(library_namespace) {
 			if (_this.regenerate || !_this.reget_chapter) {
 				// @see function get_data() @
 				// CeL.application.net.work_crawler.chapter
-				library_namespace.get_URL_cache(work_URL, function(data, error,
-						XMLHttp) {
+				library_namespace.get_URL_cache(chapter_list_URL, function(
+						data, error, XMLHttp) {
 					pre_process_chapter_list_data(XMLHttp, error);
 				}, {
 					no_write_info : true,
@@ -1298,8 +1306,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			_this.get_URL(work_URL, pre_process_chapter_list_data, post_data,
-					true);
+			_this.get_URL(chapter_list_URL, pre_process_chapter_list_data,
+					post_data, true);
 		}
 
 		// ----------------------------------------------------------
@@ -1469,6 +1477,10 @@ function module_code(library_namespace) {
 						chapter_list.then(process_chapter_list_data.bind(this,
 								html), onerror);
 						return;
+					}
+					if (library_namespace.is_Object(chapter_list)
+							&& chapter_list.next_chapter_list_URL) {
+						// TODO:
 					}
 				} catch (e) {
 					return onerror(e);

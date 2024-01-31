@@ -406,12 +406,14 @@ function module_code(library_namespace) {
 
 		if (full_title && (full_title = full_title.trim())
 				&& full_title !== title && chapter_data.title === title) {
+			chapter_data.title = library_namespace.HTML_to_Unicode(full_title)
+					.trim();
 			library_namespace.log(library_namespace.display_align([
 			// @see gettext_config:{"id":"work_data.chapter_title"}
 			[ gettext('章節標題：'), JSON.stringify(title) ],
 			// 第一行包含完整標題，改成完整標題。
-			[ '→', JSON.stringify(full_title) ] ]));
-			chapter_data.title = title = full_title;
+			[ '→', JSON.stringify(chapter_data.title) ] ]));
+			title = full_title;
 		}
 
 		if (false && title.includes('')) {

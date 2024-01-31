@@ -520,6 +520,7 @@ function module_code(library_namespace) {
 		},
 		// 外部連結 external link, external web link
 		external_link : function() {
+			// [ url, delimiter, display_text ]
 			// assert: this.length === 1 or 3
 			// assert: this.length === 3
 			// && this[1].trim() === '' && this[2] === this[2].trimStart()
@@ -1556,6 +1557,7 @@ function module_code(library_namespace) {
 			// including "'''". e.g., [http://a.b/''disply text'']
 			var matched = URL.match(/^(.+?)(''.*)$/);
 			if (matched) {
+				// assert: 本階段尚未執行過 split_text_apostrophe_unit(wikitext)
 				URL = matched[1];
 				if (delimiter) {
 					parameters = matched[2] + delimiter + parameters;
@@ -1595,15 +1597,45 @@ function module_code(library_namespace) {
 					if (delimiter)
 						delimiter = ' ';
 				}
-				// console.trace(parameters)
-				// 紀錄 delimiter as {String}token[1]，
-				// 否則 .toString() 時 .join() 後會與原先不同。
-				if (delimiter || URL.length === 1)
-					URL.push(delimiter);
+				// console.trace(parameters);
+
 				// 經過改變，需再進一步處理。
 				if (parameters)
-					URL.push(parse_wikitext(parameters, options, queue));
+					parameters = parse_wikitext(parameters, options, queue);
+
+				// 確保 [ url, delimiter, display_text ]，
+				// 否則 .toString() 時 .join() 後會與原先不同。
+				if (URL.length === 1) {
+					URL.push(delimiter, parameters);
+				} else if (URL.length === 2) {
+					URL.push(parameters);
+				} else if (URL.length !== 3) {
+					library_namespace
+							.error('parse_external_link: Invalid external url: '
+									+ URL);
+					return all;
+				} else if (parameters
+				// || parameters === 0
+				) {
+					if (URL[2].type === 'plain') {
+						if (parameters.type === 'plain') {
+							URL[2].append(parameters);
+							// or use flat_plain_element(token);
+						} else {
+							URL[2].push(parameters);
+						}
+					} else {
+						if (parameters.type === 'plain') {
+							parameters.unshift(URL[2]);
+							URL[2] = parameters;
+						} else {
+							URL[2] = _set_wiki_type([ URL[2], parameters ],
+									'plain');
+						}
+					}
+				}
 			}
+
 			_set_wiki_type(URL, 'external_link');
 			queue.push(URL);
 			return include_mark + (queue.length - 1) + end_mark;
