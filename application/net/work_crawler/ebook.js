@@ -250,7 +250,7 @@ function module_code(library_namespace) {
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~\-々\u00A0]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\-々\s]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
@@ -309,10 +309,24 @@ function module_code(library_namespace) {
 
 		var special_chars_count = 0, full_title;
 		var title_start_index = first_line.indexOf(title);
+
+		if (title_start_index === NOT_FOUND) {
+			var matched = title.match(/(第.+章)(\s+)/);
+			if (matched && first_line.includes(matched[1])) {
+				// e.g., https://www.piaotia.com/html/15/15301/10626057.html
+				// title: "第1章 山下少年",
+				// first_line: "\n&nbsp;&nbsp;&nbsp;&nbsp;第1章山下少年"
+				// 內文中的標題去掉了空白字元。
+				first_line = first_line.replace(matched[1], matched[0]);
+				text = text.replace(matched[1], matched[0]);
+				first_line_end_index += matched[2].length;
+				title_start_index = first_line.indexOf(title);
+			}
+		}
 		// console.trace([ title, title_start_index, first_line ]);
 
 		if (title_start_index === NOT_FOUND) {
-			// assert: 第一行不包含與 title 相同之標題。
+			// assert: 第一行不包含與 title 完全相同之標題。
 
 			var first_line_trimmed = first_line.replace(
 					trim_start_title.PATTERN_special_chars, '');
@@ -328,6 +342,10 @@ function module_code(library_namespace) {
 			var title_trimmed = title.replace(
 					trim_start_title.PATTERN_special_chars, '');
 			title_start_index = first_line_trimmed.indexOf(title_trimmed);
+			if (false) {
+				console.trace([ title_trimmed, title_start_index,
+						first_line_trimmed ]);
+			}
 			if (title_start_index === NOT_FOUND) {
 				// 第一行不包含去除特殊字元後的標題。
 				// 正文不以標題起始。

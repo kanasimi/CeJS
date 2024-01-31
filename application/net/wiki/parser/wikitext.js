@@ -280,6 +280,7 @@ function module_code(library_namespace) {
 				// console.log(result);
 				set_wiki_type(result, 'plain');
 			} else {
+				// console.trace(result);
 				result = result[0];
 			}
 			if (!resolve_filter && result.includes(include_mark)) {
@@ -973,7 +974,7 @@ function module_code(library_namespace) {
 	default_include_mark = '\x00', default_end_mark = '\x01',
 	// \n, $ 都會截斷 italic, bold
 	// <tag> 不會截斷 italic, bold
-	template_PATTERN_text_apostrophe_unit = /([^'\n]*(?:'[^'\n]+)*?)('(?:(?:include_mark\d+end_mark)*')+|\n|$)/.source,
+	template_PATTERN_text_apostrophe_unit = /(.*?)('(?:(?:include_mark\d+end_mark)*')+|\n|$)/.source,
 	// [ all, text, apostrophes(''+) ]
 	default_PATTERN_text_apostrophe_unit = new RegExp(
 			template_PATTERN_text_apostrophe_unit.replace(/include_mark/g,
@@ -1945,6 +1946,7 @@ function module_code(library_namespace) {
 					if (delimiter)
 						delimiter = ' ';
 				}
+				// console.trace(parameters)
 				// 紀錄 delimiter as {String}token[1]，
 				// 否則 .toString() 時 .join() 後會與原先不同。
 				URL.push(delimiter,

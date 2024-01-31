@@ -3472,6 +3472,11 @@ function test_wiki() {
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span xml:lang="zh">深圳</span>')], 'wikitext_to_plain_text() #4');
 		assert(['大稻埕', CeL.wiki.wikitext_to_plain_text('大<span lang="zh" xml:lang="zh">稻埕</span>')], 'wikitext_to_plain_text() #5');
 
+		wikitext = '\'t\' "t"'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: quoted text');
+		wikitext = '"t" \'t\''; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: quoted text');
+
 		wikitext = 't[http://a.b/ x[[l]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #1');
 		wikitext = "[http://a.b/  disply text]"; parsed = CeL.wiki.parse(wikitext);
