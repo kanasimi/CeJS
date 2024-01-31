@@ -117,6 +117,8 @@ function module_code(library_namespace) {
 	 * TODO: "https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/",
 	 * "{{t0|urn:0{{t1|urn:1}}}}"
 	 * 
+	 * @deprecated Use `PATTERN_URL_WITH_PROTOCOL_GLOBAL` instead.
+	 * 
 	 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
 	 *      https://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
 	 * 
@@ -126,26 +128,22 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_URL_GLOBAL = /(?:https?:)?\/\/(?:[^\s\|<>\[\]{}]+|{[^{}]*})+/ig,
-
+	// PATTERN_URL_GLOBAL = /(?:https?:)?\/\/(?:[^\s\|<>\[\]{}]+|{[^{}]*})+/ig,
 	/**
 	 * 匹配URL網址，僅用於 parse_wikitext()。
 	 * 
-	 * "\0" 應該改成 include_mark。
-	 * 
-	 * matched: [ all, previous, URL, protocol without ":", others ]
+	 * matched: [ all, previous, URL, protocol with "://", URL_others ]
 	 * 
 	 * @type {RegExp}
+	 * 
+	 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+	 *      https://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
 	 * 
 	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_URL_WITH_PROTOCOL_GLOBAL =
-	// 照理來說應該是這樣的。
-	/(^|[^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|<>\[\]{}\/][^\0\s\|<>\[\]{}]*))/ig,
-	// MediaWiki實際上會parse的。
-	// /(^|[^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|<>\[\]{}]+))/ig,
+	PATTERN_URL_WITH_PROTOCOL_GLOBAL = /(^|[^a-z\d_])(((?:https?|ssh|telnet|ftps?|sftp):?\/\/|(?:mailto|urn):)((?:\[[a-f\d:]+\]|[^\s\|<>\[\]\/])[^\s\|<>\[\]]*))/ig;
 
 	/**
 	 * 匹配以URL網址起始。
@@ -158,9 +156,8 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_URL_prefix = /^(?:(?:https?|s?ftp|telnet|ssh):)?\/\/[^.:\\\/]+\.[^.:\\\/]+/i;
-	// ↓ 這會無法匹配中文域名。
-	// PATTERN_URL_prefix = /^(?:https?:)?\/\/([a-z\d\-]{1,20})\./i,
+	var PATTERN_URL_prefix = new RegExp(PATTERN_URL_WITH_PROTOCOL_GLOBAL.source
+			.replace(/^\([^()]+\)/, '(^)'), 'i');
 
 	// 嘗試從 options 取得 API_URL。
 	function API_URL_of_options(options) {

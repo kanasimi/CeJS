@@ -116,10 +116,15 @@ text 2
 // ----------------------------------------------------------------------------
 
 function stringify(value) {
-	value = JSON.stringify(value);
-	return typeof value === 'string' ? value.replace(/</g, '&lt;')
-	// &nbsp;
-	.replace(/ /g, '\xa0') : value;
+	let display_value = JSON.stringify(value);
+	if (typeof display_value === 'string') {
+		display_value = display_value.replace(/</g, '&lt;')
+		// &nbsp;
+		.replace(/ /g, '\xa0');
+		if (CeL.wiki.is_parsed_element(value))
+			display_value = `<span style="color:#aef" title="type">${value.type}</span>: ` + display_value;
+	}
+	return display_value;
 }
 
 function add_parser_sample(wikitext, title, panel) {
@@ -206,7 +211,7 @@ function generate_wiki_parser_token(token, wikitext) {
 	sub_document = [];
 	for (const property_name in token) {
 		if (isNaN(property_name) && property_name !== 'toString') {
-			push_pair(property_name, stringify(token[property_name]), sub_document);
+			push_pair(property_name,  stringify(token[property_name]), sub_document);
 		}
 	}
 	document.push('additional properties' + (wikitext ? ' of result:' : ':'), { table: sub_document, C: "property_pairs" });

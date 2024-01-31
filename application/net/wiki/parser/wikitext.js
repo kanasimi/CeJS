@@ -331,7 +331,8 @@ function module_code(library_namespace) {
 	/**
 	 * Wikimedia projects 的 external link 匹配模式。
 	 * 
-	 * matched: [ all external link wikitext, URL, delimiter, link name ]
+	 * matched: [ all external link wikitext, URL, protocol with "://",
+	 * URL_others, delimiter, link name ]
 	 * 
 	 * 2016/2/23: 經測試，若為結尾 /$/ 不會 parse 成 external link。<br />
 	 * 2016/2/23: "[ http...]" 中間有空白不會被判別成 external link。
@@ -344,7 +345,10 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=protocols&utf8&format=json
 	 */
-	var PATTERN_external_link_global = /\[((?:(?:https?:|ftps?:)?\/\/|mailto:[^:@]+@)[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:([^\S\r\n]+)([^\]]*))?\]/ig,
+	var PATTERN_external_link_global = new RegExp(
+			PATTERN_URL_WITH_PROTOCOL_GLOBAL.source.replace(/^\([^()]+\)/,
+					/\[/.source)
+					+ /(?:([^\S\r\n]+)([^\]]*))?\]/.source, 'ig'),
 
 	// 若包含 br|hr| 會導致 "aa<br>\nbb</br>\ncc" 解析錯誤！
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
@@ -502,9 +506,12 @@ function module_code(library_namespace) {
 			+ this[2] : '') + ']]';
 		},
 		// 內部連結 (wikilink / internal link) + interwiki link
+		// TODO: [ start quote (e.g., [<!----><!---->[), page_title, #anchor,
+		// pipe (e.g., {{!}}), display_text, end quote (e.g., ]<!---->]) ]
+		// TODO: .normalize(): [[A|A]] → [[A]]
 		link : function() {
 			return '[[' + this[0]
-			//
+			// this: [ page_title, #anchor, display_text ]
 			+ (this[1] || '') + (this.length > 2
 			// && this[2] !== undefined && this[2] !== null
 			? (this.pipe || '|')
@@ -969,20 +976,41 @@ function module_code(library_namespace) {
 		return element_list
 	}
 
+	function generate_token_pattern(pattern_template, options) {
+		if (library_namespace.is_RegExp(pattern_template))
+			pattern_template = pattern_template.source;
+
+		// assert: typeof pattern_template === 'string'
+
+		options = library_namespace.setup_options(options);
+
+		var include_mark = library_namespace
+				.to_RegExp_pattern(options.include_mark || default_include_mark),
+		//
+		end_mark = library_namespace.to_RegExp_pattern(options.end_mark
+				|| default_end_mark),
+		// /\d+/
+		queue_index = /\d{1,5}/.source,
+		//	
+		pattern = new RegExp(pattern_template.replace(
+				/token_mark/g,
+				include_mark
+						+ (options.with_queue_index ? '(' + queue_index + ')'
+								: queue_index) + end_mark).replace(
+				/include_mark/g, include_mark).replace(/end_mark/g, end_mark),
+				options.flags || 'g');
+
+		return pattern;
+	}
+
 	var KEY_apostrophe_element_start_quote = 0, KEY_apostrophe_element_content = 1, KEY_apostrophe_element_end_quote = 2,
 	//
 	default_include_mark = '\x00', default_end_mark = '\x01',
 	// \n, $ 都會截斷 italic, bold
 	// <tag> 不會截斷 italic, bold
-	template_PATTERN_text_apostrophe_unit = /(.*?)('(?:(?:include_mark\d+end_mark)*')+|\n|$)/.source,
+	template_PATTERN_text_apostrophe_unit = /([^\n]*?)('(?:(?:token_mark)*')+|\n|$)/.source,
 	// [ all, text, apostrophes(''+) ]
-	default_PATTERN_text_apostrophe_unit = new RegExp(
-			template_PATTERN_text_apostrophe_unit.replace(/include_mark/g,
-					library_namespace.to_RegExp_pattern(default_include_mark))
-					.replace(
-							/end_mark/g,
-							library_namespace
-									.to_RegExp_pattern(default_end_mark)), 'g');
+	default_PATTERN_text_apostrophe_unit = generate_token_pattern(template_PATTERN_text_apostrophe_unit);
 
 	/**
 	 * parse The MediaWiki markup language (wikitext / wikicode). 解析維基語法。
@@ -1092,12 +1120,8 @@ function module_code(library_namespace) {
 		//
 		PATTERN_text_apostrophe_unit = include_mark === default_include_mark
 				&& end_mark === default_end_mark ? default_PATTERN_text_apostrophe_unit
-				: new RegExp(template_PATTERN_text_apostrophe_unit.replace(
-						/include_mark/g,
-						library_namespace.to_RegExp_pattern(include_mark))
-						.replace(/end_mark/g,
-								library_namespace.to_RegExp_pattern(end_mark)),
-						'g'),
+				: generate_token_pattern(template_PATTERN_text_apostrophe_unit,
+						options),
 		/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
 		normalize = options.normalize,
 		/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
@@ -1441,17 +1465,164 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		var PATTERN_token_unit;
+		function setup_PATTERN_token_unit() {
+			if (!PATTERN_token_unit) {
+				PATTERN_token_unit = generate_token_pattern(
+				// matched: [ , string, token_mark, queue_index ]
+				/([\s\S]*?)(token_mark|$)/g, Object.assign(Object
+						.clone(options), {
+					with_queue_index : true
+				}));
+			} else {
+				// reset PATTERN index
+				PATTERN_token_unit.lastIndex = 0;
+			}
+		}
+
+		function has_invalid_token(original_value, invalid_token_filter) {
+			// assert: original_value.includes(include_mark)
+
+			setup_PATTERN_token_unit();
+
+			var invalid_token_data = [/* valid_value */'' ];
+			while (PATTERN_token_unit.lastIndex < original_value.length) {
+				var matched = PATTERN_token_unit.exec(original_value);
+				// matched: [ , string, token_mark, queue_index ]
+				var token = queue[matched[3]];
+				if (invalid_token_filter.call(invalid_token_data, token)) {
+					invalid_token_data[0] += matched[1];
+					// [ valid_value, invalid_token_mark, queue_index ]
+					invalid_token_data.push(matched[2], matched[3]);
+					return invalid_token_data;
+				}
+
+				invalid_token_data[0] += matched[1] + matched[2];
+			}
+
+		}
+
+		function parse_url(all, previous, URL) {
+			var following = '';
+			if (URL.includes(include_mark)) {
+				// 內部包含{{!}}之類，需再進一步處理。
+
+				var invalid_token_data = has_invalid_token(URL,
+				// TODO: 必須先 expand_template 才能確定到底該不該算做URL的一部分
+				function is_non_url_token(token) {
+					return token && !(token.type in {
+						comment : true
+					}) && !(token.type === 'magic_word_function'
+					//
+					&& (token.name in {
+						'!' : true,
+						'=' : true
+					}));
+				});
+
+				// [ valid_value, invalid_token_mark, queue_index ]
+				if (invalid_token_data) {
+					if (!invalid_token_data[0])
+						return all;
+
+					following = URL.slice(invalid_token_data[0].length)
+					// assert: following === ''
+					// + (following || '')
+					;
+					URL = invalid_token_data[0];
+				}
+
+				URL = parse_wikitext(URL,
+				//
+				Object.assign(Object.clone(options), {
+					inside_transclusion : true
+				}), queue);
+			}
+
+			// 須注意:此裸露 URL 之 type 與 external_link 內之type相同！
+			// 因此需要測試 token.parent 以確定是否在 external link 內。
+			all = _set_wiki_type(URL, 'url');
+			if (typeof URL === 'string')
+				all.is_bare = true;
+			queue.push(all);
+			return previous + include_mark + (queue.length - 1) + end_mark
+					+ following;
+		}
+
+		function parse_external_link(all, URL, protocol, URL_others, delimiter,
+				parameters) {
+			// assert: all === URL + (delimiter || '') + (parameters || '')
+
+			// including "'''". e.g., [http://a.b/''disply text'']
+			var matched = URL.match(/^(.+?)(''.*)$/);
+			if (matched) {
+				URL = matched[1];
+				if (delimiter) {
+					parameters = matched[2] + delimiter + parameters;
+				} else {
+					// assert: parameters === undefined
+					parameters = matched[2];
+				}
+				delimiter = '';
+			}
+
+			URL = parse_wikitext(URL, options, queue);
+			if (URL.type === 'url') {
+				URL = [ URL ];
+			} else if (URL.type === 'plain' && URL[0].type === 'url') {
+				// including "'''". e.g., [http://a.b/''disply text'']
+				if (delimiter) {
+					parameters = delimiter + (parameters || '');
+					delimiter = '';
+				}
+				// 確保 [1] 是 delimiter
+				URL.splice(1, 0, '');
+			} else {
+				library_namespace.error('parse_external_link: Invalid url: '
+						+ URL);
+				return all;
+			}
+
+			URL[0].parent = URL;
+
+			if (delimiter || parameters) {
+				// assert: /^\s*$/.test(delimiter)
+				// && typeof delimiter === 'string'
+				// && typeof parameters === 'string'
+				// assert: parameters 已去除最前面的 delimiter (space)。
+				if (normalize) {
+					parameters = parameters.trimEnd();
+					if (delimiter)
+						delimiter = ' ';
+				}
+				// console.trace(parameters)
+				// 紀錄 delimiter as {String}token[1]，
+				// 否則 .toString() 時 .join() 後會與原先不同。
+				if (delimiter || URL.length === 1)
+					URL.push(delimiter);
+				// 經過改變，需再進一步處理。
+				if (parameters)
+					URL.push(parse_wikitext(parameters, options, queue));
+			}
+			_set_wiki_type(URL, 'external_link');
+			queue.push(URL);
+			return include_mark + (queue.length - 1) + end_mark;
+		}
+
+		// --------------------------------------------------------------------
+
 		function is_invalid_page_name(page_name) {
 			return page_name.is_link || page_name.tag
 			// <nowiki /> 能斷開如 [[L<nowiki />L]]
 			&& page_name.tag.toLowerCase() in extensiontag_hash;
 		}
 
-		// TODO: 緊接在連結後面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分。
+		// TODO: 緊接在連結前面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分。
 		// https://phabricator.wikimedia.org/T263266
 		// TODO: "[<!--1-->[t|x]<!--2--><!--2-->]"
 		function parse_wikilink(all_link, page_and_anchor, page_name, anchor,
 				pipe_separator, display_text) {
+
 			// 自 end_mark 向前回溯。
 			var previous;
 			if (display_text && display_text.includes('[[')) {
@@ -1474,6 +1645,57 @@ function module_code(library_namespace) {
 			} else {
 				previous = '';
 			}
+
+			// --------------------------------------------
+
+			// [ page_name{{!}}, |, display_text ]
+			// →
+			// [ page_name, {{!}}, |display_text ]
+			if (page_and_anchor.includes(include_mark)) {
+				// 內部包含{{!}}之類，需再進一步處理。
+
+				var invalid_token_data = has_invalid_token(page_and_anchor,
+				//
+				function is_pipe_separator(token) {
+					if (token) {
+						if (token.type === 'link')
+							return this.link_inside_link = true;
+						return token.type === 'magic_word_function'
+								&& token.name === '!';
+					}
+				});
+
+				// [ valid_value, invalid_token_mark, queue_index ]
+				if (invalid_token_data) {
+					if (invalid_token_data.link_inside_link)
+						return previous + all_link;
+
+					if (pipe_separator) {
+						display_text = (pipe_separator || '')
+								+ (display_text || '');
+					}
+
+					if (!invalid_token_data[0])
+						return all_link;
+					pipe_separator = queue[invalid_token_data[2]];
+					display_text = page_and_anchor
+							.slice(invalid_token_data[0].length
+									+ invalid_token_data[1].length)
+							+ (display_text || '');
+					page_and_anchor = invalid_token_data[0];
+					anchor = page_and_anchor.match(/^(.*?)(#.*)$/);
+					if (anchor) {
+						page_name = anchor[1];
+						anchor = anchor[2];
+					} else {
+						page_name = page_and_anchor;
+						// anchor = null;
+					}
+				}
+
+			}
+
+			// --------------------------------------------
 
 			if (display_text && /\n=+[^=]=+/.test(display_text)) {
 				// incase '[[A|B]\n==T==\n<code>[[]]</code>'
@@ -1609,9 +1831,11 @@ function module_code(library_namespace) {
 					// 先處理掉裏面的功能性代碼。 e.g.,
 					// [[File:a.svg|alt=alt_of_{{tl|t}}|NG_caption|gykvg=56789{{tl|t}}|{{#ifexist:abc|alt|link}}=abc|{{#ifexist:abc|left|456}}|{{#expr:100+300}}px|thumb]]
 					// e.g., [[File:a.svg|''a''|caption]]
-					display_text = parse_wikitext(display_text, Object.assign({
+					display_text = parse_wikitext(display_text,
+					//
+					Object.assign(Object.clone(options), {
 						no_resolve : true
-					}, options), queue);
+					}), queue);
 
 					display_text = resolve_escaped(
 					// recover {{!}}
@@ -1917,46 +2141,7 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
-		function parse_external_link(all, URL, delimiter, parameters) {
-			// assert: all === URL + (delimiter || '') + (parameters || '')
-			// including "'''". e.g., [http://a.b/''t'']
-			var matched = URL.match(/^(.+?)(''.*)$/);
-			if (matched) {
-				URL = matched[1];
-				if (delimiter) {
-					parameters = matched[2] + delimiter + parameters;
-				} else {
-					// assert: parameters === undefined
-					parameters = matched[2];
-				}
-				delimiter = '';
-			}
-			URL = [ URL.includes(include_mark)
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			? parse_wikitext(URL, options, queue)
-			// 以 token[0].toString() 取得 URL。
-			: _set_wiki_type(URL, 'url') ];
-			if (delimiter || parameters) {
-				// assert: /^\s*$/.test(delimiter)
-				// && typeof delimiter === 'string'
-				// && typeof parameters === 'string'
-				// assert: parameters 已去除最前面的 delimiter (space)。
-				if (normalize) {
-					parameters = parameters.trimEnd();
-					if (delimiter)
-						delimiter = ' ';
-				}
-				// console.trace(parameters)
-				// 紀錄 delimiter as {String}token[1]，
-				// 否則 .toString() 時 .join() 後會與原先不同。
-				URL.push(delimiter,
-				// 經過改變，需再進一步處理。
-				parse_wikitext(parameters, options, queue));
-			}
-			_set_wiki_type(URL, 'external_link');
-			queue.push(URL);
-			return include_mark + (queue.length - 1) + end_mark;
-		}
+		// ----------------------------------------------------------------------------------------
 
 		// (|...): allow "{{{}}}", e.g., [[w:zh:Template:Policy]]
 		var PATTERN_for_template_parameter = /{{{(|[^{}][\s\S]*?)}}}/g;
@@ -2048,11 +2233,12 @@ function module_code(library_namespace) {
 					'parse_wikitext.transclusion');
 
 			// e.g., for `{{#if:|''[[{{T}}|D]]''|}}`
-			parameters = parse_wikitext(parameters, Object.assign({
+			parameters = parse_wikitext(parameters, Object.assign(Object
+					.clone(options), {
 				// inside_transclusion: 尚未切分 "|"
 				inside_transclusion : true,
 				no_resolve : true
-			}, options), queue);
+			}), queue);
 
 			parameters = parameters.split('|');
 
@@ -2158,9 +2344,10 @@ function module_code(library_namespace) {
 				token.forEach(function(subtoken, index) {
 					if (typeof subtoken !== 'string')
 						return;
-					subtoken = parse_wikitext(subtoken, Object.assign({
+					subtoken = parse_wikitext(subtoken, Object.assign(Object
+							.clone(options), {
 						inside_transclusion : true
-					}, options), queue);
+					}), queue);
 					token[index] = subtoken;
 				});
 
@@ -3470,6 +3657,8 @@ function module_code(library_namespace) {
 		 */
 
 		function split_text_apostrophe_unit(wikitext) {
+			// assert: wikitext.includes('\n') === false
+
 			if (!wikitext.includes("'"))
 				return wikitext;
 
@@ -3487,7 +3676,7 @@ function module_code(library_namespace) {
 
 				unit.shift();
 				if (!unit[1].startsWith("'")) {
-					// assert: 最後一個。 unit[1] === '\n' || unit[1] === ''
+					// assert: 本行最後一個。 unit[1] === '\n' || unit[1] === ''
 					unit_list.push(unit);
 					break;
 				}
@@ -3573,7 +3762,7 @@ function module_code(library_namespace) {
 
 			// --------------------------------------------
 
-			var wikitext = '';
+			wikitext = '';
 			var tokens_to_resolve = [];
 			for (var index = 0, this_token = undefined; index < unit_list.length; index++) {
 				var unit = unit_list[index], switch_italic = unit.switch_italic, switch_bold = unit.switch_bold;
@@ -4145,30 +4334,6 @@ function module_code(library_namespace) {
 				parse_language_conversion);
 
 		// ----------------------------------------------------
-		// wikilink
-		// [[~:~|~]], [[~:~:~|~]]
-
-		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
-
-		// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
-		// 前面檢查，或是使 display_text 不包含 {{}}。
-
-		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
-		// 可以解析成圖片, Caption: "{{tl|t}}"
-
-		wikitext = wikitext.replace_till_stable(
-		// or use ((PATTERN_link))
-		PATTERN_wikilink_global, parse_wikilink);
-
-		// ----------------------------------------------------
-		// external link
-		// [http://... ...]
-		// TODO: [{{URL template}} ...]
-		// TODO: [<!-- --><!-- -->ht<!-- -->tp://... ...]
-		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
-				parse_external_link);
-
-		// ----------------------------------------------------
 		// [[w:zh:Help:模板]]
 		// 在模板頁面中，用三個大括弧可以讀取參數。
 
@@ -4219,6 +4384,38 @@ function module_code(library_namespace) {
 		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
 
 		// ----------------------------------------------------
+		// external link
+		// [http://... ...]
+
+		// TODO:
+		// [{{URL template}} ...]
+		// [<!-- --><!-- -->ht<!-- -->tp://... ...]
+		// @see
+		// https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+
+		// 注意: "[[http://example.com]]" 會被解析成 external_link，
+		// 因此 parse_external_link() 應放在 parse_wikilink() 前面。
+
+		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
+				parse_external_link);
+
+		// ----------------------------------------------------
+		// wikilink
+		// [[~:~|~]], [[~:~:~|~]]
+
+		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
+
+		// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
+		// 前面檢查，或是使 display_text 不包含 {{}}。
+
+		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
+		// 可以解析成圖片, Caption: "{{tl|t}}"
+
+		wikitext = wikitext.replace_till_stable(
+		// or use ((PATTERN_link))
+		PATTERN_wikilink_global, parse_wikilink);
+
+		// ----------------------------------------------------
 		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
 		// @see [[w:en:Help:Link#Http: and https:]]
 
@@ -4226,16 +4423,8 @@ function module_code(library_namespace) {
 
 		// 在 transclusion 中不會被當作 bare / plain URL。
 		if (!options.inside_transclusion) {
-			wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL,
-			//
-			function(all, previous, URL) {
-				all = _set_wiki_type(URL, 'url');
-				// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
-				// 因此需要測試 token.is_bare 以確定是否在 external link 內。
-				all.is_bare = true;
-				queue.push(all);
-				return previous + include_mark + (queue.length - 1) + end_mark;
-			});
+			wikitext = wikitext.replace_till_stable(
+					PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_url);
 
 			// ----------------------------------------------------
 			// 處理 / parse list @ wikitext
@@ -4348,6 +4537,8 @@ function module_code(library_namespace) {
 		// or use ((PATTERN_link))
 		PATTERN_wikilink_global, parse_wikilink);
 
+		// ----------------------------------------------------
+
 		// '''~''' ''~'' 不能跨行，且須在 parse_transclusion(), parse_table() 之後解析！
 		// 注意: '''{{font color}}''', '''{{tsl}}''', '''{{text}}'''
 
@@ -4364,13 +4555,12 @@ function module_code(library_namespace) {
 		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
 
 		// @see PATTERN_section
-		var PATTERN_section = new RegExp(
+		var PATTERN_section =
 		// 採用 positive lookahead (?=\n|$) 是為了循序匹配 section title，不跳過任何一個。
 		// 不採用則 parse_wiki 處理時若遇到連續章節，不會按照先後順序，造成這邊還不能設定
 		// section_title_hierarchy，只能在 parsed.each_section() 設定。
-		/(^|\n)(={1,6})(.+)\2((?:[ \t]|mark)*)(?=\n|$)/g.source.replace('mark',
-				library_namespace.to_RegExp_pattern(include_mark) + '\\d+'
-						+ library_namespace.to_RegExp_pattern(end_mark)), 'g');
+		generate_token_pattern(
+				/(^|\n)(={1,6})(.+)\2((?:[ \t]|token_mark)*)(?=\n|$)/g, options);
 		// console.log(PATTERN_section);
 		// console.log(JSON.stringify(wikitext));
 

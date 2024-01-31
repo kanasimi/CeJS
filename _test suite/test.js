@@ -3473,42 +3473,9 @@ function test_wiki() {
 		assert(['大稻埕', CeL.wiki.wikitext_to_plain_text('大<span lang="zh" xml:lang="zh">稻埕</span>')], 'wikitext_to_plain_text() #5');
 
 		wikitext = '\'t\' "t"'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: quoted text');
+		assert([wikitext, parsed], 'wiki.parse: quoted text');
 		wikitext = '"t" \'t\''; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: quoted text');
-
-		wikitext = 't[http://a.b/ x[[l]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #1');
-		wikitext = "[http://a.b/  disply text]"; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #2');
-		assert(['disply text', parsed[2].toString()], 'wiki.parse: external link #2-1');
-		// https://github.com/earwig/mwparserfromhell/issues/40
-		wikitext = "[http://a.b/''disply text'']"; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #3');
-		assert(["external_link", parsed.type], 'wiki.parse: external link #3-1');
-		assert(["''disply text''", parsed[2].toString()], 'wiki.parse: external link #3-2');
-		wikitext = "[http://a.b/''disply'' text]"; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #4');
-		assert(["''disply'' text", parsed[2].toString()], 'wiki.parse: external link #4-1');
-		wikitext = "[http://a.b/''dt]t"; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #5');
-		assert(["''dt", parsed[0][2].toString()], 'wiki.parse: external link #5-1');
-		wikitext = "[http://a.b/]"; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #6');
-		assert(["http://a.b/", parsed[0].toString()], 'wiki.parse: external link #6-1');
-		wikitext = "[https://a.b <a>a</a><!-- -->]"; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #7');
-		assert(["<a>a</a>", parsed[2][0]], 'wiki.parse: external link #7-1');
-		wikitext = "[mailto:info@example.org?Subject=URL%20Encoded%20Subject&body=Body%20Textinfo]"; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #8');
-		assert(["external_link", parsed.type], 'wiki.parse: external link #8-1');
-		// TODO: '[[http://example.com foo bar]]'
-		// "https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/"
-		// "{{t0|urn:0{{t1|urn:1}}}}"
-		// "http://example.com/foo{{!}}bar"
-		// "http://example.com{{dead link}}"
-		// @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
-		// @see https://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
+		assert([wikitext, parsed], 'wiki.parse: quoted text');
 
 		wikitext = '++\npp:http://h /p n\n++'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #1');
@@ -3523,6 +3490,71 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #5');
 		(parsed = CeL.wiki.parser(wikitext)).each('url', function (token) { return '~~'; }, true);
 		assert(['~~{{t}}~~[g]~~', parsed.toString()], 'wiki.parse: plain url #6');
+		wikitext = 'https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #7');
+		assert(['url', parsed.type], 'wiki.parse: plain url #7-1');
+		wikitext = '{{text|urn:0{{text| |urn:1}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #8');
+		assert(['url', parsed.parameters[1][0].type], 'wiki.parse: plain url #8-1');
+		assert(['url', parsed.parameters[1][1].parameters[2].type], 'wiki.parse: plain url #8-1');
+		wikitext = 'http://example.com/foo{{!}}bar'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #9');
+		assert(['url', parsed.type], 'wiki.parse: plain url #9-1');
+		wikitext = 'http://example.com/foo{{=}}bar'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #10');
+		assert(['url', parsed.type], 'wiki.parse: plain url #10-1');
+		wikitext = 'http://example.com{{dead link}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #11');
+		assert(['plain', parsed.type], 'wiki.parse: plain url #11-1');
+		assert(['url', parsed[0].type], 'wiki.parse: plain url #11-2');
+
+		wikitext = 't[http://a.b/ x[[l]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #1');
+		wikitext = "[http://a.b/  disply text]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #2');
+		assert(['disply text', parsed[2].toString()], 'wiki.parse: external link #2-1');
+		// https://github.com/earwig/mwparserfromhell/issues/40
+		wikitext = "[http://a.b/''disply text'']"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #3');
+		assert(["external_link", parsed.type], 'wiki.parse: external link #3-1');
+		assert(["''disply text''", parsed[2].toString()], 'wiki.parse: external link #3-2');
+		wikitext = "[http://a.b/''disply'' text]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #4');
+		assert(["", parsed[1]], 'wiki.parse: external link #4-1');
+		assert(["''disply'' text", parsed[2].toString()], 'wiki.parse: external link #4-2');
+		wikitext = "[http://a.b/''dt]t"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #5');
+		assert(["''dt", parsed[0][2].toString()], 'wiki.parse: external link #5-1');
+		wikitext = "[http://a.b/]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #6');
+		assert(["http://a.b/", parsed[0].toString()], 'wiki.parse: external link #6-1');
+		wikitext = "[https://a.b <a>a</a><!-- -->]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #7');
+		assert(["<a>a</a>", parsed[2][0]], 'wiki.parse: external link #7-1');
+		wikitext = "[mailto:info@example.org?Subject=URL%20Encoded%20Subject&body=Body%20Textinfo]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #8');
+		assert(["external_link", parsed.type], 'wiki.parse: external link #8-1');
+		wikitext = "[[http://example.com]]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #9');
+		assert(['plain', parsed.type], 'wiki.parse: external link #9-1');
+		assert(['[', parsed[0]], 'wiki.parse: external link #9-2');
+		assert(['external_link', parsed[1].type], 'wiki.parse: external link #9-3');
+		wikitext = "[[http://example.com foo bar]]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #10');
+		assert(['plain', parsed.type], 'wiki.parse: external link #10-1');
+		assert(['[', parsed[0]], 'wiki.parse: external link #10-2');
+		assert(['external_link', parsed[1].type], 'wiki.parse: external link #10-3');
+		wikitext = '[https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/ text]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #11');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #11-1');
+		wikitext = "[http://example.com/foo{{!}}bar''foo bar'']"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #12');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #12-1');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #12-2');
+		assert(['http://example.com/foo{{!}}bar', parsed[0].toString()], 'wiki.parse: external link #12-3');
+		assert(['', parsed[1]], 'wiki.parse: external link #12-4');
+		assert(['italic', parsed[2].type], 'wiki.parse: external link #12-5');
+		assert(["''foo bar''", parsed[2].toString()], 'wiki.parse: external link #12-6');
 
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);

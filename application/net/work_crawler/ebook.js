@@ -309,6 +309,7 @@ function module_code(library_namespace) {
 
 		var special_chars_count = 0, full_title;
 		var title_start_index = first_line.indexOf(title);
+		var new_text;
 
 		if (title_start_index === NOT_FOUND) {
 			var matched = title.match(/(第.+章)(\s+)/);
@@ -317,9 +318,10 @@ function module_code(library_namespace) {
 				// title: "第1章 山下少年",
 				// first_line: "\n&nbsp;&nbsp;&nbsp;&nbsp;第1章山下少年"
 				// 內文中的標題去掉了空白字元。
+				new_text = text.replace(matched[1], matched[0]);
 				first_line = first_line.replace(matched[1], matched[0]);
-				text = text.replace(matched[1], matched[0]);
 				first_line_end_index += matched[2].length;
+				// re-check
 				title_start_index = first_line.indexOf(title);
 			}
 		}
@@ -420,7 +422,8 @@ function module_code(library_namespace) {
 					+ (full_title || title).length).slice(0, 100) ]);
 		}
 
-		return text.slice(title_start_index + (full_title || title).length);
+		return (new_text || text).slice(title_start_index
+				+ (full_title || title).length);
 	}
 
 	// text = CeL.work_crawler.trim_start_title(text, chapter_data);
