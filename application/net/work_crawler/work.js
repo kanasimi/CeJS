@@ -839,10 +839,15 @@ function module_code(library_namespace) {
 			return work_page_path;
 		}
 		function get_chapter_list_path(work_data) {
+			var index_text = work_data.next_chapter_list_URL
+			// assert: work_data.next_chapter_list_URL &&
+			// work_data.next_chapter_list_NO >= 2
+			? '-' + work_data.next_chapter_list_NO : '';
+
 			var work_directory_name = get_work_directory_name(work_data);
 			var chapter_list_path = work_cache_directory + work_directory_name
 			// .TOC.htm
-			+ '.list.' + Work_crawler.HTML_extension;
+			+ '.list' + index_text + '.' + Work_crawler.HTML_extension;
 			return chapter_list_path;
 		}
 
@@ -1259,18 +1264,29 @@ function module_code(library_namespace) {
 				}
 			}
 
-			fetch_chapter_list_data();
+			// reset
+			delete work_data.next_chapter_list_URL;
+			delete work_data.next_chapter_list_NO;
+			fetch_chapter_list_data(XMLHttp);
 		}
 
 		// ----------------------------------------------------------
 
-		function fetch_chapter_list_data(chapter_list_URL) {
+		/**
+		 * 獲取章節列表資訊的頁面資料。
+		 * 
+		 * @param {Object}[XMLHttp]
+		 *            本作品首次執行時，這裡的 XMLHttp 應該是作品資訊的頁面資料。
+		 * @returns
+		 */
+		function fetch_chapter_list_data(XMLHttp) {
 
-			if (!_this.chapter_list_URL) {
+			if (!_this.chapter_list_URL && !work_data.next_chapter_list_URL) {
 				pre_process_chapter_list_data(XMLHttp);
 				return;
 			}
 
+			var chapter_list_URL = work_data.chapter_list_URL
 			/**
 			 * 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定 .chapter_list_URL。 e.g., <code>
 			chapter_list_URL : '',
@@ -1278,8 +1294,9 @@ function module_code(library_namespace) {
 			chapter_list_URL : function(work_id, work_data) { return [ 'url', { post_data } ]; },
 			 </code>
 			 */
-			chapter_list_URL = work_data.chapter_list_URL = _this.full_URL(
-					_this.chapter_list_URL, work_id, work_data);
+			= work_data.next_chapter_list_URL ? _this
+					.full_URL(work_data.next_chapter_list_URL) : _this
+					.full_URL(_this.chapter_list_URL, work_id, work_data);
 			// console.trace(chapter_list_URL);
 			var post_data = null;
 			if (Array.isArray(chapter_list_URL)) {
@@ -1312,7 +1329,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------------
 
-		function pre_process_chapter_list_data(XMLHttp) {
+		function pre_process_chapter_list_data(XMLHttp, error) {
 			_this.set_chapter_time_interval(XMLHttp);
 
 			// 因為隱私問題？有些瀏覽器似乎會隱藏網址，只要輸入host即可？
@@ -1367,7 +1384,9 @@ function module_code(library_namespace) {
 			// 預防(work_data.directory)不存在。
 			library_namespace.create_directory(work_data.directory);
 
-			if (_this.is_finished(work_data)) {
+			if (_this.is_finished(work_data)
+			// 第二次獲取 chapter list 時無須再處理。
+			&& !work_data.next_chapter_list_URL) {
 				if (false) {
 					node_fs.writeFileSync(work_data.directory
 					// 已經改成產生報告檔。
@@ -1427,7 +1446,9 @@ function module_code(library_namespace) {
 				// TODO: skip finished + no update works
 			}
 
-			if (true || _this.need_create_ebook) {
+			if (!work_data.next_chapter_list_URL
+			// || _this.need_create_ebook
+			) {
 				// 提供給 this.get_chapter_list() 使用。
 				if (!('time_zone' in work_data)) {
 					// e.g., 9
@@ -1441,6 +1462,10 @@ function module_code(library_namespace) {
 			if (typeof _this.pre_get_chapter_list === 'function') {
 				// 處理章節列表分散在多個檔案時的情況。
 				// e.g., dajiaochong.js
+
+				// @deprecated 現在應該在 crawler.get_chapter_list() 中設定
+				// `work_data.next_chapter_list_URL`，
+				// 這樣可以處理 preserve_chapter_page。
 				_this.pre_get_chapter_list(
 				// function(callback, work_data, html, get_label)
 				check_get_chapter_list.bind(_this, html), work_data, html,
@@ -1467,9 +1492,19 @@ function module_code(library_namespace) {
 
 			// old name: this.get_chapter_count()
 			if (typeof _this.get_chapter_list === 'function') {
+				// reset
+				delete work_data.next_chapter_list_URL;
 				try {
 					// 解析出章節列表。
-					var chapter_list = _this.get_chapter_list(work_data, html,
+					var chapter_list = work_data.chapter_list;
+					// auto reset
+					if (false && !work_data.next_chapter_list_NO) {
+						(work_data.chapter_list = []).old_chapter_list = chapter_list;
+					}
+
+					// 在 this.get_chapter_list() 中要檢測是否為多次獲取 chapter list，必須用
+					// `work_data.next_chapter_list_NO`。
+					chapter_list = _this.get_chapter_list(work_data, html,
 							crawler_namespace.get_label);
 					if (library_namespace.is_thenable(chapter_list)) {
 						// 得要從章節內容獲取必要資訊例如更新時間的情況。
@@ -1477,10 +1512,6 @@ function module_code(library_namespace) {
 						chapter_list.then(process_chapter_list_data.bind(this,
 								html), onerror);
 						return;
-					}
-					if (library_namespace.is_Object(chapter_list)
-							&& chapter_list.next_chapter_list_URL) {
-						// TODO:
 					}
 				} catch (e) {
 					return onerror(e);
@@ -1497,6 +1528,19 @@ function module_code(library_namespace) {
 
 		// 解析出 章節列表/目次/完整目錄列表
 		function process_chapter_list_data(html) {
+			if (work_data.next_chapter_list_URL) {
+				if (!work_data.next_chapter_list_NO) {
+					// 現在正處理 chapter list 第一頁。
+					work_data.next_chapter_list_NO = 1;
+				}
+				work_data.next_chapter_list_NO++;
+				library_namespace.log_temporary('get_work_data: '
+						+ 'Fetch next chapter list page #'
+						+ work_data.next_chapter_list_NO + '...');
+				fetch_chapter_list_data();
+				return;
+			}
+
 			// work_data.chapter_list 為非正規之 chapter data list。
 			// e.g., work_data.chapter_list = [ chapter_data,
 			// chapter_data={url:'',title:'',date:new Date}, ... ]

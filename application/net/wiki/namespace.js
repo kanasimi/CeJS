@@ -136,14 +136,16 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+	 * @see https://en.wikipedia.org/wiki/Help:URL#Fixing_links_with_unsupported_characters
 	 *      https://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
 	 * 
 	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_URL_WITH_PROTOCOL_GLOBAL = /(^|[^a-z\d_])(((?:https?|ssh|telnet|ftps?|sftp):?\/\/|(?:mailto|urn):)((?:\[[a-f\d:]+\]|[^\s\|<>\[\]\/])[^\s\|<>\[\]]*))/ig;
+	PATTERN_URL_WITH_PROTOCOL_GLOBAL
+	// 警告: PATTERN_external_link_global 會用到 '):)'
+	= /(^|[^a-z\d_])(((?:https?|ssh|telnet|ftps?|sftp|gopher|ircs?|news|nntp|worldwind|svn|git|mms):?\/\/|(?:mailto|urn):)((?:\[[a-f\d:]+\]|[^\s\|<>\[\]\/])[^\s\|<>\[\]]*))/ig;
 
 	/**
 	 * 匹配以URL網址起始。

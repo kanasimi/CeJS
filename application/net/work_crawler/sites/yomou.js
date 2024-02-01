@@ -130,7 +130,8 @@ function module_code(library_namespace) {
 		},
 		get_chapter_list : function get_chapter_list(work_data, html) {
 			// TODO: 對於單話，可能無目次。
-			work_data.chapter_list = [];
+			if (!work_data.next_chapter_list_NO)
+				work_data.chapter_list = [];
 			html.between('<div class="index_box">', '<div id="novel_footer">')
 			//
 			.each_between('<dl class="novel_sublist2">', '</dl>',
@@ -182,10 +183,8 @@ function module_code(library_namespace) {
 			// <a href="/n2710db/?p=3" class="novelview_pager-next">次へ</a>
 			.match(/<a href="([^"]+)" class="novelview_pager-next">次へ/);
 			if (matched) {
-				return {
-					// list_file_name_postfix : '',
-					next_chapter_list_URL : matched[1]
-				};
+				work_data.next_chapter_list_URL = this.novel_base_URL
+						+ matched[1].replace(/^\//, '');
 			}
 		},
 

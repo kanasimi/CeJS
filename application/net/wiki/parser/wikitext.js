@@ -346,8 +346,9 @@ function module_code(library_namespace) {
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=protocols&utf8&format=json
 	 */
 	var PATTERN_external_link_global = new RegExp(
-			PATTERN_URL_WITH_PROTOCOL_GLOBAL.source.replace(/^\([^()]+\)/,
-					/\[/.source)
+			PATTERN_URL_WITH_PROTOCOL_GLOBAL.source
+			// 允許 [//example.com/]
+			.replace('):)', '):|\\/\\/)').replace(/^\([^()]+\)/, /\[/.source)
 					+ /(?:([^\S\r\n]+)([^\]]*))?\]/.source, 'ig'),
 
 	// 若包含 br|hr| 會導致 "aa<br>\nbb</br>\ncc" 解析錯誤！
@@ -506,10 +507,12 @@ function module_code(library_namespace) {
 			+ this[2] : '') + ']]';
 		},
 		// 內部連結 (wikilink / internal link) + interwiki link
-		// TODO: [ start quote (e.g., [<!----><!---->[), page_title, #anchor,
-		// pipe (e.g., {{!}}), display_text, end quote (e.g., ]<!---->]) ]
+		// TODO: [ start_quote (e.g., [<!----><!---->[), page_title, #anchor,
+		// pipe (e.g., {{!}}), display_text, end_quote (e.g., ]<!---->]) ]
 		// TODO: .normalize(): [[A|A]] → [[A]]
 		link : function() {
+			// 警告: for_each_subelement() 會忽略 .pipe, start_quote, end_quote 中的元素
+			// ({{!}}, <!---->)!
 			return '[[' + this[0]
 			// this: [ page_title, #anchor, display_text ]
 			+ (this[1] || '') + (this.length > 2
@@ -949,6 +952,29 @@ function module_code(library_namespace) {
 		return set_wiki_type(_token, token.type);
 	}
 
+	// for_each_subelement() 的超簡化版
+	// @inner
+	function for_each_non_plain_subtoken(token, for_each_token, index, parent) {
+		if (!Array.isArray(token) || token.type !== 'plain') {
+			return for_each_token(token, index, parent);
+		}
+
+		return token.some(function(suntoken, index, parent) {
+			return for_each_non_plain_subtoken(suntoken, for_each_token, index,
+					parent);
+		});
+	}
+
+	/**
+	 * 將層層疊疊的 plain: [ plain[], plain[], ... ]<br />
+	 * 轉成 [ non-plain, non-plain, non-plain, … ]
+	 * 
+	 * @param {Array}token
+	 *            root token
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @returns
+	 */
 	function flat_plain_element(token, options) {
 		var element_list = set_wiki_type([], 'plain');
 
@@ -1503,6 +1529,8 @@ function module_code(library_namespace) {
 
 		}
 
+		// bare external link
+		// [[w:en:Wikipedia:Bare URLs]]
 		function parse_url(all, previous, URL) {
 			var following = '';
 			if (URL.includes(include_mark)) {
@@ -1568,7 +1596,13 @@ function module_code(library_namespace) {
 				delimiter = '';
 			}
 
+			if (matched = /^\/\//.test(URL)) {
+				// https://en.wikipedia.org/wiki/Help:Link#http:_and_https:
+				URL = 'https:' + URL;
+			}
+
 			URL = parse_wikitext(URL, options, queue);
+
 			if (URL.type === 'url') {
 				URL = [ URL ];
 			} else if (URL.type === 'plain' && URL[0].type === 'url') {
@@ -1585,6 +1619,17 @@ function module_code(library_namespace) {
 				return all;
 			}
 
+			// assert: URL[0].type === 'url'
+			if (matched) {
+				// non-protocol
+				URL[0].non_protocol = true;
+				// 去掉先前添加的 protocol。
+				URL[0][0] = URL[0][0].replace('https:', '');
+				if (URL[0].toString() === '//') {
+					// e.g., [//<ref></ref>]
+					return all;
+				}
+			}
 			URL[0].parent = URL;
 
 			if (delimiter || parameters) {
@@ -1644,11 +1689,18 @@ function module_code(library_namespace) {
 		// --------------------------------------------------------------------
 
 		function is_invalid_page_name(page_name) {
-			return page_name.is_link || page_name.tag
+			return page_name.is_link
+
+			// 用不著 in extensiontag_hash，連 <s>, <b> 都不行。
+			|| page_name.tag
 			// <nowiki /> 能斷開如 [[L<nowiki />L]]
-			&& page_name.tag.toLowerCase() in extensiontag_hash;
+			// && page_name.tag.toLowerCase() in extensiontag_hash
+
+			// e.g., [[ //example.org]]
+			|| /^\s*\/\//.test(page_name);
 		}
 
+		// TODO: suffix https://en.wikipedia.org/wiki/Help:Pipe_trick
 		// TODO: 緊接在連結前面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分。
 		// https://phabricator.wikimedia.org/T263266
 		// TODO: "[<!--1-->[t|x]<!--2--><!--2-->]"
@@ -1680,6 +1732,11 @@ function module_code(library_namespace) {
 
 			// --------------------------------------------
 
+			function is_pipe_separator(token) {
+				return token && token.type === 'magic_word_function'
+						&& token.name === '!';
+			}
+
 			// [ page_name{{!}}, |, display_text ]
 			// →
 			// [ page_name, {{!}}, |display_text ]
@@ -1688,18 +1745,34 @@ function module_code(library_namespace) {
 
 				var invalid_token_data = has_invalid_token(page_and_anchor,
 				//
-				function is_pipe_separator(token) {
-					if (token) {
-						if (token.type === 'link')
-							return this.link_inside_link = true;
-						return token.type === 'magic_word_function'
-								&& token.name === '!';
+				function(token) {
+					function for_each_token() {
+						if (!token)
+							return;
+
+						if (is_pipe_separator(token))
+							return this.is_pipe_separator = true;
+
+						// page name 不能包含這些類型
+						return token.type in {
+							// tag 會在 is_invalid_page_name(page_name) 被刷掉。
+							// tag : true,
+
+							// this.link_inside_link = true;
+							link : true,
+
+							external_link : true,
+							url : true
+						};
 					}
+
+					return for_each_non_plain_subtoken(token, for_each_token
+							.bind(this))
 				});
 
 				// [ valid_value, invalid_token_mark, queue_index ]
 				if (invalid_token_data) {
-					if (invalid_token_data.link_inside_link)
+					if (!invalid_token_data.is_pipe_separator)
 						return previous + all_link;
 
 					if (pipe_separator) {
@@ -1778,6 +1851,11 @@ function module_code(library_namespace) {
 					return previous + all_link;
 				}
 				if (page_name.includes(include_mark)) {
+					// e.g., [[{{T}}]]
+					// assert: 先前的
+					// if (page_and_anchor.includes(include_mark))
+					// 僅檢核 invalid token，沒 resolve。
+
 					// console.trace(page_name);
 					// 預防有特殊 elements 置入link其中。
 					page_name = parse_wikitext(page_name, options, queue);
@@ -1804,6 +1882,9 @@ function module_code(library_namespace) {
 					page_name = [ page_name ];
 					page_name.oddly = matched || true;
 				} else {
+					if (is_invalid_page_name(page_name)) {
+						return previous + all_link;
+					}
 					var matched = (session || wiki_API).namespace(page_name, {
 						get_name : true
 					});
@@ -2052,6 +2133,36 @@ function module_code(library_namespace) {
 				} else {
 					var parsed_display_text = parse_wikitext(display_text,
 							options, queue);
+					while (for_each_non_plain_subtoken(parsed_display_text,
+					// 一直執行到不包含external_link為止。
+					function(token, index, parent) {
+						if (!token)
+							return;
+						if (token.type === 'external_link') {
+							token.type = 'plain';
+							// assert: token[0].type === 'url'
+							delete token[0].parent;
+							token.push(']');
+							token.unshift('[');
+							if (parent) {
+								parent[index] = token;
+							} else {
+								// assert: parent ===
+								// parsed_display_text
+								parsed_display_text = token;
+							}
+							return true;
+						}
+						if (token.type === 'url') {
+							// e.g., [[a| https://example.org]]
+							// 無連結功能、無連結作用。
+							token.no_linking_effect = parameters;
+						}
+					})) {
+						parsed_display_text = flat_plain_element(
+								parsed_display_text, options);
+					}
+
 					// 需再進一步處理 {{}}, -{}- 之類。
 					// [[w:en:Wikipedia:Categorization#Sort keys]]
 					parameters[category_matched ? 'sort_key'
@@ -2965,6 +3076,7 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// TODO: "[[t|d<b>b]]B</b>n"
 		function parse_HTML_tag(all, tag, attributes, inner, ending, end_tag,
 				offset, original_string) {
 			// console.log('queue start:');
@@ -3891,6 +4003,7 @@ function module_code(library_namespace) {
 							need_create_next_token.type);
 					need_create_next_token.following_content = this_token;
 					this_token.previous_content = need_create_next_token;
+					tokens_to_resolve.push(this_token);
 					queue.push(this_token);
 					wikitext += include_mark + (queue.length - 1) + end_mark;
 				}
@@ -3959,7 +4072,7 @@ function module_code(library_namespace) {
 			return wikitext;
 		}
 
-		function parse_section(all, previous, section_level, parameters,
+		function parse_section_title(all, previous, section_level, parameters,
 				postfix) {
 			function not_only_comments(token) {
 				return typeof token === 'string' ? !/^[ \t]+$/.test(token)
@@ -4425,11 +4538,22 @@ function module_code(library_namespace) {
 		// @see
 		// https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
 
-		// 注意: "[[http://example.com]]" 會被解析成 external_link，
-		// 因此 parse_external_link() 應放在 parse_wikilink() 前面。
-
+		// 不可跨行。
 		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
 				parse_external_link);
+
+		// ----------------------------------------------------
+		// plain url
+
+		// PATTERN_external_link_global 必須偵測 url pattern，因此必須
+		// parse_external_link() → parse_wikilink()
+		// 又因為 "[[http://example.com]]" 會被解析成 external_link，因此必須
+		// parse_external_link() or parse_external_link() → parse_wikilink()
+		if (!options.inside_transclusion) {
+			// 不可跨行。
+			wikitext = wikitext.replace_till_stable(
+					PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_url);
+		}
 
 		// ----------------------------------------------------
 		// wikilink
@@ -4455,8 +4579,6 @@ function module_code(library_namespace) {
 
 		// 在 transclusion 中不會被當作 bare / plain URL。
 		if (!options.inside_transclusion) {
-			wikitext = wikitext.replace_till_stable(
-					PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_url);
 
 			// ----------------------------------------------------
 			// 處理 / parse list @ wikitext
@@ -4536,6 +4658,8 @@ function module_code(library_namespace) {
 		// console.trace(PATTERN_non_extensiontags);
 		// console.trace(wikitext);
 
+		// 表格的 cell 可截斷 <b>，因此
+		// parse_table() → PATTERN_non_extensiontags
 		wikitext = wikitext.replace_till_stable(PATTERN_non_extensiontags,
 				parse_HTML_tag);
 
@@ -4556,7 +4680,8 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 
 		wikitext = wikitext.replace(PATTERN_BEHAVIOR_SWITCH,
-				parse_behavior_switch);
+		// 可跨行。
+		parse_behavior_switch);
 
 		// 若是要處理<b>, <i>這兩項，也必須調整 wiki_API.section_link()。
 
@@ -4571,10 +4696,11 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 
-		// '''~''' ''~'' 不能跨行，且須在 parse_transclusion(), parse_table() 之後解析！
+		// parse_transclusion(), parse_table() → split_text_apostrophe_unit()
 		// 注意: '''{{font color}}''', '''{{tsl}}''', '''{{text}}'''
 
 		if (!options.inside_apostrophe) {
+			// '''~''' ''~'' 不能跨行。
 			wikitext = wikitext.split('\n').map(split_text_apostrophe_unit)
 					.join('\n');
 		}
@@ -4586,18 +4712,18 @@ function module_code(library_namespace) {
 
 		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
 
-		// @see PATTERN_section
-		var PATTERN_section =
+		var PATTERN_section_title =
 		// 採用 positive lookahead (?=\n|$) 是為了循序匹配 section title，不跳過任何一個。
 		// 不採用則 parse_wiki 處理時若遇到連續章節，不會按照先後順序，造成這邊還不能設定
 		// section_title_hierarchy，只能在 parsed.each_section() 設定。
 		generate_token_pattern(
 				/(^|\n)(={1,6})(.+)\2((?:[ \t]|token_mark)*)(?=\n|$)/g, options);
-		// console.log(PATTERN_section);
+		// console.log(PATTERN_section_title);
 		// console.log(JSON.stringify(wikitext));
 
+		// 不可跨行。
 		// 應該一次遍歷就找出所有的 section title，否則 section_title_hierarchy 會出錯。
-		wikitext = wikitext.replace(PATTERN_section, parse_section);
+		wikitext = wikitext.replace(PATTERN_section_title, parse_section_title);
 
 		// console.log('10: ' + JSON.stringify(wikitext));
 
@@ -4633,17 +4759,19 @@ function module_code(library_namespace) {
 		}
 
 		// ----------------------------------------------------
-		// MUST be last: 處理段落 / parse paragraph @ wikitext
+		// MUST be last: 處理 \n{2,} 分隔的段落 / parse paragraph (<p></p>) @ wikitext
 
 		// console.log('15: ' + JSON.stringify(wikitext));
+
 		// [ all, text, separator ]
 		var PATTERN_paragraph = /([\s\S]*?)((?:\s*?\n){2,}|$)/g;
+		// ** NOT section! 不是章節!
 		if (initialized_fix && options.parse_paragraph
 				&& /\n\s*?\n/.test(wikitext)) {
 			// 警告: 解析段落的動作可能破壞文件的第一層結構，會使文件的第一層結構以段落為主。
 			wikitext = wikitext.replace(PATTERN_paragraph,
 			// assert: 這個 pattern 應該能夠完全分割 wikitext。
-			function(all, text, separator) {
+			function parse_paragraph(all, text, separator) {
 				if (!all) {
 					return '';
 				}
