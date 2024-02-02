@@ -1537,34 +1537,83 @@ function module_code(library_namespace) {
 			article_lead_section : [ 'Soft redirect', 'Short description',
 			// hatnote templates
 			'Hatnote',
+
 			// deletion templates [[Category:刪除模板]]
 			'Proposed deletion', 'Article for deletion', 'Copy edit',
 			//
 			'Use American English', 'Use mdy dates', 'Use dmy dates',
+
 			// infobox templates
 			'Infobox', 'Contains special characters' ],
+
 			// [[w:en:Wikipedia:Talk page layout#Lead (bannerspace)]]
 			// @ [[w:en:Wikipedia:Talk page layout#Talk page layout]]
-			talk_page_lead : [ 'GA nominee', 'Featured article candidates',
-					'Peer review', 'Skip to talk', 'Talk page of redirect',
-					'Soft redirect', 'Talk header',
-					// High-importance attention templates
-					'Notice', 'Contentious topics/talk notice',
-					'Gs/talk notice', 'BLP others',
-					// Specific talk page guideline banners
-					'Calm', 'Censor', 'Controversial', 'Not a forum', 'FAQ',
-					'Round in circles', 'American English', 'British English',
-					'GA', 'FailedGA', 'Old XfD multi', 'Old prod', 'DYK talk',
-					'On this day', 'ITN talk', 'Article history',
-					'WikiProject banner shell', 'WikiProject Biography',
-					'Image requested', 'Infobox requested',
-					'Connected contributor', 'To do', 'Consensus',
-					'Reliable sources for medical articles', 'Copied',
-					'Split article', 'Merged-from', 'Merged-to',
-					'Annual readership', 'Section sizes', 'Translated page',
-					'Archives' ],
+			// @see
+			// "Other talk page template redirect fixes; Cleanup redirects"
+			// @ https://en.wikipedia.org/wiki/User:Magioladitis/WikiProjects
+			talk_page_lead : [
+			// Active nominations, when applicable
+			'GA nominee', 'Featured article candidates', 'Peer review',
+
+			// Skip templates
+			'Skip to talk', 'Skip to bottom', 'Skip to section',
+			//
+			'Skip to top and bottom',
+
+			// On redirect talk pages
+			'Talk page of redirect', 'Soft redirect',
+
+			// should only be used where it is needed
+			'Talk header',
+
+			// High-importance attention templates
+			'Notice', 'Contentious topics/talk notice', 'Gs/talk notice',
+			//
+			'BLP others',
+
+			// TalkWarningTemplates @
+			// https://sourceforge.net/p/autowikibrowser/code/HEAD/tree/AWB/WikiFunctions/TalkPageFixes.cs#l237
+			"COI editnotice", "Warning", "Austrian economics sanctions",
+
+			// Specific talk page guideline banners
+			'Calm', 'Censor', 'Controversial', 'Not a forum', 'FAQ',
+			//
+			'Round in circles',
+
+			// Language-related talk page guideline banners
+			'Category:Varieties of English templates',
+
+			// Any "article history"
+			// @see [[Category:Talk message boxes]]
+			'GA', 'FailedGA', 'Old XfD multi', 'Old prod', 'Old peer review',
+			// TalkHistoryBTemplates @
+			// https://sourceforge.net/p/autowikibrowser/code/HEAD/tree/AWB/WikiFunctions/TalkPageFixes.cs#l237
+			"Afd-merged-from", "Old CfD", "Old RfD",
+
+			// "article milestone"
+			'Article history', 'DYK talk', 'On this day', 'ITN talk',
+			// {{WPBS}}
+			'WikiProject banner shell', 'WikiProject Biography',
+
+			// banners indicating a known issue with the page
+			'Image requested', 'Photo requested', 'Infobox requested',
+			// if applicable
+			'Connected contributor', 'Press',
+			// when used as a banner
+			'To do', 'Consensus',
+			//
+			'Reliable sources for medical articles',
+			// Attribution history templates
+			'Copied', 'Split article', 'Merged-from', 'Merged-to',
+			// Page metadata
+			'Annual readership', 'Section sizes',
+			// Smaller right-aligned banners
+			'Translated page',
+			// dedicated archive templates
+			'Archives' ],
 
 			appendices : [ 'Reflist', 'Refbegin', 'Refend' ],
+
 			// footer
 			end_matter : [
 			// succession templates
@@ -1576,6 +1625,7 @@ function module_code(library_namespace) {
 			// Geographical coordinates
 			'Coord', 'Coord missing', 'DEFAULTSORT' ]
 		},
+
 		zhwiki : {
 			// [[w:zh:Wikipedia:格式手冊/版面佈局#導言]]
 			// [[w:zh:Wikipedia:格式手冊/序言章節]]
@@ -1975,6 +2025,7 @@ function module_code(library_namespace) {
 		;
 	}
 
+	// prepare for using parsed.insert_layout_element()
 	function setup_layout_element_to_insert(token, callback, options) {
 		var session = this;
 		options = wiki_API.add_session_to_options(session, Object.assign({
@@ -1982,12 +2033,80 @@ function module_code(library_namespace) {
 			no_message : true
 		}, options));
 
-		function do_register_redirects(location) {
-			if (!location)
-				location = get_location_of_template_element(token, options);
+		var location, template_name_list, category_name_list = [];
+		function do_register_redirects() {
+			if (false) {
+				console.trace(wiki_API.site_name(session), location,
+						template_name_list);
+			}
+			session.register_redirects(template_name_list, function(
+					root_page_data, error) {
+				callback(location, error);
+			}, options);
+		}
+
+		function get_next_categorymembers() {
+			if (category_name_list.length === 0) {
+				do_register_redirects();
+				return;
+			}
+
+			var category_name = category_name_list.shift();
+			// assert: session.is_namespace(category_name, 'category')
+
+			wiki_API.list(category_name,
+			//
+			function(list/* , target, options */) {
+				var index = template_name_list.indexOf(category_name);
+				// assert: index >= 0
+				// console.trace([ category_name, index, list ]);
+
+				// assert: Array.isArray(list)
+				if (list.error) {
+					library_namespace
+							.error('setup_layout_element_to_insert: '
+									+ 'Cannot get ' + category_name + ': '
+									+ list.error);
+					template_name_list.split(index, 1);
+					get_next_categorymembers();
+					return;
+				}
+
+				list = list.filter(function(page_data) {
+					return session.is_namespace(page_data, 'template');
+				}).map(function(page_data) {
+					return session.remove_namespace(page_data);
+				});
+
+				// Keep order.
+				list.unshift(index, 1);
+				Array.prototype.splice.apply(template_name_list, list);
+				get_next_categorymembers();
+			}, Object.assign({
+				type : 'categorymembers'
+			}, options));
+		}
+
+		function check_template_list() {
+			location = get_location_of_template_element(token, options);
 			if (!location) {
-				if (callback)
-					callback(location, 'No location');
+				if (token.type !== 'transclusion') {
+					if (callback)
+						callback(location, 'No location');
+					return;
+				}
+
+				library_namespace.debug('先解析 layout element 模板的重定向: ' + token,
+						1, 'setup_layout_element_to_insert');
+				session.register_redirects(token.name, function(root_page_data,
+						error) {
+					// console.trace(root_page_data);
+					token = wiki_API.parse(token.toString(), options);
+					token[0] = session.remove_namespace(root_page_data.title);
+					token = wiki_API.parse(token.toString(), options);
+					// console.trace(token);
+					check_template_list();
+				}, options);
 				return;
 			}
 
@@ -2000,7 +2119,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (!template_order_of_layout[location]) {
+			template_name_list = template_order_of_layout[location];
+			if (!Array.isArray(template_name_list)) {
 				if (callback) {
 					callback(location
 					// , 'Nothing to run session.register_redirects()'
@@ -2009,32 +2129,37 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			session.register_redirects(template_order_of_layout[location],
+			template_name_list = template_order_of_layout[location]
 			//
-			function(root_page_data, error) {
-				callback(location, error);
-			}, options);
+			= template_name_list.filter(function(page_name) {
+				page_name = page_name.trim();
+				if (!page_name)
+					return;
+				if (session.is_namespace(page_name, 'main')) {
+					// normal
+					return true;
+				}
+				if (session.is_namespace(page_name, 'template')) {
+					template_name_list[index] = session
+							.remove_namespace(page_name);
+					return true;
+				}
+				if (session.is_namespace(page_name, 'category')) {
+					category_name_list.push(page_name);
+					return true;
+				}
+				library_namespace.warn('setup_layout_element_to_insert: '
+						+ 'Invalid namespace in location [' + location + ']: '
+						+ page_name);
+			});
+
+			get_next_categorymembers();
 		}
 
 		if (typeof token === 'string')
 			token = wiki_API.parse(token, options);
 
-		var location = get_location_of_template_element(token, options);
-		if (location || token.type !== 'transclusion') {
-			do_register_redirects(location);
-			return;
-		}
-
-		library_namespace.debug('先解析 layout element 模板的重定向: ' + token, 1,
-				'setup_layout_element_to_insert');
-		session.register_redirects(token.name, function(root_page_data, error) {
-			// console.trace(root_page_data);
-			token = wiki_API.parse(token.toString(), options);
-			token[0] = session.remove_namespace(root_page_data.title);
-			token = wiki_API.parse(token.toString(), options);
-			// console.trace(token);
-			do_register_redirects();
-		}, options);
+		check_template_list();
 	}
 
 	/**
