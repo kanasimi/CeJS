@@ -1468,33 +1468,7 @@ function module_code(library_namespace) {
 	}
 
 	var layout_configuration = {
-		// {{Short description}}
-		'short description' : 'Template:Short description',
 
-		// [[Category:Hatnote templates]]
-		'hatnote' : 'Category:Hatnote templates',
-
-		// Deletion / protection tags
-		// [[Category:Speedy deletion templates]],
-		// [[Category:Proposed deletion-related templates]],
-		// [[Category:Protection templates]]
-		'deletion tag' : [ 'Category:Speedy deletion templates',
-				'Category:Proposed deletion-related templates',
-				'Category:Protection templates' ],
-
-		// Maintenance / dispute tags
-
-		// {{Use British English}}, {{Use mdy dates}}
-		'date style' : [ 'Template:Use mdy dates', 'Template:Use dmy dates' ],
-
-		// {{Info...}}
-
-		// [[Category:Foreign character warning boxes]]
-		'foreign character warning box' : 'Category:Foreign character warning boxes'
-
-	// Images
-	// Navigational boxes (header navboxes)
-	// introduction
 	};
 
 	// ------------------------------------------------------------------------
@@ -1502,25 +1476,31 @@ function module_code(library_namespace) {
 	var default_layout_order = [
 	// header
 	'page_begin',
-	// [[w:en:Category:Deletion tags]], [[w:en:Category:Deletion templates]],
-	// [[w:en:Category:Speedy deletion templates]]
-	'deletion_templates', 'redirect', 'redirect_end', 'article_lead_section',
-			'short_description', 'hatnote_templates', 'talk_page_lead',
-			'deletion_templates', 'protection_templates', 'dispute_templates',
-			'maintenance_templates', 'infobox_templates',
-			//
-			'lead_templates_end', 'lead_section_end', 'content', 'content_end',
-			//
-			'appendices',
-			//
-			'end_matter', 'succession_templates', 'navigation_templates',
-			'featured_template', 'DEFAULTSORT', 'categories', 'stub_templates',
-			//
-			'page_end' ];
 
-	// 整個頁面只能有單一個這種元素。
-	var single_layout_types = [ 'short_description', 'featured_template',
-			'DEFAULTSORT' ];
+	'deletion_templates',
+
+	'redirect', 'redirect_end',
+
+	// lead_section_locations
+	'article_lead_section', 'talk_page_lead', 'hatnote_templates',
+	// [[Category:Wikipedia maintenance templates]]
+	'maintenance_templates', 'wikiproject_banners', 'infobox_templates',
+
+	'lead_templates_end', 'lead_section_end',
+
+	'content', 'content_end',
+
+	'appendices',
+	//
+	'end_matter', 'navigation_templates', 'DEFAULTSORT', 'categories',
+
+	// 小作品模板 stub_templates, zhwiki:featured_template
+	'page_footer',
+	//
+	'page_end' ];
+
+	// 整個頁面只能有單一個這種 location。
+	var single_layout_location_types = [ 'redirect', 'DEFAULTSORT' ];
 
 	var KEY_map_template_to_location = typeof Symbol === 'function' ? Symbol('template_to_location')
 			: '\0template_to_location';
@@ -1532,19 +1512,51 @@ function module_code(library_namespace) {
 	// assert: default_layout_order.includes(layout type)
 	setup_layout_elements.template_order_of_layout = {
 		enwiki : {
-			// [[w:en:Wikipedia:Manual of Style/Lead section]]
+			// Deletion / protection tags
+			// @see [[Category:Deletion templates]]
+			deletion_templates : [ 'Category:Deletion tags',
+					'Category:Speedy deletion templates' ],
+
+			// [[Wikipedia:Manual of Style/Lead section]]
 			// [[Wikipedia:Manual of Style/Layout#Order of article elements]]
 			article_lead_section : [ 'Soft redirect', 'Short description',
-			// hatnote templates
-			'Hatnote',
+			//
+			'DISPLAYTITLE', 'Lowercase title', 'Italic title',
+
+			// Hatnotes / hatnote templates
+			'Category:Hatnote templates',
+
+			'Featured list', 'Featured article', 'Good article',
 
 			// deletion templates [[Category:刪除模板]]
-			'Proposed deletion', 'Article for deletion', 'Copy edit',
-			//
-			'Use American English', 'Use mdy dates', 'Use dmy dates',
+			'Proposed deletion', 'Category:Protection templates',
+			// 'Category:Proposed deletion-related templates',
+			'Article for deletion', 'Copy edit',
 
-			// infobox templates
-			'Infobox', 'Contains special characters' ],
+			// Maintenance / dispute tags
+			'Category:Cleanup templates', 'Category:Dispute templates',
+
+			// English variety and date format
+			'Category:Use English templates',
+			// @see [[Category:Time and date maintenance templates]]
+			'Use mdy dates', 'Use dmy dates',
+
+			// Infoboxes / infobox templates
+			'Infobox',
+
+			// e.g., {{Contains special characters}}
+			'Category:Language maintenance templates',
+
+			// zhwiki: foreign character warning box
+			// 'Category:Foreign character warning boxes'
+
+			// Images
+
+			// Navigation header templates (sidebar templates)
+			// / Navigational boxes (header navboxes)
+
+			// introduction
+			],
 
 			// [[w:en:Wikipedia:Talk page layout#Lead (bannerspace)]]
 			// @ [[w:en:Wikipedia:Talk page layout#Talk page layout]]
@@ -1593,7 +1605,9 @@ function module_code(library_namespace) {
 			// "article milestone"
 			'Article history', 'DYK talk', 'On this day', 'ITN talk',
 			// {{WPBS}}
-			'WikiProject banner shell', 'WikiProject Biography',
+			'WikiProject banner shell',
+			// wikiproject_banners
+			'Category:WikiProject banners with quality assessment',
 
 			// banners indicating a known issue with the page
 			'Image requested', 'Photo requested', 'Infobox requested',
@@ -1627,19 +1641,23 @@ function module_code(library_namespace) {
 		},
 
 		zhwiki : {
-			// [[w:zh:Wikipedia:格式手冊/版面佈局#導言]]
-			// [[w:zh:Wikipedia:格式手冊/序言章節]]
+			// [[Wikipedia:格式手冊/版面佈局#導言]]
+			// [[Wikipedia:格式手冊/序言章節]]
 			article_lead_section : [ '討論頁重定向', 'Soft redirect',
-			// deletion templates [[Category:刪除模板]]
-			'Vfd', 'Cfd',
+			// deletion templates
+			'Category:刪除模板',
 			// [[Wikipedia:模板消息/消歧义模板]]
-			'Distinguish', 'Other uses',
+			// [[Category:消歧义与重定向模板]]
+			'Category:顶注模板',
 			// [[Wikipedia:模板消息/维护|維護模板]]
-			'Multiple issues', 'Cleanup', 'Unreferenced',
+			'Multiple issues', 'Category:清理模板', 'Category:引用與查證維護模板',
+			//
+			'Category:維基百科維護模板',
+
 			// 字詞轉換模板
 			'NoteTA', '全局僻字',
 			// 導讀提示模板
-			'CJK-New-Char', 'UTC+8',
+			'Category:頁面訊息模板', 'Category:时间模板',
 			// 資訊框模板
 			'Infobox' ],
 
@@ -1652,12 +1670,19 @@ function module_code(library_namespace) {
 			'Navbox', 'Navboxes', 'Portal bar', 'Taxonbar',
 			// authority control template "控製"也能引導到"控制"
 			'Authority control', '規範控製', '權威控製', 'Coord', 'Coord missing',
-					'DEFAULTSORT' ]
+					'DEFAULTSORT' ],
+
+			page_footer : [
+
+			'Featured list', 'Featured article', 'Good article'
+
+			]
 		}
 	};
 
 	// TODO: analysis wiki page layout 定位版面布局元素
 	// search anchor tokens of elements @ [[WP:LAY]],
+	// TODO: 處理/警告只能包含一個的 tempalte 分組。
 	function analysis_layout_indices(options) {
 		var parsed = this;
 		if (parsed.layout_indices)
@@ -1688,14 +1713,27 @@ function module_code(library_namespace) {
 				layout_indices[layout_type] = _index >= 0 ? _index : index;
 				return true;
 			}
-			if (single_layout_types.includes(layout_type)) {
-				library_namespace.error([ 'analysis_layout_indices: ', {
+
+			if (single_layout_location_types.includes(layout_type)
+					&& index !== layout_indices[layout_type]
+					&& index < parsed.length
+			// && layout_type !== 'content'
+			) {
+				library_namespace.warn([ 'analysis_layout_indices: ', {
 					T : [
 					// gettext_config:{"id":"there-are-more-than-one-$1-in-$2"}
 					'There are more than one %1 in %2', layout_type,
 					//
 					wiki_API.title_link_of(parsed.page || 'null page') ]
 				} ]);
+				if (library_namespace.is_debug()) {
+					console.trace([
+							layout_indices[layout_type],
+							parsed[layout_indices[layout_type]]
+									&& parsed[layout_indices[layout_type]]
+											.toString(), index,
+							parsed[index] && parsed[index].toString() ]);
+				}
 			}
 		}
 
@@ -1709,6 +1747,8 @@ function module_code(library_namespace) {
 				if ((session || wiki_API).is_template(
 						template_order_of_layout[location], token)) {
 					set_index(location);
+					if (location === 'deletion_templates')
+						delete layout_indices.content;
 					return location;
 				}
 			}
@@ -1740,7 +1780,10 @@ function module_code(library_namespace) {
 
 		function set_content_token_index() {
 			set_index('content');
-			layout_indices.content_end = index + 1;
+			// 本 token 屬於 content，因此 content_end 起碼為下一個開始。
+			var content_end_index = index + 1;
+			if (!(layout_indices.content_end >= content_end_index))
+				layout_indices.content_end = content_end_index;
 			delete layout_indices.navigation_templates;
 			delete layout_indices.end_matter;
 		}
@@ -1752,7 +1795,10 @@ function module_code(library_namespace) {
 				continue;
 
 			if (token.type in {
+				// e.g., ----
 				hr : true,
+				// e.g., __TOC__
+				'switch' : true,
 				comment : true
 			}) {
 				// Skip comments, etc.
@@ -1769,7 +1815,7 @@ function module_code(library_namespace) {
 
 				// treat as 正文 Article content, Lead section
 				// e.g., 首段即有內容。
-				set_index('content');
+				set_content_token_index();
 				continue;
 			}
 
@@ -1778,35 +1824,17 @@ function module_code(library_namespace) {
 
 			switch (token.type) {
 			case 'transclusion':
-				if (!(layout_indices.lead_section_end >= 0)) {
-					if ((session || wiki_API).is_template('Short description',
-							token)) {
-						set_index('short_description');
-					} else if (/^(?:(?:About|For|Further|Main|Other|Redirect|See)(?:\w+|([\s\-]?\w+)+)?|Distinguish|Qnote)$/
-					// [[Category:Hatnote templates]]
-					.test(token.name)) {
-						// TODO: 若 [[w:zh:Template:DYKEntry/archive]]
-						// 這種自包含章節標題的模板放在首段，插入時會出錯。
-						set_index('talk_page_lead');
-						set_index('hatnote_templates');
-					} else if (/^(?:Db-\w+)$/.test(token.name)
-							|| (session || wiki_API).is_template([
-									'Proposed deletion',
-									'Article for deletion', 'Copy edit' ],
-									token)) {
-						set_index('deletion_templates');
-						delete layout_indices.content;
-					} else if (/^Pp/.test(token.name)) {
-						set_index('protection_templates');
-					} else if (/^Dispute/.test(token.name)) {
-						set_index('dispute_templates');
-					} else if (/^Infobox/.test(token.name)) {
-						set_index('infobox_templates');
-					} else if (check_template_order_of_layout(token)) {
-						// 屬於有登記的模板。
+				if (check_template_order_of_layout(token)) {
+					// 屬於有登記的模板。
 
+				} else if (!(layout_indices.lead_section_end >= 0)) {
+					if (token.name.startsWith('Infobox ')) {
+						set_index('infobox_templates');
+					} else if (token.name.startsWith('WikiProject ')) {
+						set_index('wikiproject_banners');
 					} else if ((session || wiki_API)
 					// [[w:zh:Template:DYKEntry/archive]]
+					// 這種自包含章節標題的模板放在首段，插入時會出錯。
 					.is_template('DYKEntry/archive', token)
 					// 嵌入包含了其他頁面。
 					// e.g., [[w:en:Talk:Cuvier's dwarf caiman]],
@@ -1814,52 +1842,37 @@ function module_code(library_namespace) {
 					|| /^(?:\w[ _])?Talk:/.test(token.name)) {
 						// 模板本身包含標題。
 						// e.g., [[w:zh:Template:DYKEntry/archive]]
-						set_index('content');
 						set_index('lead_section_end', BACKTRACKING_SPACES);
 						set_index('lead_templates_end', BACKTRACKING_SPACES);
+						set_content_token_index();
 
-					} else if (set_index('maintenance_templates')) {
+					} else {
 						// maintenance tag
-
+						set_index('maintenance_templates');
 					}
 
 				} else {
 					// console.trace(token);
-					if (/^Ref/i.test(token.name)) {
-						set_index('content_end');
-						set_index('appendices');
+					if (/(?:Stub|小作品)$/i.test(token.name)
+					// ↑ e.g., {{Africa-stub}}
+					|| layout_indices.categories >= 0
+							|| layout_indices.DEFAULTSORT >= 0) {
+						set_index('content_end', BACKTRACKING_SPACES);
+						set_index('end_matter');
+						set_index('page_footer');
 
-					} else {
-						if (/^(?:Succession|S-)$/.test(token.name)) {
-							set_index('content_end', BACKTRACKING_SPACES);
-							set_index('end_matter');
-							set_index('succession_templates');
-						} else if (/^(?:Featured list|Featured article|Good article)$/
-								.test(token.name)) {
-							set_index('content_end', BACKTRACKING_SPACES);
-							set_index('end_matter');
-							set_index('featured_template');
-						} else if (/(?:Stub|小作品)$/i.test(token.name)
-								|| layout_indices.categories >= 0
-								|| layout_indices.DEFAULTSORT >= 0) {
-							set_index('content_end', BACKTRACKING_SPACES);
-							set_index('end_matter');
-							// 小作品模板‎
-							set_index('stub_templates');
-						} else if (layout_indices.content_end >= 0
-								&& set_index('navigation_templates')) {
-							;
-						}
+					} else if (layout_indices.content_end >= 0) {
+						set_index('navigation_templates');
 					}
 				}
 				break;
 
 			case 'section_title':
-				// 第一個有標題的段落亦可算作 content。
-				set_index('content');
 				// 機器人是看標題與起始 hatnote templates 來判斷。若這個模板之前還有其他章節標題的話，就不會出錯了。
 				set_index('lead_section_end', BACKTRACKING_SPACES);
 				set_index('lead_templates_end', BACKTRACKING_SPACES);
+				// 第一個有標題的段落亦可算作 content。
+				set_content_token_index();
 				break;
 
 			case 'category':
@@ -1873,8 +1886,8 @@ function module_code(library_namespace) {
 					デフォルトソート : true,
 					DEFAULTSORT : true
 				}) {
-					set_index('DEFAULTSORT');
 					set_index('end_matter');
+					set_index('DEFAULTSORT');
 					break;
 				}
 				set_content_token_index();
@@ -1883,10 +1896,17 @@ function module_code(library_namespace) {
 			case 'tag_single':
 			case 'tag':
 				if (token.tag === 'references') {
-					set_index('content_end');
+					set_content_token_index();
 					set_index('appendices');
 				}
 				set_content_token_index();
+				break;
+
+			case 'file':
+				if (!(layout_indices.content >= 0)) {
+					// Images
+					// set_index('image');
+				}
 				break;
 
 			default:
@@ -1911,15 +1931,15 @@ function module_code(library_namespace) {
 		// assert: index === parsed.length
 		set_index('content_end');
 		set_index('end_matter');
+		// set_index('page_footer');
 		set_index('page_end');
 
 		index = layout_indices.content;
 		// 添加在首段文字或首個 section_title 前，最後一個 hatnote template 後。
 		set_index('lead_templates_end', BACKTRACKING_SPACES);
 
-		index = layout_indices.short_description >= 0 ? layout_indices.short_description
-				: layout_indices.redirect_end >= 0 ? layout_indices.redirect_end
-						: layout_indices.page_begin;
+		index = layout_indices.redirect_end >= 0 ? layout_indices.redirect_end
+				: layout_indices.page_begin;
 
 		// assert: layout_indices.lead_section_end >=0
 		// && layout_indices.content >=0
@@ -1937,8 +1957,7 @@ function module_code(library_namespace) {
 
 	if (false) {
 		parsed = page_data.parse();
-		parsed.insert_layout_element('{{maintenance_template}}',
-				'maintenance_templates');
+		parsed.insert_layout_element('{{WPBS}}');
 		parsed.insert_layout_element('[[Category:category name]]');
 		parsed.insert_layout_element('{{DEFAULTSORT:sort key}}');
 		return parsed.toString();
@@ -2033,7 +2052,7 @@ function module_code(library_namespace) {
 			no_message : true
 		}, options));
 
-		var location, template_name_list, category_name_list = [];
+		var location, template_name_list, category_name_list = [], template_name_Set;
 		function do_register_redirects() {
 			if (false) {
 				console.trace(wiki_API.site_name(session), location,
@@ -2047,6 +2066,8 @@ function module_code(library_namespace) {
 
 		function get_next_categorymembers() {
 			if (category_name_list.length === 0) {
+				// free
+				template_name_Set = null;
 				do_register_redirects();
 				return;
 			}
@@ -2072,25 +2093,36 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				list = list.filter(function(page_data) {
-					return session.is_namespace(page_data, 'template');
-				}).map(function(page_data) {
-					return session.remove_namespace(page_data);
+				if (!template_name_Set)
+					template_name_Set = new Set(template_name_list);
+
+				var filtered_list = [], page_data;
+				list.forEach(function(page_data) {
+					if (!session.is_namespace(page_data, 'template'))
+						return;
+					var page_name = session.remove_namespace(page_data);
+					if (!template_name_Set.has(page_name))
+						filtered_list.push(page_name);
 				});
 
 				// Keep order.
-				list.unshift(index, 1);
-				Array.prototype.splice.apply(template_name_list, list);
+				filtered_list.unshift(index, 1);
+				Array.prototype.splice
+				//
+				.apply(template_name_list, filtered_list);
 				get_next_categorymembers();
+
 			}, Object.assign({
 				type : 'categorymembers'
 			}, options));
 		}
 
 		function check_template_list() {
-			location = get_location_of_template_element(token, options);
+			if (!location && token) {
+				location = get_location_of_template_element(token, options);
+			}
 			if (!location) {
-				if (token.type !== 'transclusion') {
+				if (!token || token.type !== 'transclusion') {
 					if (callback)
 						callback(location, 'No location');
 					return;
@@ -2156,8 +2188,13 @@ function module_code(library_namespace) {
 			get_next_categorymembers();
 		}
 
-		if (typeof token === 'string')
-			token = wiki_API.parse(token, options);
+		if (typeof token === 'string') {
+			// treat token as location
+			location = get_template_order_of_layout(session, token);
+			if (!location) {
+				token = wiki_API.parse(token, options);
+			}
+		}
 
 		check_template_list();
 	}
@@ -2167,6 +2204,12 @@ function module_code(library_namespace) {
 
 	// 警告: 使用這個功能必須先:
 	session.setup_layout_element_to_insert(layout_element, callback);
+	session.setup_layout_element_to_insert(location, callback);
+	// e.g.,
+	session.setup_layout_element_to_insert('{{WPBS}}', callback);
+	session.setup_layout_element_to_insert('deletion_templates', callback);
+
+
 	// or:
 	session.setup_layout_elements(callback, options);
 
@@ -2342,7 +2385,7 @@ function module_code(library_namespace) {
 		var append_original_layout_token = layout_index >= 0
 		// 或可有多個 layout_token，則將 original_layout_token === parsed[parsed_index]
 		// 添附於 token 後，並且不傳入原先的 original_layout_token。
-		|| !single_layout_types.includes(location);
+		|| !single_layout_location_types.includes(location);
 
 		if (typeof token === 'function') {
 			token = token.call(this, !append_original_layout_token
@@ -2360,6 +2403,7 @@ function module_code(library_namespace) {
 		// ----------------------------
 
 		// 避免重複插入。
+		// dafsult: 整個頁面只能有單一個這種元素。
 		if (token.type === 'transclusion') {
 			var layout_element_list = [];
 			// 一個 layout template 只加一次。

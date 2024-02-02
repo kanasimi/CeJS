@@ -3855,7 +3855,7 @@ function module_code(library_namespace) {
 					// 本 apostrophe piece 包含非註解，不能算 "'"。
 					if (apostrophe_count < 2) {
 						// 把前面的全部搬到 unit[0]。但是必須去掉末尾的 "'"。
-						unit[0] += unit[1].join('').slice(0, -1);
+						unit[0] += unit[1].join('') + apostrophe_list[index];
 						// 重新計算。
 						apostrophe_count = 1;
 						unit[1] = [ "'" ];

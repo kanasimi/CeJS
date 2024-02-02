@@ -407,7 +407,9 @@ function module_code(library_namespace) {
 		if (full_title && (full_title = full_title.trim())
 				&& full_title !== title && chapter_data.title === title) {
 			chapter_data.title = library_namespace.HTML_to_Unicode(full_title)
-					.trim();
+					.trim()
+					// 取單一空白即可。
+					.replace(/(第.+章)((\s){2,})/, '$1$3');
 			library_namespace.log(library_namespace.display_align([
 			// @see gettext_config:{"id":"work_data.chapter_title"}
 			[ gettext('章節標題：'), JSON.stringify(title) ],

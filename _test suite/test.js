@@ -4222,6 +4222,28 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()]);
 		assert(['bold', parsed[0].type], "''' ''t'' ''' will render as <b><i>t</i></b>");
 		assert(['italic', parsed[0][1][1].type], "''' ''t'' ''' will render as <b><i>t</i></b> #2");
+		wikitext = "a '<s>t</s>' b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a <s>'t'</s> b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a ''<s>t</s>'' b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a <s>''t''</s> b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a '[[t]]' b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a ''[[t]]'' b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a '''[[t]]''' b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a ''''[[t]]'''' b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a '''''[[t]]''''' b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "a ''''''[[t]]'''''' b"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		wikitext = "'[[t]]'[[t]]<!---->[[t]]'<!---->'<s>d</s>'f'[[t]]'[[t]]'<!---->'<!---->'g'[[t]]'[[t]]'<!---->'<!---->'g"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
 		wikitext = "'''b''ib''b''ib''b'''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['bold', parsed[0].type], "''' ''t'' ... ''' will render as <b><i>t</i></b>");
@@ -5529,8 +5551,12 @@ function test_wiki() {
 			var WPBS_template_wikitext = CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/);
 			assert(['talk_page_lead', CeL.wiki.get_location_of_template_element(WPBS_template_wikitext, enwiki)], 'CeL.wiki.get_location_of_template_element() #1');
 
-			assert([true, parsed.insert_layout_element(CeL.wiki.parse(WPBS_template_wikitext), CeL.wiki.add_session_to_options(enwiki))], 'enwiki: parsed.insert_layout_element() #1');
-			assert([wikitext.replace('{{WikiProject', WPBS_template_wikitext + '\n{{WikiProject'), parsed.toString()], 'enwiki: parsed.insert_layout_element() #2');
+			assert([true, parsed.insert_layout_element(CeL.wiki.parse(WPBS_template_wikitext), CeL.wiki.add_session_to_options(enwiki))], 'enwiki: parsed.insert_layout_element() #1-1');
+			assert([wikitext.replace('{{WikiProject', WPBS_template_wikitext + '\n{{WikiProject'), parsed.toString()], 'enwiki: parsed.insert_layout_element() #1-2');
+
+			wikitext = '\n#REDIRECT [[target]]'; parsed = CeL.wiki.parser(wikitext, enwiki).parse();
+			assert([true, parsed.insert_layout_element(CeL.wiki.parse(WPBS_template_wikitext), CeL.wiki.add_session_to_options(enwiki))], 'enwiki: parsed.insert_layout_element() #2-1');
+			assert([wikitext + '\n' + WPBS_template_wikitext + '\n', parsed.toString()], 'enwiki: parsed.insert_layout_element() #2-2');
 
 			_finish_test(test_name);
 		});
