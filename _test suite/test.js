@@ -3577,6 +3577,10 @@ function test_wiki() {
 		assert(['', parsed[1]], 'wiki.parse: external link #13-4');
 		assert(['plain', parsed[2].type], 'wiki.parse: external link #13-5');
 		assert(['{{text|}} t', parsed[2].toString()], 'wiki.parse: external link #13-6');
+		wikitext = "{{t|[https://a.b d]}}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #14');
+		assert(['external_link', parsed.parameters[1].type], 'wiki.parse: external link #14');
+		assert(['url', parsed.parameters[1][0].type], 'wiki.parse: external link #14');
 
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
@@ -4730,6 +4734,9 @@ function test_wiki() {
 		wikitext = "{{<!-- -->in<!-- -->t:dot-separator}}"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{int:}} #2');
 		assert(['magic_word_function', parsed.type], 'wiki.parse: {{int:}} #2-1');
+		wikitext = "{{#if:|</s>}}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{#if:}} #1');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: {{#if:}} #1-1');
 
 		wikitext = '{{t|p=<gallery>\na.png|text\n</gallery>}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{t|<gallery>}} #1');

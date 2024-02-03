@@ -601,6 +601,7 @@ function module_code(library_namespace) {
 			action[1].converttitles = 1;
 		}
 
+		// console.trace(options);
 		for ( var parameter in options) {
 			if (parameter.startsWith(prefix)) {
 				var value = options[parameter];
@@ -1191,9 +1192,10 @@ function module_code(library_namespace) {
 		usercontribs : [ 'uc', , function(title_parameter, options) {
 			if (!options.ucdir && options.ucend - options.ucstart > 0) {
 				library_namespace.warn(
-				//		
-				'usercontribs: Change ucdir to "newer"');
+				//
+				'usercontribs: Change ucdir to "newer", oldest first.');
 				options.ucdir = 'newer';
+				// console.trace(title_parameter, options);
 			}
 			return title_parameter.replace(/^&uctitle=/, '&ucuser=');
 		} ],

@@ -979,28 +979,32 @@ function module_code(library_namespace) {
 		var element_list = set_wiki_type([], 'plain');
 
 		function add_subtoken(plain_token) {
-			plain_token.forEach(function(subtoken) {
+			for (var index = 0, length = plain_token.length; index < length; index++) {
+				var subtoken = plain_token[index];
+
 				if (subtoken.type === 'plain') {
 					add_subtoken(subtoken);
 
-				} else if (subtoken.type === 'tag_single'
+				} else if (typeof element_list.at(-1) === 'string'
 				// e.g., "</s>" only
-				&& subtoken.slash
-				// split new line
+				&& (subtoken.type === 'tag_single' && subtoken.slash
+				// Keep new line.
 				|| typeof subtoken === 'string' && !subtoken.startsWith('\n')
-						&& typeof element_list.at(-1) === 'string'
-						&& !element_list.at(-1).endsWith('\n')) {
+				//
+				&& !element_list.at(-1).endsWith('\n'))) {
+					// assert: element_list.length > 0
 					// Warning: may need re-parse!
 					element_list[element_list.length - 1] += subtoken;
+
 				} else {
 					element_list.push(subtoken);
 				}
-			});
+			}
 		}
 
 		add_subtoken(token.type === 'plain' ? token : [ token ]);
 
-		return element_list
+		return element_list;
 	}
 
 	function generate_token_pattern(pattern_template, options) {
@@ -1564,7 +1568,7 @@ function module_code(library_namespace) {
 				URL = parse_wikitext(URL,
 				//
 				Object.assign(Object.clone(options), {
-					inside_transclusion : true
+					inside_url : true
 				}), queue);
 			}
 
@@ -3854,10 +3858,12 @@ function module_code(library_namespace) {
 
 					// 本 apostrophe piece 包含非註解，不能算 "'"。
 					if (apostrophe_count < 2) {
+						// e.g., "'[[t]]'"
 						// 把前面的全部搬到 unit[0]。但是必須去掉末尾的 "'"。
 						unit[0] += unit[1].join('') + apostrophe_list[index];
 						// 重新計算。
 						apostrophe_count = 1;
+						// 前面一個 .split("'") 時被切掉的 "'"。
 						unit[1] = [ "'" ];
 						continue;
 					}
@@ -4549,7 +4555,7 @@ function module_code(library_namespace) {
 		// parse_external_link() → parse_wikilink()
 		// 又因為 "[[http://example.com]]" 會被解析成 external_link，因此必須
 		// parse_external_link() or parse_external_link() → parse_wikilink()
-		if (!options.inside_transclusion) {
+		if (!options.inside_url) {
 			// 不可跨行。
 			wikitext = wikitext.replace_till_stable(
 					PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_url);

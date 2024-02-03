@@ -260,6 +260,7 @@ function module_code(library_namespace) {
 		if (typeof callback !== 'function') {
 			throw new Error('wiki_API_query: No {Function}callback!');
 		}
+		// console.trace(POST_data);
 
 		// 處理 action
 		// console.trace([action, POST_data]);
@@ -400,7 +401,7 @@ function module_code(library_namespace) {
 				&& wiki_API.general_parameters.format) {
 			action.search_params.set_parameters(wiki_API.general_parameters);
 		}
-		// console.trace(action);
+		// console.trace(action, POST_data);
 
 		// 開始處理 query request。
 		if (!POST_data && wiki_API_query.allow_JSONP) {
