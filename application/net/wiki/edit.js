@@ -53,14 +53,18 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	wiki_API.get_task_id = function get_task_id(options) {
-		if (options.check_section)
+		if (options.check_section) {
 			return options.check_section;
+		}
 
 		var session = wiki_API.session_of_options(options);
+		if (session.check_options && session.check_options.check_section) {
+			return session.check_options.check_section;
+		}
 
-		var check_task_id;
+		var check_task_id = session.latest_task_configuration;
 
-		if ((check_task_id = session.latest_task_configuration)
+		if (check_task_id
 				&& (check_task_id = check_task_id.configuration_page_title)
 				// e.g., 'User:Cewbot/log/20200122/configuration'
 				&& (check_task_id = check_task_id.match(/\/(\d{8})\//))) {

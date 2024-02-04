@@ -1566,10 +1566,15 @@ function module_code(library_namespace) {
 					} else if (previous_action[3] !== args[2]) {
 						// e.g., 20171025.fix_LintErrors.js
 						library_namespace.warn('wiki_API_prototype_methods: '
-								+ '合併 .page() 的選項至 .edit() 的選項。');
-						// console.trace(args[2], previous_action);
-						previous_action[3] = Object.assign(args[2],
-								previous_action[3], args[2]);
+								+ wiki_API.title_link_of(previous_action[1])
+								+ ': 合併 .edit() 的選項至 .page() 的選項。');
+						if (false) {
+							console.trace([ previous_action[1],
+									previous_action[3], args[2] ]);
+						}
+						args[2] = previous_action[3] = Object.assign(
+						// 重建一個，避免污染。
+						Object.clone(previous_action[3]), args[2]);
 						// console.trace(previous_action);
 					}
 				}

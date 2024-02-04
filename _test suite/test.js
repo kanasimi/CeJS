@@ -3680,6 +3680,11 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #13');
 		wikitext = '[[<ref>a</ref>|b]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #14');
+		wikitext = '[[File:a.jpg|link= http://a.b ]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #15');
+		assert(['file', parsed.type], 'wiki.parse.file #15');
+		assert(['url', parsed.link.type], 'wiki.parse.file #15');
+		assert(['http://a.b', parsed.link.toString()], 'wiki.parse.file #15');
 
 		wikitext = '[[:Category:cat|sort_key]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.category #1-1');

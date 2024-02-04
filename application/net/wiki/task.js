@@ -326,7 +326,7 @@ function module_code(library_namespace) {
 			if (!page_data.title) {
 				console.trace(page_title, page_data);
 			}
-			console.trace(options);
+			// console.trace(options);
 		}
 
 		options.page_to_edit = page_data;
@@ -465,8 +465,9 @@ function module_code(library_namespace) {
 		}
 		if (library_namespace.is_debug(3)
 		// .show_value() @ interact.DOM, application.debug
-		&& library_namespace.show_value)
+		&& library_namespace.show_value) {
 			library_namespace.show_value(this.actions.slice(0, 10));
+		}
 		var next = this.actions.shift();
 		// 不改動 next。
 		var type = next[0], list_type;
@@ -705,9 +706,12 @@ function module_code(library_namespace) {
 						next[3].page_title_to_edit = next[1];
 					}
 				}
-				// 設定個僅 debug 用、無功能的註記。
-				next[3].actions_when_fetching_page = [ next ]
-						.append(this.actions);
+				if (library_namespace.is_debug(2)) {
+					// 設定個僅 debug 用、無功能的註記。
+					next[3].actions_when_fetching_page = [ next ]
+							.append(this.actions);
+					next[3].actions_when_fetching_page.only_for_debug = true;
+				}
 			}
 
 			// this.page(title, callback, options)

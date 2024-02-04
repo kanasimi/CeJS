@@ -984,14 +984,19 @@ function module_code(library_namespace) {
 
 				if (subtoken.type === 'plain') {
 					add_subtoken(subtoken);
+					continue;
 
-				} else if (typeof element_list.at(-1) === 'string'
+				}
+
+				// element_list[element_list.length - 1];
+				var previous_subtoken = element_list.at(-1);
+				if (typeof previous_subtoken === 'string'
 				// e.g., "</s>" only
 				&& (subtoken.type === 'tag_single' && subtoken.slash
 				// Keep new line.
 				|| typeof subtoken === 'string' && !subtoken.startsWith('\n')
 				//
-				&& !element_list.at(-1).endsWith('\n'))) {
+				&& !previous_subtoken.endsWith('\n'))) {
 					// assert: element_list.length > 0
 					// Warning: may need re-parse!
 					element_list[element_list.length - 1] += subtoken;
@@ -2088,7 +2093,9 @@ function module_code(library_namespace) {
 								/^(?:link|alt|lang|page|thumbtime|start|end|class)$/
 										.test(option_name)) {
 							// 以後到的為準。
-							if (option_name === 'link') {
+							if (option_name === 'link'
+							// [[File:a.jpg|link=//a.b]] 會被認做URL。
+							&& !/\/\//.test(option_value)) {
 								// pass .session
 								option_value = wiki_API.normalize_title(
 										option_value, options);
