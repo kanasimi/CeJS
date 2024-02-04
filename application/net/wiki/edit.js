@@ -58,9 +58,6 @@ function module_code(library_namespace) {
 		}
 
 		var session = wiki_API.session_of_options(options);
-		if (session.check_options && session.check_options.check_section) {
-			return session.check_options.check_section;
-		}
 
 		var check_task_id = session.latest_task_configuration;
 
@@ -69,6 +66,9 @@ function module_code(library_namespace) {
 				// e.g., 'User:Cewbot/log/20200122/configuration'
 				&& (check_task_id = check_task_id.match(/\/(\d{8})\//))) {
 			check_task_id = check_task_id[1];
+
+		} else if (/* !check_task_id && */session.check_options) {
+			check_task_id = session.check_options.check_section;
 		}
 
 		return check_task_id;

@@ -1558,7 +1558,7 @@ function module_code(library_namespace) {
 			// introduction
 			],
 
-			// [[w:en:Wikipedia:Talk page layout#Lead (bannerspace)]]
+			// [[Wikipedia:Talk page layout#Lead (bannerspace)]]
 			// @ [[w:en:Wikipedia:Talk page layout#Talk page layout]]
 			// @see
 			// "Other talk page template redirect fixes; Cleanup redirects"
@@ -1585,6 +1585,7 @@ function module_code(library_namespace) {
 
 			// TalkWarningTemplates @
 			// https://sourceforge.net/p/autowikibrowser/code/HEAD/tree/AWB/WikiFunctions/TalkPageFixes.cs#l237
+			// @see [[Category:Notice and warning templates]]
 			"COI editnotice", "Warning", "Austrian economics sanctions",
 
 			// Specific talk page guideline banners
