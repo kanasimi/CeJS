@@ -138,6 +138,8 @@ function (globalThis) {
 		old_namespace,
 
 		// default not_native_keyword.
+		// @inner
+		// const
 		KEY_not_native = typeof Symbol === 'function' ? Symbol('not_native') : 'not_native',
 
 		// _base_function_to_extend,
@@ -151,9 +153,10 @@ function (globalThis) {
 	try {
 		// undefined === void 0
 		if (undefined !== undefined) {
-			throw 1;
+			throw new Error('Invalid undefined');
 		}
-		// eval('if(undefined!==undefined){throw 1;}');
+		// eval('if(undefined!==undefined){throw new Error('Invalid
+		// undefined');}');
 	} catch (e) {
 		// Firefox/49.0 WebExtensions 可能 throw:
 		// Error: call to eval() blocked by CSP
@@ -610,6 +613,17 @@ function (globalThis) {
 		if (do_set)
 			l--;
 
+		function cannot_travel_down() {
+			variable_name_array[i] = '<em>' + variable_name_array[i] + '</em><span class="debug_weaken">';
+			if (false)
+				alert(_.log.buffer.length + ',' + _.log.max_length + '\n'
+						+ _.debug);
+			_.debug('Cannot ' + (do_set ? 'set' : 'get') +
+					' variable [<span title="' + variable_name + '">' + variable_name_array.join('.') + '</span></span>]!', 2, 'value_of');
+			// throw
+			return undefined;
+		}
+		
 		try {
 			while (i < l) {
 				// _.debug('to [' + variable_name_array[i] + ']: ' +
@@ -617,7 +631,7 @@ function (globalThis) {
 				if (variable_name_array[i] in v)
 					v = v[variable_name_array[i++]];
 				else
-					throw 1;
+					return cannot_travel_down();
 			}
 
 			if (do_set) {
@@ -633,14 +647,7 @@ function (globalThis) {
 			}
 
 		} catch (e) {
-			variable_name_array[i] = '<em>' + variable_name_array[i] + '</em><span class="debug_weaken">';
-			if (false)
-				alert(_.log.buffer.length + ',' + _.log.max_length + '\n'
-						+ _.debug);
-			_.debug('Cannot ' + (do_set ? 'set' : 'get') +
-					' variable [<span title="' + variable_name + '">' + variable_name_array.join('.') + '</span></span>]!', 2, 'value_of');
-			// throw
-			return undefined;
+			return cannot_travel_down();
 		}
 
 		return v;
@@ -1406,37 +1413,39 @@ function (globalThis) {
 		 * @type {String}
 		 */
 		env.registry_path_key_name = env.registry_base + 'path';
-		// if(typeof WScript === 'object')
-		try {
-			// WScript.Echo(env.registry_path_key_name);
-			// WScript.Echo(_.get_script_base_path());
-			
-			var WshShell = WScript.CreateObject("WScript.Shell");
-			/**
-			 * 存放在 registry 中的 path，通常指的是 library 在 File System 中的 base path。<br />
-			 * 將在 setup_library_base_path 以此設定 base path，並以此決定 module path。
-			 * 
-			 * @name CeL.env.registry_path
-			 * @type {String}
-			 * @see https://msdn.microsoft.com/en-us/library/x83z1d9f.aspx
-			 * 
-			 */
-			env.registry_path = WshShell.RegRead(env.registry_path_key_name)
-			// 去除 filename
-			// .replace(/[^\\\/]+$/, '')
-			;
-			// _.debug(env.registry_path);
+		if(typeof WScript === 'object') {
+			try {
+				// WScript.Echo(env.registry_path_key_name);
+				// WScript.Echo(_.get_script_base_path());
+				
+				var WshShell = WScript.CreateObject("WScript.Shell");
+				/**
+				 * 存放在 registry 中的 path，通常指的是 library 在 File System 中的 base
+				 * path。<br />
+				 * 將在 setup_library_base_path 以此設定 base path，並以此決定 module path。
+				 * 
+				 * @name CeL.env.registry_path
+				 * @type {String}
+				 * @see https://msdn.microsoft.com/en-us/library/x83z1d9f.aspx
+				 * 
+				 */
+				env.registry_path = WshShell.RegRead(env.registry_path_key_name)
+				// 去除 filename
+				// .replace(/[^\\\/]+$/, '')
+				;
+				// _.debug(env.registry_path);
 
-			// @see getEnvironment() @ CeL.application.OS.Windows
-			var WshEnvironment = WshShell.Environment("Process");
-			for (var index = 0; index < win_env_keys.length; index++) {
-				var key = win_env_keys[index], value = WshEnvironment(key);
-				if (value)
-					env[key] = value;
+				// @see getEnvironment() @ CeL.application.OS.Windows
+				var WshEnvironment = WshShell.Environment("Process");
+				for (var index = 0; index < win_env_keys.length; index++) {
+					var key = win_env_keys[index], value = WshEnvironment(key);
+					if (value)
+						env[key] = value;
+				}
+
+			} catch (e) {
+				// _.warn(e.message);
 			}
-
-		} catch (e) {
-			// _.warn(e.message);
 		}
 
 		if (platform.nodejs) {
@@ -2656,10 +2665,12 @@ OS='UNIX'; // unknown
 	defineProperty[KEY_not_native] = true;
 
 	if (typeof Object.defineProperty !== 'function') {
-		// 會動到原來的 Object.defineProperty。
+		// Warning: 會動到新版環境中為native的 Object.defineProperty。
 		Object.defineProperty = defineProperty;
 	} else {
 		try {
+			// If we don't have standard Object.defineProperty(),
+			// the code below will throw.
 			(function () {
 				// workaround for Object.defineProperty @ IE8
 				// http://kangax.github.com/es5-compat-table/
@@ -2695,46 +2706,38 @@ OS='UNIX'; // unknown
 	}
 
 	// 確認 Object.defineProperty() 是否能正確設值。
-	if (!Object.defineProperty[KEY_not_native]) {
-		try {
-			(function() {
-				var i, value = 7, old_value = value,
-				//
-				test_Funciton = function() {
-				};
-				Object.defineProperty(test_Funciton, 'size', {
-					// enumerable : false,
-					// configurable : false,
-					get : function() {
-						return value;
-					},
-					set : function(v) {
-						if (value - 1 === v)
-							value = v;
-					}
-				});
-				for (i in test_Funciton)
-					if (i === 'size')
-						throw 1;
-				try {
-					test_Funciton.size = value + 1;
-				} catch (e) {
-				}
-				try {
-					delete test_Funciton.size;
-				} catch (e) {
-				}
-				if (test_Funciton.size !== value)
-					throw 1;
-				test_Funciton.size = value - 1;
-				if (test_Funciton.size !== value || test_Funciton.size === old_value)
-					throw 1;
-			})();
-
-		} catch (e) {
-			// Don't have standard Object.defineProperty()!
-			Object.defineProperty[KEY_not_native] = true;
+	// @see https://en.wikipedia.org/wiki/Feature_detection_(web_development)
+	if (!Object.defineProperty[KEY_not_native] && (function() {
+		var object = {}, value = 7;
+		Object.defineProperty(object, 'v', {
+			get : function() {
+				return value;
+			},
+			set : function(v) {
+				return value = v;
+			}
+		});
+		for ( var p in object) {
+			if (p === 'v')
+				return true;
 		}
+
+		object.v = 8;
+		if (object.v !== 8 || value !== 8)
+			return true;
+
+		// `delete object.v` will throw in node.js:
+		// TypeError: Cannot delete property 'v' of #<Object>
+		// Skip the unimportant test.
+		if (typeof Symbol === 'function')
+			return;
+
+		delete object.v;
+		if (object.v !== 7)
+			return true;
+	})()) {
+		// Don't have standard Object.defineProperty()!
+		Object.defineProperty[KEY_not_native] = true;
 	}
 
 	// ---------------------------------------------------------------------------//
@@ -3215,7 +3218,7 @@ OS='UNIX'; // unknown
 	// test globalThis.
 	try {
 		if (_ !== eval(library_name))
-			throw 1;
+			throw new Error('無法正確設定 globalThis object!');
 		// TODO: test delete globalThis object.
 	} catch (e) {
 		if (e === 1) {

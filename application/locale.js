@@ -1750,14 +1750,15 @@ function module_code(library_namespace) {
 				// gettext_config:{"id":"language-domain-$1-loaded"}
 				T : [ 'Language / domain [%1] loaded.', language ]
 			}, 1, 'gettext.adapt_domain');
-			try {
-				// 設置頁面語系。
-				document.getElementsByTagName('html')[0].setAttribute('lang',
-						language);
-			} catch (e) {
-			}
-			if (library_namespace.is_WWW())
+			if (library_namespace.is_WWW()) {
+				try {
+					// 設置頁面語系。
+					document.getElementsByTagName('html')[0].setAttribute(
+							'lang', language);
+				} catch (e) {
+				}
 				gettext.translate_nodes();
+			}
 			create_domain_menu.onchange.forEach(function(handler) {
 				handler(language);
 			});

@@ -1521,12 +1521,14 @@ function module_code(library_namespace) {
 
 				// ----------------------------------------
 
-				try {
-					library_namespace.debug('add action: '
-							+ args.map(JSON.stringify).join('<br />\n'), 3,
-							'wiki_API.prototype.' + method);
-				} catch (e) {
-					// TODO: handle exception
+				if (library_namespace.is_debug(3)) {
+					try {
+						library_namespace.debug('add action: '
+								+ args.map(JSON.stringify).join('<br />\n'), 3,
+								'wiki_API.prototype.' + method);
+					} catch (e) {
+						// TODO: handle exception
+					}
 				}
 
 				var previous_action = this.actions.at(-1);

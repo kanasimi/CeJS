@@ -99,7 +99,7 @@ function module_code(library_namespace) {
 					s[f[4]] = [ s[f[4]], s[f[5]], s[f[6]] ];
 				else
 					return 'Illegal date format!';
-				if (format == 1 && s[4].match(/([+-]\d{2})/))
+				if (format == 1 && s[4].match(/([+\-]\d{2})/))
 					s[f[4]][0] = parseInt(s[f[3]][0]) + parseInt(RegExp.$1);
 				library_namespace.debug(str + '\n' + s[f[1]] + ',' + s[f[2]]
 						+ '(' + UTCMonth[s[f[2]]] + '),' + s[f[3]] + ','
@@ -118,7 +118,7 @@ function module_code(library_namespace) {
 
 	var is_Date = library_namespace.is_Date,
 	//
-	UTC_PATTERN = /UTC(?:\s*([+-]?\d{1,2})(:\d{1,2})?)?/i,
+	UTC_PATTERN = /UTC(?:\s*([+\-]?\d{1,2})(:\d{1,2})?)?/i,
 	// assert: isNaN(DEFAULT_TIME_ZONE) === true
 	// isNaN(Object.create(null)) will throw @ Chrome/36
 	// (Cannot convert object to primitive value),

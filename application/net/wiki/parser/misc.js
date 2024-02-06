@@ -1695,13 +1695,33 @@ function module_code(library_namespace) {
 					'$1')
 			// Remove comments
 			.replace(/<!--[\s\S]*?-->/g, '');
-			try {
-				// e.g., 'true' / 'false' / number
-				value = JSON.parse(value);
-				// TODO: 應避免安全問題。
-			} catch (e) {
-				// TODO: handle exception
+
+			switch (value) {
+			case 'true':
+				value = true;
+				break;
+
+			case 'false':
+				value = false;
+				break;
+
+			default:
+				var numeric = +value;
+				if (!isNaN(numeric)) {
+					value = value;
+				} else if (/[{}\[\]"']/.test(value)) {
+					try {
+						// e.g., 'true' / 'false' / number
+						value = JSON.parse(value);
+						// TODO: 應避免安全問題。
+					} catch (e) {
+						// TODO: handle exception
+					}
+				} else {
+					// Treat value as pure string.
+				}
 			}
+
 			return value;
 		}
 

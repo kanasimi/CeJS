@@ -424,27 +424,39 @@ if (typeof CeL === 'function') {
 		 * @inner
 		 * @ignore
 		 */
-		if (_.is_HTA)
+		if (_.is_HTA) {
 			try {
 				_.new_XMLHttp = new_MS_XMLHTTP() && new_MS_XMLHTTP;
 			} catch (e) {
+				// Try next
 			}
+		}
 
-		if (!_.new_XMLHttp)
+		if (!_.new_XMLHttp && (
+		// in 2024 browser
+		typeof XMLHttpRequest === 'function'
+		// in HTA
+		|| typeof XMLHttpRequest === 'object')) {
 			try {
 				// normal method to get a new XMLHttpRequest controller.
 				// 相當於 new XMLHttpRequest()
 				// Ajax 程式應該考慮到 server 沒有回應時之處置
 				_.new_XMLHttp = new_XMLHttpRequest() && new_XMLHttpRequest;
 			} catch (e) {
+				// Try next
 			}
+		}
 
 		// _.is_HTA 的情況，已經測在前面試過了。
-		if (!_.new_XMLHttp && !_.is_HTA)
+		if (!_.new_XMLHttp && !_.is_HTA
+		// in HTA
+		&& typeof ActiveXObject === 'function') {
 			try {
 				_.new_XMLHttp = new_MS_XMLHTTP() && new_MS_XMLHTTP;
 			} catch (e) {
+				// Try next
 			}
+		}
 
 		// 皆無：use XMLDocument.
 		// The document.all().XMLDocument is a Microsoft IE subset of
@@ -453,11 +465,12 @@ if (typeof CeL === 'function') {
 		// http://www.java2s.com/Code/JavaScriptReference/Javascript-Properties/XMLDocument.htm
 
 		if (_.new_XMLHttp
-				// https://github.com/electron/electron/issues/2288
-				// How to detect if running in electron?
-				// https://github.com/cheton/is-electron/blob/master/index.js
-				&& (typeof process !== 'object'
-						|| typeof process.versions !== 'object' || !process.versions.electron)) {
+		// https://github.com/electron/electron/issues/2288
+		// How to detect if running in electron?
+		// https://github.com/cheton/is-electron/blob/master/index.js
+		&& (typeof process !== 'object'
+		//
+		|| typeof process.versions !== 'object' || !process.versions.electron)) {
 
 		} else if (_.platform.nodejs) {
 			// for node.js, node_fs

@@ -333,101 +333,104 @@ function module_code(library_namespace) {
 		}
 	}
 
-	(function() {
-		try {
-			// workaround for IE, 因用 General type, 效能較差
-			var d = window.document.createElement('div'), s;
-			if (false)
-				alert('toString test: '
-						+ element_pattern.test(get_object_type.call(d)));
-
-			if (d.nodeType !== ELEMENT_NODE) {
-				// doesn't support W3C DOM?
-				throw 0;
-			}
-
+	if (library_namespace.is_WWW()) {
+		(function() {
 			try {
-				// IE8 中使用 d.getElementsByName('n') 會失效，_.is_NodeList(s) ===
-				// true。
-				s = d.getElementsByTagName('div');
-				if (!_.is_NodeList(s)
-						&& get_object_type.call(s) === '[object Object]') {
-					// IE 6-8
-					_.is_NodeList = function(object) {
-						try {
+				// workaround for IE, 因用 General type, 效能較差
+				var d = window.document.createElement('div'), s;
+				if (false)
+					alert('toString test: '
+							+ element_pattern.test(get_object_type.call(d)));
+
+				if (d.nodeType !== ELEMENT_NODE) {
+					// doesn't support W3C DOM?
+					throw 0;
+				}
+
+				try {
+					// IE8 中使用 d.getElementsByName('n') 會失效，_.is_NodeList(s) ===
+					// true。
+					s = d.getElementsByTagName('div');
+					if (!_.is_NodeList(s)
+							&& get_object_type.call(s) === '[object Object]') {
+						// IE 6-8
+						_.is_NodeList = function(object) {
+							try {
+								return object
+										&& '[object Object]' === get_object_type
+												.call(object)
+										// IE9 的相容Quirks模式中可能符合 NodeList 的條件，但卻為
+										// ELEMENT_NODE..
+										&& !object.tagName
+										// function or object
+										&& typeof object.item !== 'undefined'
+										&& !isNaN(object.length)
+										// use NodeList(index), e.g.,
+										// `object(0)`,
+										// may throw.
+										&& (object.length > 0 ? _
+												.is_HTML_element(object[0])
+												: object[0] === null);
+							} catch (e) {
+							}
+						};
+					}
+				} catch (e) {
+					// TODO: handle exception
+				}
+
+				s = element_pattern.test(get_object_type.call(d));
+				if (!s) {
+					if (element_pattern.test('' + d))
+						// e.g., IE 9
+						_.is_HTML_element = function(object) {
 							return object
-									&& '[object Object]' === get_object_type
-											.call(object)
-									// IE9 的相容Quirks模式中可能符合 NodeList 的條件，但卻為
-									// ELEMENT_NODE..
-									&& !object.tagName
-									// function or object
-									&& typeof object.item !== 'undefined'
-									&& !isNaN(object.length)
-									// use NodeList(index), e.g., `object(0)`,
-									// may throw.
-									&& (object.length > 0 ? _
-											.is_HTML_element(object[0])
-											: object[0] === null);
-						} catch (e) {
-						}
+									&& (element_pattern.test('' + object)
+									// for IE8. object 可能是 null!
+									|| typeof object === 'object'
+											// && object.tagName === "OBJECT"
+											&& object.nodeType === ELEMENT_NODE
+											&& "[object NamedNodeMap]" === ''
+													+ object.attributes);
+						};
+					else if (get_object_type.call(d) === '[object Object]') {
+						// e.g., IE 5-8. 這種判別方法有漏洞!
+						_.is_HTML_element = function(object) {
+							return get_object_type.call(object) === '[object Object]'
+									// object !== null, undefined
+									&& object
+									&& typeof object.nodeType === 'number';
+						};
+						// bug fix/workaround for IE8:
+						// IE8 中 CeL.is_Object(ELEMENT_NODE) === true！
+						_.is_Object = function(object) {
+							return get_object_type.call(object) === '[object Object]'
+									// object !== null, undefined
+									&& object
+									// test a readonly property
+									&& typeof object.nodeType !== 'number';
+						};
+					} else
+						throw 1;
+
+					// General type
+					_.is_HTML_element_type = function(object, type) {
+						return _.is_HTML_element(object)
+								&& object.nodeType === type;
+					};
+					_.is_ELEMENT_NODE = function(object) {
+						return _.is_HTML_element(object)
+								&& object.nodeType === ELEMENT_NODE;
 					};
 				}
+
 			} catch (e) {
 				// TODO: handle exception
+			} finally {
+				d = null;
 			}
-
-			s = element_pattern.test(get_object_type.call(d));
-			if (!s) {
-				if (element_pattern.test('' + d))
-					// e.g., IE 9
-					_.is_HTML_element = function(object) {
-						return object
-								&& (element_pattern.test('' + object)
-								// for IE8. object 可能是 null!
-								|| typeof object === 'object'
-										// && object.tagName === "OBJECT"
-										&& object.nodeType === ELEMENT_NODE
-										&& "[object NamedNodeMap]" === ''
-												+ object.attributes);
-					};
-				else if (get_object_type.call(d) === '[object Object]') {
-					// e.g., IE 5-8. 這種判別方法有漏洞!
-					_.is_HTML_element = function(object) {
-						return get_object_type.call(object) === '[object Object]'
-								// object !== null, undefined
-								&& object
-								&& typeof object.nodeType === 'number';
-					};
-					// bug fix/workaround for IE8:
-					// IE8 中 CeL.is_Object(ELEMENT_NODE) === true！
-					_.is_Object = function(object) {
-						return get_object_type.call(object) === '[object Object]'
-								// object !== null, undefined
-								&& object
-								// test a readonly property
-								&& typeof object.nodeType !== 'number';
-					};
-				} else
-					throw 1;
-
-				// General type
-				_.is_HTML_element_type = function(object, type) {
-					return _.is_HTML_element(object)
-							&& object.nodeType === type;
-				};
-				_.is_ELEMENT_NODE = function(object) {
-					return _.is_HTML_element(object)
-							&& object.nodeType === ELEMENT_NODE;
-				};
-			}
-
-		} catch (e) {
-			// TODO: handle exception
-		} finally {
-			d = null;
-		}
-	})();
+		})();
+	}
 
 	/**
 	 * <code>
@@ -7775,99 +7778,108 @@ function module_code(library_namespace) {
 	get_selection = function(index) {
 	};
 
-	try {
+	if (library_namespace.is_WWW()) {
+		try {
+			if (window.getSelection)
+				_.get_selection = function(index) {
+					/**
+					 * Firefox, Opera, Safari
+					 * 
+					 * http://help.dottoro.com/ljcvonpc.php
+					 * 
+					 * Although the selection object is supported by Opera, it
+					 * is only partially suppported. The window.getSelection
+					 * method provides more complex functionality in that
+					 * browser.
+					 * 
+					 * http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
+					 */
+					var e = document.activeElement,
+					// 在 Opera 中，e 為 [object Text]
+					tag = e && e.tagName && e.tagName.toLowerCase(), s = window
+							.getSelection();
+					if (!s.rangeCount)
+						// 點擊而無選擇?
+						// 最起碼回應能得知的資訊
+						return {
+							text : '',
+							element : s,
+							selection : s
+						};
 
-		if (window.getSelection)
-			_.get_selection = function(index) {
-				// Firefox, Opera, Safari
-				// http://help.dottoro.com/ljcvonpc.php
-				// Although the selection object is supported by Opera, it is
-				// only partially suppported. The window.getSelection method
-				// provides more complex functionality in that browser.
-				// http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
-				var e = document.activeElement,
-				// 在 Opera 中，e 為 [object Text]
-				tag = e && e.tagName && e.tagName.toLowerCase(), s = window
-						.getSelection();
-				if (!s.rangeCount)
-					// 點擊而無選擇?
-					// 最起碼回應能得知的資訊
+					// 超出範圍可能會 Error: INDEX_SIZE_ERR: DOM Exception 1
+					s = s.getRangeAt(!isNaN(index) && 0 <= index
+							&& index < s.rangeCount ? index : 0);
+
+					// Gecko: https://developer.mozilla.org/en/DOM/range
+					// 除了 Gecko 外，都有 s.getBoundingClientRect
+					// 但無 s.endContainer.getBoundingClientRect。
+					// Gecko 可以取 mouse event 作 workaround
+					if (false)
+						library_namespace.debug(s.endContainer.parentNode);
+					var offset = _.get_node_offset(s.getBoundingClientRect ? s
+							: s.endContainer.parentNode);
+
 					return {
-						text : '',
-						element : s,
+						// TODO: offset
+						// TODO: do test
+						// s.startOffset,
+						left : offset.left,
+						top : offset.top,
+						// s.endOffset,
+						width : offset.width,
+						height : offset.height,
+						text : tag === 'textarea' || tag === 'input'
+								|| tag === 'select' ? e.value.substring(
+								e.selectionStart, e.selectionEnd) : s
+								.toString(),
+						element :
+						// s.endContainer
+						s,
 						selection : s
 					};
 
-				// 超出範圍可能會 Error: INDEX_SIZE_ERR: DOM Exception 1
-				s = s.getRangeAt(!isNaN(index) && 0 <= index
-						&& index < s.rangeCount ? index : 0);
-
-				// Gecko: https://developer.mozilla.org/en/DOM/range
-				// 除了 Gecko 外，都有 s.getBoundingClientRect 但無
-				// s.endContainer.getBoundingClientRect。
-				// Gecko 可以取 mouse event 作 workaround
-				if (false)
-					library_namespace.debug(s.endContainer.parentNode);
-				var offset = _.get_node_offset(s.getBoundingClientRect ? s
-						: s.endContainer.parentNode);
-
-				return {
-					// TODO: offset
-					// TODO: do test
-					// s.startOffset,
-					left : offset.left,
-					top : offset.top,
-					// s.endOffset,
-					width : offset.width,
-					height : offset.height,
-					text : tag === 'textarea' || tag === 'input'
-							|| tag === 'select' ? e.value.substring(
-							e.selectionStart, e.selectionEnd) : s.toString(),
-					element :
-					// s.endContainer
-					s,
-					selection : s
 				};
 
-			};
+			else if (document.selection && document.selection.createRange) {
+				// Internet Explorer
+				// http://msdn.microsoft.com/en-us/library/ms534692%28VS.85%29.aspx
+				// TODO: http://help.dottoro.com/ljefwsqm.php
 
-		else if (document.selection && document.selection.createRange) {
-			// Internet Explorer
-			// http://msdn.microsoft.com/en-us/library/ms534692%28VS.85%29.aspx
-			// TODO: http://help.dottoro.com/ljefwsqm.php
+				document.execCommand
+						&& document
+								.execCommand('MultipleSelection', true, true);
 
-			document.execCommand
-					&& document.execCommand('MultipleSelection', true, true);
+				_.get_selection = function(input) {
+					var s = document.selection.createRange();
 
-			_.get_selection = function(input) {
-				var s = document.selection.createRange();
+					return s.type !== 'None' && {
+						// TODO: do test
+						// http://msdn.microsoft.com/en-us/library/ms535872%28v=VS.85%29.aspx
+						// s.offsetLeft, s.offsetTop 較不準
+						left : s.boundingLeft,
+						top : s.boundingTop,
+						width : s.boundingWidth,
+						height : s.boundingHeight,
+						text : s.text,
+						// TODO
+						// element: null,
+						selection : s
+					};
 
-				return s.type !== 'None' && {
-					// TODO: do test
-					// http://msdn.microsoft.com/en-us/library/ms535872%28v=VS.85%29.aspx
-					// s.offsetLeft, s.offsetTop 較不準
-					left : s.boundingLeft,
-					top : s.boundingTop,
-					width : s.boundingWidth,
-					height : s.boundingHeight,
-					text : s.text,
-					// TODO
-					// element: null,
-					selection : s
 				};
 
-			};
-
-		} else if (document.getSelection)
-			_.get_selection = function(input) {
-				return {
-					// TODO: get offset from mouse location
-					text : document.getSelection()
+			} else if (document.getSelection)
+				_.get_selection = function(input) {
+					return {
+						// TODO: get offset from mouse location
+						text : document.getSelection()
+					};
 				};
-			};
 
-	} catch (e) {
-		// TODO: handle exception
+		} catch (e) {
+			// TODO: handle exception
+		}
 	}
 
 	// ↑HTML only -------------------------------------------------------

@@ -820,10 +820,10 @@ function module_code(library_namespace) {
 		a = a === '+' ? 1 : a === '-' ? 0 : (F = 1);
 
 		if (F) {
-			// 無 [+-]
+			// 無 [+\-]
 			F = flags;
 		} else {
-			// f: [+-]~ 的情況，parse flags
+			// f: [+\-]~ 的情況，parse flags
 			for ( var i in RegExp_flags.flags)
 				if ((m = flags.indexOf(RegExp_flags.flags[i], 1) !== NOT_FOUND)
 						&& a || !m && regexp[i])

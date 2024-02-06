@@ -354,8 +354,8 @@ if (typeof CeL === 'function')
 				return Object.prototype.toString.call(value) === "[object Map]";
 			};
 
-			// (new Map()).entries();
-			(new Map()).forEach();
+			Array.from(new Map().entries()).forEach(
+					library_namespace.null_function);
 
 		} catch (e) {
 
@@ -573,7 +573,7 @@ if (typeof CeL === 'function')
 							}
 						});
 
-						if (iterable)
+						if (iterable) {
 							// initialization. 為 Map 所作的初始化工作。
 							try {
 								if (Array.isArray(iterable)) {
@@ -611,6 +611,7 @@ if (typeof CeL === 'function')
 								//
 								: iterable));
 							}
+						}
 					}
 
 					/**
@@ -1376,79 +1377,95 @@ if (typeof CeL === 'function')
 		 *      accessdate="2012/12/10 8:54">Loop dependence analysis</a>
 		 */
 		function dependency_chain_independent(item) {
-			var relations = this.relations, no_independent;
-			if (relations.size > 0)
-				try {
-					if (!arguments.length) {
-						library_namespace.debug('自 ' + relations.size
-								+ ' 個元素中，隨便取得一個沒 previous 的元素。', 5,
-								'dependency_chain.independent');
-						// 用 for .. of 會更好。
-						relations.forEach(function(declaration, _item) {
-							library_namespace.debug('item [' + _item + ']', 6,
-									'dependency_chain.independent');
-							item = _item;
-							if (declaration.previous.size === 0)
-								throw 1;
-						});
+			var relations = this.relations, no_independent = undefined;
+			if (!(relations.size > 0))
+				return item;
 
-						if (library_namespace.is_debug())
-							library_namespace
-									.warn('dependency_chain.independent: 沒有獨立之元素!');
-						no_independent = true;
+			if (!arguments.length) {
+				library_namespace.debug('自 ' + relations.size
+						+ ' 個元素中，隨便取得一個沒 previous 的元素。', 5,
+						'dependency_chain.independent');
+				// {Map}relations
+				// 用 for .. of 會更好。
+				relations.forEach(function(declaration, _item) {
+					if (no_independent === false) {
+						// Already found
+						return;
 					}
 
-					var
-					// 已經處理過的 item Set。
-					chain = new Set,
-					// 當前要處理的 item Set。
-					current,
-					// 下一個要處理的 item Set。
+					library_namespace.debug('item [' + _item + ']', 6,
+							'dependency_chain.independent');
+					item = _item;
+					if (declaration.previous.size === 0) {
+						// break; return;
+						no_independent = false;
+					}
+				});
+				if (no_independent === false)
+					return item;
+
+				if (library_namespace.is_debug())
+					library_namespace
+							.warn('dependency_chain.independent: 沒有獨立之元素!');
+				no_independent = true;
+			}
+
+			try {
+				var
+				/** {Set}已經處理過的 item Set。 */
+				chain = new Set,
+				/** {Set}當前要處理的 item Set。 */
+				current,
+				/** {Set}下一個要處理的 item Set。 */
+				next = new Set;
+
+				next.add(item);
+				item = undefined;
+
+				while ((current = next).size > 0) {
 					next = new Set;
+					// 針對 item 挑一個沒 previous 的元素。
+					current.forEach(function(_item) {
+						var declaration = relations.get(_item);
+						if (declaration.previous.size === 0) {
+							item = _item;
+							// break; return;
+							throw 2;
+						}
 
-					next.add(item);
-					item = undefined;
-
-					while ((current = next).size > 0) {
-						next = new Set;
-						// 針對 item 挑一個沒 previous 的元素。
-						current.forEach(function(_item) {
-							var declaration = relations.get(_item);
-							if (declaration.previous.size === 0) {
-								item = _item;
-								throw 2;
+						if (!chain.has(_item))
+							chain.add(_item);
+						else {
+							// 否則最起碼挑一個在 dependency chain 中的元素。
+							item = _item;
+							if (no_independent) {
+								// break; return;
+								throw 3;
 							}
+						}
 
-							if (!chain.has(_item))
-								chain.add(_item);
-							else {
-								// 否則最起碼挑一個在 dependency chain 中的元素。
-								item = _item;
-								if (no_independent)
-									throw 3;
+						// 把所有未處理過的 previous 排入 next 排程。
+						// 遍歷 previous，找出獨立之元素。
+						declaration.previous.forEach(function(previous) {
+							// assert: previous !== _item
+							if (!chain.has(previous)) {
+								next.add(previous);
+							} else if (no_independent) {
+								item = previous;
+								// break; return;
+								throw 4;
 							}
-
-							// 把所有未處理過的 previous 排入 next 排程。
-							// 遍歷 previous，找出獨立之元素。
-							declaration.previous.forEach(function(previous) {
-								// assert: previous !== _item
-								if (!chain.has(previous))
-									next.add(previous);
-								else if (no_independent) {
-									item = previous;
-									throw 4;
-								}
-							});
-
 						});
-					}
-				} catch (e) {
-					if (isNaN(e)) {
-						library_namespace.warn('dependency_chain.independent: '
-								+ e.message);
-						library_namespace.error(e);
-					}
+
+					});
 				}
+			} catch (e) {
+				if (isNaN(e)) {
+					library_namespace.warn('dependency_chain.independent: '
+							+ e.message);
+					library_namespace.error(e);
+				}
+			}
 
 			return item;
 		}
