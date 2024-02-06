@@ -120,10 +120,21 @@ function module_code(library_namespace) {
 		if (typeof title === 'function') {
 			title = title(options.token || session.token);
 		}
+
+		var check_task_id = wiki_API.get_task_id(options)
+				|| wiki_API.check_stop.KEY_any_task;
+
 		if (!title
 				&& !(title = wiki_API.check_stop.title(options.token
 						|| session.token))) {
-			callback();
+			session.task_control_status[check_task_id] = {
+				latest_checked : Date.now(),
+				no_stop_page : true,
+				stopped : false
+			};
+
+			// task_status
+			callback(session.task_control_status[check_task_id]);
 			return;
 		}
 
@@ -181,9 +192,6 @@ function module_code(library_namespace) {
 				//
 				+ options.check_section + '(.*?)==\n');
 			}
-
-			var check_task_id = wiki_API.get_task_id(options)
-					|| wiki_API.check_stop.KEY_any_task;
 
 			if (content) {
 				if (!library_namespace.is_RegExp(PATTERN)) {

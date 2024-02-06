@@ -406,6 +406,7 @@ function module_code(library_namespace) {
 					// _this.next(callback, ...callback_arguments);
 					.apply(_this, process_callback.args);
 				} catch (e) {
+					// Error.stackTraceLimit = Infinity;
 					if (library_namespace.env.has_console)
 						console.error(e);
 					else
@@ -706,7 +707,7 @@ function module_code(library_namespace) {
 						next[3].page_title_to_edit = next[1];
 					}
 				}
-				if (library_namespace.is_debug(2)) {
+				if (library_namespace.is_debug(0)) {
 					// 設定個僅 debug 用、無功能的註記。
 					next[3].actions_when_fetching_page = [ next ]
 							.append(this.actions);

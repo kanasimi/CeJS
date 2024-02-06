@@ -1300,6 +1300,7 @@ function module_code(library_namespace) {
 		var run_next_status = session && session.set_up_if_needed_run_next();
 		var newer_revision, revision_count = 0;
 		function search_revisions(page_data, error) {
+			// console.trace(page_data, error);
 			if (error) {
 				callback(null, page_data, error);
 				return;
@@ -1368,9 +1369,26 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				// console.trace(diff_list);
+
 				var found, diff_index = 0;
 
 				search_next_diff();
+
+				function check_result(result) {
+					if (library_namespace.is_thenable(result)) {
+						result = result.then(check_result);
+						if (session)
+							session.check_and_run_next(run_next_status, result);
+						// 直接跳出。之後會等 promise 出結果才繼續執行。
+					} else {
+						found = result;
+						if (found)
+							finish_search_revision();
+						else
+							search_next_diff();
+					}
+				}
 
 				function search_next_diff() {
 					// console.trace(diff_index + '/' + diff_list.length);
@@ -1398,7 +1416,7 @@ function module_code(library_namespace) {
 					}
 
 					var diff = diff_list[diff_index++];
-					// console.trace(diff);
+					// console.trace(revision_index, diff_index, diff);
 					if (options.search_diff) {
 						result = to_search(diff, newer_revision, this_revision);
 					} else {
@@ -1411,15 +1429,8 @@ function module_code(library_namespace) {
 						&& !do_search(diff[options.search_deleted ? 1 : 0]);
 					}
 
-					// console.trace(library_namespace.is_thenable(result));
-					if (library_namespace.is_thenable(result)) {
-						result = result.then(search_next_diff);
-						if (session)
-							session.check_and_run_next(run_next_status, result);
-						// 直接跳出。之後會等 promise 出結果才繼續執行。
-					} else {
-						search_next_diff();
-					}
+					// console.trace(result);
+					check_result(result);
 				}
 
 				function finish_search_revision(page_data, error) {
