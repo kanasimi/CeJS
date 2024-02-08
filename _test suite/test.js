@@ -3501,7 +3501,7 @@ function test_wiki() {
 		wikitext = 'http://example.com/foo{{!}}bar'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #9');
 		assert(['url', parsed.type], 'wiki.parse: plain url #9-1');
-		wikitext = 'http://example.com/foo{{=}}bar'; parsed = CeL.wiki.parse(wikitext);
+		wikitext = 'http://example.com/?year{{=}}{{CURRENTYEAR}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: plain url #10');
 		assert(['url', parsed.type], 'wiki.parse: plain url #10-1');
 		wikitext = 'http://example.com{{dead link}}'; parsed = CeL.wiki.parse(wikitext);
@@ -4647,7 +4647,7 @@ function test_wiki() {
 		assert(['[b]', CeL.wiki.wikitext_to_plain_text(wikitext)], 'wiki.parse: nowiki #34-3');
 
 		// 2024/2/7 18:0:20 Will throw error: Uncaught RangeError: Maximum call stack size exceeded
-		CeL.wiki.parser(`<noinclude>\n{{Documentation}}</noinclude>`).parse().each(function (token) { });
+		CeL.wiki.parser('<noinclude>\n{{Documentation}}</noinclude>').parse().each(function (token) { });
 
 		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: self-closed HTML tags: br #1');

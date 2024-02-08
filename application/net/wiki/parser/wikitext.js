@@ -1555,13 +1555,9 @@ function module_code(library_namespace) {
 				// TODO: 必須先 expand_template 才能確定到底該不該算做URL的一部分
 				function is_non_url_token(token) {
 					return token && !(token.type in {
+						magic_word_function : true,
 						comment : true
-					}) && !(token.type === 'magic_word_function'
-					//
-					&& (token.name in {
-						'!' : true,
-						'=' : true
-					}));
+					});
 				});
 
 				// [ valid_value, invalid_token_mark, queue_index ]

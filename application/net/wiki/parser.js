@@ -1681,6 +1681,9 @@ function module_code(library_namespace) {
 		}
 	};
 
+	// 暫時代用。
+	setup_layout_elements.template_order_of_layout.zhwiki.talk_page_lead = setup_layout_elements.template_order_of_layout.enwiki.talk_page_lead;
+
 	// TODO: analysis wiki page layout 定位版面布局元素
 	// search anchor tokens of elements @ [[WP:LAY]],
 	// TODO: 處理/警告只能包含一個的 tempalte 分組。
