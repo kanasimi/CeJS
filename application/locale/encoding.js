@@ -359,7 +359,7 @@ function module_code(library_namespace) {
 								+ (i.count_of('・') / i.length) + ' @ ' + enc,
 								1, 'guess_encoding');
 					// 計算 '・' 佔非 ASCII 之比例。
-					// .02: 依據經驗而得之 magic number 閥值。
+					// .02: 依據經驗而得之 magic number 閾值。
 					if (i.count_of('・') / i.length > .08)
 						continue;
 				}
@@ -379,7 +379,7 @@ function module_code(library_namespace) {
 				} else if (t.indexOf('�', i) !== -1) {
 					unknown_character_count = t.count_of('�');
 				}
-				// .001: 依據經驗而得之 magic number 閥值。
+				// .001: 依據經驗而得之 magic number 閾值。
 				if (unknown_character_count / t.length > .001) {
 					library_namespace.debug('看來似乎不是 encoding [' + enc
 							+ ']! Unknown characters: '
@@ -503,13 +503,13 @@ function module_code(library_namespace) {
 		'GB 2312' : {
 			// 0: use guess_text_language.default_select_boundary
 			'cmn-Hans-CN' : 0,
-			// 偶爾會有以 'GB 2312' 編碼的 'cmn-Hant-TW'. .8: 依據經驗而得之 magic number 閥值。
+			// 偶爾會有以 'GB 2312' 編碼的 'cmn-Hant-TW'. .8: 依據經驗而得之 magic number 閾值。
 			'cmn-Hant-TW' : 0
 		},
 		'Big5' : {
 			// 0: use guess_text_language.default_select_boundary
 			'cmn-Hant-TW' : 0,
-			// 偶爾會有以 'Big5' 編碼的 'cmn-Hans-CN'. .8: 依據經驗而得之 magic number 閥值。
+			// 偶爾會有以 'Big5' 編碼的 'cmn-Hans-CN'. .8: 依據經驗而得之 magic number 閾值。
 			'cmn-Hans-CN' : 0
 		},
 		'Shift_JIS' : 'ja-JP',
@@ -742,7 +742,7 @@ function module_code(library_namespace) {
 						+ text.slice(0, 300) + ']');
 		}
 
-		// 依各種常用字母之經驗法則偵測/判別。.95, .5: 依據經驗而得之 magic number 閥值。
+		// 依各種常用字母之經驗法則偵測/判別。.95, .5: 依據經驗而得之 magic number 閾值。
 		if ((character_count['en-US'] + (seldom_character_count['en-US'] || 0))
 				/ (character_count.all - unrecognized) > .95
 				&& character_count['en-US']
@@ -890,14 +890,14 @@ function module_code(library_namespace) {
 	}
 	;
 
-	// 某種語言之字元數大於此界線閥值，即視為此種語言。依據經驗而得之 magic number。應 > Math.max(.5,
+	// 某種語言之字元數大於此界線閾值，即視為此種語言。依據經驗而得之 magic number。應 > Math.max(.5,
 	// guess_text_language.default_boundary)。若低於此，則進入廝殺戰。
 	guess_text_language.default_select_boundary = .9;
 
-	// 要作為候選者之最低限度閥值。依據經驗而得之 magic number。
+	// 要作為候選者之最低限度閾值。依據經驗而得之 magic number。
 	guess_text_language.default_boundary = .4;
 
-	// 若無法判別之字元比例大於此界線閥值，則當作 miss 過多，無法判別。依據經驗而得之 magic number。
+	// 若無法判別之字元比例大於此界線閾值，則當作 miss 過多，無法判別。依據經驗而得之 magic number。
 	guess_text_language.unrecognized_boundary = .3;
 
 	// 依據經驗而得之 magic number。

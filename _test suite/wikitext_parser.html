@@ -39,7 +39,8 @@ function add_sapmles() {
 		`template:{{t}}`,
 		`template with parameters:{{t|p_a=va| p_b = vb |p1| p2 }}`,
 		`template parameter:{{{1|alt}}}`,
-		`magic words:{{PAGENAME}}`,
+		`magic words PAGENAME:{{PAGENAME}}`,
+		`magic words #tag:{{#tag:ref||name="n"}}`,
 		`function:{{ucfirst:function}}`,
 		`HTML single tag:<br />`,
 		`HTML tag:<b>bold tag</b>`,
@@ -116,14 +117,21 @@ text 2
 // ----------------------------------------------------------------------------
 
 function stringify(value) {
-	let display_value = JSON.stringify(value);
+	let display_value = JSON.stringify(value), type;
 	if (typeof display_value === 'string') {
 		display_value = display_value.replace(/</g, '&lt;')
 		// &nbsp;
 		.replace(/ /g, '\xa0');
 		if (CeL.wiki.is_parsed_element(value))
-			display_value = `<span style="color:#aef" title="type">${value.type}</span>: ` + display_value;
+			type = value.type;
+	} else if (typeof value === 'function') {
+		// e.g., `{{#tag:ref||name="n"}}`
+		type = typeof value;
+		if (!display_value)
+			display_value = value.name + '()';
 	}
+	if (type)
+			display_value = `<span style="color:#aef" title="type">${type}</span>: ` + display_value;
 	return display_value;
 }
 

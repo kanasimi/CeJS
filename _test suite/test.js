@@ -3471,6 +3471,7 @@ function test_wiki() {
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span lang="zh">深圳</span>')], 'wikitext_to_plain_text() #3');
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span xml:lang="zh">深圳</span>')], 'wikitext_to_plain_text() #4');
 		assert(['大稻埕', CeL.wiki.wikitext_to_plain_text('大<span lang="zh" xml:lang="zh">稻埕</span>')], 'wikitext_to_plain_text() #5');
+		assert(['H1\tH2\tH3\n11\t12\t13\n21\t22\t23', CeL.wiki.wikitext_to_plain_text('{| class="wikitable"\n|-\n! H1 !! H2 !! H3\n|-\n| 11 || 12 || 13\n|-\n| 21 || 22 || 23\n|}')], 'wikitext_to_plain_text() #6');
 
 		wikitext = '\'t\' "t"'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed], 'wiki.parse: quoted text');
@@ -4638,6 +4639,15 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #33');
 		assert(['comment', parsed[1].type], 'wiki.parse: nowiki #33-1');
 		assert(['a', parsed[2]], 'wiki.parse: nowiki #33-2');
+		// https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_plain_text.py
+		wikitext = '<noinclude>[[a|<nowiki>[</nowiki>b<nowiki>]</nowiki>]]</noinclude>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #34');
+		assert(['link', parsed[1][0].type], 'wiki.parse: nowiki #34-1');
+		assert(['nowiki', parsed[1][0][2][0].tag], 'wiki.parse: nowiki #34-2');
+		assert(['[b]', CeL.wiki.wikitext_to_plain_text(wikitext)], 'wiki.parse: nowiki #34-3');
+
+		// 2024/2/7 18:0:20 Will throw error: Uncaught RangeError: Maximum call stack size exceeded
+		CeL.wiki.parser(`<noinclude>\n{{Documentation}}</noinclude>`).parse().each(function (token) { });
 
 		wikitext = "aa<br>\nbb</br>\ncc"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: self-closed HTML tags: br #1');

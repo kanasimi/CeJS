@@ -2625,19 +2625,24 @@ function module_code(library_namespace) {
 	</code>
 	 */
 	function table_to_array(page_data, options) {
-		if (!wiki_API.is_page_data(page_data)) {
+		if (!page_data
+				|| (page_data.type !== 'table' && !wiki_API
+						.is_page_data(page_data))) {
 			library_namespace.warn('table_to_array: Not page data!');
-			// return;
+			if (!page_data)
+				return [];
 		}
 		if (typeof options === 'string') {
 			options = {
 				file : options
 			};
+		} else {
+			options = library_namespace.setup_options(options);
 		}
 
 		var heads = [], array = [],
-		// handler
-		processor = options && options.row_processor;
+		// row handler
+		row_processor = options.row_processor, cell_processor = options.cell_processor;
 
 		(page_data.type === 'table' ? [ page_data ] : page_parser(page_data)
 				.parse())
@@ -2707,16 +2712,23 @@ function module_code(library_namespace) {
 							// @see toString of table_cell
 							cell = cell.slice(1);
 						}
-						// .join(''): no delimiter
-						cells.push(cell && cell.join('')
-						//
-						.replace(/^[\|\s]+/, '').trim() || '');
+
+						if (cell_processor) {
+							cell = cell_processor(cell, options);
+						} else if (cell
+						// || cell === 0
+						) {
+							cell = cell
+							// .join(''): no delimiter
+							.join('').replace(/^[\|\s]+/, '').trim();
+						}
+						cells.push(cell || '');
 						if (append_cells > 0) {
 							cells.append(new Array(append_cells).fill(''));
 						}
 					});
 					if (cells.length > 0) {
-						if (options && options.add_section_header) {
+						if (options.add_section_header) {
 							// 將以本列 .header_count 判定本列是否算作標題列。
 							if (row.header_count > 0) {
 								// 對於 table header，不加入 section title 資訊。
@@ -2725,8 +2737,8 @@ function module_code(library_namespace) {
 								cells.unshift(heads[2] || '', heads[3] || '');
 							}
 						}
-						if (processor) {
-							cells = processor(cells);
+						if (row_processor) {
+							cells = row_processor(cells, options);
 						}
 						array.push(cells);
 					}
@@ -2735,7 +2747,7 @@ function module_code(library_namespace) {
 		});
 
 		// output file. e.g., page_data.title + '.csv.txt'
-		if (options && options.file) {
+		if (options.file) {
 			if (library_namespace.write_file && library_namespace.to_CSV_String) {
 				library_namespace.write_file(options.file,
 				// 存成 .txt，並用 "\t" 分隔，可方便 Excel 匯入。

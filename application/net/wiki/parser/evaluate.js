@@ -177,6 +177,7 @@ function module_code(library_namespace) {
 		}
 
 		var parsed = wiki_API.parser(wikitext, options).parse();
+		// console.trace(wikitext);
 		parsed.each('tag_single', function(token) {
 			if (token.tag === 'noinclude') {
 				// Allow `<noinclude />`

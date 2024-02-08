@@ -103,6 +103,22 @@ function module_code(library_namespace) {
 			return token.toString();
 		}
 
+		if (token.type === 'table') {
+			return wiki_API.table_to_array(token, Object.assign({
+				cell_processor : function(cell) {
+					if (!cell)
+						return '';
+					cell = wiki_API.parse.set_wiki_type(cell.slice(), 'plain');
+					cell = wiki_API.wikitext_to_plain_text(cell,
+					//
+					options).trim();
+					return cell;
+				}
+			}, options)).map(function(row) {
+				return row.join('\t');
+			}).join('\n');
+		}
+
 		// console.log(token);
 		if (token.type === 'tag'/* || token.type === 'tag_single' */) {
 			// token: [ tag_attributes, tag_inner ]

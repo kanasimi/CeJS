@@ -200,6 +200,20 @@ function module_code(library_namespace) {
 				.replace(/[\\\/]$/, '');
 		var cache_archive_file = cache_directory + '.7z';
 
+		// 若無新的繁簡轉換資訊，不動到原先的壓縮檔。
+		// 一般來說不需要: 沒新檔案時，7zip 本來就不會更新壓縮檔。
+		if (this.leave_convert_cache_file_alone_when_no_news) {
+			var new_convert_cache_file_count = work_data.new_convert_cache_file_count;
+			delete work_data.new_convert_cache_file_count;
+			// console.trace(new_convert_cache_file_count);
+			if (!new_convert_cache_file_count) {
+				// console.trace(cache_directory);
+				// TODO: Only remove files in the archive file.
+				library_namespace.remove_directory(cache_directory, true);
+				return;
+			}
+		}
+
 		cache_archive_file = new library_namespace.storage.archive(
 				cache_archive_file);
 		return new Promise(function(resolve, reject) {
@@ -782,6 +796,15 @@ function module_code(library_namespace) {
 			// 超過此長度才創建個別的 cache 檔案，否則會放在 .cache_file_for_short_sentences。
 			min_cache_length : 20
 		};
+
+		if (this.leave_convert_cache_file_alone_when_no_news) {
+			work_data.new_convert_cache_file_count = 0;
+			work_data.convert_options.before_save_cache_file = function(
+					cache_file_path, content, is_short_sentences) {
+				// console.trace(cache_file_path);
+				work_data.new_convert_cache_file_count++;
+			};
+		}
 
 		if (this.convert_to_language
 				&& (!options || !options.no_extract_convert_cache_directory)) {

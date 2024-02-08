@@ -390,11 +390,17 @@ function module_code(library_namespace) {
 	// 優先權高低: <onlyinclude> → <nowiki> → <noinclude>, <includeonly>
 	// [[mw:Transclusion#Partial transclusion markup]]
 	// <noinclude>, <includeonly> 在解析模板時優先權必須高於其他 tags。
-	wiki_extensiontags = 'includeonly|noinclude|'
+	wiki_extensiontags = 'includeonly|noinclude|onlyinclude|'
 			// 在其內部的 wikitext 不會被 parse。允許內部採用 table 語法的 tags。例如
 			// [[mw:Manual:Extensions]]
 			// configurations.extensiontags
 			+ 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem',
+	// <nowiki>不允許內部再解析，但這幾個都內部得再解析。
+	wiki_extensiontags_must_parse_inner = {
+		onlyinclude : true,
+		includeonly : true,
+		noinclude : true
+	},
 	/**
 	 * {RegExp}HTML tags 的匹配模式 of <nowiki>。這些 tag 就算中間置入 "<!--" 也不會被當作
 	 * comments，必須在 "<!--" 之前解析。 PATTERN_WIKI_TAG_of_wiki_extensiontags
@@ -3065,11 +3071,11 @@ function module_code(library_namespace) {
 				// re-parse for finding functional tokens
 				&& token.has_functional_sub_token) {
 					sub_token.forEach(function(_sub_token, index) {
-						_options = _options
+						_options = _options || (options.target_array
 						// 重新造一個 options 以避免污染。
-						|| Object.assign(Object.clone(options), {
+						? Object.assign(Object.clone(options), {
 							target_array : null
-						});
+						}) : options);
 						sub_token[index] = parse_wikitext(
 						// re-parse {String} sub tokens
 						_sub_token.toString(), _options);
@@ -3207,7 +3213,15 @@ function module_code(library_namespace) {
 			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
 					'parse_wikitext.tag');
 			attributes = parse_tag_attributes(attributes);
-			inner = parse_wikitext(inner, options, queue);
+			if (tag.toLowerCase() in wiki_extensiontags_must_parse_inner) {
+				inner = parse_wikitext(inner, options.target_array
+				// 重新造一個 options 以避免污染。
+				? Object.assign(Object.clone(options), {
+					target_array : null
+				}) : options);
+			} else {
+				inner = parse_wikitext(inner, options, queue);
+			}
 
 			// 處理特殊 tags。
 			// <source>-{...}-</source>內之-{}-與<nowiki>-{...}-</nowiki>一樣無效。
@@ -4128,10 +4142,11 @@ function module_code(library_namespace) {
 			// 因此不直接傳入 parsed，而是 .toString() 另外再傳一次。
 			parameters.link = wiki_API.section_link(parameters.toString(),
 			// options: pass session. for options.language
-			Object.assign(Object.clone(options), {
-				// 重新造一個 options 以避免污染。
+			options.target_array
+			// 重新造一個 options 以避免污染。
+			? Object.assign(Object.clone(options), {
 				target_array : null
-			}));
+			}) : options);
 			/** {String}section title in wikitext */
 			parameters.title = parameters.link.id;
 

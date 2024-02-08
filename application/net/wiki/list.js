@@ -1025,7 +1025,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * All list types MediaWiki supported.
+	 * All MediaWiki list types supported by this library.
 	 * 
 	 * @type {Object}
 	 * 

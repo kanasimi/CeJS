@@ -1109,7 +1109,8 @@ function (globalThis) {
 		return platform.OS && platform.OS.toLowerCase().indexOf('win') === 0;
 	};
 
-	if (is_WWW)
+	if (is_WWW) {
+		// IIFE
 		(function() {
 			// e.g., 'Win32'
 			platform.OS = navigator.platform;
@@ -1148,6 +1149,7 @@ function (globalThis) {
 				// Firefox: Gecko
 				platform.engine = tmp;
 		})();
+	}
 
 	// for node.js: .platform.browser, .platform.is_interactive will setup in
 	// _structure/module.js.
@@ -2476,6 +2478,7 @@ OS='UNIX'; // unknown
 		// 利用原生 console 來 debug。
 		// 不直接指定 console.*: 預防 'Uncaught TypeError: Illegal invocation'.
 
+		// IIFE
 		(function() {
 			for ( var type in default_style) {
 				// default style: foreground 前景
@@ -2705,9 +2708,10 @@ OS='UNIX'; // unknown
 		}
 	}
 
+	if (!Object.defineProperty[KEY_not_native]
 	// 確認 Object.defineProperty() 是否能正確設值。
 	// @see https://en.wikipedia.org/wiki/Feature_detection_(web_development)
-	if (!Object.defineProperty[KEY_not_native] && (function() {
+	&& (function() {
 		var object = {}, value = 7;
 		Object.defineProperty(object, 'v', {
 			get : function() {
