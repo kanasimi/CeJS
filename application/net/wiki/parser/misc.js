@@ -1680,7 +1680,8 @@ function module_code(library_namespace) {
 				if (token.type === 'tag' && token.tag === 'syntaxhighlight'
 						&& /^JSON/i.test(token.attributes.lang)) {
 					console.trace(token[1].toString());
-					return JSON.parse(token[1].toString());
+					return eval_JavaScript_object_code(token[1].toString(),
+							true);
 				}
 			}
 
@@ -1696,33 +1697,7 @@ function module_code(library_namespace) {
 			// Remove comments
 			.replace(/<!--[\s\S]*?-->/g, '');
 
-			switch (value) {
-			case 'true':
-				value = true;
-				break;
-
-			case 'false':
-				value = false;
-				break;
-
-			default:
-				var numeric = +value;
-				if (!isNaN(numeric)) {
-					value = value;
-				} else if (/[{}\[\]"']/.test(value)) {
-					try {
-						// e.g., 'true' / 'false' / number
-						value = JSON.parse(value);
-						// TODO: 應避免安全問題。
-					} catch (e) {
-						// TODO: handle exception
-					}
-				} else {
-					// Treat value as pure string.
-				}
-			}
-
-			return value;
+			return eval_JavaScript_object_code(value, true);
 		}
 
 		/** {Object}設定頁面/文字所獲得之個人化設定/手動設定 manual settings。 */
@@ -2065,12 +2040,28 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	// Using JSON.parse() instead of eval()
-	function eval_object(code) {
-		// library_namespace.log('eval_object: eval(' + code + ')');
+	// e.g., 'true' / 'false' / number
+	function eval_JavaScript_object_code(code, options) {
+		// library_namespace.log('eval_JavaScript_object_code: eval(' + code +
+		// ')');
 		// console.log(code);
 		// code = eval(code);
 
+		if (options === true) {
+			options = {
+				no_throw : true
+			}
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
+		var no_throw = options.no_throw;
+
+		if (no_throw && typeof code !== 'string')
+			return code;
+
 		code = code.trim();
+
 		if (code.startsWith("'") && code.endsWith("'")) {
 			// '' to ""
 			code = code.replace(
@@ -2089,13 +2080,31 @@ function module_code(library_namespace) {
 			});
 			code = code.replace(/\t/g, '\\t');
 		}
+
+		if (no_throw && !/^[{\["]/.test(code)) {
+			// Treat value as pure string.
+			return code;
+		}
+
+		if (no_throw && /^{{\s*[^"]/.test(code)) {
+			// e.g., {{t}}
+			return code;
+		}
+
 		try {
+			// TODO: 應避免安全問題。
 			return JSON.parse(code);
 		} catch (e) {
-			console.trace('eval_object: Failed to parse code.');
+			console.trace('eval_JavaScript_object_code: '
+					+ 'Failed to parse code.');
 			console.log(JSON.stringify(code));
-			throw e;
+			if (!no_throw)
+				throw e;
+
+			// TODO: handle exception
 		}
+
+		return code;
 	}
 
 	/**
@@ -2155,7 +2164,7 @@ function module_code(library_namespace) {
 				.replace(
 						/("(?:\\[\s\S]|[^\\\n"])*"|'(?:\\[\s\S]|[^\\\n'])*')(?:\\t|[\s\n]|--[^\n]*\n)*(?:(\.\.)(?:\\t|[\s\n]|--[^\n]*\n)*)?/g,
 						function(all, string, concatenation) {
-							string = eval_object(string);
+							string = eval_JavaScript_object_code(string);
 							return JSON.stringify(string)
 									+ (concatenation || '');
 						});
@@ -2257,7 +2266,7 @@ function module_code(library_namespace) {
 				//
 				) || field.match(/^\[([\s\S]+)\][\s\n]*=([\s\S]+)$/);
 				if (matched) {
-					matched[1] = eval_object(matched[1]);
+					matched[1] = eval_JavaScript_object_code(matched[1]);
 					object_value[matched[1]] = matched[2].trim();
 					return;
 				}

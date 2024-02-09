@@ -412,16 +412,19 @@ function module_code(library_namespace) {
 	} catch (e) {
 	}
 
-	try {
-		has_caller = function(a) {
-			'use strict';
-			return arguments.callee.caller !== undefined;
-		};
-		has_caller = (function() {
-			return has_caller();
-		})();
-	} catch (e) {
-		has_caller = false;
+	if (typeof Symbol !== 'function') {
+		// 會來這邊的都是舊的環境。
+		try {
+			has_caller = function(a) {
+				'use strict';
+				return arguments.callee.caller !== undefined;
+			};
+			has_caller = (function() {
+				return has_caller();
+			})();
+		} catch (e) {
+			has_caller = false;
+		}
 	}
 
 	// class public interface ---------------------------
@@ -1132,18 +1135,6 @@ function finish(name_space) {
 		},
 		// base path of icon
 		icon_path = CeL.get_module_path(module_name, 'icon/');
-
-		try {
-			has_caller = function(a) {
-				'use strict';
-				return arguments.callee.caller !== undefined;
-			};
-			has_caller = (function() {
-				return has_caller();
-			})();
-		} catch (e) {
-			has_caller = false;
-		}
 
 		// console.log('override: CeL.Log = ' + log_controller[0]);
 		CeL.Log = log_controller[0];

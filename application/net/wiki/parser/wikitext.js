@@ -2999,12 +2999,13 @@ function module_code(library_namespace) {
 			while ((matched = PATTERN_tag_attribute.exec(attributes))
 					&& matched[0]) {
 				// console.trace(matched);
-				attributes_list.push(parse_wikitext(matched[0], _options));
+				attributes_list
+						.push(parse_wikitext(matched[0], _options, queue));
 				var name = matched[1];
 				if (!name) {
 					// console.assert(!!matched[4]);
 					if (matched[4]) {
-						name = parse_wikitext(matched[4], _options);
+						name = parse_wikitext(matched[4], _options, queue);
 						// assert: name.toString() === matched[4]
 						attribute_hash[/* name.toString() */matched[4]] = name;
 					}
@@ -3012,13 +3013,13 @@ function module_code(library_namespace) {
 				}
 
 				// parse attributes
-				// name = parse_wikitext(name, _options);
+				// name = parse_wikitext(name, _options, queue);
 				var value = matched[3]
 				// 去掉 "", ''
 				|| matched[2].slice(1, -1);
 				if (wiki_API.HTML_to_wikitext)
 					value = wiki_API.HTML_to_wikitext(value);
-				value = parse_wikitext(value, _options);
+				value = parse_wikitext(value, _options, queue);
 				attribute_hash[name] = value;
 			}
 			if (false) {
@@ -3074,7 +3075,7 @@ function module_code(library_namespace) {
 						}) : options);
 						sub_token[index] = parse_wikitext(
 						// re-parse {String} sub tokens
-						_sub_token.toString(), _options);
+						_sub_token.toString(), _options, queue);
 					});
 				}
 				pick_functional_tokens_for_pre(sub_token);
@@ -3210,11 +3211,12 @@ function module_code(library_namespace) {
 					'parse_wikitext.tag');
 			attributes = parse_tag_attributes(attributes);
 			if (tag.toLowerCase() in wiki_extensiontags_must_parse_inner) {
-				inner = parse_wikitext(inner, options.target_array
+				inner = parse_wikitext(inner,
 				// 重新造一個 options 以避免污染。
-				? Object.assign(Object.clone(options), {
+				Object.assign(Object.clone(options), {
+					parse_inner_extensiontags : true,
 					target_array : null
-				}) : options);
+				}), queue);
 			} else {
 				inner = parse_wikitext(inner, options, queue);
 			}
@@ -3292,6 +3294,25 @@ function module_code(library_namespace) {
 			// console.log(queue);
 			return previous + include_mark + (queue.length - 1) + end_mark
 					+ following;
+		}
+
+		function parse_comments_or_extensiontags(all, tag, attributes, inner,
+				ending, end_tag, parameters, offset, original_string) {
+			if (tag) {
+				// assert: is extensiontag
+				return parse_HTML_tag(all, tag, attributes, inner, ending,
+						end_tag, offset, original_string);
+			}
+
+			// console.trace([ all, parameters, arguments ]);
+
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			// e.g., "<!-- <nowiki>...</nowiki> ... -->"
+			parameters = parse_wikitext(parameters, options, queue);
+			// 不再作 parse。
+			parameters = parameters.toString();
+			queue.push(_set_wiki_type(parameters, 'comment'));
+			return include_mark + (queue.length - 1) + end_mark;
 		}
 
 		function parse_single_tag(all, slash, tag, attributes) {
@@ -4425,35 +4446,19 @@ function module_code(library_namespace) {
 		PATTERN_extensiontags = new RegExp(PATTERN_extensiontags.source
 				+ /|<\!--([\s\S]*?)-->/.source, PATTERN_extensiontags.flags);
 
-		function parse_comments_or_extensiontags(all, tag, attributes, inner,
-				ending, end_tag, parameters, offset, original_string) {
-			if (tag) {
-				// assert: is extensiontag
-				return parse_HTML_tag(all, tag, attributes, inner, ending,
-						end_tag, offset, original_string);
-			}
-
-			// console.trace([ all, parameters, arguments ]);
-
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			// e.g., "<!-- <nowiki>...</nowiki> ... -->"
-			parameters = parse_wikitext(parameters, options, queue);
-			// 不再作 parse。
-			parameters = parameters.toString();
-			queue.push(_set_wiki_type(parameters, 'comment'));
-			return include_mark + (queue.length - 1) + end_mark;
-		}
-
 		// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!-- -->wiki>"
 		// 之類），又無需向前回溯；只需在第一次檢測，不會有遺珠之憾。
-		if (initialized_fix) {
+		if (initialized_fix || options.parse_inner_extensiontags) {
 			// .replace_till_stable(): e.g., '<ref name="a"/><!-- </ref -->a'
 			wikitext = wikitext.replace_till_stable(PATTERN_extensiontags,
 					parse_comments_or_extensiontags);
+		}
+
+		if (initialized_fix) {
+			wikitext = wikitext.replace(/<\!--([\s\S]*)$/,
 			// 缺 end mark: "...<!--..."
 			// "<\": for Eclipse JSDoc.
-			wikitext = wikitext.replace(/<\!--([\s\S]*)$/, function(all,
-					parameters) {
+			function parse_comments_start(all, parameters) {
 				if (initialized_fix[1]) {
 					parameters = parameters.slice(0,
 					//
@@ -4477,30 +4482,6 @@ function module_code(library_namespace) {
 
 		// 為了 "{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}"，
 		// 將 -{}-, [], [[]] 等，所有中間可穿插 "|" 的置於 {{{}}}, {{}} 前。
-
-		// ----------------------------------------------------
-		// language conversion -{}- 以後來使用的為主。
-		// TODO: -{R|里}-
-		// TODO: -{zh-hans:<nowiki>...</nowiki>;zh-hant:<nowiki>...</nowiki>;}-
-		// TODO: 特別注意語法中帶有=>的單向轉換規則 [[w:zh:模組:CGroup/IT]]
-		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
-		// https://zh.wikipedia.org/wiki/Help:中文维基百科的繁简、地区词处理#常用的轉換工具語法
-		// [[w:zh:H:Convert]], [[w:zh:H:AC]]
-		// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
-		// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
-		// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
-
-		// https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/languages/data/ZhConversion.php
-		// https://github.com/wikimedia/mediawiki/blob/master/includes/languages/data/ZhConversion.php
-		// https://doc.wikimedia.org/mediawiki-core/master/php/ZhConversion_8php_source.html
-
-		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
-		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
-		// TODO:
-		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
-
-		wikitext = wikitext.replace_till_stable(PATTERN_language_conversion,
-				parse_language_conversion);
 
 		// ----------------------------------------------------
 		// [[w:zh:Help:模板]]
@@ -4578,6 +4559,30 @@ function module_code(library_namespace) {
 			wikitext = wikitext.replace_till_stable(
 					PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_url);
 		}
+
+		// ----------------------------------------------------
+		// language conversion -{}- 以後來使用的為主。
+		// TODO: -{R|里}-
+		// TODO: -{zh-hans:<nowiki>...</nowiki>;zh-hant:<nowiki>...</nowiki>;}-
+		// TODO: 特別注意語法中帶有=>的單向轉換規則 [[w:zh:模組:CGroup/IT]]
+		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
+		// https://zh.wikipedia.org/wiki/Help:中文维基百科的繁简、地区词处理#常用的轉換工具語法
+		// [[w:zh:H:Convert]], [[w:zh:H:AC]]
+		// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
+		// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
+		// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
+
+		// https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/languages/data/ZhConversion.php
+		// https://github.com/wikimedia/mediawiki/blob/master/includes/languages/data/ZhConversion.php
+		// https://doc.wikimedia.org/mediawiki-core/master/php/ZhConversion_8php_source.html
+
+		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
+		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
+		// TODO:
+		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
+
+		wikitext = wikitext.replace_till_stable(PATTERN_language_conversion,
+				parse_language_conversion);
 
 		// ----------------------------------------------------
 		// wikilink

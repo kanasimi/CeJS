@@ -3988,9 +3988,12 @@ function module_code(library_namespace) {
 
 		};
 
+		if (!(config.initial_target_length > 0))
+			config.initial_target_length = pages.length;
+
 		var target = pages,
 		// const 可用來紀錄整體作業進度 overall progress。因為這個作業耗時較長 標註進度可讓人知道已經做了多少
-		initial_target_length = config.initial_target_length = target.length,
+		initial_target_length = config.initial_target_length,
 		//
 		slice_size = max_slice_size(this, config),
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */

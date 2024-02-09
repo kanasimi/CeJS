@@ -515,7 +515,7 @@ function module_code(library_namespace) {
 
 		if (options && options.skip_nochange && options.page_to_edit) {
 			var original_content = wiki_API.content_of(options.page_to_edit);
-			if (/\.json$/i.test(wiki_API.title_of(title))) {
+			if (original_content && /\.json$/i.test(wiki_API.title_of(title))) {
 				try {
 					// text = JSON.stringify(JSON.parse(text));
 					original_content = JSON.stringify(JSON
@@ -1671,25 +1671,34 @@ function module_code(library_namespace) {
 	function Variable_Map(iterable) {
 		if (library_namespace.is_Object(iterable))
 			iterable = Object.entries(iterable);
-		try {
-			Map.call(this, iterable);
-			// Object.assign(iterable, Map.prototype);
-			return;
-		} catch (e) {
-			// node.js 0.11: Constructor Map requires 'new'
+
+		if (typeof Symbol !== 'function') {
+			// New environment do not allow this.
+			try {
+				Map.call(this, iterable);
+				// Object.assign(iterable, Map.prototype);
+				return;
+			} catch (e) {
+				// node.js 0.11: Constructor Map requires 'new'
+			}
 		}
 
 		iterable = new Map(iterable);
 		// Copy all methods
 		Object.assign(iterable, Variable_Map.prototype);
+
 		return iterable;
 	}
+
+	// class Variable_Map extends Map{ ... }
 	Variable_Map.prototype = {
 		format : Variable_Map_format,
 		update : Variable_Map_update,
 		to_page_text_updater : Variable_Map_to_page_text_updater,
+		// 採用 Object.assign() 無法設定 constructor。
 		constructor : Variable_Map
 	};
+	// console.trace(Variable_Map.prototype);
 
 	Variable_Map.is_Variable_Map = function is_Variable_Map(value) {
 		return value && value.constructor === Variable_Map;
