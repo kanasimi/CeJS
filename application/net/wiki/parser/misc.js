@@ -23,7 +23,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.parser.misc',
 
-	require : 'application.net.wiki.parser.wikitext.',
+	require : 'application.net.wiki.parser.wikitext.'
+	// to_JS_value()
+	+ '|data.code.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -1674,9 +1676,10 @@ function module_code(library_namespace) {
 			// console.trace(JSON.stringify(value));
 			// console.trace(JSON.stringify(filter_tags(value)));
 			value = filter_tags(value);
-			value = value.toString().trim();
+			var JS_value = value.toString().trim();
+
 			if (false) {
-				var token = wiki_API.parse(value, options);
+				var token = wiki_API.parse(JS_value, options);
 				if (token.type === 'tag' && token.tag === 'syntaxhighlight'
 						&& /^JSON/i.test(token.attributes.lang)) {
 					console.trace(token[1].toString());
@@ -1685,8 +1688,8 @@ function module_code(library_namespace) {
 				}
 			}
 
-			// console.log(JSON.stringify(value));
-			value = value
+			// console.log(JSON.stringify(JS_value));
+			JS_value = JS_value
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
@@ -1697,7 +1700,16 @@ function module_code(library_namespace) {
 			// Remove comments
 			.replace(/<!--[\s\S]*?-->/g, '');
 
-			return eval_JavaScript_object_code(value, true);
+			// console.trace([ JS_value, wiki_API.parse(JS_value), value ]);
+
+			value = wiki_API.parse(JS_value);
+			if (typeof value !== 'string'
+			// 去掉應為 parsed elements，絕對不會是 JS native value。如此可以避免 throw。
+			&& (value.type !== 'plain' || typeof value[0] !== 'string')) {
+				return JS_value;
+			}
+
+			return library_namespace.to_JS_value(JS_value);
 		}
 
 		/** {Object}設定頁面/文字所獲得之個人化設定/手動設定 manual settings。 */
@@ -2041,27 +2053,18 @@ function module_code(library_namespace) {
 
 	// Using JSON.parse() instead of eval()
 	// e.g., 'true' / 'false' / number
-	function eval_JavaScript_object_code(code, options) {
-		// library_namespace.log('eval_JavaScript_object_code: eval(' + code +
-		// ')');
-		// console.log(code);
-		// code = eval(code);
-
-		if (options === true) {
-			options = {
-				no_throw : true
-			}
-		} else {
-			options = library_namespace.setup_options(options);
+	// @inner Only for parse_lua_object_code()
+	function eval_JavaScript_object_code(code) {
+		if (false) {
+			library_namespace.log('eval_JavaScript_object_code: eval(' + code
+					+ ')');
+			console.log(code);
+			code = eval(code);
 		}
-
-		var no_throw = options.no_throw;
-
-		if (no_throw && typeof code !== 'string')
-			return code;
 
 		code = code.trim();
 
+		// Only for parse_lua_object_code()
 		if (code.startsWith("'") && code.endsWith("'")) {
 			// '' to ""
 			code = code.replace(
@@ -2081,16 +2084,6 @@ function module_code(library_namespace) {
 			code = code.replace(/\t/g, '\\t');
 		}
 
-		if (no_throw && !/^[{\["]/.test(code)) {
-			// Treat value as pure string.
-			return code;
-		}
-
-		if (no_throw && /^{{\s*[^"]/.test(code)) {
-			// e.g., {{t}}
-			return code;
-		}
-
 		try {
 			// TODO: 應避免安全問題。
 			return JSON.parse(code);
@@ -2098,13 +2091,12 @@ function module_code(library_namespace) {
 			console.trace('eval_JavaScript_object_code: '
 					+ 'Failed to parse code.');
 			console.log(JSON.stringify(code));
-			if (!no_throw)
-				throw e;
+			throw e;
 
 			// TODO: handle exception
 		}
 
-		return code;
+		// return code;
 	}
 
 	/**

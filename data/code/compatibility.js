@@ -1999,7 +1999,7 @@ function module_code(library_namespace) {
 						// Invalid JSON
 						+ escape_char + ' in JSON');
 					}
-					return escaped
+					return escaped;
 				});
 			}
 

@@ -18,6 +18,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.platform.nodejs',
 
+	// to_JS_value()
+	require : 'data.code.',
+
 	// 設定不匯出的子函式。
 	// no_extend : '*',
 
@@ -867,21 +870,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
-	// e.g., '123', '-123', '+12.34', '-.123'
-	var PATTERN_number_string = /^[+\-]?(?:\d{1,20}(?:\.\d{1,20})?|\.\d{1,20})$/,
-	// 在命令列設定這些值時，將會被轉換為所指定的值。
-	// 若是有必要將之當作字串值，必須特地加上引號。
-	arg_conversion = {
-		'true' : true,
-		'false' : false,
-
-		'Infinity' : Infinity,
-		'infinity' : Infinity,
-
-		'null' : null,
-		'undefined' : undefined
-	};
-
 	/**
 	 * command line arguments 指令列參數
 	 * 
@@ -899,7 +887,7 @@ function module_code(library_namespace) {
 			var matched = arg.match(/^(-{0,2})([^=]+?)(=(.*))?$/);
 			if (!matched) {
 				// e.g., "=..."
-				this[arg] = PATTERN_number_string.test(value) ? +value : value;
+				this[''] = arg.slice(1);
 				return;
 			}
 
@@ -918,14 +906,9 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var value = matched[4];
-			this[matched[2]] = (value in arg_conversion)
+			// 在命令列設定這些值時，將會被轉換為所指定的值。
 			// 若是有必要將之當作字串值，必須特地加上引號。
-			? arg_conversion[value]
-			// treat as number
-			: PATTERN_number_string.test(value) ? +value
-			//
-			: value;
+			this[matched[2]] = library_namespace.to_JS_value(matched[4]);
 		}, library_namespace.env.arg_hash
 		// ↑ use ((CeL.env.arg_hash)) to get command line arguments
 		= Object.create(null));

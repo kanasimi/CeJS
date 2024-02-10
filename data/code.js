@@ -800,6 +800,73 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
+	// e.g., '123', '-123', '+12.34', '-.123'
+	var PATTERN_number_string = /^[+\-]?(?:\d{1,20}(?:\.\d{1,20})?|\.\d{1,20})$/,
+	// 這些值將會被轉換為所指定的值，一如以 JSON.parse() or ecal() 解析所得。
+	value_conversion = {
+		'true' : true,
+		'false' : false,
+
+		'Infinity' : Infinity,
+		'infinity' : Infinity,
+
+		'null' : null,
+		'undefined' : undefined
+	};
+
+	function convert_string(value) {
+		value = value.replace(
+				/\\(.)|(.)/g,
+				function(all, escaped_character, character) {
+					if (character)
+						return character === '"' ? '\\"' : all;
+					return /^["\\\/bfnrtu]$/.test(escaped_character) ? all
+							: escaped_character;
+				}).replace(/^'|'$/g, '"');
+		value = value.replace(/\t/g, '\\t');
+	}
+
+	// @see function JSON_parse(text, reviver) @ CeL.data.code.compatibility
+	function to_JS_value(value/* , options or reviver */) {
+		if (false) {
+			library_namespace.log('to_JS_value: eval(' + value + ')');
+			console.trace(value);
+			return eval(value);
+		}
+
+		// options = library_namespace.setup_options(options);
+
+		if (typeof value !== 'string')
+			return value;
+
+		value = value.trim();
+
+		if (value in value_conversion) {
+			// 若是有必要將之當作字串值，必須特地加上引號。
+			return value_conversion[value];
+		}
+
+		if (PATTERN_number_string.test(value)) {
+			// treat as number
+			return +value;
+		}
+
+		// 去掉絕對不會是 JS native value。如此可以避免 throw。
+		if (!/^["'{\[]/.test(value))
+			return value;
+
+		try {
+			return JSON.parse(value);
+		} catch (e) {
+			// TODO: handle exception
+		}
+		return value;
+	}
+
+	_.to_JS_value = to_JS_value;
+
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
 	return (_// JSDT:_module_
 	);
 }
