@@ -618,6 +618,8 @@
 想要去拼一下	想要去拚一下
 // 《我在幕后调教大佬》	自己拿什么去拼…… (~拚<role.type:ARGM-ADV>自己 r:自己+v:拿+r:什么+v:去+v:拼) (~拚<role.type:A0>自己 ~拚<role.type:ARGM-MNR>拿什么 r:自己+p:拿+r:什么+v:去+v:拼+wp:……)
 拿什麼去拼	拿什麼去拚
+// 《我为长生仙》	去拼，去搏。 (~拚<COO>v:拼 ~拚<role.type:ARGM-DIS>而 ~拚<role.type:A0>这生机 ~拚<role.type:ARGM-ADV>也 ~拚<role.type:A0>我 v:去+v:拼+wp:，+v:去+v:搏+wp:。)
+去拼，去搏	去拚，去搏
 
 // 《中国历史那些事儿系列套装》	(p:以+v:死+v:相拼)
 相拼	相拚

@@ -530,6 +530,17 @@ function module_code(library_namespace) {
 						continue;
 					}
 
+					if (!Array.isArray(this_parameter)
+							|| this_parameter.length < 2) {
+						// 可能是變造過的 parameter。
+						library_namespace.warn('replace_parameter: '
+								+ 'Skip replace [' + replace_from
+								+ ']→[replace_to]');
+						console.trace(this_parameter);
+						console.trace([ index, template_token ]);
+						continue;
+					}
+
 					var parameters = template_token.parameters;
 
 					// using this_parameter[2] to keep spaces and parameter

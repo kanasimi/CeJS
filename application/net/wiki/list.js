@@ -647,7 +647,12 @@ function module_code(library_namespace) {
 		wiki_API.query(action,
 		// treat as {Function}callback or {Object}wiki_API.work config.
 		function(data, error) {
-			// console.log(JSON.stringify(data));
+			if (false) {
+				console.trace(data
+						&& (JSON.stringify(data).slice(0, 200) + '... ('
+								+ JSON.stringify(data).length + ')'), data,
+						error);
+			}
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value) {
@@ -1416,6 +1421,7 @@ function module_code(library_namespace) {
 							}
 						}
 					}
+					// library_namespace.log_temporary()
 					library_namespace.info(message);
 				} else {
 					// Only preserve length property.
