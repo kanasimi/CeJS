@@ -1639,6 +1639,8 @@ function module_code(library_namespace) {
 			'Authority control',
 			// Geographical coordinates
 			'Coord', 'Coord missing', 'DEFAULTSORT' ]
+
+		// page_footer : [ 'Category:Stub message templates' ]
 		},
 
 		zhwiki : {
@@ -1650,6 +1652,8 @@ function module_code(library_namespace) {
 			// [[Wikipedia:模板消息/消歧义模板]]
 			// [[Category:消歧义与重定向模板]]
 			'Category:顶注模板',
+
+			'Featured list', 'Featured article', 'Good article',
 			// [[Wikipedia:模板消息/维护|維護模板]]
 			'Multiple issues', 'Category:清理模板', 'Category:引用與查證維護模板',
 			//
@@ -1671,13 +1675,9 @@ function module_code(library_namespace) {
 			'Navbox', 'Navboxes', 'Portal bar', 'Taxonbar',
 			// authority control template "控製"也能引導到"控制"
 			'Authority control', '規範控製', '權威控製', 'Coord', 'Coord missing',
-					'DEFAULTSORT' ],
+					'DEFAULTSORT' ]
 
-			page_footer : [
-
-			'Featured list', 'Featured article', 'Good article'
-
-			]
+		// page_footer : [ 'Category:小作品訊息模板' ]
 		}
 	};
 
