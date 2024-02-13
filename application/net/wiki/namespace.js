@@ -2803,6 +2803,10 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// https://en.wikipedia.org/wiki/Wikipedia:Village_pump_(technical)/Archive_210#About_wikia_flag_in_Special:Interwiki
+		// changing [[Special:Interwiki]] matrix for all Wikimedia projects
+		// should be brought up at [[meta:Talk:Interwiki map]].
+		// Local projects can not override this list.
 		var interwikimap =
 		// session.has_languagevariants &&
 		configurations.interwikimap;

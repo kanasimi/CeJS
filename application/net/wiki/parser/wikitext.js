@@ -1897,6 +1897,7 @@ function module_code(library_namespace) {
 						return previous + all_link;
 					}
 					var matched = (session || wiki_API).namespace(page_name, {
+						is_page_title : true,
 						get_name : true
 					});
 					page_name = [ page_name ];
@@ -1909,8 +1910,10 @@ function module_code(library_namespace) {
 					} else {
 						// e.g., [[File]]
 						page_name.namespace = '';
-						// page_name = page_name.split(normalize ? /\s*:\s*/ :
-						// ':');
+						if (false) {
+							page_name = page_name.split(normalize ? /\s*:\s*/
+									: ':');
+						}
 					}
 				}
 				page_name = _set_wiki_type(page_name, 'namespaced_title');

@@ -4049,6 +4049,9 @@ function test_wiki() {
 		wikitext = '[[T{{ \n!\n }}t{{ \n!}}l]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['t{{ \n!}}l', parsed[0][2].toString()], 'wiki.parse: wikilink: display_text');
+		wikitext = "[[1,1':2',1'':3'',1'''-四聯苯]]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['', parsed[0].namespace], 'wiki.parse: wikilink');
 
 		wikitext = '[[a\ta]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
