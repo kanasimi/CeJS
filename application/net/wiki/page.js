@@ -974,7 +974,12 @@ function module_code(library_namespace) {
 						+ data.from + ': [' + to + ']→['
 						//
 						+ page_list.redirects.map[to].to + ']');
-						to = page_list.redirects.map[to].to;
+						var next__to = page_list.redirects.map[to].to;
+						if (to === next__to) {
+							// e.g., [[愛愛內含光]] 2024/2/12 自己連到自己
+							break;
+						}
+						to = next__to;
 					}
 					if (!title_data_map[to]) {
 						// console.trace(page_list);

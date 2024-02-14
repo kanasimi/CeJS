@@ -261,10 +261,13 @@ function module_code(library_namespace) {
 	https://www.piaotian.com/html/14/14431/10565524.html	道诡异仙 第1027章 番外1 感谢白银盟主（李火旺0402生
 	&nbsp;&nbsp;&nbsp;&nbsp;第1027章 番外1 感谢白银盟主（李火旺0402生日快乐）的打赏。<br/><br/>
 
+	https://www.69xinshu.com/txt/47093/34685221	我爲長生仙 > 第385章 吾名泰一！
+	&emsp;&emsp;第385章 吾名——泰一！
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~\-々\s]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\-—々\s]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
@@ -432,16 +435,27 @@ function module_code(library_namespace) {
 			title = full_title;
 		}
 
-		if (false && title.includes('')) {
+		if (false && title.includes('—')) {
 			console.trace([ full_title, title, title_start_index, first_line,
-					content_before_title, content_after_title,
-					text.slice(title_start_index
-					//
-					+ (full_title || title).length).slice(0, 100) ]);
+					content_before_title, content_after_title ]);
+		}
+		if (!new_text)
+			new_text = text;
+		if (!full_title)
+			full_title = title;
+		// new_text 可能以空白字元起始，因此需要重新計算 index。
+		// e.g., https://www.69xinshu.com/txt/47093/34685221
+		title_start_index = new_text.indexOf(full_title);
+		if (!(title_start_index >= 0)) {
+			throw new Error('trim_start_title: Text not includes title ['
+					+ full_title + ']: ' + new_text.slice(0, 200));
+		}
+		new_text = new_text.slice(title_start_index + full_title.length);
+		if (false && title.includes('—')) {
+			console.trace([ title_start_index, new_text.slice(0, 200) ]);
 		}
 
-		return (new_text || text).slice(title_start_index
-				+ (full_title || title).length);
+		return new_text;
 	}
 
 	// text = CeL.work_crawler.trim_start_title(text, chapter_data);

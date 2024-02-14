@@ -8265,7 +8265,9 @@ function module_code(library_namespace) {
 		// match a back-reference
 		var unicode_text = HTML.valueOf();
 
-		if (options.is_URI) {
+		if (options.is_URI === true
+		//
+		|| options.is_URI === 'auto' && /%[\dA-F]{2}/i.test(unicode_text)) {
 			try {
 				// 必須先採用 decodeURIComponent()，
 				// CeL.HTML_to_Unicode() 往後的程式碼僅為了解碼 &#*。

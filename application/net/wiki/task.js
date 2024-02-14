@@ -1727,7 +1727,7 @@ function module_code(library_namespace) {
 			// && next[2].section !== 'new'
 			//
 			&& !wiki_API.content_of.had_fetch_content(next[2].page_to_edit)) {
-				console.trace(this);
+				console.trace([ this, next ]);
 				console.trace('actions_when_fetching_page:',
 						next[2].actions_when_fetching_page);
 				console.trace('next:', next);

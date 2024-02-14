@@ -2267,6 +2267,9 @@ function module_code(library_namespace) {
 				} catch (e) {
 					// e.g., error after convert /\.([\dA-F]{2})/g
 					anchor = original_hash;
+					// TODO: 無法解碼可能會被辨識為普通文字而非 wikilink。
+					// e.g., "[[Francisco_Hern%E1ndez_de_C%F3"... @
+					// [[w:en:Talk:Francisco_Hernández_de_Córdoba_(Yucatán_conquistador)]]
 				}
 				// console.log(anchor);
 				// wikilink_token.anchor without "#" 網頁錨點 section_title

@@ -1849,7 +1849,7 @@ function module_code(library_namespace) {
 			predefined : true,
 			entity : true,
 			numeric : true,
-			is_URI : true
+			is_URI : 'auto'
 		});
 
 		// e.g., "Wikipedia:削除依頼/ログ/{{#time:Y年Fj日|-1 days +9 hours}}"
@@ -2152,17 +2152,17 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}text
 	 *            包含有問題字元的文字字串。
-	 * @param {Boolean}is_uri
+	 * @param {Boolean}is_URI
 	 *            輸出為 URI 或 URL。
 	 * @returns {String}plain wikitext
 	 * 
-	 * @see function section_link_escape(text, is_uri)
+	 * @see function section_link_escape(text, is_URI)
 	 * @see [[w:en:Help:Special characters]]
 	 */
-	function escape_text(text, is_uri) {
+	function escape_text(text, is_URI) {
 		function escape_character(character) {
 			var code = character.charCodeAt(0);
-			if (is_uri) {
+			if (is_URI) {
 				return '%' + code.toString(16);
 			}
 			return '&#' + code + ';';
@@ -2612,18 +2612,28 @@ function module_code(library_namespace) {
 
 	// 曾經以 session.page() 請求過內容。
 	get_page_content.had_fetch_content = function(page_data, revision_index) {
-		return get_page_content.is_page_data(page_data)
-		//
-		&& (('missing' in page_data)
+		if (!get_page_content.is_page_data(page_data))
+			return false;
+
+		if (('missing' in page_data)
 		// {title:'%2C',invalidreason:
 		// 'The requested page title contains invalid characters:
 		// "%2C".'
 		// ,invalid:''}
-		|| ('invalid' in page_data)
-		//
-		|| 'string' === typeof revision_content(
-		//
-		get_page_content.revision(page_data, revision_index), true));
+		|| ('invalid' in page_data))
+			return true;
+
+		var revision = get_page_content.revision(page_data, revision_index);
+		if ('textmissing' in revision) {
+			// e.g., {revid:,timestamp:,textmissing:''}
+			library_namespace.warn('get_page_content.had_fetch_content: '
+					+ '可能其他人正編輯 ' + wiki_API.title_link_of(page_data)
+					+ '，本執行緒欲取得最新版本內容時，資料庫尚未完成變更，造成 textmissing？');
+			return true;
+		}
+
+		if ('string' === typeof revision_content(revision, true))
+			return true;
 	};
 
 	// CeL.wiki.content_of.edit_time(page_data) -
