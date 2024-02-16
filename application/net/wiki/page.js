@@ -983,9 +983,12 @@ function module_code(library_namespace) {
 					}
 					if (!title_data_map[to]) {
 						// console.trace(page_list);
-						throw new Error('No redirects title data: ['
+						error = error
+						//
+						|| new Error('No redirects title data: ['
 						//
 						+ to + ']←[' + data.from + ']');
+						return;
 					}
 					// 注意: 這可能註冊多種不同的標題。
 					title_data_map[data.from] = title_data_map[to];
@@ -994,9 +997,12 @@ function module_code(library_namespace) {
 			if (page_list.converted) {
 				page_list.converted.forEach(function(data) {
 					if (!title_data_map[data.to]) {
-						throw new Error('No converted title data: ['
+						error = error
+						//
+						|| new Error('No converted title data: ['
 						//
 						+ data.to + ']←[' + data.from + ']');
+						return;
 					}
 					// 注意: 這可能註冊多種不同的標題。
 					title_data_map[data.from] = title_data_map[data.to];
@@ -1012,9 +1018,12 @@ function module_code(library_namespace) {
 						}
 						console.trace(pages);
 						// console.trace(page_list);
-						throw new Error('No normalized title data: ['
+						error = error
+						//
+						|| new Error('No normalized title data: ['
 						//
 						+ data.to + ']←[' + data.from + ']');
+						return;
 					}
 					// 注意: 這可能註冊多種不同的標題。
 					title_data_map[data.from] = title_data_map[data.to];
@@ -1181,8 +1190,11 @@ function module_code(library_namespace) {
 			}
 
 			if (options.expandtemplates) {
-				if (options.titles_left)
-					throw new Error('There are options.titles_left!');
+				if (options.titles_left) {
+					error = error
+					//
+					|| new Error('There are options.titles_left!');
+				}
 
 				// 需要expandtemplates的情況。
 				if (!Array.isArray(page_list)) {
@@ -1190,13 +1202,13 @@ function module_code(library_namespace) {
 					var revision = wiki_API.content_of.revision(page_list);
 					// 出錯時 revision 可能等於 undefined。
 					if (!revision) {
-						callback(page_list);
+						callback(page_list, error);
 						return;
 					}
 					wiki_API_expandtemplates(
 					//
 					wiki_API.revision_content(revision), function() {
-						callback(page_list);
+						callback(page_list, error);
 					}, Object.assign({
 						page : page_list,
 						title : page_data.title,
@@ -1224,7 +1236,7 @@ function module_code(library_namespace) {
 						session : options[KEY_SESSION]
 					}, options.expandtemplates));
 				}, function() {
-					callback(page_list);
+					callback(page_list, error);
 				});
 				return;
 			}
@@ -1243,7 +1255,7 @@ function module_code(library_namespace) {
 
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
-			callback(page_list);
+			callback(page_list, error);
 
 		}, post_data, options);
 	}

@@ -1633,8 +1633,8 @@ function module_code(library_namespace) {
 
 		} else {
 			page_title = wiki_API.normalize_title(page_title, options);
-			// assert: {Number|Undefined}namespace
 			namespace = wiki_API.namespace(page_title, options);
+			// assert: {Number|Undefined}namespace
 		}
 
 		if (!page_title || typeof page_title !== 'string')

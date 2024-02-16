@@ -1660,12 +1660,13 @@ function module_code(library_namespace) {
 	function Yesno(value, default_value) {
 		if (value === undefined)
 			return;
-		value = String(value).trim();
+		value = String(value).replace(/<!--[\s\S]*?-->/g, '').trim();
 		if (/^(?:[nf否关關]|no|false|off)$/i.test(value))
 			return false;
 		if (/^(?:[yt是开開]|yes|true|on)$/i.test(value))
 			return true;
-		return default_value;
+		// 須注意有特別的元素時可能回傳整個字串!
+		return default_value === undefined ? value : default_value;
 	}
 
 	// ------------------------------------------------------------------------

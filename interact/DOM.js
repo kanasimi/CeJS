@@ -8266,7 +8266,7 @@ function module_code(library_namespace) {
 		var unicode_text = HTML.valueOf();
 
 		if (options.is_URI === true
-		//
+		// /^([\w\s\-.~!*'();:@&=+$,/?#\[\]]|%[\dA-F]{2})+$/.test(unicode_text)
 		|| options.is_URI === 'auto' && /%[\dA-F]{2}/i.test(unicode_text)) {
 			try {
 				// 必須先採用 decodeURIComponent()，

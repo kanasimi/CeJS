@@ -443,7 +443,7 @@ function module_code(library_namespace) {
 			new_text = text;
 		if (!full_title)
 			full_title = title;
-		// new_text 可能以空白字元起始，因此需要重新計算 index。
+		// new_text 可能以空白字元、<br />、<p> 起始，因此需要重新計算 index。
 		// e.g., https://www.69xinshu.com/txt/47093/34685221
 		title_start_index = new_text.indexOf(full_title);
 		if (!(title_start_index >= 0)) {
