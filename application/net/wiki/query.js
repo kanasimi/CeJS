@@ -808,6 +808,8 @@ function module_code(library_namespace) {
 	 * default: 使用5秒 (5000 ms) 的編輯時間間隔。
 	 * 
 	 * @type {ℕ⁰:Natural+0}
+	 * 
+	 * @see pywikibot.config.minthrottle @ https://doc.wikimedia.org/pywikibot/stable/api_ref/pywikibot.config.html#settings-to-avoid-server-overload
 	 */
 	wiki_API_query.default_edit_time_interval = 5000;
 

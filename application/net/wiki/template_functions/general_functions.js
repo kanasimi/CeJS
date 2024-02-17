@@ -141,6 +141,33 @@ function module_code(library_namespace) {
 	// 一些會產生網頁錨點 anchors 的模板或模組。
 	// Templates or modules that generate web anchors
 
+	// @inner
+	// var wikitext = tag_with_id.call(this, parameter_name, '__id__', 'div');
+	function tag_with_id(parameter_name, pattern, tag_name) {
+		var parameters = this.parameters;
+		var id = wiki_API.wikitext_to_plain_text(
+				parameters[parameter_name] || '').replace(/"/g, '');
+		if (!id)
+			return '';
+
+		if (pattern) {
+			if (typeof pattern === 'function')
+				id = pattern(id);
+			else if (typeof pattern === 'string')
+				id = pattern.replace('__id__', id);
+			else
+				library_namespace.error('tag_with_id: Invalid pattern! '
+						+ pattern);
+		}
+
+		if (!tag_name)
+			tag_name = 'span';
+		var wikitext = '<' + tag_name + ' id="' + rfcid.replace(/"/g, '')
+				+ '">' + '</' + tag_name + '>';
+		// console.trace(wikitext);
+		return wikitext;
+	}
+
 	// {{Anchor|anchor|別名1|別名2}}
 	function expand_template_Anchor(options) {
 		var parameters = this.parameters;
@@ -197,7 +224,21 @@ function module_code(library_namespace) {
 				+ '">'
 				+ (parameters.content || parameters[2] || parameters.term
 						|| parameters[1] || '') + '</dt>';
-		// console.log(wikitext);
+		// console.trace(wikitext);
+		return wikitext;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function expand_template_Rfc(options) {
+		var parameters = this.parameters;
+		var wikitext = '<span id="rfctag"></span>';
+		var rfcid = parameters.rfcid || '';
+		if (rfcid) {
+			rfcid = 'rfc_' + rfcid;
+			wikitext = '<span id="' + rfcid + '">' + '</span>' + wikitext;
+		}
+		// console.trace(wikitext);
 		return wikitext;
 	}
 
@@ -582,6 +623,11 @@ function module_code(library_namespace) {
 		Term : {
 			properties : {
 				expand : expand_template_Term
+			}
+		},
+		Rfc : {
+			properties : {
+				expand : expand_template_Rfc
 			}
 		},
 		Wikicite : {
