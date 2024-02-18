@@ -1548,7 +1548,7 @@ function module_code(library_namespace) {
 			// for wiki_API.namespace()
 			is_page_title : true
 		}, options);
-		// console.log(options);
+		// console.trace([ page_title, options ]);
 		var session = session_of_options(options), namespace;
 		if (wiki_API.is_page_data(page_title)) {
 			// assert: {Number}namespace
@@ -1557,6 +1557,7 @@ function module_code(library_namespace) {
 
 		} else {
 			page_title = wiki_API.normalize_title(page_title, options);
+			// console.trace([ page_title ]);
 			if (!session) {
 				if (/^(Special|特殊|特別|Media|媒體|媒体|メディア|Topic|話題|话题):/i
 						.test(page_title)) {
@@ -1578,7 +1579,7 @@ function module_code(library_namespace) {
 		if (!page_title || typeof page_title !== 'string' || namespace < 0)
 			return;
 
-		// console.log([ namespace, page_title ]);
+		// console.trace([ namespace, page_title ]);
 		if (is_talk_namespace(namespace, options)) {
 			library_namespace.debug('Is already talk page: ' + page_title, 3,
 					'to_talk_page');
@@ -1589,6 +1590,7 @@ function module_code(library_namespace) {
 		// session === wiki_API?
 		&& session.configurations && session.configurations.name_of_NO
 				|| wiki_API.namespace.name_of_NO;
+		// console.trace([ namespace, name_of_NO ]);
 		if (namespace >= 0) {
 			namespace = name_of_NO[namespace + 1];
 			if (!namespace)
@@ -1899,7 +1901,7 @@ function module_code(library_namespace) {
 		? page_name.replace(/ /g, '_') : page_name.replace(/_/g, ' ');
 
 		page_name = page_name.split(':');
-		var has_language;
+		var has_language, has_namespace;
 		var session = session_of_options(options);
 		var interwiki_pattern = session
 		// session === wiki_API?
@@ -1908,7 +1910,7 @@ function module_code(library_namespace) {
 		var no_session_namespace_hash = !session || !session.configurations
 				|| !session.configurations.namespace_hash;
 
-		var _options = Object.assign(Object.create(null), options, {
+		var _options = Object.assign(Object.clone(options), {
 			is_page_title : false,
 			get_name : true
 		});
@@ -1946,15 +1948,17 @@ function module_code(library_namespace) {
 				return true;
 			}
 
-			var namespace = isNaN(section)
-			//
-			&& get_namespace(section, _options);
-			// console.log([ index, section, namespace ]);
-			if (namespace) {
-				// Wikipedia namespace
-				page_name[index] = use_underline ? namespace.replace(/ /g, '_')
-						: namespace.replace(/_/g, ' ');
-				return false;
+			if (!has_namespace) {
+				has_namespace = isNaN(section)
+				//
+				&& get_namespace(section, _options);
+				// console.trace([ index, section, namespace ]);
+				if (has_namespace) {
+					// Wikipedia namespace
+					page_name[index] = use_underline ? has_namespace.replace(
+							/ /g, '_') : has_namespace.replace(/_/g, ' ');
+					return false;
+				}
 			}
 
 			if (has_language) {
@@ -4027,20 +4031,21 @@ function module_code(library_namespace) {
 			if (typeof options !== 'object') {
 				options = {
 					namespace : options || 0
-				}
+				};
 			} else if (wiki_API.is_page_data(options)) {
 				options = {
 					namespace : options.ns
-				}
+				};
 			}
 			return page_title_is_namespace(page_title, add_session_to_options(
 					this, options));
 		},
 		to_namespace : function to_namespace(page_title, options) {
-			if (typeof options !== 'object')
+			if (typeof options !== 'object') {
 				options = {
 					namespace : options || 0
-				}
+				};
+			}
 			return convert_page_title_to_namespace(page_title,
 					add_session_to_options(this, options));
 		},

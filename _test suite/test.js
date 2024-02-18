@@ -3388,6 +3388,7 @@ function test_wiki() {
 		[['Wikipedia talk:NAME', CeL.wiki.to_talk_page('Wikipedia talk:NAME')], 'wiki.to_talk_page #4'],
 		[['Talk:ABC DEF: RRR', CeL.wiki.to_talk_page('ABC DEF: RRR')], 'wiki.to_talk_page #5'],
 		[['Module talk:NAME', CeL.wiki.to_talk_page('模块:NAME')], 'wiki.to_talk_page #6'],
+		[["Talk:1,1':2',1'':3'',1'''-四联苯", CeL.wiki.to_talk_page("Talk:1,1':2',1'':3'',1'''-四联苯")], 'wiki.to_talk_page #7'],
 		[!CeL.wiki.to_talk_page('topic:NAME'), 'wiki.to_talk_page: There is no talk page for Topic.'],
 		[['NAME', CeL.wiki.talk_page_to_main('NAME')], 'wiki.talk_page_to_main #1'],
 		[['NAME', CeL.wiki.talk_page_to_main('talk:NAME')], 'wiki.talk_page_to_main #2'],
@@ -5627,6 +5628,8 @@ function test_wiki() {
 
 			assert(["Template:Tl", zhwiki.normalize_title('t:tl')], 'zhwiki.normalize_title() #1-1');
 			assert(["Wikipedia:小作品", zhwiki.normalize_title('WP:小作品')], 'zhwiki.normalize_title() #1-2');
+
+			assert(["Talk:1,1':2',1'':3'',1'''-四联苯", zhwiki.to_talk_page("Talk:1,1':2',1'':3'',1'''-四联苯")], 'zhwiki.to_talk_page #1');
 
 			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			var parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
