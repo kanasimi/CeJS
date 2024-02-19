@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Adriendelucca",
 			"Ajeje Brazorf",
 			"Crochet.david",
 			"Gomoko",
@@ -1118,6 +1119,7 @@
 	"download_options.chapter_no_range": "Télécharger cette place de numéros de chapitres. Par exemple, « 20-30,50-60 ».",
 	"download_options.directory_name_pattern": "Personnalise le modèle de nom de répertoire du travail. Par défaut : « ${id_title}${directory_name_extension} ». « ${title} » indiquera uniquement le titre de l’œuvre en tant que répertoire de travail, « ${id} » indiquera uniquement l’identifiant de l’œuvre en tant que répertoire de travail.",
 	"download_options.hide_chapter_information": "Masquer le champ d’information du chapitre de l’ebook.",
+	"download_options.use_finished_date_to_archive_old_works": "Archiver les anciens travaux en se basant sur le moment de leur fin. Par défaut, c’est le moment du dernier téléchargement.",
 	"download_options.acceptable_types": "Types d’images acceptables (extensions). Séparé par des barres verticales « | », par exemple « webp|jpg|jpeg|png ». Aucun paramètre ne sera vérifié. Entrez « images» pour accepter tous les types d’image. Si l’image téléchargée ne fait pas partie des types spécifiés, cela sera considéré comme une erreur. Cet outil ne peut télécharger que certains types d’images. Cette option ne sert qu’à vérifier les images, pas à sélectionner les types d’images que vous voulez télécharger.",
 	"download_options.allow_eoi_error": "Lorsque l’image n’a aucune balise EOI (fin d’image) ou si une non-image est détectée, le fichier est encore stocké malgré tout.",
 	"download_options.archive_all_good_images_only": "Compresser le fichier d’image sans aucune erreur.",
@@ -1157,14 +1159,14 @@
 	"download_options.start_chapter": "Démarrer / continuer le téléchargement. Il sera automatiquement converti en « .start_chapter_NO » ou « .start_chapter_title ». Pour les chapitres téléchargés, vous devez faire correspondre un « .recheck ».",
 	"download_options.start_chapter_no": "Démarrer / continuer le téléchargement depuis ce numéro de chapitre.",
 	"download_options.start_chapter_title": "Démarrer / continuer le téléchargement depuis ce titre de chapitre.",
-	"download_options.start_list_serial": "Spécifie le numéro de série du travail à commencer à télécharger. Le travail réalisé avant ce signal sera sauté. Généralement utilisé uniquement dans les paramètres de ligne de commande. Par défaut : 1.",
+	"download_options.start_list_serial": "Spécifie le numéro de série du travail à commencer à télécharger. Le travail réalisé avant ce numéro de série sera sauté. Généralement utilisé uniquement dans les paramètres de ligne de commande. Par défaut : 1.",
 	"download_options.timeout": "Délai maximum (en ms) pour le téléchargement d’une page ou image sur le web. Si le délai est trop court (par exemple 10 secondes), le téléchargement d’un gros fichier peut facilement échouer.",
 	"download_options.user_agent": "Identification du navigateur. Toujours maintenir la reconnaissance du même navigateur avant et après l’exécution, cela ne devrait pas affecter le téléchargement.",
 	"download_options.vertical_writing": "Changer l’orientation de la nouvelle de l’horizontale à la verticale.",
 	"download_options.write_chapter_metadata": "Écrire les informations sur chaque archive de chapitre dans un fichier JSON de même nom (avec l’extension « .json » ajoutée) pour faciliter l’import par d’autres outils.",
 	"download_options.write_image_metadata": "Écrire les informations sur chaque image dans un fichier JSON de même nom (avec l’extension « .json » ajoutée) pour faciliter l’import par d’autres outils.",
 	"limit-log-lines": "Limite des lignes de journal",
-	"local-language-name": "anglais",
+	"local-language-name": "français",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "Il y a actuellement %1 messages en %2 qui n’ont pas encore été traduits. Ceux qui traduisent avec nous sont bienvenus !",
 	"environment-variables-$1": "Variables d’environnement : %1",
 	"default-download-directory-$1": "Répertoire par défaut de téléchargement : %1",

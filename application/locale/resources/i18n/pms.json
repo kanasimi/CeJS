@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Adriendelucca",
 			"Borichèt"
 		]
 	},
@@ -939,8 +940,8 @@
 	"namespaces-$1": "Spassi nominaj: %1.",
 	"get-$1-pages-from-$2": "Oten-e %1 {{PLURAL:%1|pàgina|pàgine}} da %2.",
 	"normalize-template-$1": "Normalisé {{%1}}",
-	"maintenance-template-list": "lista dë stamp ëd manutension",
-	"maintenance-template-list-to-be-excluded": "lista dë stamp ëd manutension da esclude",
+	"maintenance-template-list": "Lista dë stamp ëd manutension",
+	"maintenance-template-list-to-be-excluded": "Lista dë stamp ëd manutension da esclude",
 	"categories-added-to-report": "Categorìe giontà al rapòrt",
 	"merge-$1-templates-into-template-$2": "Fonde %1 {{PLURAL:%1|stamp}} an {{%2}}",
 	"create-template-$2-with-$1-maintenance-templates": "Creé {{%2}} con %1 {{PLURAL:%1|stamp}} ëd mantniment",
@@ -1156,7 +1157,7 @@
 	"download_options.write_chapter_metadata": "Scrive j'anformassion su ògni archivi ëd capìtol an n'archivi JSON con ël midem nòm (con l'estension .json giontà) për fassilité l'amportassion d'àutri utiss.",
 	"download_options.write_image_metadata": "Scrive j'anformassion d'ògni plancia ant l'archivi JSON con ël midem nòm (con l'estension .json giontà) për fassilité l'amportassion d'àutri utiss.",
 	"limit-log-lines": "Lìmit ëd le linie d'argistr",
-	"local-language-name": "Anglèis",
+	"local-language-name": "Piemontèis",
 	"there-are-currently-$1-$2-messages-that-have-not-been-translated.-welcome-to-translate-with-us": "A-i son al moment %1 mëssagi an %2 ch'a son ancor nen ëstàit voltà. Coj ch'a veulo fé le tradussion con nojàutri a son bin-ëvnù!",
 	"environment-variables-$1": "Variàbij d'ambient: %1",
 	"default-download-directory-$1": "Dossié ëd dëscariament pr'ëstàndard: %1",
