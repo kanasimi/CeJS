@@ -916,9 +916,9 @@ function module_code(library_namespace) {
 		var token = this, allow_promise = session && options
 				&& options.allow_promise;
 
-		function NYI() {
+		function NYI(reason) {
 			// delete token.expand;
-			token.not_evaluated = true;
+			token.not_evaluated = reason || true;
 			if (!options) {
 				return token;
 			}
@@ -956,7 +956,8 @@ function module_code(library_namespace) {
 				if (message_name) {
 					library_namespace.warn('evaluate_parser_function_token: '
 							+ '尚未加入演算 {{' + message_name + '}} 的功能'
-							+ transclusion_message + ': ' + token);
+							+ transclusion_message + ': '
+							+ (reason ? reason + ': ' : '') + token);
 				}
 				// Error.stackTraceLimit = Infinity;
 				// console.trace(options);
@@ -1437,6 +1438,21 @@ function module_code(library_namespace) {
 			}
 			return typeof default_value === 'number' ? get_parameter_String(
 					default_value, true) : default_value;
+
+			// ----------------------------------------------------------------
+
+		case '#language':
+			if (typeof Intl !== 'object' || !Intl.DisplayNames) {
+				return NYI('No Intl');
+			}
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#examples
+			// Language Display Names
+			var languageNames = new Intl.DisplayNames([ get_parameter_String(2)
+					|| get_parameter_String(1) ], {
+				type : 'language'
+			});
+
+			return languageNames.of(get_parameter_String(1));
 
 			// ----------------------------------------------------------------
 

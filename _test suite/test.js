@@ -3634,6 +3634,15 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.link #12');
 		assert(["Fascist regime (1922–1943)", parsed.anchor], 'wiki.parse.link #12-1');
 		assert(["Fascist Italy", parsed.display_text], 'wiki.parse.link #12-2');
+		wikitext = '[[wikt:頁&#x23;{{#language:zh|en}}|頁]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #13');
+		assert(["{{#language:zh|en}}", parsed.anchor], 'wiki.parse.link #13-1');
+		wikitext = '[[wikt:頁&#35;{{#language:zh|en}}|頁]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #14');
+		assert(["{{#language:zh|en}}", parsed.anchor], 'wiki.parse.link #14-1');
+		wikitext = '[[wikt:頁%23{{#language:zh|en}}|頁]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #15');
+		assert(["{{#language:zh|en}}", parsed.anchor], 'wiki.parse.link #15-1');
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #1');

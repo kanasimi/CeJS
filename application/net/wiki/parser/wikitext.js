@@ -1832,7 +1832,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('[' + previous + '] + [' + all_link + ']',
 					4, 'parse_wikitext.link');
 
-			var file_matched, category_matched;
+			var file_matched, category_matched, hash_sign;
 			if (!page_name) {
 				// assert: [[#anchor]]
 				page_name = '';
@@ -1845,6 +1845,16 @@ function module_code(library_namespace) {
 				if (!anchor) {
 					anchor = '';
 				}
+
+				var matched = page_name
+				// /(#|%23|&#x23;|&#35;)/
+				.match(/^(.*?)((%23|&#x23;|&#35;)[\s\S]*)$/);
+				if (matched) {
+					hash_sign = matched[3];
+					anchor = matched[2] + anchor;
+					page_name = matched[1];
+				}
+
 				if (normalize) {
 					page_name = page_name.trim();
 				}
@@ -1931,7 +1941,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!anchor) {
-				matched = wiki_API.normalize_title(page_name.toString(),
+				var matched = wiki_API.normalize_title(page_name.toString(),
 						options);
 				if (!matched) {
 					// console.trace(page_name);
@@ -2249,9 +2259,8 @@ function module_code(library_namespace) {
 				}
 				parameters.pipe = pipe_separator;
 
-				anchor = anchor.toString()
-				// remove prefix: '#'
-				.slice(1).trimEnd();
+				// 警告: 這可能留下字串型態的 magic_word_function, transclusion
+				anchor = anchor.toString().trimEnd();
 				var original_hash = anchor;
 				if (PATTERN_is_dot_encoded.test(anchor)) {
 					// Change to [[percent-encoding]].
@@ -2277,8 +2286,12 @@ function module_code(library_namespace) {
 				// wikilink_token.anchor without "#" 網頁錨點 section_title
 				parameters.anchor = wiki_API.parse.anchor.normalize_anchor(
 						anchor, true)
-				// 只去除結尾的空白，保留前面的一個。
-				.replace(/^\s+/, ' ').trimEnd();
+				// assert: parameters.anchor.startsWith('#') remove prefix: '#'
+				.slice(1)
+				// 只去除結尾的空白(前面的.trimEnd())，保留前面的一個。
+				.replace(/^\s+/, ' ');
+				if (hash_sign)
+					parameters.hash_sign = hash_sign || '#';
 				// TODO: [[Special:]]
 				// TODO: [[Media:]]: 連結到圖片但不顯示圖片
 				if (page_name.oddly === 'link_inside_file') {
