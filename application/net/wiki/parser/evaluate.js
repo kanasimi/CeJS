@@ -138,18 +138,16 @@ function module_code(library_namespace) {
 		// Error.stackTraceLimit = Infinity;
 		// console.trace([ parsed.toString(), parsed ]);
 		// Error.stackTraceLimit = 10;
-		var promise;
 		if (parsed.type === 'magic_word_function') {
-			promise = evaluate_parser_function_token.call(parsed, options);
-		} else {
-			promise = for_each_subelement.call(parsed, 'magic_word_function',
-			//
-			function(token) {
-				// console.trace(token);
-				return evaluate_parser_function_token.call(token, options);
-			}, true);
-
+			parsed = [ parsed ];
+			parsed.has_shell = true;
 		}
+		var promise = for_each_subelement.call(parsed, 'magic_word_function',
+		//
+		function(token) {
+			// console.trace(token);
+			return evaluate_parser_function_token.call(token, options);
+		}, true);
 
 		// Error.stackTraceLimit = Infinity;
 		// console.trace([ parsed.toString(), parsed, promise ]);
@@ -291,7 +289,7 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			console.trace(Object.keys(options));
 			// console.trace(parsed);
-			// console.trace(wiki_API.parse(wikitext));
+			// console.trace(wiki_API.parse(wikitext, options));
 		}
 
 		if (options.template_token_called !== template_token_called) {
@@ -453,13 +451,16 @@ function module_code(library_namespace) {
 				parsed = [ parsed ];
 				parsed.has_shell = true;
 			}
+			// console.trace(parsed);
 		} else {
 			parsed = wiki_API.parser(wikitext, options).parse();
 		}
 
-		if (options.template_token_called)
+		// console.trace(parsed, options);
+		if (options.template_token_called) {
 			parsed = convert_parameter(parsed,
 					options.template_token_called.parameters, options);
+		}
 
 		var session = wiki_API.session_of_options(options);
 		// console.trace(parsed);
@@ -1017,6 +1018,7 @@ function module_code(library_namespace) {
 			// /[{}]/.test(value) &&
 			expand_transclusion(value, options);
 			if (!library_namespace.is_thenable(_value)) {
+				// console.trace(_value);
 				value = return_parameter(_value);
 			} else if (allow_thenable) {
 				value = _value.then(return_parameter);
@@ -1031,11 +1033,9 @@ function module_code(library_namespace) {
 		}
 
 		function get_page_title(remove_namespace) {
-			var title = options
+			var title = wiki_API.normalize_title(get_parameter_String(1)
 			// [[mw:Help:Magic words#Page names]]
-			&& wiki_API.normalize_title(get_parameter_String(1)
-			//
-			|| options[KEY_on_page_title_option], options) || '';
+			|| options && options[KEY_on_page_title_option], options) || '';
 			return remove_namespace ? wiki_API.remove_namespace(title, options)
 					: title;
 		}
@@ -1537,6 +1537,18 @@ function module_code(library_namespace) {
 			return (end ? title.slice(start, end) : title.slice(start))
 					.join('/');
 
+		case '#rel2abs':
+			var path = get_parameter_String(1);
+			var base_path = get_parameter_String(2) || get_page_title();
+			base_path += '/' + path;
+			path = library_namespace.simplify_path(base_path);
+			if (/^[.\/]/.test(path)) {
+				return new Error('Error: Invalid depth in path: '
+						+ JSON.stringify(base_path)
+						+ ' (tried to access a node above the root node).');
+			}
+			return path.replace(/\/$/, '');
+
 			// ----------------------------------------------------------------
 
 		case 'NS':
@@ -1635,6 +1647,8 @@ function module_code(library_namespace) {
 			// ----------------------------------------------------------------
 
 		case 'INT':
+			// https://www.mediawiki.org/wiki/Help:Magic_words#Transclusion_modifiers
+			// https://en.wikipedia.org/wiki/Help:Magic_words#Other
 			var session = wiki_API.session_of_options(options);
 			if (!session) {
 				return NYI();
@@ -1647,6 +1661,67 @@ function module_code(library_namespace) {
 				return NYI();
 			}
 			return page_title;
+
+			// ----------------------------------------------------------------
+
+		case 'PLURAL':
+			// assert: Has library_namespace.gettext()
+			var check_plurality = function check_plurality(value) {
+				var session = wiki_API.session_of_options(options);
+				// console.trace(token, value, (session || wiki_API).language);
+				value = library_namespace.gettext.adapt_plural('{{PLURAL:'
+						+ value + '|2|3}}', [], (session || wiki_API).language);
+				// console.trace(value);
+				value = get_parameter_String(+value, true);
+				// console.trace(value);
+
+				// value = wiki_API.parse(value, options);
+				return value;
+			};
+
+			var value = get_parameter_String(1, true);
+			if (library_namespace.is_thenable(value))
+				return value.then(check_plurality);
+			return check_plurality(value);
+
+			// ----------------------------------------------------------------
+
+		case '#tag':
+			var attributes = [];
+			for (var index = 1; index < token.length; index++) {
+				var attribute = get_parameter_String(index, true);
+				if (library_namespace.is_thenable(attribute)) {
+					return NYI();
+				}
+				attributes.push(attribute);
+			}
+
+			// console.trace(attributes);
+			var tag_name = attributes.shift();
+			if (attributes.length === 0)
+				return wiki_API.parse('<' + tag_name + '/>', options);
+
+			var innerHTML = attributes.shift();
+			var attributes_hash = Object.create(null);
+			attributes.forEach(function(attribute) {
+				var matched = attribute.match(/^([^=]*)=([\s\S]*)$/);
+				if (!matched)
+					return;
+				matched[2] = matched[2].trim();
+				if (matched[2].startsWith('"') && matched[2].endsWith('"')
+						|| matched[2].startsWith("'")
+						&& matched[2].endsWith("'")) {
+					matched[2] = matched[2].slice(1, -1);
+				}
+				attributes_hash[matched[1].trim()] = matched[2];
+			});
+			attributes = [ tag_name ];
+			for ( var attribute_name in attributes_hash) {
+				attributes.push(attribute_name + '="'
+						+ attributes_hash[attribute_name] + '"');
+			}
+			return wiki_API.parse('<' + attributes.join(' ') + '>' + innerHTML
+					+ '</' + tag_name + '>', options);
 
 			// ----------------------------------------------------------------
 

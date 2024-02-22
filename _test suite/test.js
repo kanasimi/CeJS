@@ -3782,6 +3782,14 @@ function test_wiki() {
 		assert(['bar/baz', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 | 2 }}').evaluate()], '{{#titleparts}} #12');
 		assert(['baz', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok | -1 | -2 }}').evaluate()], '{{#titleparts}} #1');
 
+		assert(['Help:Foo/bar/baz/quok', CeL.wiki.parse('{{#rel2abs: /quok | Help:Foo/bar/baz }}').evaluate()], '{{#rel2abs}} #1');
+		assert(['Help:Foo/bar/baz/quok', CeL.wiki.parse('{{#rel2abs: ./quok | Help:Foo/bar/baz }}').evaluate()], '{{#rel2abs}} #2');
+		assert(['Help:Foo/bar/quok', CeL.wiki.parse('{{#rel2abs: ../quok | Help:Foo/bar/baz }}').evaluate()], '{{#rel2abs}} #3');
+		assert(['Help:Foo/bar', CeL.wiki.parse('{{#rel2abs: ../. | Help:Foo/bar/baz }}').evaluate()], '{{#rel2abs}} #4');
+		assert(['Help:Foo/bar/quok', CeL.wiki.parse('{{#rel2abs: ../quok/. | Help:Foo/bar/baz }}').evaluate()], '{{#rel2abs}} #5');
+		assert(['Help:Foo/quok', CeL.wiki.parse('{{#rel2abs: ../../quok | Help:Foo/bar/baz }}').evaluate()], '{{#rel2abs}} #6');
+		assert(['quok', CeL.wiki.parse('{{#rel2abs: ../../../quok | Help:Foo/bar/baz }}').evaluate()], '{{#rel2abs}} #7');
+
 		wikitext = '1{{t|a=\nb\n}}{{p|b}}2'; parsed = CeL.wiki.parser(wikitext);
 		assert(['b', parsed.parse()[1].parameters.a], 'wiki.parse: template .parameters #1-1');
 		assert([wikitext, parsed.toString()], 'wiki.parse: template .parameters #1');
@@ -4872,6 +4880,21 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:1e23|.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #4');
 		//assert(['0', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456789|9034567890123456788|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #5');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456700.0|9034567890123456800|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #6');
+
+		assert(['Chinese', CeL.wiki.expand_transclusion('{{#language:zh|en}}').toString()], 'wiki.expand_transclusion: {{#language:}} #1');
+		assert(['中文', CeL.wiki.expand_transclusion('{{#language:zh}}').toString()], 'wiki.expand_transclusion: {{#language:}} #2');
+		assert(['中文', CeL.wiki.expand_transclusion('{{#language:zh|zh}}').toString()], 'wiki.expand_transclusion: {{#language:}} #3');
+
+		assert(['<testtag/>', CeL.wiki.expand_transclusion('{{#tag:testtag}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #1');
+		assert(['<testtag></testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag|}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #2');
+		assert(['<testtag>inner HTML</testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag|inner HTML}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #3');
+		assert(['<testtag a1="q">inner HTML</testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag|inner HTML|a1="p"|a1="q"}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #4');
+		assert(['<testtag attr="v"></testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag||attr="v"}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #5');
+		assert(['<testtag ="v2" attr="" a1="f" a2=""p" a3="q"" a4="r" a5="r"f" a6="r\'f" a7="r"f"></testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag||=v1|attr=|=v2||a1=\'f\'|||a2="p|a3=q"|a4=\'r\'|a5=\'r"f\'|a6=\'r\'f\'|a7="r"f"}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #6');
+
+		assert(['is', CeL.wiki.expand_transclusion('{{PLURAL:1|is|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #1');
+		assert(['are', CeL.wiki.expand_transclusion('{{PLURAL:2|is|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #2');
+		assert(['1', CeL.wiki.expand_transclusion('{{PLURAL:{{#expr:1+1-1}}|{{#expr:2+2-3}}|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #3');
 
 		// https://meta.wikimedia.org/wiki/Help:Calculation#Comparisons
 		//assert(['0', CeL.wiki.expand_transclusion('{{#ifexpr:1e23=.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifexpr:}} #1');

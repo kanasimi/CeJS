@@ -803,13 +803,14 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/Help:Magic_words
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
 	('DISPLAYTITLE|DEFAULTSORT|DEFAULTSORTKEY|DEFAULTCATEGORYSORT|デフォルトソート'
-			+ '|ns|nse|lc|lcfirst|uc|ucfirst' + '|padleft|padright'
+			+ '|ns|nse|lc|lcfirst|uc|ucfirst' + '|padleft|padright|bidi'
 			+ '|formatnum' + '|urlencode|anchorencode'
 			+ '|localurl|fullurl|filepath'
 
 			// https://www.mediawiki.org/wiki/Help:Magic_words#Transclusion_modifiers
 			// https://en.wikipedia.org/wiki/Help:Transclusion#Transclusion_modifiers
-			+ '|int|msg|raw|msgnw|subst|safesubst'
+			// https://www.mediawiki.org/wiki/Help:Magic_words#Localization
+			+ '|PLURAL|GRAMMAR|GENDER|int|msg|raw|msgnw|subst|safesubst'
 	// 這些需要指定數值。 e.g., {{NS:1}}: OK, {{NS}} will get " ", {{NS:}} will get ""
 	).split('|').forEach(function name(magic_word) {
 		default_magic_words_hash[magic_word.toUpperCase()] = true;

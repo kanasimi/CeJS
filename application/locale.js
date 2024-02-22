@@ -531,6 +531,8 @@ function module_code(library_namespace) {
 		return converted_text;
 	}
 
+	gettext.adapt_plural = adapt_plural;
+
 	// -----------------------------------------------------------------------------------------------------------------
 	// JavaScript 國際化 i18n (Internationalization) / 在地化 本土化 l10n (Localization)
 	// / 全球化 g11n (Globalization).
@@ -629,7 +631,20 @@ function module_code(library_namespace) {
 			domain_name = _domain_name;
 			// 在不明環境，如 node.js 中執行時，((gettext_texts[domain_name])) 可能為
 			// undefined。
-			domain = gettext_texts[domain_name] || Object.create(null);
+			domain = gettext_texts[domain_name];
+
+			if (!domain) {
+				if (false) {
+					// No 強制載入 flag here.
+					library_namespace.warn({
+						// gettext_config:{"id":"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag"}
+						T : [ '所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。',
+								domain_name ]
+					});
+				}
+				domain = Object.create(null);
+			}
+
 			var _text = String(convert(library_namespace.is_Object(text_id) ? text_id[domain_name]
 					: text_id));
 
@@ -1246,12 +1261,13 @@ function module_code(library_namespace) {
 
 		} else {
 			if (domain_name) {
-				if (domain_name !== gettext_domain_name)
+				if (domain_name !== gettext_domain_name) {
 					library_namespace.warn({
 						// gettext_config:{"id":"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag"}
 						T : [ '所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。',
 								domain_name ]
 					});
+				}
 
 			} else if (typeof callback === 'function'
 					&& library_namespace.is_debug())
