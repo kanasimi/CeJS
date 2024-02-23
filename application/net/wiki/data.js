@@ -1587,25 +1587,22 @@ function module_code(library_namespace) {
 	// CeL.wiki.data.is_DAB(entity)
 	function is_DAB(entity, callback) {
 		var property = entity && entity.claims && entity.claims.P31;
-		var entity_is_DAB = property ? wikidata_datavalue(property) === 'Q4167410'
-				//
-				: entity
-						&& /\((?:disambiguation|消歧義|消歧義|曖昧さ回避)\)$/
-								.test(typeof entity === 'string' ? entity
-										: entity.title);
-
+		var entity_is_DAB = property
 		// wikidata 的 item 或 Q4167410 需要手動加入，非自動連結。
 		// 因此不能光靠 Q4167410 準確判定是否為消歧義頁。其他屬性相同。
 		// 準確判定得自行檢查原維基之資訊，例如檢查 action=query&prop=info。
+		? wikidata_datavalue(property) === 'Q4167410'
+		//
+		: entity && /\((?:disambiguation|消歧義|消歧義|曖昧さ回避)\)$/
+		// 檢查標題是否有 "(消歧義)" 之類。
+		.test(typeof entity === 'string' ? entity : entity.title);
 
 		// 基本上只有 Q(entity, 可連結 wikipedia page) 與 P(entity 的屬性) 之分。
 		// 再把各 wikipedia page 手動加入 entity 之 sitelink。
 
-		// TODO: 檢查 __DISAMBIG__ page property
+		// TODO: expand 之後檢查 __DISAMBIG__ page property
 
 		// TODO: 檢查 [[Category:All disambiguation pages]]
-
-		// TODO: 檢查標題是否有 "(消歧義)" 之類。
 
 		// TODO: 檢查
 		// https://en.wikipedia.org/w/api.php?action=query&titles=title&prop=pageprops
@@ -6170,8 +6167,10 @@ function module_code(library_namespace) {
 					item.sitelink = matched[2];
 				}
 				if ((matched = miscellaneous[4])
-				// @see function to_talk_page(page_title, options)
-				&& (matched = matched.match(/\[\[:d:([^{}\[\]\|<>\t\n#�:]+)/))) {
+				// @see function to_talk_page()
+				&& (matched = matched.match(
+				//
+				/\[\[:d:([^{}\[\]\|<>\t\n#�:]+)/))) {
 					item.wikidata = matched[1];
 				}
 				items.push(item);

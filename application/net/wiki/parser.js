@@ -707,11 +707,16 @@ function module_code(library_namespace) {
 					// parent_token.toString() ]);
 					if (typeof result === 'string'
 					//
+					|| typeof result === 'number'
+					//
 					|| Array.isArray(result)) {
 						// 將指定類型節點替換作此回傳值。
 						parent_token[index] = token = result;
 						// console.trace([ result.toString(),
 						// parent_token.toString() ]);
+					} else if (result) {
+						library_namespace.debug('Invalid result to replace: '
+								+ result, 1, 'for_each_subelement');
 					}
 				}
 

@@ -126,6 +126,16 @@ function module_code(library_namespace) {
 		return parsed;
 	}
 
+	function set_shell(parsed) {
+		// assert: wiki_API.is_parsed_element(parsed)
+		if (parsed.type !== 'plain') {
+			parsed = [ parsed ];
+			parsed.has_shell = true;
+		}
+
+		return parsed;
+	}
+
 	// 演算 wikitext 中的所有 magic word。
 	function evaluate_parsed(parsed, options) {
 		if (!parsed)
@@ -138,10 +148,8 @@ function module_code(library_namespace) {
 		// Error.stackTraceLimit = Infinity;
 		// console.trace([ parsed.toString(), parsed ]);
 		// Error.stackTraceLimit = 10;
-		if (parsed.type === 'magic_word_function') {
-			parsed = [ parsed ];
-			parsed.has_shell = true;
-		}
+		parsed = set_shell(parsed);
+
 		var promise = for_each_subelement.call(parsed, 'magic_word_function',
 		//
 		function(token) {
@@ -446,14 +454,15 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(wikitext)) {
-			parsed = wikitext;
-			if (parsed.type !== 'plain') {
-				parsed = [ parsed ];
-				parsed.has_shell = true;
-			}
+			parsed = set_shell(wikitext);
 			// console.trace(parsed);
 		} else {
 			parsed = wiki_API.parser(wikitext, options).parse();
+			if (!options[KEY_on_page_title_option]
+					&& wiki_API.is_page_data(wikitext)) {
+				options[KEY_on_page_title_option] = wikitext;
+			}
+
 		}
 
 		// console.trace(parsed, options);
@@ -1032,6 +1041,21 @@ function module_code(library_namespace) {
 			return value_to_String(get_parameter(NO), allow_thenable, as_key);
 		}
 
+		function get_page_data() {
+			if (options
+					&& wiki_API.is_page_data(options[KEY_on_page_title_option])) {
+				return options[KEY_on_page_title_option];
+			}
+		}
+
+		function get_page_revision() {
+			var page_data = get_page_data();
+			if (!page_data)
+				return;
+			var revision = wiki_API.content_of.revision(page_data);
+			return revision;
+		}
+
 		function get_page_title(remove_namespace) {
 			var title = wiki_API.normalize_title(get_parameter_String(1)
 			// [[mw:Help:Magic words#Page names]]
@@ -1548,6 +1572,99 @@ function module_code(library_namespace) {
 						+ ' (tried to access a node above the root node).');
 			}
 			return path.replace(/\/$/, '');
+
+			// ----------------------------------------------------------------
+
+		case 'NUMBEROFPAGES':
+		case 'NUMBEROFARTICLES':
+		case 'NUMBEROFFILES':
+		case 'NUMBEROFEDITS':
+		case 'NUMBEROFUSERS':
+		case 'NUMBEROFADMINS':
+		case 'NUMBEROFACTIVEUSERS':
+			// https://stackoverflow.com/questions/73223844/get-the-number-of-pages-in-a-mediawiki-wikipedia-namespace
+			// https://phabricator.wikimedia.org/T312200
+			var session = wiki_API.session_of_options(options);
+			if (!session || !session.latest_site_configurations
+					|| !session.latest_site_configurations.statistics) {
+				return NYI();
+			}
+			var value = token.name.replace(/^NUMBEROF/, '').toLowerCase();
+			if (value === 'files')
+				value = 'images';
+			value = session.latest_site_configurations.statistics[value];
+			if (typeof value !== 'number' || !(value >= 0))
+				return NYI();
+			return value.toLocaleString('en');
+
+			// ----------------------------------------------------------------
+
+		case 'PAGEID':
+			var page_data = get_page_data();
+			if (!page_data)
+				return NYI();
+			// console.trace(page_data.pageid);
+			return page_data.pageid;
+
+		case 'PAGESIZE':
+			var page_title = get_parameter_String(1),
+			//
+			get_page_length = function get_page_length(page_title) {
+				var page_data = get_page_data();
+				if (!page_data)
+					return NYI();
+				if (page_title !== page_data.title)
+					return NYI();
+				var wikitext = wiki_API.content_of(page_data);
+				if (typeof wikitext !== 'string')
+					return NYI();
+				// console.trace(page_data.pageid);
+				return wikitext.length;
+			};
+
+			if (library_namespace.is_thenable(page_title))
+				return page_title.then(get_page_length);
+
+			return get_page_length(page_title);
+
+		case 'REVISIONID':
+			return /* NYI() */'-';
+			var revision = get_page_revision();
+			if (!revision || !revision.revid)
+				return NYI();
+			return revision.revid;
+
+		case 'REVISIONUSER':
+			var revision = get_page_revision();
+			if (!revision || !revision.user)
+				return NYI();
+			return revision.user;
+
+		case 'REVISIONTIMESTAMP':
+			var revision = get_page_revision();
+			if (!revision || !revision.timestamp)
+				return NYI();
+			return revision.timestamp.replace(/[\-:TZ]/g, '').replace(/\.\d+$/,
+					'');
+
+		case 'REVISIONDAY':
+		case 'REVISIONDAY2':
+		case 'REVISIONMONTH':
+		case 'REVISIONYEAR':
+			var revision = get_page_revision();
+			if (!revision || !revision.timestamp)
+				return NYI();
+			var matched = revision.timestamp.matche(/^(\d{4})-(\d{2})-(\d{2})/);
+			if (!matched)
+				return NYI();
+			if (token.name === 'REVISIONYEAR')
+				return matched[1];
+			if (token.name === 'REVISIONMONTH')
+				return matched[2];
+			if (token.name === 'REVISIONDAY2')
+				return matched[3];
+			if (token.name === 'REVISIONDAY')
+				return +matched[3];
 
 			// ----------------------------------------------------------------
 

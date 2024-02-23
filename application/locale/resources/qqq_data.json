@@ -948,7 +948,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3313}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2109}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3313}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2125}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"jdn": {
@@ -1448,7 +1448,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4903}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4911}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2113}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4903}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4911}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2129}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"28-mansions": {
@@ -1967,13 +1967,22 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L158}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": {
+		"message": "所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。",
+		"notes": "Used as debugging message when selecting language.",
+		"scope": "CeL.application.locale: use_domain()",
+		"original_message_language_code": "cmn-Hant-TW",
+		"parameters": "%1: domain_name",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1267}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L641}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"$1-is-loaded-setting-up-user-domain-resources-now": {
 		"message": "已載入過 [%1]，直接設定使用者自訂資源。",
 		"notes": "",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: domain_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1211}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1226}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"force-loading-using-domain-locale-$2-($1)": {
@@ -1982,7 +1991,7 @@
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: domain_name, %2: alias of domain_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1223}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1238}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"loading-using-domain-locale-$2-($1)": {
@@ -1991,16 +2000,7 @@
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: domain_name, %2: alias of domain_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1225}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"specified-domain-$1-is-not-yet-loaded.-you-may-need-to-set-the-force-flag": {
-		"message": "所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。",
-		"notes": "Used as debugging message when selecting language.",
-		"scope": "CeL.application.locale: use_domain()",
-		"original_message_language_code": "cmn-Hant-TW",
-		"parameters": "%1: domain_name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1252}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1240}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-distinguish-domain-but-set-callback": {
@@ -2008,7 +2008,7 @@
 		"notes": "無論如何還是執行 callback。",
 		"scope": "CeL.application.locale: use_domain()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1259}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1275}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"illegal-domain-alias-list-$1": {
@@ -2017,7 +2017,7 @@
 		"scope": "CeL.application.locale: set_alias()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: domain alias list",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1468}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1484}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"adding-domain-alias-$1-→-$2": {
@@ -2026,7 +2026,7 @@
 		"scope": "CeL.application.locale: set_alias()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: domain alias, %2: normalized domain name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1484}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1500}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"testing-domain-alias-$1": {
@@ -2035,7 +2035,7 @@
 		"scope": "CeL.application.locale: to_standard()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: domain alias, %2: normalized domain name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1575}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1591}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"failed-to-extract-gettext-id": {
@@ -2043,7 +2043,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: translate_node()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1705}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1721}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"loading-language-domain-$1": {
@@ -2051,7 +2051,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1745}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1761}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"language-domain-$1-loaded": {
@@ -2059,7 +2059,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: adapt_domain()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1751}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1767}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-find-menu-node-$1": {
@@ -2068,7 +2068,7 @@
 		"scope": "CeL.application.locale: create_domain_menu()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: menu node id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1794}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1810}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"language": {
@@ -2076,7 +2076,7 @@
 		"notes": "Label used when selecting language.",
 		"additional_notes": "{{identical|Language}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1850}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1866}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"convert-number-$1-to-$2-format": {
@@ -2084,7 +2084,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: gettext.numeral()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1874}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L1890}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unable-to-convert-number-$1": {
@@ -2092,7 +2092,7 @@
 		"notes": "",
 		"scope": "CeL.application.locale: 打折扣",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2264}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2280}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"enter-a-non-string-parameter-$1": {
@@ -2650,14 +2650,14 @@
 		"message": "跳過 %2 之 %1 設定，因數值已存在且未設定 %3。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: claim items (qualifiers, references, rank). %2: \"property = value\". %3: property of options",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2991}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L2988}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"Comma-separator": {
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <bdi><code>{{int:Comma-separator}}</code></bdi> ([[translatewiki:MediaWiki:Comma-separator]]).\nBe careful to the presence of a trailing space when appropriate for your language (if it is needed, you can input it as <code>&amp;#32;</code> to avoid its trimming when editing this message.\nSee also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3003}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1507}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L168}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1817}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L647}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2897}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2904}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2911}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L618}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L203}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L446}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L451}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3000}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1507}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L168}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1817}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.%E8%A7%A3%E6%B6%88%E6%B8%88%E3%81%BF%E4%BB%AE%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%92%E3%83%AA%E3%83%B3%E3%82%AF%E3%81%AB%E7%BD%AE%E3%81%8D%E6%8F%9B%E3%81%88%E3%82%8B.js#L647}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2897}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2904}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2911}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L618}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L203}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L446}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L451}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"check-the-emergency-stop-page-$1": {
@@ -2799,14 +2799,14 @@
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3075}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3084}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3108}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3117}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2814,14 +2814,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3188}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3197}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3771}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3780}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2933,7 +2933,7 @@
 		"message": "There are more than one %1 in %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: layout type, %2: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1729}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1734}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {

@@ -2704,6 +2704,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		var session = wiki_API.session_of_options(options);
 		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|specialpagealiases|magicwords|extensiontags|protocols&utf8&format=json
 		options = Object.assign({
 			siprop : 'general|namespaces|namespacealiases|specialpagealiases'
@@ -2714,8 +2715,12 @@ function module_code(library_namespace) {
 			// + '|languages'
 			+ '|interwikimap|languagevariants'
 
+			// for {{NUMBEROFPAGES}} @ function
+			// evaluate_parser_function_token(options)
+			+ '|statistics'
+
 			// 工作隊列lag
-			// + '|statistics|dbrepllag'
+			// + '|dbrepllag'
 
 			// + '|usergroups'
 			+ '|restrictions'
@@ -2724,9 +2729,12 @@ function module_code(library_namespace) {
 
 			// + '|showhooks|libraries|extensions'
 			+ '|extensiontags|protocols|fileextensions'
+
+			&& session.API_parameters['query+siteinfo']
+			// get all prop
+			.parameter_Map.get('prop').type.join('|')
 		}, options);
 
-		var session = wiki_API.session_of_options(options);
 		var siteinfo = session && session.get_storage(action.meta);
 		if (siteinfo) {
 			adapt_site_configurations(session, siteinfo);
@@ -2853,6 +2861,7 @@ function module_code(library_namespace) {
 		var magic_words_hash = Object.create(null);
 		site_configurations.magic_words_hash = magic_words_hash;
 
+		// console.trace(configurations.functionhooks);
 		configurations.functionhooks
 		//
 		&& configurations.functionhooks.forEach(function(magic_word) {

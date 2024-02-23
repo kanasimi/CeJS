@@ -915,7 +915,7 @@ function module_code(library_namespace) {
 
 	// is_wiki_token(), is_token()
 	function is_parsed_element(value) {
-		return Array.isArray(value) && value.type;
+		return Array.isArray(value) && (value.type in wiki_element_toString);
 	}
 
 	/** token為無意義的token。 */
