@@ -1467,7 +1467,7 @@ function module_code(library_namespace) {
 
 		case '#language':
 			if (typeof Intl !== 'object' || !Intl.DisplayNames) {
-				return NYI('No Intl');
+				return NYI('No valid Intl.');
 			}
 			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#examples
 			// Language Display Names

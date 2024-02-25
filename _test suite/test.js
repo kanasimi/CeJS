@@ -4881,9 +4881,13 @@ function test_wiki() {
 		//assert(['0', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456789|9034567890123456788|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #5');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456700.0|9034567890123456800|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #6');
 
-		assert(['Chinese', CeL.wiki.expand_transclusion('{{#language:zh|en}}').toString()], 'wiki.expand_transclusion: {{#language:}} #1');
-		assert(['中文', CeL.wiki.expand_transclusion('{{#language:zh}}').toString()], 'wiki.expand_transclusion: {{#language:}} #2');
-		assert(['中文', CeL.wiki.expand_transclusion('{{#language:zh|zh}}').toString()], 'wiki.expand_transclusion: {{#language:}} #3');
+		if (typeof Intl !== 'object' || !Intl.DisplayNames) {
+			CeL.warn('No valid Intl. Skip tests of wiki.expand_transclusion: {{#language:}}');
+		} else {
+			assert(['Chinese', CeL.wiki.expand_transclusion('{{#language:zh|en}}').toString()], 'wiki.expand_transclusion: {{#language:}} #1');
+			assert(['中文', CeL.wiki.expand_transclusion('{{#language:zh}}').toString()], 'wiki.expand_transclusion: {{#language:}} #2');
+			assert(['中文', CeL.wiki.expand_transclusion('{{#language:zh|zh}}').toString()], 'wiki.expand_transclusion: {{#language:}} #3');
+		}
 
 		assert(['<testtag/>', CeL.wiki.expand_transclusion('{{#tag:testtag}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #1');
 		assert(['<testtag></testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag|}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #2');
