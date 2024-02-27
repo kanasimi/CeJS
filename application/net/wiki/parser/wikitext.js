@@ -4975,6 +4975,10 @@ function module_code(library_namespace) {
 		var parsed = parse_wikitext(options.replace_by_wikitext
 				|| token.toString(), options);
 
+		if (token.type !== parsed.type) {
+			throw new Error('token.type: ' + token.type + '⭢' + parsed.type);
+		}
+
 		token.truncate();
 
 		Object.assign(token, parsed);

@@ -264,10 +264,13 @@ function module_code(library_namespace) {
 	https://www.69xinshu.com/txt/47093/34685221	我爲長生仙 > 第385章 吾名泰一！
 	&emsp;&emsp;第385章 吾名——泰一！
 
+	https://www.69xinshu.com/txt/47093/35513904	我为长生仙 > 第516章 真娲皇之子！（三更求月票）
+	&emsp;&emsp;第516章 真·娲皇之子！（三更求月票）
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~\-—々\s]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\-—々·\s]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
