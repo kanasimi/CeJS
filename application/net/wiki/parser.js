@@ -1678,8 +1678,8 @@ function module_code(library_namespace) {
 			'S-start', 'Start box', 'Succession box', 'End box', 'S-end',
 			// navigation templates
 			'Navbox', 'Navboxes', 'Portal bar', 'Taxonbar',
-			// authority control template "控製"也能引導到"控制"
-			'Authority control', '規範控製', '權威控製', 'Coord', 'Coord missing',
+			// authority control template
+			'Authority control', 'Coord', 'Coord missing',
 					'DEFAULTSORT' ]
 
 		// page_footer : [ 'Category:小作品訊息模板' ]

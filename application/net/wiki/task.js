@@ -287,6 +287,46 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	/**
+	 * 系統內定繁簡轉換無法獲得的字元，屬於一對多繁簡轉換詞彙。<br />
+	 * 例如 "模板:規範控製" 可重定向到 "模板:規范控制"，然而系統內定的繁簡轉換無法從"控制"獲得"控製"。因此在設定
+	 * redirects_variants_patterns 時必須手動加入 "製"→"制"。
+	 * 
+	 * 這邊基本上只記錄用在模板的文字。
+	 * 
+	 * @see [[w:zh:簡繁轉換一對多列表]]。
+	 */
+	var char_variants_hash = {
+		// 维基大学计划 ⭠ 維基大學計畫
+		划 : [ '畫' ],
+		// 規范控制 ⭠ 規範控製
+		制 : [ '製' ]
+	};
+
+	function add_char_variants(char_Array) {
+		// char_Array = char_Array.clone();
+
+		for ( var char_to_check in char_variants_hash) {
+			if (char_Array.includes(char_to_check)) {
+				var char_list_to_append = char_variants_hash[char_to_check];
+				char_list_to_append.forEach(function(char_to_append) {
+					if (!char_Array.includes(char_to_append)) {
+						if (false) {
+							console.trace([ char_to_check, char_to_append,
+									char_Array ]);
+						}
+						char_Array.push(char_to_append);
+					}
+				});
+				break;
+			}
+		}
+
+		return char_Array;
+	}
+
+	// ------------------------------------------------------------------------
+
 	/** 代表欲自動設定 options.page_to_edit */
 	wiki_API.VALUE_set_page_to_edit = true;
 	var KEY_first_char_list = typeof Symbol === 'function' ? Symbol('first_char_list')
@@ -1084,20 +1124,33 @@ function module_code(library_namespace) {
 							|| redirect_list === root_page_data.redirect_list);
 				}
 
-				var registered_page_list = Array.isArray(next[1]) ? next[1]
-						: [ next[1] ];
+				var page_list_to_check_variants
+				//
+				= Array.isArray(next[1]) ? next[1] : [ next[1] ];
 				// from: alias, to: 正式名稱
 				function register_title(from, to) {
-					if (!from
-					// || (from in redirects_data)
-					) {
+					if (!from) {
 						return;
 					}
 					// assert: from ===
 					// _this.normalize_title(from)
 					// the namespace of from, to is normalized
+
+					// from === to 亦登記，以供確認此頁面存在。
+					// 並方便 register_redirect_list_via_mapper() 中的 map_to 設定。
+
+					if (redirects_data[from]) {
+						if (redirects_data[from] === to)
+							return;
+						// Should not fo to here.
+						library_namespace
+								.error('register_title: ' + from + '→'
+										+ redirects_data[from]
+										+ '\n\tchange to →' + to);
+					}
+
 					redirects_data[from] = to;
-					registered_page_list.push(from);
+					page_list_to_check_variants.push(from);
 				}
 				function register_root_alias(page_data) {
 					if (page_data.original_title) {
@@ -1221,7 +1274,7 @@ function module_code(library_namespace) {
 				// --------------------------------------------------
 
 				// 處理 converttitles。
-				// console.trace('處理繁簡轉換問題: ' + registered_page_list);
+				// console.trace('處理繁簡轉換問題: ' + page_list_to_check_variants);
 				// console.trace(root_page_data);
 				// console.trace(JSON.stringify(redirects_data));
 
@@ -1241,6 +1294,7 @@ function module_code(library_namespace) {
 				// 也不能獲得繁體字，但繁體字會自動 mapping 的問題；必須自行
 				// wiki.register_redirects(繁體字名稱)。
 				function register_variants_pattern() {
+					// console.trace(variants_of_target);
 					for ( var register_target in variants_of_target) {
 						variants_of_target[register_target].forEach(function(
 								variants_list) {
@@ -1278,6 +1332,7 @@ function module_code(library_namespace) {
 							}
 
 							var pattern = char_list.map(function(chars) {
+								chars = add_char_variants(chars);
 								return chars.length === 1 ? chars : '['
 										+ chars.join('') + ']';
 							});
@@ -1367,24 +1422,26 @@ function module_code(library_namespace) {
 				}
 
 				function register_redirect_list_via_mapper(original_list,
-						list_to_map, error) {
+						variants_list, error) {
 					if (false) {
 						console.trace([ next[3].uselang, original_list,
-								list_to_map ]);
+								variants_list ]);
 					}
-					if (!Array.isArray(list_to_map)) {
+					if (!Array.isArray(variants_list)) {
 						library_namespace
 								.error('register_redirect_list_via_mapper: '
 										+ '無法繁簡轉換: ' + (error || '未知的錯誤'));
 						return;
 					}
 
+					// assert: variants_list.length === original_list.length
+
 					if (/* check_char_variants */false) {
 						original_list = original_list.slice(1);
-						list_to_map = list_to_map.slice(1);
+						variants_list = variants_list.slice(1);
 					}
 
-					list_to_map.forEach(function(map_from, index) {
+					variants_list.forEach(function(map_from, index) {
 						// if (map_from in redirects_data) return;
 						var map_to
 						//
@@ -1393,54 +1450,85 @@ function module_code(library_namespace) {
 						if (false) {
 							library_namespace
 									.log('register_redirect_list_via_mapper: ['
-											+ next[3].uselang + '] ' + map_from
+											+ variants_list.uselang + '] '
+											+ '[' + index + '] ' + map_from
 											+ ' → ' + map_to);
 						}
 						redirects_data[map_from] = map_to;
 
-						if (!variants_of_target[map_to])
-							variants_of_target[map_to] = [];
-						if (!variants_of_target[map_to][index]) {
-							variants_of_target[map_to][index] = [ map_from ];
-						} else if (!variants_of_target[map_to][index]
-								.includes(map_from)) {
-							variants_of_target[map_to][index].push(map_from);
+						var variants_map = variants_of_target[map_to];
+						if (!variants_map)
+							variants_map = variants_of_target[map_to] = [];
+
+						if (!variants_map[index]) {
+							variants_map[index] = [ map_from ];
+						} else if (!variants_map[index].includes(map_from)) {
+							variants_map[index].push(map_from);
 						}
 					});
 
 				}
 
+				var promise = Promise.resolve();
+				function add_variant_of_page_list(uselang) {
+					// next[3] : options
+					var options = Object.assign(Object.clone(next[3]), {
+						uselang : uselang
+					});
+					promise = promise.then(function() {
+						// console.trace(uselang);
+						return new Promise(
+						/* executor */function(resolve, reject) {
+							// console.trace(uselang);
+							wiki_API.convert_Chinese(
+							//
+							page_list_to_check_variants,
+							//
+							function(converted_page_list, error) {
+								if (false) {
+									console.trace([
+									//
+									page_list_to_check_variants,
+									//
+									uselang, converted_page_list, error ]);
+								}
+								register_redirect_list_via_mapper(
+										page_list_to_check_variants,
+										converted_page_list, error);
+
+								// console.trace(variants_of_target, promise);
+								resolve();
+							}, options);
+						});
+					});
+				}
+
+				page_list_to_check_variants = page_list_to_check_variants
+				//
+				.filter(function(page_title) {
+					// 去掉全英文字母的頁面名稱。
+					return !/^[\w\s:\-]+$/.test(page_title);
+				});
+
+				// console.trace(page_list_to_check_variants);
 				if (/* check_char_variants */false) {
-					registered_page_list.unshift(registered_page_list.join('')
+					page_list_to_check_variants
+					//
+					.unshift(page_list_to_check_variants.join('')
 					// 這些字元不該有變體。
 					.replace(/[\w\s:"']/g, '').chars().unique().join(','));
 				}
-				// next[3] : options
-				next[3].uselang = 'zh-hant';
-				wiki_API.convert_Chinese(registered_page_list, function(
-						converted_hant, error) {
-					if (false) {
-						console.trace([ registered_page_list, converted_hant,
-								error ]);
-					}
-					register_redirect_list_via_mapper(registered_page_list,
-							converted_hant, error);
 
-					next[3].uselang = 'zh-hans';
-					wiki_API.convert_Chinese(registered_page_list, function(
-							converted_hans, error) {
-						if (false) {
-							console.trace([ registered_page_list,
-									converted_hans, error ]);
-						}
-						register_redirect_list_via_mapper(registered_page_list,
-								converted_hans, error);
+				[ 'zh-tw',
+				// zh-cn: e.g., "Template:軟體專題" ⭠ "Template:软件专题"
+				'zh-cn' ].forEach(add_variant_of_page_list);
+				promise.then(function() {
+					// console.trace(variants_of_target, promise);
+					register_variants_pattern();
 
-						register_variants_pattern();
+					_this.next(next[2], root_page_data);
+				});
 
-						_this.next(next[2], root_page_data);
-					}, next[3]);
-				}, next[3]);
 			},
 			// next[3] : options
 			next[3]);

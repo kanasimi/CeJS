@@ -1857,12 +1857,14 @@ function module_code(library_namespace) {
 				data = unescape(data);
 				if (is_JSON) {
 					data = JSON.parse(data);
-					if (Array.isArray(is_JSON)
-							&& is_JSON.length !== data.length) {
-						throw new Error(
-						//
-						'wiki_API.convert_Chinese: fault on {Array}: '
-								+ is_JSON.length + ' !== ' + data.length);
+					if (Array.isArray(is_JSON)) {
+						if (is_JSON.length !== data.length) {
+							throw new Error(
+							//
+							'get_language_variants: fault on {Array}: '
+									+ is_JSON.length + ' !== ' + data.length);
+						}
+						data.uselang = uselang;
 					}
 				}
 			} catch (e) {

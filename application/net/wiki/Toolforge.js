@@ -747,7 +747,7 @@ function module_code(library_namespace) {
 			}
 			// 不指定namespace，或者指定namespace為((undefined)): 取得所有的namespace。
 			/** {Integer|String}namespace NO. */
-			var namespace = wiki_API.namespace(options.namespace);
+			var namespace = wiki_API.namespace(options.namespace, options);
 			if (namespace !== undefined) {
 				SQL.namespace = namespace;
 			}

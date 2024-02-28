@@ -5646,13 +5646,17 @@ function test_wiki() {
 		var zhwiki = new CeL.wiki(null, null, 'zh');
 
 		zhwiki.run(function () {
-			zhwiki.register_redirects(['template:Authority control', '模板:規範控製'], function test_register_redirects() {
+			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software'], function test_register_redirects() {
 				var test_name = 'wiki: register_redirects';
 				_setup_test(test_name);
 
 				//console.trace(zhwiki.redirects_variants_patterns, zhwiki.has_languagevariants);
-				assert(zhwiki.is_template('權威控制', '规范控制'), 'zhwiki.is_template() #1');
-				assert(zhwiki.is_template('模板:規范控制', '規范控製'), 'zhwiki.is_template() #2');
+				assert(zhwiki.is_template('權威控制', '规范控制'), 'zhwiki.is_template() #1-1');
+				assert(zhwiki.is_template('模板:規范控制', '規范控製'), 'zhwiki.is_template() #1-2');
+
+				assert(zhwiki.is_template('模板:維基大學計畫', '模板:大學專題'), 'zhwiki.is_template() #2-1');
+
+				assert(zhwiki.is_template('软件专题', '軟體專題'), 'zhwiki.is_template() #3-1');
 
 				_finish_test(test_name);
 			});

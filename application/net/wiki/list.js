@@ -330,11 +330,12 @@ function module_code(library_namespace) {
 			};
 		}
 		if ('namespace' in options) {
-			// 檢查 options.namespace。
-			options.namespace = wiki_API.namespace(options.namespace);
+			// console.trace('檢查 options.namespace: ' + options.namespace);
+			options.namespace = wiki_API.namespace(options.namespace, options);
+			// console.trace(options.namespace);
 			if (options.namespace === undefined) {
 				library_namespace
-						.warn('get_list: options.namespace 並非為正規 namespace！將被忽略！');
+						.warn('get_list: options.namespace 非正規 namespace！將被忽略！');
 				delete options.namespace;
 			}
 		}
@@ -1792,8 +1793,8 @@ function module_code(library_namespace) {
 			delete categorymembers_options.page_filter;
 			categorymembers_options.namespace = 'namespace' in categorymembers_options
 			// 確保一定有 NS_Category。
-			? wiki_API.namespace(wiki_API
-					.namespace(categorymembers_options.namespace)
+			? wiki_API.namespace(wiki_API.namespace(
+					categorymembers_options.namespace, options)
 					+ '|' + NS_Category) : category_tree.default_namespace;
 
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
@@ -2492,7 +2493,8 @@ function module_code(library_namespace) {
 			}
 		}
 		if (options.srnamespace) {
-			options.srnamespace = wiki_API.namespace(options.srnamespace);
+			options.srnamespace = wiki_API.namespace(options.srnamespace,
+					options);
 		}
 
 		var _options = Object.clone(options);
