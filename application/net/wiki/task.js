@@ -1503,6 +1503,34 @@ function module_code(library_namespace) {
 					});
 				}
 
+				function check_big_variations() {
+					for ( var register_target in variants_of_target) {
+						variants_of_target[register_target]
+						//
+						= variants_of_target[register_target].filter(function(
+								variants_list) {
+							if (variants_list.length === 1) {
+								// 沒有任何變體。
+								return;
+							}
+
+							var length = variants_list[0].length;
+							for (var index = 1;
+							//
+							index < variants_list.length; index++) {
+								if (variants_list[index].length !== length) {
+									// 有地區化語詞。
+									page_list_to_check_variants
+											.append(variants_list);
+									return;
+									// break;
+								}
+							}
+							return true;
+						});
+					}
+				}
+
 				page_list_to_check_variants = page_list_to_check_variants
 				//
 				.filter(function(page_title) {
@@ -1522,11 +1550,25 @@ function module_code(library_namespace) {
 				[ 'zh-tw',
 				// zh-cn: e.g., "Template:軟體專題" ⭠ "Template:软件专题"
 				'zh-cn' ].forEach(add_variant_of_page_list);
-				promise.then(function() {
-					// console.trace(variants_of_target, promise);
-					register_variants_pattern();
 
-					_this.next(next[2], root_page_data);
+				promise.then(function() {
+					// reset
+					page_list_to_check_variants = [];
+					check_big_variations();
+					if (page_list_to_check_variants.length > 0) {
+						// e.g., "Template:独联体专题" ⭠ "Template:獨立國協專題"
+						// console.trace(page_list_to_check_variants);
+						[ 'zh-hant', 'zh-hans' ]
+								.forEach(add_variant_of_page_list);
+					}
+
+					promise.then(function() {
+						// console.trace(variants_of_target, promise);
+
+						register_variants_pattern();
+
+						_this.next(next[2], root_page_data);
+					});
 				});
 
 			},

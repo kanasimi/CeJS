@@ -1287,6 +1287,7 @@ function module_code(library_namespace) {
 		 * 
 		 * @see https://en.wikipedia.org/wiki/UTF-16#Code_points_U.2B10000_to_U.2B10FFFF
 		 *      http://teppeis.hatenablog.com/entry/2014/01/surrogate-pair-in-javascript
+		 *      https://docs.oracle.com/javase/6/docs/api/java/lang/String.html#toCharArray()
 		 */
 		split_by_code_point = function(with_combined) {
 			// if (has_spread_syntax && !with_combined) return [...this];

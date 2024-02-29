@@ -3295,6 +3295,7 @@ function test_wiki() {
 		[["Talk:ABC", CeL.wiki.normalize_title('talk:ABC')], 'normalize_title #20'],
 		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC')], 'normalize_title #21'],
 		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC', { is_page_title: true })], 'normalize_title #22'],
+		[["Talk:ß", CeL.wiki.normalize_title('talk:ß', { is_page_title: true })], 'normalize_title #23'],
 
 		// Should use CeL.wiki.title_of(page_data, options);
 		[['Wikipedia:ABC', CeL.wiki.title_of('Wikipedia:ABC')], 'title_of #1'],
@@ -3389,6 +3390,7 @@ function test_wiki() {
 		[['Talk:ABC DEF: RRR', CeL.wiki.to_talk_page('ABC DEF: RRR')], 'wiki.to_talk_page #5'],
 		[['Module talk:NAME', CeL.wiki.to_talk_page('模块:NAME')], 'wiki.to_talk_page #6'],
 		[["Talk:1,1':2',1'':3'',1'''-四联苯", CeL.wiki.to_talk_page("Talk:1,1':2',1'':3'',1'''-四联苯")], 'wiki.to_talk_page #7'],
+		[['Talk:ß', CeL.wiki.to_talk_page('talk:ß')], 'wiki.to_talk_page #8'],
 		[!CeL.wiki.to_talk_page('topic:NAME'), 'wiki.to_talk_page: There is no talk page for Topic.'],
 		[['NAME', CeL.wiki.talk_page_to_main('NAME')], 'wiki.talk_page_to_main #1'],
 		[['NAME', CeL.wiki.talk_page_to_main('talk:NAME')], 'wiki.talk_page_to_main #2'],
@@ -5646,7 +5648,7 @@ function test_wiki() {
 		var zhwiki = new CeL.wiki(null, null, 'zh');
 
 		zhwiki.run(function () {
-			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software'], function test_register_redirects() {
+			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software', 'Template:WikiProject CIS'], function test_register_redirects() {
 				var test_name = 'wiki: register_redirects';
 				_setup_test(test_name);
 
@@ -5657,6 +5659,8 @@ function test_wiki() {
 				assert(zhwiki.is_template('模板:維基大學計畫', '模板:大學專題'), 'zhwiki.is_template() #2-1');
 
 				assert(zhwiki.is_template('软件专题', '軟體專題'), 'zhwiki.is_template() #3-1');
+
+				assert(zhwiki.is_template('獨立國協專題', '獨聯體專題'), 'zhwiki.is_template() #4-1');
 
 				_finish_test(test_name);
 			});
@@ -5670,6 +5674,7 @@ function test_wiki() {
 			assert(["Wikipedia:小作品", zhwiki.normalize_title('WP:小作品')], 'zhwiki.normalize_title() #1-2');
 
 			assert(["Talk:1,1':2',1'':3'',1'''-四联苯", zhwiki.to_talk_page("Talk:1,1':2',1'':3'',1'''-四联苯")], 'zhwiki.to_talk_page #1');
+			assert(["Talk:ß", zhwiki.to_talk_page("Talk:ß")], 'zhwiki.to_talk_page #2');
 
 			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			var parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();

@@ -1754,10 +1754,29 @@ function module_code(library_namespace) {
 
 		// method 1
 		// TODO: check .charCodeAt()
-		return words.charAt(0).toUpperCase() + words.slice(1);
+		var initial_char = words.charAt(0);
+		if (initial_char !== 'ß') {
+			// https://www.reddit.com/r/javascript/comments/9i455b/why_is_%C3%9Ftouppercase_equal_to_ss/
+			// https://stackoverflow.com/questions/9127644/converting-%C3%9F-cfg-to-upper-case-using-touppercase-in-java
+			// https://unicode.org/Public/UNIDATA/SpecialCasing.txt
+			// 'ẞ'.toLowerCase()==='ß'
+			// 'ß'.toUpperCase()==='SS'
+			// 'ẞ'.toUpperCase()==='ẞ'
+
+			// MediaWiki 技術上可使用這個為標題首字母:
+			// https://de.wikipedia.org/wiki/Spezial:Pr%C3%A4fixindex?prefix=%C3%9F
+			// https://en.wikipedia.org/wiki/Special:PrefixIndex?prefix=%C3%9F
+			// 因此應保留 'ß'
+
+			initial_char = initial_char.toUpperCase();
+		}
+		return initial_char + words.slice(1);
 
 		// method 2
 		return words.replace(/^\S/g, function(initial_char) {
+			if (initial_char === 'ß') {
+				return initial_char;
+			}
 			return initial_char.toUpperCase();
 		});
 	}
