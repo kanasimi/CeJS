@@ -1871,7 +1871,9 @@
 铺天卷地	鋪天捲地
 // 解析錯誤 @ 《我师兄实在太稳健了》	身周火焰四卷四面八方， (~捲<←SBV>n:火焰 n:身+nd:周+n:火焰+m:四+q:卷+i:四面八方)
 火焰四卷	火焰四捲
-// 解析錯誤 @ 《烂柯棋缘》	燕飞长剑翻卷， (~捲<VOB>v:翻 n:燕+v:飞+n:长剑+v:翻+n:卷+wp:，)
+// 《我为长生仙》	齐无惑按剑低语看着云海翻卷， (~捲<VOB>v:翻 nh:齐无惑+p:按+n:剑+v:低语+v:看+u:着+n:云海+v:翻+n:卷+wp:，) 單純 zh_conversion 轉換過程: 翻卷→翻卷
+云海翻卷	雲海翻捲
+// 解析錯誤 @ 《烂柯棋缘》	燕飞长剑翻卷， (~捲<VOB>v:翻 n:燕+v:飞+n:长剑+v:翻+n:卷+wp:，) 單純 zh_conversion 轉換過程: 翻卷→翻卷
 长剑翻卷	長劍翻捲
 // 《烂柯棋缘》	而尸首也被破席子卷在一起。 (~捲<role.type:ARGM-DIS>而 ~捲<role.type:A1>尸首 ~捲<role.type:ARGM-DIS>也 ~捲<role.type:A2>破席子 ~捲<role.type:ARGM-ADV>在 ~捲<role.type:ARGM-ADV>一起 c:而+n:尸首+d:也+p:被+a:破+n:席子+v:卷+p:在+nl:一起+wp:。)
 卷在一起	捲在一起
@@ -2454,8 +2456,10 @@
 榨取干	搾取乾
 // 《我为长生仙》	就连整个锦州的河流都被蒸腾干了， (~乾<CMP>v:蒸腾 d:就+u:连+b:整个+ns:锦州+u:的+n:河流+d:都+p:被+v:蒸腾+a:干+u:了+wp:，) 單純 zh_conversion 轉換過程: 干了→幹了
 蒸腾干	蒸騰乾
-// 《我为长生仙》	我是粗人，不讲求这些礼节，就先干了！ (~乾<COO>v:见 ~乾<role.type:ARGM-DIS>就 ~乾<role.type:ARGM-ADV>先 ~乾<role.type:ARGM-ADV>就要 ~乾<role.type:ARGM-ADV>却 ~乾<role.type:ARGM-ADV>似乎 r:我+v:是+n:粗人+wp:，+d:不+v:讲求+r:这些+n:礼节+wp:，+d:就+d:先+v:干+u:了+wp:！)
+// 《我为长生仙》	我是粗人，不讲求这些礼节，就先干了！ (~乾<COO>v:见 ~乾<role.type:ARGM-DIS>就 ~乾<role.type:ARGM-ADV>先 ~乾<role.type:ARGM-ADV>就要 ~乾<role.type:ARGM-ADV>却 ~乾<role.type:ARGM-ADV>似乎 r:我+v:是+n:粗人+wp:，+d:不+v:讲求+r:这些+n:礼节+wp:，+d:就+d:先+v:干+u:了+wp:！) 單純 zh_conversion 轉換過程: 干了→幹了
 就先干了！	就先乾了！
+// 《我为长生仙》	一口气将手中酒壶里的美酒都干了。 (~乾<COO>v:饮酒 ~乾<role.type:ARGM-ADV>都 d:一口气+p:将+nl:手中+n:酒壶+nd:里+u:的+n:美酒+d:都+v:干+u:了+wp:。) 單純 zh_conversion 轉換過程: 干了→幹了
+酒都干了	酒都乾了
 
 // 《剑宗旁门》	看着那新干的墨迹， (~新乾<ATT>n:墨迹 v:看+u:着+r:那+d:新干+u:的+n:墨迹+wp:，)
 新干的	新乾的
@@ -3781,6 +3785,8 @@
 互有克制	互有剋制
 // 《我只想安静的做个苟道中人》	这幻术非常克制她， (~剋制<VOB>v:说道 ~剋制<role.type:A0>这幻术 ~剋制<role.type:ARGM-ADV>非常 ~剋制<role.type:A1>她 r:这+n:幻术+d:非常+v:克制+r:她+wp:，)
 非常克制她	非常剋制她
+// 《我为长生仙》	周天星辰大阵可谓是最为克制斗部了， (~剋制<VOB>v:是 ~剋制<role.type:A1>一戏法 ~剋制<role.type:ARGM-ADV>最为 ~剋制<role.type:A1>斗部 n:周天+n:星辰+n:大阵+v:可谓+v:是+d:最为+v:克制+n:斗部+u:了+wp:，)
+最为克制斗部	最為剋制斗部
 // 《我只想安静的做个苟道中人（精校反和谐加料版）》	传给了他两门神通，用以克制那裴凌的仙术与法则。 (~剋制<COO>v:传 ~剋制<role.type:ARGM-DIS>便 v:传+v:给+u:了+r:他+m:两+q:门+n:神通+wp:，+d:用以+v:克制+r:那+nh:裴凌+u:的+n:仙术+c:与+n: 法则+wp:。)
 用以克制	用以剋制
 // 《我在幕后调教大佬》	那青年眼底虽然还有着渴望，但是却已经到了足以克制住的程度， (~克制<ATT>n:程度 r:那+n:青年+n:眼底+c:虽然+d:还+v:有着+v:渴望+wp:，+c:但是+d:却+d:已经+v:到+u:了+d:足以+v:克制+v:住+u:的+n:程度+wp:，) 單純 zh_conversion 轉換過程: 足以克制→足以剋制
@@ -3837,6 +3843,8 @@
 有一道能克制	有一道能剋制
 // 《请公子斩妖》	那些缺乏远程战斗能力的武道修行者会受到极大克制。 (~剋制<VOB>v:受到 r:那些+v:缺乏+b:远程+v:战斗+n:能力+u:的+n:武道+n:修行者+v:会+v:受到+a:极大+v:克制+wp:。)
 受到极大克制	受到極大剋制
+// 《我为长生仙》	唯守娲皇可克制伏羲！ (~剋制<COO>v:克 ~剋制<role.type:A0>唯守娲皇 ~剋制<role.type:A1>伏羲 d:唯+v:守+nh:娲皇+v:可+v:克制+nh:伏羲+wp:！)
+可克制伏羲	可剋制伏羲
 
 
 // 《平平无奇大师兄》	大道青莲所托住的诸天世界， (n:大道+n:青莲+u:所+v:托+v:住+u:的+n:诸天+n:世界)
@@ -5206,37 +5214,41 @@ https://ctext.org/post-han/zh?searchu=%E6%B1%A1%E8%A1%8A
 //刮风后	刮風後
 // 《回到过去变成猫》	很多塑胶袋之类的被刮飞起来， (m:很多+n:塑胶袋+r:之类+u:的+p:被+v:刮+v:飞+v:起来+wp:，)
 被刮飞起来	被颳飛起來
-// 《烂柯棋缘》	计缘刮了刮孙雅雅的鼻子， (nh:计缘+v:刮+u:了+v:刮+nh:孙雅雅+u:的+n:鼻子+wp:，)
-// 《烂柯棋缘》	计缘伸出一根手指刮了刮小纸鹤的脖颈， (~刮<COO>v:伸出 ~刮<role.type:A1>小纸鹤的脖颈 nh:计缘+v:伸出+m:一+q:根+n:手指+v:刮+u:了+v:刮+n:小纸鹤+u:的+n:脖颈+wp:，)
+// 《烂柯棋缘》	计缘刮了刮孙雅雅的鼻子， (nh:计缘+v:刮+u:了+v:刮+nh:孙雅雅+u:的+n:鼻子+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
+// 《烂柯棋缘》	计缘伸出一根手指刮了刮小纸鹤的脖颈， (~刮<COO>v:伸出 ~刮<role.type:A1>小纸鹤的脖颈 nh:计缘+v:伸出+m:一+q:根+n:手指+v:刮+u:了+v:刮+n:小纸鹤+u:的+n:脖颈+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
 刮了刮	刮了刮
-// 《我在修仙界长生不死》	表面却刮了鳞片。 (~刮<COO>a:凶险 ~刮<role.type:ARGM-EXT>百倍 ~刮<role.type:ARGM-DIR>表面 ~刮<role.type:ARGM-DIS>却 n:表面+d:却+v:刮+u:了+n:鳞片+wp:。)
+// 《我为长生仙》	本座今次一定要刮了你， (~刮<COO>i:势不两立 ~刮<role.type:A1>你 r:本座+nt:今次+d:一定+v:要+v:刮+u:了+r:你+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
+要刮了你	要刮了你
+// 《我在修仙界长生不死》	表面却刮了鳞片。 (~刮<COO>a:凶险 ~刮<role.type:ARGM-EXT>百倍 ~刮<role.type:ARGM-DIR>表面 ~刮<role.type:ARGM-DIS>却 n:表面+d:却+v:刮+u:了+n:鳞片+wp:。) 單純 zh_conversion 轉換過程: 刮了→颳了
 刮了鳞	刮了鱗
-// 《亏成首富从游戏开始》	把胡子刮了， (p:把+n:胡子+v:刮+u:了+wp:，)
+// [general.TW.txt]	脸刚刮了一半。 (~刮<role.type:A1>脸 ~刮<role.type:A1-QTY>一半 ~刮<←SBV>n:脸 ) 單純 zh_conversion 轉換過程: 刮了→颳了
+// 《亏成首富从游戏开始》	刮了一半， (~刮<role.type:ARGM-EXT>一半 v:刮+u:了+m:一半+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
+刮了一半	刮了一半
+// 《中国历史那些事儿系列套装》	刮了一层又一层， (~刮<COO>v:骂 ~刮<role.type:ARGM-TMP>上任之前 v:刮+u:了+m:一+q:层+d:又+m:一+q:层+wp:，) (~刮<role.type:ARGM-EXT>一层又一层 v:刮+u:了+m:一+q:层+d:又+m:一+q:层+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
+刮了一层	刮了一層
+// 《第一序列》	他用手指刮了一下女人的鼻梁： (~刮<COO>v:是 r:他+p:用+n:手指+v:刮+u:了+m:一下+n:女人+u:的+n:鼻梁+wp:：) (~刮<role.type:A0>他 ~刮<role.type:ARGM-MNR>用手指 ~刮<role.type:ARGM-ADV>一下 ~刮<role.type:A1>女人的鼻梁 r:他+p:用+n:手指+v:刮+u:了+m:一下+n:女人+u:的+n:鼻梁+wp:：) 單純 zh_conversion 轉換過程: 刮了→颳了
+刮了一下	刮了一下
+// 《我的一天有48小时》	于是之后张恒掏出匕首，在铜管上用力的刮了几下。 (~刮<COO>v:掏 ~刮<role.type:ARGM-DIS>于是 ~刮<role.type:ARGM-TMP>之后 ~刮<role.type:A0>张恒 ~刮<role.type:ARGM-LOC>在铜管上 ~刮<role.type:ARGM-ADV>用力的 ~刮<role.type:ARGM-FRQ>几下 c:于是+nd:之后+nh:张恒+v:掏+v:出+n:匕首+wp:，+p:在+n:铜管+nd:上+a:用力+u:的+v:刮+u:了+m:几+q:下+wp:。) 單純 zh_conversion 轉換過程: 刮了→颳了
+刮了几下	刮了幾下
+// 《玩家超正义》	刮了头发后还缩了点。 (~刮<ATT>nd:后 ~刮<role.type:A1>头发 v:刮+u:了+n:头发+nd:后+d:还+v:缩+u:了+q:点+wp:。) (~刮<ATT>nd:后 v:刮+u:了+n:头发+nd:后+d:还+v:缩+u:了+q:点+wp:。) 單純 zh_conversion 轉換過程: 刮了→颳了
+刮了头发	刮了頭髮
+// 《第一序列》	然后硬生生将巴掌大创面给刮了下来， (~刮<role.type:ARGM-DIS>然后 ~刮<role.type:ARGM-ADV>硬生生 ~刮<role.type:A1>巴掌大创面 c:然后+d:硬生生+p:将+n:巴掌+a:大+n:创面+v:给+v:刮+u:了+v:下来+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
+刮了下来	刮了下來
+// 《我为长生仙》	但凡是灵物宝物，尽数都给刮了出来。 (~刮<role.type:ARGM-DIS>但 ~刮<role.type:ARGM-ADV>尽数 ~刮<role.type:ARGM-ADV>都 ~刮<role.type:ARGM-ADV>而后 ~刮<role.type:ARGM-ADV>就是 c:但+d:凡是+n:灵物+n:宝物+wp:，+d:尽数+d:都+v:给+v:刮+u:了+v:出来+wp:。) 單純 zh_conversion 轉換過程: 刮了→颳了
+给刮了出来	給刮了出來
+// 《一品修仙》	也足够我将你一寸一寸的活刮了。 (~刮<VOB>v:足够 ~刮<role.type:A0>我 d:也+v:足够+r:我+p:将+r:你+m:一+q:寸+m:一+q:寸+u:的+n:活+v:刮+u:了+wp:。) 單純 zh_conversion 轉換過程: 刮了→颳了
+// 《一品修仙》	老子差点被人活刮了， (~刮<role.type:A0>人 ~刮<role.type:ARGM-ADV>活 n:老子+d:差点+p:被+n:人+d:活+v:刮+u:了+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
+活刮了	活刮了
+// 《我在幕后调教大佬》	我要一刀一刀刮了这一头狼…… (~刮<role.type:A0>我 ~刮<role.type:ARGM-MNR>一刀一刀 ~刮<role.type:A1>这一头狼 r:我+v:要+m:一+q:刀+m:一+q:刀+v:刮+u:了+r:这+m:一+q:头+n:狼+wp:……) 單純 zh_conversion 轉換過程: 刮了→颳了
+刀刮了	刀刮了
+// 《大奉打更人》	许师傅，不要刮了！ (~刮<COO>n:师傅 ~刮<role.type:ARGM-ADV>不要 nh:许+n:师傅+wp:，+d:不要+v:刮+u:了+wp:！) 單純 zh_conversion 轉換過程: 刮了→颳了
+不要刮了	不要刮了
+// 《一品修仙》	恨不得刮了张正义和秦阳， (~刮<role.type:A1>张正义和秦阳 d:恨不得+v:刮+u:了+nh:张正义+c:和+nh:秦阳+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
+恨不得刮了	恨不得刮了
+// 《亏成首富从游戏开始》	把胡子刮了， (p:把+n:胡子+v:刮+u:了+wp:，) 單純 zh_conversion 轉換過程: 刮了→颳了
 胡子刮	鬍子刮
 // 《女主从书里跑出来了怎么办》	刮着脸道： (~刮<COO>v:弯弯 v:刮+u:着+n:脸+v:道+wp:：)
 刮着脸	刮着臉
-// [general.TW.txt]	脸刚刮了一半。 (~刮<role.type:A1>脸 ~刮<role.type:A1-QTY>一半 ~刮<←SBV>n:脸 )
-// 《亏成首富从游戏开始》	刮了一半， (~刮<role.type:ARGM-EXT>一半 v:刮+u:了+m:一半+wp:，)
-刮了一半	刮了一半
-// 《中国历史那些事儿系列套装》	刮了一层又一层， (~刮<COO>v:骂 ~刮<role.type:ARGM-TMP>上任之前 v:刮+u:了+m:一+q:层+d:又+m:一+q:层+wp:，) (~刮<role.type:ARGM-EXT>一层又一层 v:刮+u:了+m:一+q:层+d:又+m:一+q:层+wp:，)
-刮了一层	刮了一層
-// 《第一序列》	他用手指刮了一下女人的鼻梁： (~刮<COO>v:是 r:他+p:用+n:手指+v:刮+u:了+m:一下+n:女人+u:的+n:鼻梁+wp:：) (~刮<role.type:A0>他 ~刮<role.type:ARGM-MNR>用手指 ~刮<role.type:ARGM-ADV>一下 ~刮<role.type:A1>女人的鼻梁 r:他+p:用+n:手指+v:刮+u:了+m:一下+n:女人+u:的+n:鼻梁+wp:：)
-刮了一下	刮了一下
-// 《我的一天有48小时》	于是之后张恒掏出匕首，在铜管上用力的刮了几下。 (~刮<COO>v:掏 ~刮<role.type:ARGM-DIS>于是 ~刮<role.type:ARGM-TMP>之后 ~刮<role.type:A0>张恒 ~刮<role.type:ARGM-LOC>在铜管上 ~刮<role.type:ARGM-ADV>用力的 ~刮<role.type:ARGM-FRQ>几下 c:于是+nd:之后+nh:张恒+v:掏+v:出+n:匕首+wp:，+p:在+n:铜管+nd:上+a:用力+u:的+v:刮+u:了+m:几+q:下+wp:。)
-刮了几下	刮了幾下
-// 《第一序列》	然后硬生生将巴掌大创面给刮了下来， (~刮<role.type:ARGM-DIS>然后 ~刮<role.type:ARGM-ADV>硬生生 ~刮<role.type:A1>巴掌大创面 c:然后+d:硬生生+p:将+n:巴掌+a:大+n:创面+v:给+v:刮+u:了+v:下来+wp:，)
-刮了下来	刮了下來
-// 《玩家超正义》	刮了头发后还缩了点。 (~刮<ATT>nd:后 ~刮<role.type:A1>头发 v:刮+u:了+n:头发+nd:后+d:还+v:缩+u:了+q:点+wp:。) (~刮<ATT>nd:后 v:刮+u:了+n:头发+nd:后+d:还+v:缩+u:了+q:点+wp:。)
-刮了头发	刮了頭髮
-// 《一品修仙》	也足够我将你一寸一寸的活刮了。 (~刮<VOB>v:足够 ~刮<role.type:A0>我 d:也+v:足够+r:我+p:将+r:你+m:一+q:寸+m:一+q:寸+u:的+n:活+v:刮+u:了+wp:。)
-// 《一品修仙》	老子差点被人活刮了， (~刮<role.type:A0>人 ~刮<role.type:ARGM-ADV>活 n:老子+d:差点+p:被+n:人+d:活+v:刮+u:了+wp:，)
-活刮了	活刮了
-// 《我在幕后调教大佬》	我要一刀一刀刮了这一头狼…… (~刮<role.type:A0>我 ~刮<role.type:ARGM-MNR>一刀一刀 ~刮<role.type:A1>这一头狼 r:我+v:要+m:一+q:刀+m:一+q:刀+v:刮+u:了+r:这+m:一+q:头+n:狼+wp:……)
-刀刮了	刀刮了
-// 《大奉打更人》	许师傅，不要刮了！ (~刮<COO>n:师傅 ~刮<role.type:ARGM-ADV>不要 nh:许+n:师傅+wp:，+d:不要+v:刮+u:了+wp:！)
-不要刮了	不要刮了
-// 《一品修仙》	恨不得刮了张正义和秦阳， (~刮<role.type:A1>张正义和秦阳 d:恨不得+v:刮+u:了+nh:张正义+c:和+nh:秦阳+wp:，)
-恨不得刮了	恨不得刮了
 // 《道诡异仙》	用食指内部一下一下地刮着自己的下巴。 (~刮<COO>v:眯 p:用+n:食指+nd:内部+m:一下+m:一下+u:地+v:刮+u:着+r:自己+u:的+n:下巴+wp:。)
 刮着自己的	刮着自己的
 
@@ -6834,6 +6846,8 @@ https://blog.udn.com/glwang/130670390
 煞气不详	煞氣不祥
 // 《我为长生仙》	化作了散发血色的模样，隐隐不详， (~不祥<COO>v:是 v:化作+u:了+v:散发+n:血色+u:的+n:模样+wp:，+z:隐隐+v:不详+wp:，)
 隐隐不详，	隱隱不祥，
+// 《我为长生仙》	翻腾不详， (v:翻腾+v:不详+wp:，)
+翻腾不详，	翻騰不祥，
 // 《我为长生仙》	代表着不详的暗红色火焰翻卷着。 (~不祥<VOB>v:代表 v:代表+u:着+v:不详+u:的+n:暗红色+n:火焰+v:翻卷+u:着+wp:。)
 代表着不详的	代表著不祥的
 // 《我只想安静的做个苟道中人》	充满了不详意味的赤红色纹路密密麻麻的浮现， (~不祥<ATT>n:意味 v:充满+u:了+v:不详+n:意味+u:的+n:赤红色+n:纹路+z:密密麻麻+u:的+v:浮现+wp:，)
