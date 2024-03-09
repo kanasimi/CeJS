@@ -2618,18 +2618,28 @@ function module_code(library_namespace) {
 			T : [ '以 7zip 創建電子書：%1……', target_file ]
 		}, 1, 'archive_to_ZIP');
 
-		var archive_file = library_namespace.storage.archive.archive_under(
+		var archive_file = library_namespace.append_path_separator(
+				this.path.root, mimetype_filename);
+		if (/\.epub$/i.test(target_file)
+				|| library_namespace.file_exists(archive_file)) {
+			archive_file = [ mimetype_filename ];
+		} else {
+			// Should be .zip
+			library_namespace.error('archive_to_ZIP: ' + '[' + archive_file
+					+ '] is not exist! Skip mimetype file.');
+			archive_file = [];
+		}
+
+		archive_file = library_namespace.storage.archive.archive_under(
 		// 注意: 這需要先安裝 7z.exe 程式。
 		this.path.root,
 		// 確保 mimetype 這個檔在第一順位。
 		target_file, {
 			level : 0,
-			files : [ mimetype_filename ],
+			files : archive_file,
 			type : 'zip'
-		}),
+		});
 		// 改變後的檔案長度必須要和原先的相同，這樣比較保險，不會更改到檔案結構。
-		mimetype_first_order_name = mimetype_filename.replace(/^./, '!');
-		// assert: mimetype_filename.length === mimetype_first_order_name.length
 
 		// https://support.microsoft.com/en-us/help/830473/command-prompt-cmd-exe-command-line-string-limitation
 		// On computers running Microsoft Windows XP or later, the maximum
@@ -2651,6 +2661,9 @@ function module_code(library_namespace) {
 			file_list = [ container_directory_name,
 					Ebook.prototype.root_directory_name ]
 		}
+
+		var mimetype_first_order_name = mimetype_filename.replace(/^./, '!');
+		// assert: mimetype_filename.length === mimetype_first_order_name.length
 
 		// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
 		archive_file.rename([ mimetype_filename, mimetype_first_order_name ]);
