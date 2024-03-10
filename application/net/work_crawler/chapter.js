@@ -1288,6 +1288,7 @@ function module_code(library_namespace) {
 					// 檢測所獲得內容的章節編號是否相符。
 					? html.between(_this.check_chapter_NO[0],
 							_this.check_chapter_NO[1])
+					// extract chapter_data. TODO: allow return {Promise}
 					// {Function}return chapter NO is OK
 					: _this.check_chapter_NO(html);
 					var chapter_NO_text = null;
@@ -1532,6 +1533,8 @@ function module_code(library_namespace) {
 				// 對於每一張圖片都得要從載入的頁面獲得資訊的情況，可以參考 hhcool.js, dm5.js。
 
 				if (typeof _this.pre_parse_chapter_data === 'function') {
+					// XMLHttp.error = XMLHttp.error || error;
+
 					// 執行在解析章節資料 process_chapter_data() 之前的作業 (async)。
 					// 必須自行保證執行 callback()，不丟出異常、中斷。
 					_this.pre_parse_chapter_data(XMLHttp, work_data,

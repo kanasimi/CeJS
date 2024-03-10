@@ -154,7 +154,8 @@ function module_code(library_namespace) {
 
 			if (!content) {
 				library_namespace.info([ 'wiki_API.check_stop: ', {
-					T : [ 'missing' in page_data
+					// page_data maybe undefined when the network is down.
+					T : [ !page_data || 'missing' in page_data
 					// gettext_config:{"id":"the-emergency-stop-page-was-not-found-($1)"}
 					? 'The emergency stop page was not found (%1).'
 					// gettext_config:{"id":"the-emergency-stop-page-is-empty-($1)"}

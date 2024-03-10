@@ -88,8 +88,9 @@ function module_code(library_namespace) {
 		parse_search_result_biquge : function(html, get_label) {
 			// console.log(html);
 			var matched = html
-					.match(/og:url" content="[^<>"]+?\/(?:\d+_)?(\d+)\/"/);
+					.match(/og:url" content="[^<>"]+?\/(?:\d+_)?(\d+)\/?"/);
 			if (matched) {
+				// assert: 直接跳到了作品頁面。
 				return [ [ +matched[1] ],
 						[ get_label(html.between('og:title" content="', '"')) ] ];
 			}
@@ -189,10 +190,19 @@ function module_code(library_namespace) {
 				latest_chapter : html.between(
 						'og:novel:latest_chapter_name" content="', '"'),
 				description : get_label(
+				// e.g., 630book, biqizw.js
+				html.between('<div id="intro">', '</div>')
+				/**
+				 * <code>
+
+				// https://www.ecxs.net/book/3740/
+				<p class="text-muted" id="bookIntro" style="height:200px;"><a href="javascript:;" id="bookIntroMore" class="badge" data-isExpand="no">展开<i class="fa fa-angle-double-down fa-fw"></i></a><img class="img-thumbnail pull-left visible-xs" style="margin:0 5px 0 0" alt="长生：开局一条命，修为全靠苟" src="https://www.ecxs.net/images/nocover.jpg" title="长生：开局一条命，修为全靠苟" width="80" height="120" /> &nbsp;&nbsp;【长生流修仙、轻松诙谐】 ...<br /></p>
+
+				</code>
+				 */
+				|| html.between(' id="bookIntro"', '</p></div>')
 				//
-				html.between('og:description" content="', '"')
-				// e.g., 630book
-				|| html.between('<div id="intro">', '</div>'))
+				.between('<img ').between('>'))
 				// 偶爾會有沒填上描述的書籍。
 				|| '',
 				language : 'cmn-Hans-CN',
@@ -202,7 +212,16 @@ function module_code(library_namespace) {
 				//
 				|| html.between('<div class="header_logo">', '</div>')
 				// e.g., 630book
-				|| html.between('<strong class="logo">', '</strong>'))
+				|| html.between('<strong class="logo">', '</strong>')
+				/**
+				 * <code>
+
+				// https://www.ecxs.net/book/3740/
+				<a class="navbar-brand" href="/">烟草小说网</a>
+
+				</code>
+				 */
+				|| html.between('class="navbar-brand" href="/">', '</a>'))
 			};
 			// 由 meta data 取得作品資訊。
 			extract_work_data(work_data, html);
@@ -228,6 +247,13 @@ function module_code(library_namespace) {
 				work_data.site_name = html.between("AddFavorite('", "'");
 			}
 
+			if (work_data.image
+			// 處理特殊圖片: ignore site default image
+			// https://www.ecxs.net/images/nocover.jpg
+			&& work_data.image.includes('nocover.jpg')) {
+				delete work_data.image;
+			}
+
 			// console.log(work_data);
 			return work_data;
 		},
@@ -236,11 +262,16 @@ function module_code(library_namespace) {
 		get_chapter_list : function(work_data, html, get_label) {
 			// determine base directory of work
 			work_data.base_url = work_data.url.endsWith('/') ? work_data.url
-					: work_data.url.replace(/\.[^.]+$/, '/');
+			//
+			: /\.[^./]+$/.test(work_data.url) ? work_data.url.replace(
+					/\.[^./]+$/, '/')
+			// e.g., ecxs.js
+			: work_data.url + '/';
 			if (work_data.base_url.startsWith(this.base_URL)) {
 				work_data.base_url = work_data.base_url
 						.slice(this.base_URL.length - 1);
 			}
+			// console.trace(work_data);
 
 			if (this.get_chapter_list_contents) {
 				html = this.get_chapter_list_contents(html);
@@ -269,6 +300,8 @@ function module_code(library_namespace) {
 					} else if (part_title.includes('正文')) {
 						// e.g., 《...》正文卷, 《...》正文
 						part_title = '';
+					} else {
+						// this.set_part(work_data, part_title);
 					}
 					// console.log(part_title);
 
@@ -287,6 +320,7 @@ function module_code(library_namespace) {
 						title : matched.between('title="', '"')
 								|| get_label(matched.between('>'))
 					};
+					// this.add_chapter(work_data, chapter_data);
 					work_data.chapter_list.push(chapter_data);
 				}
 			}

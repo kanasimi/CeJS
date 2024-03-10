@@ -1407,7 +1407,7 @@ function module_code(library_namespace) {
 			? text.lastIndexOf(foot.tail)
 			// 正常:從頭搜尋。
 			: text.indexOf(foot, index)) !== NOT_FOUND)) {
-				head = foot ? text.slice(index, foot) : index > 0 ? text
+				head = foot >= 0 ? text.slice(index, foot) : index > 0 ? text
 						.slice(index) : text;
 				return return_data ?
 				// [ last index, head 與 foot 之間的字串 ]
