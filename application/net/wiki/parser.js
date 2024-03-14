@@ -149,7 +149,7 @@ function module_code(library_namespace) {
 	// CeL.wiki.parser.parser_prototype, wiki_API.parser.parser_prototype
 	/** {Object}prototype of {wiki page parser} */
 	page_parser.parser_prototype = {
-		// traversal_tokens()
+		// traversal_tokens(), parsed.each()
 		// CeL.wiki.parser.parser_prototype.each.call(token_list,'Template:',(token,index,parent)=>{});
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_subelement,
@@ -1679,8 +1679,7 @@ function module_code(library_namespace) {
 			// navigation templates
 			'Navbox', 'Navboxes', 'Portal bar', 'Taxonbar',
 			// authority control template
-			'Authority control', 'Coord', 'Coord missing',
-					'DEFAULTSORT' ]
+			'Authority control', 'Coord', 'Coord missing', 'DEFAULTSORT' ]
 
 		// page_footer : [ 'Category:小作品訊息模板' ]
 		}
