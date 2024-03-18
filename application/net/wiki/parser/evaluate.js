@@ -1231,7 +1231,8 @@ function module_code(library_namespace) {
 				return (+number[1]).toLocaleString('en')
 						+ (number[2] ? decimal_separator + number[2] : '');
 			// digits
-			number[1] = number[1].chars();
+			// number[1] maybe null
+			number[1] = (number[1] || '').chars();
 			for (var index = number[1].length, numbers = 0; index > 0; index--) {
 				if (!/^\d$/.test(number[1][index])) {
 					numbers = 0;
