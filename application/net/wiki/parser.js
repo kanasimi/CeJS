@@ -2439,7 +2439,7 @@ function module_code(library_namespace) {
 						return true;
 					}
 				})) {
-					var changed;
+					var token_changed;
 					var old_wikitext = main_token.toString();
 					var conflict_parameters = wiki_API.parse
 							.merge_template_parameters(main_token, token);
@@ -2450,7 +2450,7 @@ function module_code(library_namespace) {
 								+ wiki_API.title_link_of(parsed.page
 										|| 'null page') + ': 合併 ' + token
 								+ ' 入 main element ' + main_token);
-						changed = true;
+						token_changed = true;
 					}
 
 					parsed.each(token.page_title, function(template_token) {
@@ -2467,7 +2467,7 @@ function module_code(library_namespace) {
 									+ wiki_API.title_link_of(parsed.page
 											|| 'null page') + ': Remove '
 									+ template_token);
-							changed = true;
+							token_changed = true;
 							return parsed.each.remove_token;
 						}
 					});
@@ -2476,7 +2476,8 @@ function module_code(library_namespace) {
 						options.main_template_processor(main_token);
 					}
 
-					return (changed || old_wikitext !== main_token.toString())
+					return (token_changed || old_wikitext !== main_token
+							.toString())
 							&& main_token;
 				}
 

@@ -753,6 +753,7 @@ function module_code(library_namespace) {
 							.append(this.actions);
 					next[3].actions_when_fetching_page.only_for_debug = true;
 				}
+				next[3].page_fetching = Date.now();
 			}
 
 			// this.page(title, callback, options)
@@ -1822,9 +1823,21 @@ function module_code(library_namespace) {
 					break;
 				}
 
+				if (next[2] && next[2].page_fetching) {
+					// e.g., node 20201008.fix_anchor.js use_language=en
+					library_namespace
+							.debug('可能是 wiki.page() 跳出後，等待中又呼叫 wiki.next()?');
+					// console.trace(next);
+					this.actions.unshift(next);
+					break;
+				}
+
 				library_namespace
 						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first! 另請注意: 您不能在 callback 中呼叫 .edit() 之類的 wiki 函數！請在 callback 執行完畢後再執行新的 wiki 函數！例如放在 setTimeout() 中。');
 				if (typeof console === 'object' && console.trace) {
+					if (false && next[2]) {
+						next[2].no_page_in_the_queue = new Date;
+					}
 					console.trace(this);
 					console
 							.trace(next[2]

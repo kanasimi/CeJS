@@ -2268,20 +2268,24 @@ function module_code(library_namespace) {
 					anchor = anchor.replace(/\.([\dA-F]{2})/g, '%$1');
 				}
 				// console.log([ original_hash, anchor ]);
-				try {
-					// @see HTML_to_Unicode()
-					anchor = decodeURIComponent(anchor);
-					if (/[\x00-\x1F\x7F]/.test(anchor)) {
-						// e.g. [[w:ja:エヴァンゲリオン (架空の兵器)#Mark.09]]
+				if (/%[\dA-F]{2}/i.test(anchor)) {
+					try {
+						// @see HTML_to_Unicode()
+						anchor = decodeURIComponent(anchor);
+						if (/[\x00-\x1F\x7F]/.test(anchor)) {
+							// e.g. [[w:ja:エヴァンゲリオン (架空の兵器)#Mark.09]]
+							anchor = original_hash;
+						}
+					} catch (e) {
+						// e.g., error after convert /\.([\dA-F]{2})/g
 						anchor = original_hash;
+						// 可能是非 UTF-8 編碼？
+						// TODO: 無法解碼可能會被辨識為普通文字而非 wikilink。
+						// e.g., "[[Francisco_Hern%E1ndez_de_C%F3"... @
+						// [[w:en:Talk:Francisco_Hernández_de_Córdoba_(Yucatán_conquistador)]]
 					}
-				} catch (e) {
-					// e.g., error after convert /\.([\dA-F]{2})/g
+				} else {
 					anchor = original_hash;
-					// 可能是非 UTF-8 編碼？
-					// TODO: 無法解碼可能會被辨識為普通文字而非 wikilink。
-					// e.g., "[[Francisco_Hern%E1ndez_de_C%F3"... @
-					// [[w:en:Talk:Francisco_Hernández_de_Córdoba_(Yucatán_conquistador)]]
 				}
 				// console.log(anchor);
 				// wikilink_token.anchor without "#" 網頁錨點 section_title

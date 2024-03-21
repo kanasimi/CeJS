@@ -1513,63 +1513,75 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(for_section);
-		if (typeof for_section === 'function') {
-			level_filter
-			// 要篩選的章節標題層級 e.g., {level_filter:[1,2]}
-			= Array.isArray(options.level_filter) ? options.level_filter
-			// e.g., { level_filter : 3 }
-			: 1 <= options.level_filter && (options.level_filter | 0)
-			// default: level 2. 僅處理階級2的章節標題。
-			|| 2;
-
-			var section_filter = function(section) {
-				var section_title = section.section_title;
-				if (!section_title)
-					return true;
-				if (Array.isArray(level_filter))
-					return level_filter.includes(section_title.level);
-				return level_filter === section_title.level;
-			};
-
-			// TODO: return (result === for_each_subelement.remove_token)
-			// TODO: move section to another page
-			if (library_namespace.is_async_function(for_section)) {
-				// console.log(all_root_section_list);
-
-				// Promise.allSettled() 不會 throw。
-				return Promise.all(all_root_section_list.map(function(section,
-						section_index) {
-					return section_filter(section)
-							&& for_section.apply(this, arguments);
-				}));
-
-				// @deprecated
-				all_root_section_list
-						.forEach(function(section, section_index) {
-							if (false) {
-								console.log('Process: ' + section.section_title
-								// section_title.toString(true): get inner
-								&& section.section_title.toString(true));
-							}
-							if (!section_filter(section))
-								return;
-							return eval('(async function() {'
-									+ ' try { return await for_section(section, section_index); }'
-									+ ' catch(e) { library_namespace.error(e); }'
-									+ ' })();');
-						});
-			} else {
-				// for_section(section, section_index)
-				all_root_section_list.some(function(section) {
-					// return parsed.each.exit;
-					return section_filter(section)
-							&& (for_each_subelement.exit ===
-							// exit if the result calls exit
-							for_section.apply(this, arguments));
-				}, this);
-			}
+		if (typeof for_section !== 'function') {
+			return this;
 		}
-		return this;
+
+		level_filter
+		// 要篩選的章節標題層級 e.g., {level_filter:[1,2]}
+		= Array.isArray(options.level_filter) ? options.level_filter
+		// e.g., { level_filter : 3 }
+		: 1 <= options.level_filter && (options.level_filter | 0)
+		// default: level 2. 僅處理階級2的章節標題。
+		|| 2;
+
+		var section_filter = function(section) {
+			var section_title = section.section_title;
+			if (!section_title)
+				return true;
+			if (Array.isArray(level_filter))
+				return level_filter.includes(section_title.level);
+			return level_filter === section_title.level;
+		};
+
+		// TODO: return (result === for_each_subelement.remove_token)
+		// TODO: move section to another page
+		if (!library_namespace.is_async_function(for_section)
+				|| all_root_section_list.length === 0) {
+			// for_section(section, section_index)
+			all_root_section_list.some(function(section) {
+				// return parsed.each.exit;
+				return section_filter(section) && (for_each_subelement.exit
+				// exit if the result calls exit
+				=== for_section.apply(this, arguments));
+			}, this);
+			return this;
+		}
+
+		// console.log(all_root_section_list);
+
+		if (options.allow_parallel_processing) {
+			// Promise.allSettled() 不會 throw。
+			return Promise.all(all_root_section_list.map(function(section,
+					section_index) {
+				return section_filter(section)
+						&& for_section.apply(this, arguments);
+			}, this));
+
+			// @deprecated
+			all_root_section_list.forEach(function(section, section_index) {
+				if (false) {
+					console.log('Process: ' + section.section_title
+					// section_title.toString(true): get inner
+					&& section.section_title.toString(true));
+				}
+				if (!section_filter(section))
+					return;
+				return eval('(async function() {'
+				//
+				+ ' try { return await for_section(section, section_index); }'
+						+ ' catch(e) { library_namespace.error(e); }'
+						+ ' })();');
+			});
+		}
+
+		// 預設為依序 resolve。
+		var promise = Promise.resolve();
+		all_root_section_list.forEach(function(section, section_index) {
+			if (section_filter(section))
+				promise = promise.then(for_section.apply(this, arguments));
+		}, this);
+		return promise;
 	}
 
 	function replace_section_by(wikitext, options) {

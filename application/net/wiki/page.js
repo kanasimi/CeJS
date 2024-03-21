@@ -2293,8 +2293,14 @@ function module_code(library_namespace) {
 					= new Date(receive_time - delay_ms).toISOString();
 				}
 
-				if (session && !('has_flagged_revision' in session)
+				if (session
+				// https://meta.wikimedia.org/wiki/Flagged_Revisions
+				// enwiki 也有 flagged revisions 但似乎不會 pending changes
+				&& session.language === 'de'
+				// [[w:en:Wikipedia:Pending changes]]
+				&& !('has_flagged_revision' in session)
 						&& session.API_parameters['query+revisions']) {
+					// console.trace(session.API_parameters['query+revisions']);
 					session.has_flagged_revision = session.API_parameters['query+revisions'].parameter_Map
 							.get('prop').type.includes('flagged');
 				}

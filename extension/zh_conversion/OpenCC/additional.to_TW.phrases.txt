@@ -824,6 +824,8 @@
 至於這麼拼	至於這麼拚
 // 《超神机械师》	您何必这么拼呢， (r:您+d:何必+r:这么+v:拼+u:呢)
 何必這麼拼	何必這麼拚
+// 《长生：开局一条命，修为全靠苟》	有没有必要这么拼啊， (~拚<VOB>v:有 ~拚<role.type:ARGM-ADV>这么 v:有+d:没+v:有+a:必要+r:这么+v:拼+u:啊+wp:，)
+必要這麼拼	必要這麼拚
 // 《仙人只想躺着》	其实也不需要这么拼， (~拚<COO>v:听 ~拚<role.type:ARGM-ADV>其实 ~拚<role.type:ARGM-ADV>也 ~拚<role.type:ARGM-ADV>不 ~拚<role.type:ARGM-ADV>这么 d:其实+d:也+d:不+v:需要+r:这么+v:拼+wp:，)
 不需要這麼拼	不需要這麼拚
 // 《亏成首富从游戏开始》	也不用这么拼吧。 (~拚<role.type:ARGM-ADV>不用 ~拚<role.type:ARGM-ADV>这么 d:也+d:不用+r:这么+v:拼+u:吧)
@@ -939,6 +941,8 @@
 不用如此拼	不用如此拚
 // 《仙人只想躺着》	就好比如只拼灵气的话， (~拚<SBV>v:拼 ~拚<role.type:ARGM-ADV>只 ~拚<role.type:A1>灵气 d:就+d:好比+c:如+d:只+v:拼+n:灵气+u:的话+wp:，) 單純 zh_conversion 轉換過程: 只拼→只拼
 只拼靈氣	只拚靈氣
+// 《如此堕怠，怎能成仙》	也是，唉，那就拼…… (~拚<COO>v:是 ~拚<role.type:ARGM-DIS>那 ~拚<role.type:ARGM-ADV>就 ~拚<role.type:ARGM-ADV>就是 ~拚<role.type:ARGM-ADV>不 d:也+v:是+wp:，+e:唉+wp:，+r:那+d:就+v:拼+wp:……)
+那就拼……	那就拚……
 
 // 《最仙遊》	所以才会大胆放心的和圆法拼在一起。 (~拚<COO>v:了解 ~拚<role.type:ARGM-DIS>所以 ~拚<role.type:ARGM-ADV>才 ~拚<role.type:ARGM-ADV>大胆放心的 ~拚<role.type:ARGM-ADV>和圆法 ~拚<role.type:ARGM-ADV>在 ~拚<role.type:ARGM-ADV>一 起 ~拚<role.type:A0>圆法 ~拚<role.type:ARGM-ADV>还是 ~拚<role.type:ARGM-ADV>怎么 c:所以+d:才+v:会+a:大胆+v:放心+u:的+p:和+n:圆法+v:拼+p:在+nl:一起+wp:。)
 和圓法拼	和圓法拚

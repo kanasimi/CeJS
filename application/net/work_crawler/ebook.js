@@ -267,10 +267,13 @@ function module_code(library_namespace) {
 	https://www.69xinshu.com/txt/47093/35513904	我为长生仙 > 第516章 真娲皇之子！（三更求月票）
 	&emsp;&emsp;第516章 真·娲皇之子！（三更求月票）
 
+	https://www.69shu.pro/txt/42242/28563223	如此堕怠，怎能成仙 > 第12章 你穿越到了修真世界，前方有一道悬崖，你选择：跳/不跳
+	&emsp;&emsp;第12章 你穿越到了修真世界，前方有一道悬崖，你选择：跳不跳
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~\-—々·\s]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\/\-—々·\s]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
@@ -430,12 +433,17 @@ function module_code(library_namespace) {
 					.trim()
 					// 取單一空白即可。
 					.replace(/(第.+章)((\s){2,})/, '$1$3');
-			library_namespace.log(library_namespace.display_align([
-			// @see gettext_config:{"id":"work_data.chapter_title"}
-			[ gettext('章節標題：'), JSON.stringify(title) ],
-			// 第一行包含完整標題，改成完整標題。
-			[ '→', JSON.stringify(chapter_data.title) ] ]));
-			title = full_title;
+			if (title.covers(chapter_data.title)) {
+				// title 比 full_title 更完整。
+				chapter_data.title = title;
+			} else {
+				library_namespace.log(library_namespace.display_align([
+				// @see gettext_config:{"id":"work_data.chapter_title"}
+				[ gettext('章節標題：'), JSON.stringify(title) ],
+				// 第一行包含完整標題，改成完整標題。
+				[ '→', JSON.stringify(chapter_data.title) ] ]));
+			}
+			// title = full_title;
 		}
 
 		if (false && title.includes('—')) {
@@ -453,6 +461,7 @@ function module_code(library_namespace) {
 			throw new Error('trim_start_title: Text not includes title ['
 					+ full_title + ']: ' + new_text.slice(0, 200));
 		}
+		// 切掉 full_title。
 		new_text = new_text.slice(title_start_index + full_title.length);
 		if (false && title.includes('—')) {
 			console.trace([ title_start_index, new_text.slice(0, 200) ]);

@@ -5962,7 +5962,7 @@ function test_wiki() {
 	// --------------------------------
 
 	// 取得完整 embeddedin list 後才作業。
-	CeL.wiki.list('Template:a‎‎', function (pages) {
+	CeL.wiki.list('Template:a', function (pages) {
 		// console.log(pages);
 		console.log(pages.length + ' pages got.');
 	}, {
