@@ -764,7 +764,8 @@ function module_code(library_namespace) {
 					next[1] ],
 			//
 			function wiki_API_next_page_callback(page_data, error) {
-				// console.trace([ page_data, error ]);
+				if (false && next[3].page_fetching === 'unshift_edit')
+					console.trace([ page_data, error, _this.actions ]);
 				if (false) {
 					if (Array.isArray(page_data)) {
 						console.trace(page_data.length
@@ -1826,9 +1827,10 @@ function module_code(library_namespace) {
 				if (next[2] && next[2].page_fetching) {
 					// e.g., node 20201008.fix_anchor.js use_language=en
 					library_namespace
-							.debug('可能是 wiki.page() 跳出後，等待中又呼叫 wiki.next()?');
-					// console.trace(next);
+							.debug('可能是 wiki.page() 跳出後，等待中又呼叫 wiki.next()？先等待取得頁面。');
+					// next[2].page_fetching = 'unshift_edit';
 					this.actions.unshift(next);
+					// console.trace(next);
 					break;
 				}
 
@@ -2075,6 +2077,10 @@ function module_code(library_namespace) {
 					// 無論如何都再執行 this.next()，並且設定 this.running。
 					// e.g., for
 					// 20200209.「S.P.A.L.」関連ページの貼り換えのbot作業依頼.js
+
+					if (false && next[2].page_fetching === 'unshift_edit')
+						console.trace([ callback_result, _this.running,
+								_this.actions ]);
 
 					// console.trace([ _this.running, _this.actions.length ]);
 					// setTimeout(_this.next.bind(_this), 0);

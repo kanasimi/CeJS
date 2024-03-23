@@ -1576,11 +1576,19 @@ function module_code(library_namespace) {
 		}
 
 		// 預設為依序 resolve。
-		var promise = Promise.resolve();
+		var promise;
 		all_root_section_list.forEach(function(section, section_index) {
-			if (section_filter(section))
-				promise = promise.then(for_section.apply(this, arguments));
-		}, this);
+			if (!section_filter(section))
+				return;
+			if (!promise) {
+				promise = for_section.apply(_this, arguments);
+				return;
+			}
+			var _arguments = arguments;
+			promise = promise.then(function() {
+				return for_section.apply(_this, _arguments);
+			});
+		});
 		return promise;
 	}
 

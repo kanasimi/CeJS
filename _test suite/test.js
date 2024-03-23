@@ -4807,6 +4807,11 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'CeL.wiki.parse.anchor: #6');
 		assert(["a", CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor: #6-1');
 
+		wikitext = "[[a]] <!-- --> ''v'' '''b'''"; parsed = CeL.wiki.parse(wikitext);
+		assert(["[[a]]", CeL.wiki.next_meaningful_element(parsed).toString()], 'CeL.wiki.next_meaningful_element() #1-1');
+		assert(["''v''", CeL.wiki.next_meaningful_element(parsed, 1).toString()], 'CeL.wiki.next_meaningful_element() #1-2');
+		assert(["''v''", CeL.wiki.next_meaningful_element(parsed, 2).toString()], 'CeL.wiki.next_meaningful_element() #1-3');
+
 		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
 		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
 		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');

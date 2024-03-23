@@ -3270,12 +3270,16 @@ function module_code(library_namespace) {
 									T : [ 'Write data to cache file [%1].',
 											file_name ]
 								} ]);
-						library_namespace.debug({
-							// gettext_config:{"id":"the-data-to-cache-$1"}
-							T : [ 'The data to cache: %1...',
-							//
-							data && JSON.stringify(data).slice(0, 190) ]
-						}, 3, 'get_URL_cache_node');
+						try {
+							library_namespace.debug({
+								// gettext_config:{"id":"the-data-to-cache-$1"}
+								T : [ 'The data to cache: %1...',
+								// JSON.stringify(data) maybe throw.
+								data && JSON.stringify(data).slice(0, 190) ]
+							}, 3, 'get_URL_cache_node');
+						} catch (e) {
+							// TODO: handle exception
+						}
 					}
 					try {
 						node_fs.writeFileSync(file_name, data, encoding);

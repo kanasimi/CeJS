@@ -985,6 +985,60 @@ function module_code(library_namespace) {
 		this.show(this.progress_value + delta, post_text, pre_text);
 	}
 
+	// ----------------------------------------------------------------------------------------------------------------
+
+	function beep(options) {
+		try {
+			var child_process = require("child_process");
+
+			if (library_namespace.platform.OS === 'darwin') {
+				// Mac
+				child_process.exec("afplay /System/Library/Sounds/Glass.aiff");
+				return;
+			}
+
+			// library_namespace.platform.is_Windows()
+			// https://github.com/jayralencar/node-beep/blob/master/beep.js
+			if (process.platform !== 'win32') {
+				process.stderr.write("\x07");
+				return;
+			}
+
+			if (options && options.multiple) {
+				child_process.exec(
+				// Multiple beeps
+				"1..3 | %{ [console]::beep(1000, 200) }", {
+					'shell' : 'powershell.exe'
+				});
+				return;
+			}
+
+			// Single beep @ windows or wsl
+			// https://stackoverflow.com/questions/8557624/how-i-trigger-the-system-bell-in-nodejs
+			// https://gist.github.com/taterbase/3154646
+			if (true) {
+				if (false) {
+					child_process.exec("rundll32.exe user32.dll,MessageBeep");
+				}
+				child_process.exec("powershell.exe [console]::beep(1000,200)");
+			} else {
+				child_process.exec("[console]::beep(1000, 500)", {
+					'shell' : 'powershell.exe'
+				});
+			}
+
+		} catch (e) {
+			// TODO: handle exception
+		}
+
+		process.stderr.write("\x07");
+	}
+
+	// CeL.console.beep();
+	_.beep = beep;
+
+	// ----------------------------------------------------------------------------------------------------------------
+
 	return (_// JSDT:_module_
 	);
 }

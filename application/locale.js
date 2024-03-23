@@ -587,7 +587,7 @@ function module_code(library_namespace) {
 			// console.log(text_id);
 
 			var prefix, postfix;
-			if (library_namespace.is_debug(9)) {
+			if (library_namespace.is_debug(12)) {
 				console.trace(domain);
 			}
 

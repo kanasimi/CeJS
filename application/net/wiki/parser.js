@@ -552,12 +552,13 @@ function module_code(library_namespace) {
 				length = parent_token.length;
 				// parent_token.some(for_token);
 			}
+			var use_parent_token_length = length === parent_token.length;
 
 			function traversal_next_sibling() {
 				if (promise) {
 					// console.trace([ index + '/' + length, depth, exit ]);
 				}
-				if (exit || index === length) {
+				if (exit || !(index < length)) {
 					// 已遍歷所有本階層節點，或已設定 exit 跳出。
 					if (promise) {
 						set_promise(resolve);
@@ -580,7 +581,7 @@ function module_code(library_namespace) {
 						&& (!token_name || (session ? session.is_template(
 								token_name, token) : token.name === token_name))) {
 					// options.set_index
-					if (options.add_index && typeof token !== 'string') {
+					if (options.add_index && token && typeof token === 'object') {
 						// 假如需要自動設定 .parent, .index 則必須特別指定。
 						// token.parent[token.index] === token
 						// .index_of_parent
@@ -600,6 +601,13 @@ function module_code(library_namespace) {
 					// for_each_subelement(token, token_index, parent_of_token,
 					// depth)
 					var result = processor(token, index, parent_token, depth);
+					if (use_parent_token_length
+							&& length !== parent_token.length) {
+						library_namespace.debug('parent_token 長度改變: ' + length
+								+ '→' + parent_token.length + '。', 1,
+								'for_each_subelement');
+						length = parent_token.length;
+					}
 					// console.log(modify_by_return);
 					// console.trace(result);
 					if (false && token.toString().includes('Internetquelle')) {
@@ -635,7 +643,8 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				if (options.add_index === 'all' && typeof token === 'object') {
+				if (options.add_index === 'all' && token
+						&& typeof token === 'object') {
 					token.index = index;
 					token.parent = parent_token;
 				}
@@ -970,6 +979,47 @@ function module_code(library_namespace) {
 		var parent_1 = token_1.parent;
 		token_1.parent = token_2.parent;
 		token_2.parent = parent_1;
+	}
+
+	// ------------------------------------------------------------------------
+
+	function next_meaningful_element(parent_element, start_index, options) {
+		var options;
+		if (library_namespace.is_Object(start_index)) {
+			options = start_index;
+			start_index = options.start_index;
+		} else {
+			options = Object.create(null);
+		}
+
+		if (!(start_index >= 1)) {
+			start_index = 0;
+		}
+
+		for (; start_index < parent_element.length; start_index++) {
+			var this_element = parent_element[start_index];
+			if (!this_element)
+				continue;
+
+			if (typeof this_element === 'string') {
+				if (this_element.trim()) {
+					return options.get_index ? start_index : this_element;
+				}
+				continue;
+			}
+
+			if (this_element.type === 'comment')
+				continue;
+
+			return options.get_index ? start_index : this_element;
+		}
+
+		// 向上追溯。
+		if (options.trace_upwards && parent_element.parent
+				&& parent_element.index >= 0) {
+			return next_meaningful_element(parent_element.parent,
+					parent_element.index + 1, options);
+		}
 	}
 
 	// ------------------------------------------------------------------------
@@ -2911,6 +2961,8 @@ function module_code(library_namespace) {
 		scan_token_index : scan_token_index,
 		replace_element : replace_element,
 		swap_elements : swap_elements,
+
+		next_meaningful_element : next_meaningful_element,
 
 		// parse_table(), parse_wikitable()
 		table_to_array : table_to_array,
