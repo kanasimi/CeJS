@@ -225,6 +225,7 @@
 	"work_crawler-search_result_columns-completed": "F\u00e4erdeg",
 	"\u6700\u65b0\u7ae0\u7bc0": "Lescht Kapitel",
 	"\u932f\u8aa4\u539f\u56e0": "Grond vum Feeler",
+	"\u53d6\u6d88": "Ofbriechen",
 	"Options:": "Optiounen:"
 },
 "lb-LU");

@@ -635,6 +635,7 @@ function module_code(library_namespace) {
 				expand : expand_template_Wikicite
 			}
 		},
+		// Citation : @see application/net/wiki/parser/section.js
 		// Sfn : { properties : { expand : expand_template_Sfn } },
 		SfnRef : {
 			properties : {
