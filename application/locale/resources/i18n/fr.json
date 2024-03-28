@@ -10,6 +10,7 @@
 			"Nom d'User",
 			"SleaY",
 			"Thibaut120094",
+			"Urhixidur",
 			"Verdy p",
 			"Wladek92"
 		]
@@ -1160,7 +1161,7 @@
 	"download_options.start_chapter_no": "Démarrer / continuer le téléchargement depuis ce numéro de chapitre.",
 	"download_options.start_chapter_title": "Démarrer / continuer le téléchargement depuis ce titre de chapitre.",
 	"download_options.start_list_serial": "Spécifie le numéro de série du travail à commencer à télécharger. Le travail réalisé avant ce numéro de série sera sauté. Généralement utilisé uniquement dans les paramètres de ligne de commande. Par défaut : 1.",
-	"download_options.timeout": "Délai maximum (en ms) pour le téléchargement d’une page ou image sur le web. Si le délai est trop court (par exemple 10 secondes), le téléchargement d’un gros fichier peut facilement échouer.",
+	"download_options.timeout": "Délai maximum (en ms) pour le téléchargement d’une page ou image sur le web. Si le délai est trop court (par exemple 10 000 millisecondes), le téléchargement d’un gros fichier peut facilement échouer.",
 	"download_options.user_agent": "Identification du navigateur. Toujours maintenir la reconnaissance du même navigateur avant et après l’exécution, cela ne devrait pas affecter le téléchargement.",
 	"download_options.vertical_writing": "Changer l’orientation de la nouvelle de l’horizontale à la verticale.",
 	"download_options.write_chapter_metadata": "Écrire les informations sur chaque archive de chapitre dans un fichier JSON de même nom (avec l’extension « .json » ajoutée) pour faciliter l’import par d’autres outils.",
