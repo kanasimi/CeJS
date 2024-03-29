@@ -2044,6 +2044,7 @@ function module_code(library_namespace) {
 						.is_template('Citation', template_token, options)) {
 					// console.trace(JSON.stringify(template_token.name));
 					var parameters = template_token.parameters;
+					// for {{Citation|ref={{harvid|...}}|...}}
 					var anchor = wiki_API.repeatedly_expand_template_token(
 							parameters.ref, options);
 					// console.trace(JSON.stringify(anchor));

@@ -230,37 +230,43 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(JSON.stringify(combined_tail));
-		if (!/^\s/.test(combined_tail)) {
-			// No need to change
 
-			// 注意: /\s/.test('\n') === true
-		} else if (/^\s*?\n/.test(combined_tail)) {
-			var preserve_heading_new_line;
-			while (_i > 0) {
-				var token = parent_token[--_i];
-				if (token) {
-					// 前文以 new line 作結，或者要 trim 的 token 是第一個 token，
-					// 則不保留末尾的 preserve_heading_new_line。
-					preserve_heading_new_line =
-					// typeof token !== 'string' ||
-					!/\n\s*?$/.test(token);
-					break;
+		// 在全是 "" 的 element 中刪除 children，
+		// 此時 index 可能等於 parent_token.length，combined_tail === undefined。
+		if (combined_tail !== undefined) {
+			if (!/^\s/.test(combined_tail)) {
+				// No need to change
+
+				// 注意: /\s/.test('\n') === true
+			} else if (/^\s*?\n/.test(combined_tail)) {
+				var preserve_heading_new_line;
+				while (_i > 0) {
+					var token = parent_token[--_i];
+					if (token) {
+						// 前文以 new line 作結，或者要 trim 的 token 是第一個 token，
+						// 則不保留末尾的 preserve_heading_new_line。
+						preserve_heading_new_line =
+						// typeof token !== 'string' ||
+						!/\n\s*?$/.test(token);
+						break;
+					}
+					// assert: token === ''
 				}
-				// assert: token === ''
+
+				combined_tail = combined_tail
+				// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
+				// e.g., "* list\n\n{{t1}}\n{{t2}}",
+				// remove "{{t1}}\n" → "* list\n\n{{t2}}"
+				.replace(/^\s*?\n/, preserve_heading_new_line ? '\n' : '');
+			} else {
+				combined_tail = combined_tail
+				// 去除後方太多空白，僅留下最後一個空白。
+				.replace(/^(\s)*/, do_not_preserve_tail_spaces ? '' : '$1');
 			}
 
-			combined_tail = combined_tail
-			// 去除後方的空白 + 僅一個換行。 去除前方的空白或許較不合適？
-			// e.g., "* list\n\n{{t1}}\n{{t2}}",
-			// remove "{{t1}}\n" → "* list\n\n{{t2}}"
-			.replace(/^\s*?\n/, preserve_heading_new_line ? '\n' : '');
-		} else {
-			combined_tail = combined_tail
-			// 去除後方太多空白，僅留下最後一個空白。
-			.replace(/^(\s)*/, do_not_preserve_tail_spaces ? '' : '$1');
+			parent_token[index] = combined_tail;
 		}
 
-		parent_token[index] = combined_tail;
 		return index;
 	}
 
