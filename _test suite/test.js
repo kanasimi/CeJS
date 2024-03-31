@@ -5350,6 +5350,9 @@ function test_wiki() {
 		wikitext = ':t<div style="color:red">red block\nnormal'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #18');
 		assert([':t<div style="color:red">red block', parsed[0].toString()], 'wiki.parse: list #19');
+		wikitext = "#l\n##''a''{{tl|t}}\n##c\n <!--\n--> <!--\n--> \n  <!--\n--> <!--\n--> \n##d\n"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #20');
+		assert(['\n##c\n <!--\n--> <!--\n--> \n  <!--\n--> <!--\n--> ', parsed[0][1][0][1].toString()], 'wiki.parse: list #21 list with comments in new line');
 
 		wikitext = 'a\n p\n  2\n {{t}}\n  [[a]]\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: pre #1');

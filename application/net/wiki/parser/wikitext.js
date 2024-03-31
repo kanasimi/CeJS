@@ -284,6 +284,7 @@ function module_code(library_namespace) {
 				result = result[0];
 			}
 			if (!resolve_filter && result.includes(include_mark)) {
+				// Error.stackTraceLimit = Infinity;
 				throw new Error('resolve_escaped: 仍有 include mark 殘留！');
 			}
 			return result;
@@ -1533,7 +1534,8 @@ function module_code(library_namespace) {
 				var matched = PATTERN_token_unit.exec(original_value);
 				// matched: [ , string, token_mark, queue_index ]
 				var token = queue[matched[3]];
-				if (invalid_token_filter.call(invalid_token_data, token)) {
+				if (invalid_token_filter.call(invalid_token_data, token,/* previous_text */
+				matched[1])) {
 					invalid_token_data[0] += matched[1];
 					// [ valid_value, invalid_token_mark, queue_index ]
 					invalid_token_data.push(matched[2], matched[3]);
@@ -4269,6 +4271,19 @@ function module_code(library_namespace) {
 				// position += list_prefixes_now[index++].length;
 				index++;
 				position++;
+			}
+
+			if (position === 0 && list_now.length > 0 && line
+			//
+			&& !has_invalid_token(line, function(token, previous_text) {
+				if (previous_text.trim())
+					return true;
+				// token maybe undefined
+				return token && token.type !== 'comment';
+			})) {
+				list_now.at(-1).at(-1).push(
+						parse_wikitext('\n' + line, options, queue));
+				return;
 			}
 
 			// console.log(list_now);
