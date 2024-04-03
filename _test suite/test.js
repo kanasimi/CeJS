@@ -5388,6 +5388,9 @@ function test_wiki() {
 		wikitext = '{|\n|-\n|\n/a|b/\n|}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: table #7');
 		assert(['\n/a|b/', parsed/* ← type: 'table' */[0]/* ← table_row */[0]/* ← table_cell */[0].toString()], 'wiki.parse: table #7-1');
+		wikitext = ' :: {| class="wikitable"\n! H\n|-\n| t\n|}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: table #8');
+		assert([' :: ', parsed.indentation], 'wiki.parse: table #8-1');
 
 		wikitext = ' <span id="{{anchorencode:id_abc}}">ABC</span> <span id{{=}}"{{anchorencode:id 123}}">ABC</span> <span id="{{anchorencode:A[[B]]}}">AB</span> ';
 		assert(['id abc,id 123,AB', CeL.wiki.parse.anchor(wikitext).join()], 'CeL.wiki.parse.anchor() #1');

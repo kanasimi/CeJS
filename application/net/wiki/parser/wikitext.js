@@ -562,7 +562,7 @@ function module_code(library_namespace) {
 		// [[Help:Table]]
 		table : function() {
 			// this: [ table style, row, row, ... ]
-			return '{|' + this.join('')
+			return (this.indentation || '') + '{|' + this.join('')
 					+ ('ending' in this ? this.ending : '\n|}');
 		},
 		// table attributes / styles, old name before 2021/1/24: table_style
@@ -3388,17 +3388,43 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
-		function parse_table(all, parameters, ending) {
+		function last_matched_of_RegExp(text, pattern) {
+			var flags = pattern && pattern.flags;
+			if (typeof flags !== 'string')
+				flags = '';
+			if (!flags.includes('g'))
+				flags += 'g';
 
-			var index = all.lastIndexOf('\n{|');
+			if (library_namespace.is_RegExp(pattern))
+				pattern = pattern.source;
+			else
+				pattern = String(pattern);
+			pattern = new RegExp(pattern, flags);
+
+			var last_matched = null, matched;
+			while (matched = pattern.exec(text)) {
+				// last_index = matched.index;
+				last_matched = matched;
+			}
+
+			return last_matched;
+		}
+
+		function parse_table(all, indentation, parameters, ending) {
+			// Indenting with colons [[w:en:Help:Table#Indenting tables]]
+			var last_matched = last_matched_of_RegExp(all, /\n(\s*:+\s*)?{\|/g);
+			var index = last_matched.index;
 			var previous;
 			if (index > 0) {
 				previous = all.slice(0, index);
-				parameters = all.slice(index + '\n-{'.length,
+				indentation = last_matched[1];
+				parameters = all.slice(index + last_matched[0].length,
 						ending ? -ending.length : all.length);
 			} else {
 				previous = '';
 			}
+			// free
+			last_matched = null;
 
 			function append_table_cell(table_cell, delimiter, table_row_token) {
 				if (!table_cell && !delimiter) {
@@ -3612,6 +3638,9 @@ function module_code(library_namespace) {
 				// matched[2] 屬於下一 row。
 				last_delimiter = matched[2];
 			}
+
+			if (indentation)
+				table_token.indentation = indentation;
 
 			if (false) {
 				console.assert(table_token.every(function(table_row_token) {
@@ -4561,7 +4590,7 @@ function module_code(library_namespace) {
 
 		wikitext = wikitext.replace_till_stable(
 		// [[Help:Table]]
-		/\n{\|([\s\S]*?)(\n?$|\n\|})/g, parse_table);
+		/\n(\s*:+\s*)?{\|([\s\S]*?)(\n?$|\n\|})/g, parse_table);
 
 		// ----------------------------------------------------
 
