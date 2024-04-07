@@ -4580,19 +4580,6 @@ function module_code(library_namespace) {
 		}
 
 		// ----------------------------------------------------
-		// table: \n{| ... \n|}
-		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]],
-		// [[w:zh:世界大桥列表]]
-
-		// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
-		// 因此先處理 {{Template}} 再處理 table。
-		// {|表示表格開始，|}表示表格結束。
-
-		wikitext = wikitext.replace_till_stable(
-		// [[Help:Table]]
-		/\n(\s*:+\s*)?{\|([\s\S]*?)(\n?$|\n\|})/g, parse_table);
-
-		// ----------------------------------------------------
 
 		// 在章節標題、表格 td/th 或 template parameter 結束時，
 		// e.g., "| t || <del>... || </del> || <s>... || </s> ||",
@@ -4669,6 +4656,19 @@ function module_code(library_namespace) {
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))
 		PATTERN_wikilink_global, parse_wikilink);
+
+		// ----------------------------------------------------
+		// table: \n{| ... \n|}
+		// [[Help:Table]]
+		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]],
+		// [[w:zh:世界大桥列表]]
+
+		// 因為 table 中較可能包含有"|"的 {{Template}}、wikilink，但這些元素少包含 table，
+		// 因此先處理 {{Template}}, wikilink 再處理 table。
+
+		wikitext = wikitext.replace_till_stable(
+		// {|表示表格開始，|}表示表格結束。
+		/\n(\s*:+\s*)?{\|([\s\S]*?)(\n?$|\n\|})/g, parse_table);
 
 		// ----------------------------------------------------
 		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext

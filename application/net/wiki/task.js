@@ -3751,6 +3751,12 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				if (check_options) {
+					// console.trace(check_options);
+					// wiki_API.check_stop()
+					// session.check(check_options);
+				}
+
 				Object.assign(work_options, options, {
 					check_section : check_task_id,
 					// 預防 page 本身是非法的頁面標題。當 session.page() 出錯時，將導致沒有 .last_page。
