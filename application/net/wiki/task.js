@@ -3667,6 +3667,14 @@ function module_code(library_namespace) {
 
 				// ------------------------------
 
+				if (check_options) {
+					// console.trace(check_options);
+					// wiki_API.check_stop()
+					// session.check(check_options);
+				}
+
+				// ------------------------------
+
 				var page = pages[page_index++];
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
@@ -3749,12 +3757,6 @@ function module_code(library_namespace) {
 				if (config.no_edit) {
 					// 不作編輯作業。
 					return;
-				}
-
-				if (check_options) {
-					// console.trace(check_options);
-					// wiki_API.check_stop()
-					// session.check(check_options);
 				}
 
 				Object.assign(work_options, options, {
