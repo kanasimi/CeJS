@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Felipe L. Ewald",
+			"Lc97",
 			"Re demz",
 			"YuriNikolai"
 		]
@@ -940,8 +941,8 @@
 	"namespaces-$1": "Namespaces: %1.",
 	"get-$1-pages-from-$2": "Obter %1 {{PLURAL:%1|página|páginas}} de %2",
 	"normalize-template-$1": "Normalize {{%1}}",
-	"maintenance-template-list": "lista de modelos de manutenção",
-	"maintenance-template-list-to-be-excluded": "lista de modelos de manutenção a serem excluídos",
+	"maintenance-template-list": "Lista de modelos de manutenção",
+	"maintenance-template-list-to-be-excluded": "L,ista de modelos de manutenção a serem excluídos",
 	"categories-added-to-report": "Categorias adicionadas ao relatório",
 	"merge-$1-templates-into-template-$2": "Mesclar %1 {{PLURAL:%1|template|templates}} em {{%2}}",
 	"create-template-$2-with-$1-maintenance-templates": "Criar {{%2}} com manutenção de %1 {{PLURAL:%1|template|templates}}",
@@ -1005,11 +1006,13 @@
 	"please-remember-to-sign-when-you-leave-messages": "Lembre-se de assinar quando deixar mensagens",
 	"$1-remind-to-sign-such-as-the-$2-pages-listed-in-the-notification": "[[%1|Lembrar para assinar]], como as %2 páginas listadas na notificação.",
 	"generate-topic-list-$1-topics": "Gerar lista de tópicos: %1 {{PLURAL:%1|tópico|tópicos}}",
+	"remove-the-same-ratings-as-template-wpbs-in-$2": "Remova %1 mesmo {{PLURAL:%1|valor|valores}} como {{WPBS}} em %2.",
+	"$1-wikiproject-templates": "%1 WikiProject {{PLURAL:%1|pré-definição|pré-definições}}.",
 	"$1-pages-modified": "%1 {{PLURAL:%1|páginas modificada|páginas modificadas}}",
 	"fixing-broken-anchor": "Fixação de âncora quebrada",
 	"remove-$1-non-defunct-anchors": "Remover %1 não-funcional {{PLURAL:%1|âncora|âncoras}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "A âncora %1 vincula a uma página da Web específica: %2.",
-	"the-anchor-($2)-has-been-deleted-by-other-users-before": "A âncora (%2) não está mais disponível porque foi [[Special:Diff/%1|deleted by a user]] anteriormente.",
+	"the-anchor-($2)-has-been-deleted-by-other-users-before": "A âncora (%2) [[Special:Diff/%1|deletado]].",
 	"reminder-of-an-inactive-anchor": "Lembrete de uma âncora inativa",
 	"update-links-to-archived-section-$1-$2": "Atualizar links para a seção arquivada %1: %2",
 	"incorrect-capitalization-spaced-section-title": "Título da seção com letras maiúsculas/espaçadas incorretas",
@@ -1106,6 +1109,7 @@
 	"no-longer-maintained": "Não tem mais suporte",
 	"download_options.chapter_no_range": "Faça o download desse intervalo de números de capítulos. Por exemplo, \"20-30,50-60\".",
 	"download_options.directory_name_pattern": "Personaliza o padrão de nome do diretório do trabalho. Padrão: '${id_title}${directory_name_extension}'. ${title}' será apenas o título do trabalho como diretório de trabalho, '${id}' será apenas o ID do trabalho como diretório de trabalho.",
+	"download_options.use_finished_date_to_archive_old_works": "Arquivar trabalhos antigos baseado na data de finalização do trabalho. O padrão é o tempo do último download.",
 	"download_options.acceptable_types": "Categoria de imagem aceitas (extensão). Separado pelo caractere \"|\" , exemplo \"webp|jpg|jpeg|png\". Se não tiver configurado não será verificado. Digite \"imagens\" para aceitar todas as imagens. Se a imagem baixada não estiver incluída no tipo especificado, será considerada um erro. Essa ferramenta só baixar certos tipos de imagens. Essa opção é apenas para verificar imagens, não para selecionar o tipo de imagem que você deseja baixar.",
 	"download_options.allow_eoi_error": "Quando a imagem não possui uma marcação de EOI (end of image) ou se algo que não é uma imagem for detectada, o arquivo será armazenado à força mesmo assim.",
 	"download_options.archive_all_good_images_only": "Comprime os arquivos de imagem sem nenhum erro.",
