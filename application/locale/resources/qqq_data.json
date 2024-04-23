@@ -7613,14 +7613,14 @@
 		"message": "未設定文字：%1",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: number of line",
-		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1657}}",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1659}}",
 		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
 	"this-rule-seems-unnecessary": {
 		"message": "這條規則似乎沒有必要",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: conversion rule",
-		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L2129}}",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L2131}}",
 		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
 	"cannot-move-to-$1": {
