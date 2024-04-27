@@ -931,7 +931,7 @@ function module_code(library_namespace) {
 	}
 
 	// 可算 function preprocess_section_link_token(token, options) 的簡化版。
-	// 可能保留 "\n" 必須自己 .trim()。
+	// 可能保留 "\n"、不可見字符 必須自己 .trim()。
 	function wiki_element_to_key(token) {
 		if (!Array.isArray(token))
 			return token;

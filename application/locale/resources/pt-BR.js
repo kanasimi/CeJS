@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espanha",
 	"Calendrier r\u00e9publicain": "Calend\u00e1rio Franc\u00eas Republicano",
-	"untranslated message count": "2",
+	"untranslated message count": "3",
 	"\u6e05\u9664\u8a0a\u606f": "Limpar registro",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Mostar / Esconder registro",
 	"Load failed": "Erro ao carregar",

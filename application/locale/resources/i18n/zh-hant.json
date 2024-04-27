@@ -976,6 +976,7 @@
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "所對應的中文條目重定向到了頁面本身。[[WP:CIRCULAR]]或可擴充重定向？",
 	"the-local-page-is-too-new.-will-try-again-next-time": "中文條目過新，將過幾天再測試。",
 	"missing-converted-local-page-or-the-foreign-local-page-is-not-link-to-wikidata": "缺少轉換後的本地頁面，或者外部/本地頁面未鏈接到維基數據。",
+	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title-but-the-foreign-page-directs-to-a-different-local-title": "跨語言模板的本地標題與外語標題相同，但外語頁面導向不同的本地標題。",
 	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title": "跨語言模板的本地標題與外語標題相同",
 	"local-page-title-contains-the-local-title-in-the-interlanguage-template": "本地頁面標題包含跨語言模板中的本地標題",
 	"from-the-parameter-of-template": "從模板參數",

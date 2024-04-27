@@ -315,18 +315,27 @@ function module_code(library_namespace) {
 			if (!value)
 				continue;
 			value = wiki_API.parse.wiki_element_to_key(value);
-			// console.trace(value);
+			var group_name_String;
 			if (typeof value === 'string') {
-				value = value.replace(/_/g, ' ').trim();
+				group_name_String = value = value.replace(/_/g, ' ').trim()
+				// '\u200E\u200F'.trim().length === 2
+				.replace(/^[\u200E\u200F\s]+/, '').replace(
+						/[\u200E\u200F\s]+$/, '');
 			} else {
 				library_namespace.warn('parse_template_NoteTA: 非字串之公共轉換組名稱: ['
 						+ value + '] @ ' + token);
 				console.trace(value);
+				group_name_String = value.toString().trim().replace(
+						/^[\u200E\u200F\s]+/, '').replace(/[\u200E\u200F\s]+$/,
+						'');
 			}
-			conversion_list.groups.push(value.toString());
-			conversion_list.group_data[value.toString()] = {
+			// console.trace([ value, group_name_String ]);
+			conversion_list.groups.push(group_name_String);
+			conversion_list.group_data[group_name_String] = {
 				parameter_name : parameter_name,
+				// Maybe {Ayyay} and includes "\n"、不可見字符
 				group_name : value,
+				group_name_String : group_name_String,
 				index : token.index_of[parameter_name]
 			};
 			// TODO
