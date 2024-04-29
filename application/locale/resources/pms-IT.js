@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Polid\u00e9 l'argistr",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Smon-e / st\u00ebrm\u00e9 l'argistr",
 	"Load failed": "Cariament fal\u00ec",
@@ -966,6 +966,7 @@
 	"The local link target links back to the page itself. [[MOS:CIRCULAR]]?": "\u00cbl b\u00ebrsaj dla liura local a ponta vers l'istessa p\u00e0gina. [[MOS:CIRCULAR]]?",
 	"The local page is too new. Will try again next time.": "La p\u00e0gina local a l'\u00e9 tr\u00f2p recenta. As provr\u00e0 torna pi tard.",
 	"\u7f3a\u5c11\u8f49\u63db\u5f8c\u7684\u672c\u5730\u9801\u9762\uff0c\u6216\u8005\u5916\u90e8/\u672c\u5730\u9801\u9762\u672a\u93c8\u63a5\u5230\u7dad\u57fa\u6578\u64da\u3002": "La p\u00e0gina local convert\u00eca a manca, opura la p\u00e0gina strangera o local a l'\u00e9 pa na liura vers wikidata.",
+	"\u8de8\u8a9e\u8a00\u6a21\u677f\u7684\u672c\u5730\u6a19\u984c\u8207\u5916\u8a9e\u6a19\u984c\u76f8\u540c\uff0c\u4f46\u5916\u8a9e\u9801\u9762\u5c0e\u5411\u4e0d\u540c\u7684\u672c\u5730\u6a19\u984c\u3002": "\u00cbl t\u00ectol local ant l\u00eb stamp ant\u00ebrlenga a l'\u00e9 l'istess d\u00ebl t\u00ectol an lenga strangera, ma la p\u00e0gina strangera a manda a 'n t\u00ectol local diferent.",
 	"\u8de8\u8a9e\u8a00\u6a21\u677f\u7684\u672c\u5730\u6a19\u984c\u8207\u5916\u8a9e\u6a19\u984c\u76f8\u540c": "\u00cbl t\u00ectol local ant l\u00eb stamp ant\u00ebrlenghe a l'\u00e9 l'istess che \u00ebl t\u00ectol an lenga strangera.",
 	"Local page title contains the local title in the interlanguage template": "\u00cbl t\u00ectol \u00ebd la p\u00e0gina local a conten \u00ebl t\u00ectol local ant l\u00eb stamp ant\u00ebrlenghe",
 	"From the parameter of template": "Dal par\u00e0meter d\u00eb stamp",

@@ -270,10 +270,13 @@ function module_code(library_namespace) {
 	https://www.69shu.pro/txt/42242/28563223	如此堕怠，怎能成仙 > 第12章 你穿越到了修真世界，前方有一道悬崖，你选择：跳/不跳
 	&emsp;&emsp;第12章 你穿越到了修真世界，前方有一道悬崖，你选择：跳不跳
 
+	https://www.piaotia.com/html/15/15579/11116769.html	我在田宗剑道成仙 第140章 最难甚解（加2）
+	&nbsp;&nbsp;&nbsp;&nbsp;第140章 __最难甚解（加2）<br /><br />
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~\/\-—々·\s]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\/\-—々·\s_]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
@@ -335,7 +338,7 @@ function module_code(library_namespace) {
 		var new_text;
 
 		if (title_start_index === NOT_FOUND) {
-			var matched = title.match(/(第.+章)(\s+)/);
+			var matched = title.match(/(第.+章)([\s_]+)/);
 			if (matched && first_line.includes(matched[1])) {
 				// e.g., https://www.piaotia.com/html/15/15301/10626057.html
 				// title: "第1章 山下少年",
@@ -432,7 +435,7 @@ function module_code(library_namespace) {
 			chapter_data.title = library_namespace.HTML_to_Unicode(full_title)
 					.trim()
 					// 取單一空白即可。
-					.replace(/(第.+章)((\s){2,})/, '$1$3');
+					.replace(/(第.+章)((\s)[\s_]+)/, '$1$3');
 			if (title.covers(chapter_data.title)) {
 				// title 比 full_title 更完整。
 				chapter_data.title = title;
