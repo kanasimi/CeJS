@@ -5853,12 +5853,14 @@ function test_wiki() {
 		});
 
 		_setup_test('wiki: CeL.wiki.data(get property of item)');
-		CeL.wiki.data.search.use_cache('性質', function (id_list) {
-			var test_property_name = '性質', page_title = '孔子';
+		CeL.wiki.data.search.use_cache('隸屬於', function (id_list) {
+			var test_property_name = '隸屬於', page_title = '孔子';
 			// console.trace(id_list);
+			if (Array.isArray(id_list))
+				id_list = id_list[0];
 
 			// Get the id of property `test_property_name` first.
-			// and here we get the id of '性質': "P31"
+			// and here we get the id of '隸屬於': "P31"
 			assert(['P31', id_list], 'get data id of ' + test_property_name);
 
 			// 執行剩下的程序. run rest codes.
@@ -5869,10 +5871,12 @@ function test_wiki() {
 
 			function after_get_data(data_JSON) {
 				function after_search_use_cache(id_list) {
+					//console.trace(data_JSON, data_JSON.value);
 					data_JSON.value(test_property_name, {
 						// resolve wikibase-item
 						resolve_item: true
 					}, function (entity) {
+						//console.trace(entity);
 						//console.trace(data_JSON);
 						assert(/human|person/i.test(entity.value('label', 'en')), 'get "' + test_property_name + '" id of ' + page_title);
 						_finish_test('wiki: CeL.wiki.data(get property of item)');

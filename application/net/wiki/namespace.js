@@ -2059,6 +2059,41 @@ function module_code(library_namespace) {
 		return file_name;
 	}
 
+	function generate_page_pattern_of_namespace(namespace, options) {
+		var session = wiki_API.session_of_options(options);
+		if (!session
+		// session === wiki_API?
+		|| !session.latest_site_configurations) {
+			return;
+		}
+
+		var page_pattern_of_namespace = [ session.latest_site_configurations.namespaces[
+		// session.configurations.namespace_hash[namespace]
+		wiki_API.namespace.hash[namespace]]['*'] ];
+		// console.trace(session.latest_site_configurations.namespaces);
+		session.latest_site_configurations.namespacealiases
+		//
+		.forEach(function(namespace_data) {
+			if (
+			// session.configurations.namespace_hash[namespace]
+			namespace_data.id === wiki_API.namespace.hash[namespace]) {
+				page_pattern_of_namespace.push(namespace_data['*']);
+			}
+		});
+
+		page_pattern_of_namespace = new RegExp('^ *(?:'
+				+ page_pattern_of_namespace.join('|') + ') *: *'
+				+ wiki_API.PATTERN_page_name.source
+		// .replace(/#/g, '')
+		, 'i');
+		if (false) {
+			console.trace([ wiki_API.site_name(session), namespace,
+					page_pattern_of_namespace ]);
+		}
+
+		return page_pattern_of_namespace;
+	}
+
 	/**
 	 * 創建匹配 [[File:file_name]] 之 pattern。
 	 * 
@@ -2069,11 +2104,17 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {RegExp} 能 match [[File:file_name]] 之 pattern。
 	 */
-	function file_pattern(file_name, flag) {
-		return (file_name = normalize_name_pattern(file_name, true))
-				//
-				&& new RegExp(file_pattern.source.replace(/name/, file_name),
-						flag || 'g');
+	function file_pattern(file_name, flag, options) {
+		if (options === undefined && library_namespace.is_Object(flag)) {
+			options = flag;
+			flag = undefined;
+		}
+
+		file_name = normalize_name_pattern(file_name, true);
+		if (file_name) {
+			return new RegExp(file_pattern.default_source.replace(/page_title/,
+					file_name), flag || 'g');
+		}
 	}
 
 	// [[維基百科:命名空間#文件名字空间]]
@@ -2087,20 +2128,21 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/wiki/Wikipedia:互助客栈/其他#增设空间“U：”、“UT：”作为“User：”、“User_talk：”的Alias
 	// 提議增加F、FT指向File、File Talk
 	/** {RegExp}檔案的匹配模式 for parser。 */
-	var PATTERN_file_prefix = 'File|Fichier|檔案|档案|文件|ファイル|Image|圖像|图像|画像|Media|媒[體体](?:文件)?';
+	var PATTERN_file_prefix = 'File|檔案|档案|文件|ファイル|Image|圖像|图像|画像|Media|媒[體体](?:文件)?';
 
-	file_pattern.source =
+	file_pattern.default_source =
 	// 不允許 [\s\n]，僅允許 ' '。
-	// [ ':', file name, 接續 ]
-	/\[\[ *(?:(:) *)?(?:Tag) *: *name *(\||\]\])/
-	// [[ :File:name]] === [[File:name]]
-	.source.replace('Tag', library_namespace
+	// [ ':', page title / file name, 接續 ]
+	/\[\[ *(?:(:) *)?(?:namespace_list) *: *page_title *(\||\]\])/
+	// [[ :File:page_title]] === [[File:page_title]]
+	.source.replace(/namespace_list/, library_namespace
 			.ignore_case_pattern(PATTERN_file_prefix));
 
 	// matched: [ all token[0], prefix ":"s before "File:",
 	// file name without "File:" or ":File" ]
-	PATTERN_file_prefix = new RegExp('^ *(: *)?(?:' + PATTERN_file_prefix
-			+ ') *: *' + PATTERN_page_name.source, 'i');
+	PATTERN_file_prefix = new RegExp(
+	// '^ *(: *)?(?:'
+	'^ *(?:' + PATTERN_file_prefix + ') *: *' + PATTERN_page_name.source, 'i');
 
 	// "Category" 本身可不分大小寫。
 	// 分類名稱重複時，排序索引以後出現者為主。
@@ -2108,7 +2150,7 @@ function module_code(library_namespace) {
 	var
 	// [ all_category_text, category_name, sort_order, post_space ]
 	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ|분류) *: *([^{}\[\]\|<>\t\n�]+)(?:\s*\|\s*([^\[\]\|�]*))?\]\](\s*\n?)/ig,
-	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
+	/** {RegExp}分類的匹配模式 for parser。 [all, category_name] */
 	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ|분류) *: *([^{}\[\]\|<>\t\n�]+)/i;
 
 	// ------------------------------------------------------------------------
@@ -4148,6 +4190,7 @@ function module_code(library_namespace) {
 		: PATTERN_invalid_page_name_characters,
 		PATTERN_wikilink : PATTERN_wikilink,
 		PATTERN_wikilink_global : PATTERN_wikilink_global,
+		PATTERN_page_name : PATTERN_page_name,
 		PATTERN_file_prefix : PATTERN_file_prefix,
 		PATTERN_URL_WITH_PROTOCOL_GLOBAL : PATTERN_URL_WITH_PROTOCOL_GLOBAL,
 		PATTERN_category_prefix : PATTERN_category_prefix,
@@ -4183,6 +4226,9 @@ function module_code(library_namespace) {
 		to_talk_page : to_talk_page,
 		talk_page_to_main : talk_page_to_main,
 
+		generate_page_pattern_of_namespace
+		//
+		: generate_page_pattern_of_namespace,
 		file_pattern : file_pattern,
 
 		// Please use CeL.wiki.wikitext_to_plain_text() instead!

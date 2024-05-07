@@ -431,7 +431,7 @@ function module_code(library_namespace) {
 		}, null, options);
 	}
 
-	// wikidata_search_cache[{String}"zh:性質"] = {String}"P31";
+	// wikidata_search_cache[{String}"zh:隸屬於"] = {String}"P31";
 	var wikidata_search_cache = {
 	// 載於, 出典, source of claim
 	// 'en:stated in' : 'P248',
@@ -1509,6 +1509,7 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function wikidata_entity_value(property, options, callback) {
+		// console.trace(property);
 		if (Array.isArray(property)) {
 			// e.g., entity.value(['property','property'])
 			var property_list = property;
@@ -1522,6 +1523,8 @@ function module_code(library_namespace) {
 			if (callback) {
 				;
 			}
+			// console.trace(property);
+
 			// TODO: for callback
 			for ( var key in property) {
 				var _options = property[key];
@@ -1554,12 +1557,35 @@ function module_code(library_namespace) {
 		} else if (property === 'sitelink') {
 			value = this.sitelinks && this.sitelinks[language];
 		} else if (typeof property === 'number') {
-			value = this.claims && this.claims['P' + property];
+			if (!this.claims) {
+				library_namespace
+						.warn('wikidata_entity_value: 未取得 entity.claims！');
+				value = null;
+			} else {
+				value = this.claims['P' + property];
+			}
 		} else if (value = wikidata_search.use_cache(property, Object.assign({
 			type : 'property'
 		}, options))) {
 			// 一般 property
-			value = this.claims && this.claims[value];
+			if (!this.claims) {
+				library_namespace
+						.warn('wikidata_entity_value: 未取得 entity.claims！');
+				value = null;
+			} else if (Array.isArray(value)) {
+				library_namespace
+						.log('wikidata_entity_value: 自多個屬性項目中選擇第一個有屬性的"'
+								+ property + '": ' + value.join(', ') + '。');
+				var property_list = value;
+				for (var index = 0; index < property_list.length; index++) {
+					if (property_list[index] in this.claims) {
+						value = this.claims[property_list[index]];
+						break;
+					}
+				}
+			} else {
+				value = this.claims[value];
+			}
 		} else {
 			library_namespace
 					.error('wikidata_entity_value: Cannot deal with property ['
@@ -1568,6 +1594,7 @@ function module_code(library_namespace) {
 		}
 
 		if (options && options.resolve_item) {
+			// console.trace([ property, value ]);
 			value = wikidata_datavalue(value);
 			if (Array.isArray(value)) {
 				// 有的時候因為操作錯誤，所以會有相同的屬性值。但是這一種情況應該要更正原資料。
@@ -3965,10 +3992,10 @@ function module_code(library_namespace) {
 	if (false) {
 		// examples
 
-		// Cache the id of "性質" first. 先快取必要的屬性id值。
-		CeL.wiki.data.search.use_cache('性質', function(id_list) {
-			// Get the id of property '性質' first.
-			// and here we get the id of '性質': "P31"
+		// Cache the id of "隸屬於" first. 先快取必要的屬性id值。
+		CeL.wiki.data.search.use_cache('隸屬於', function(id_list) {
+			// Get the id of property '隸屬於' first.
+			// and here we get the id of '隸屬於': "P31"
 			CeL.log(id_list);
 			// 執行剩下的程序. run rest codes.
 		}, {
@@ -3983,8 +4010,8 @@ function module_code(library_namespace) {
 		var wiki = CeL.wiki.login(user_name, password, 'zh');
 
 		wiki.data('維基數據沙盒2', function(data_JSON) {
-			CeL.wiki.data.search.use_cache('性質', function(id_list) {
-				data_JSON.value('性質', {
+			CeL.wiki.data.search.use_cache('隸屬於', function(id_list) {
+				data_JSON.value('隸屬於', {
 					// resolve wikibase-item
 					resolve_item : true
 				}, function(entity) {
@@ -3997,10 +4024,10 @@ function module_code(library_namespace) {
 			});
 		});
 
-		// If we have run CeL.wiki.data.search.use_cache('性質')
+		// If we have run CeL.wiki.data.search.use_cache('隸屬於')
 		// first or inside it...
 		wiki.data('維基數據沙盒2', function(data_JSON) {
-			data_JSON.value('性質', {
+			data_JSON.value('隸屬於', {
 				// resolve wikibase-item
 				resolve_item : true
 			}, function(entity) {
@@ -4012,8 +4039,8 @@ function module_code(library_namespace) {
 		// Old style. The same effect as codes above.
 		wiki.data('維基數據沙盒2', function(data_JSON) {
 			// Here we are running the callback.
-			CeL.wiki.data.search.use_cache('性質', function(id_list) {
-				wiki.data(data_JSON.value('性質'), function(entity) {
+			CeL.wiki.data.search.use_cache('隸屬於', function(id_list) {
+				wiki.data(data_JSON.value('隸屬於'), function(entity) {
 					// via wikidata_entity_value()
 					// get "维基数据测试沙盒"
 					CeL.log(entity.value('label'));
@@ -4025,7 +4052,7 @@ function module_code(library_namespace) {
 		});
 
 		wiki.data('維基數據沙盒2', function(data_JSON) {
-			wiki.data(data_JSON.value('性質'), function(entity) {
+			wiki.data(data_JSON.value('隸屬於'), function(entity) {
 				// via wikidata_entity_value()
 				// get "维基数据测试沙盒"
 				CeL.log(entity.value('label'));
@@ -5080,7 +5107,7 @@ function module_code(library_namespace) {
 	 * @see https://www.wikidata.org/wiki/Wikidata:Bots<br />
 	 *      Monitor
 	 *      https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations<br />
-	 *      Bots should add instance of (P31 性質) or subclass of (P279 上一級分類) or
+	 *      Bots should add instance of (P31 隸屬於) or subclass of (P279 上一級分類) or
 	 *      part of (P361 屬於) if possible<br />
 	 *      Bots importing from Wikipedia should add in addition to imported
 	 *      from (P143) also reference URL (P854) with the value of the full URL

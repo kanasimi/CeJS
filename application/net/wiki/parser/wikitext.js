@@ -40,7 +40,7 @@ function module_code(library_namespace) {
 	// requiring
 	var wiki_API = library_namespace.application.net.wiki;
 	// @inner
-	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_file_prefix = wiki_API.PATTERN_file_prefix, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_category_prefix = wiki_API.PATTERN_category_prefix, PATTERN_invalid_page_name_characters = wiki_API.PATTERN_invalid_page_name_characters;
+	var PATTERN_wikilink = wiki_API.PATTERN_wikilink, PATTERN_wikilink_global = wiki_API.PATTERN_wikilink_global, PATTERN_URL_WITH_PROTOCOL_GLOBAL = wiki_API.PATTERN_URL_WITH_PROTOCOL_GLOBAL, PATTERN_invalid_page_name_characters = wiki_API.PATTERN_invalid_page_name_characters;
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -1868,9 +1868,6 @@ function module_code(library_namespace) {
 					// test [[Category:name|order]]
 					.match(PATTERN_category_prefix);
 					// console.log([ page_name, category_matched ]);
-				} else if (file_matched[1]) {
-					// console.trace(file_matched);
-					file_matched = null;
 				}
 				// [[::zh:title]] would be rendered as plaintext
 				if (/^\s*:\s*:/.test(page_name)) {
@@ -2244,7 +2241,7 @@ function module_code(library_namespace) {
 					if (file_matched) {
 						parameters.name
 						// set file name without "File:"
-						= wiki_API.normalize_title(file_matched[2], options);
+						= wiki_API.normalize_title(file_matched[1], options);
 					} else if (category_matched) {
 						parameters.name
 						// set category name without "Category:"
@@ -2374,6 +2371,29 @@ function module_code(library_namespace) {
 		// session === wiki_API?
 		&& session.configurations && session.configurations.extensiontag_hash
 				|| wiki_extensiontags;
+
+		var PATTERN_file_prefix;
+		if (session
+		// session === wiki_API?
+		&& session.configurations && session.latest_site_configurations) {
+			PATTERN_file_prefix = session.configurations.PATTERN_file_prefix
+					|| (session.configurations.PATTERN_file_prefix = wiki_API
+							.generate_page_pattern_of_namespace('file', options));
+		} else {
+			PATTERN_file_prefix = wiki_API.PATTERN_file_prefix;
+		}
+
+		var PATTERN_category_prefix;
+		if (session
+		// session === wiki_API?
+		&& session.configurations && session.latest_site_configurations) {
+			PATTERN_category_prefix = session.configurations.PATTERN_category_prefix
+					|| (session.configurations.PATTERN_category_prefix = wiki_API
+							.generate_page_pattern_of_namespace('category',
+									options));
+		} else {
+			PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
+		}
 
 		// or use ((PATTERN_transclusion))
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
