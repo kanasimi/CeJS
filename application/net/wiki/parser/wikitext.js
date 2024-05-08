@@ -461,6 +461,8 @@ function module_code(library_namespace) {
 	 * .join() 組合各次元素。此處即為各 .toString() 之定義。<br />
 	 * 所有的 key (type) 皆為小寫。
 	 * 
+	 * CeL.wiki.parse.wiki_element_toString.*
+	 * 
 	 * @type {Object}
 	 * 
 	 * @see parse_wikitext()
@@ -2497,10 +2499,14 @@ function module_code(library_namespace) {
 				if (tail_spaces) {
 					token = token.slice(0, -tail_spaces.length);
 				}
-				// 預防經過改變，需再進一步處理。
-				token = parse_wikitext(token, options, queue);
 
 				if (_index === 0) {
+					// 預防經過改變，需再進一步處理。
+					token = parse_wikitext(token, Object.assign(Object
+							.clone(options), {
+						// 不處理 pre /\n +/。
+						inside_transclusion : true
+					}), queue);
 					// console.log(token);
 					if (tail_spaces) {
 						if (typeof token === 'string') {
@@ -2522,6 +2528,9 @@ function module_code(library_namespace) {
 					// e.g., {{ {{t|n}} | a }}
 					return token;
 				}
+
+				// 預防經過改變，需再進一步處理。
+				token = parse_wikitext(token, options, queue);
 
 				// 規格書 parse parameters to:
 				// numeral parameter: ['', '', value]

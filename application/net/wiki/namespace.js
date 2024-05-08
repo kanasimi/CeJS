@@ -2083,7 +2083,7 @@ function module_code(library_namespace) {
 
 		page_pattern_of_namespace = new RegExp('^ *(?:'
 				+ page_pattern_of_namespace.join('|') + ') *: *'
-				+ wiki_API.PATTERN_page_name.source
+				+ PATTERN_page_name.source
 		// .replace(/#/g, '')
 		, 'i');
 		if (false) {
@@ -4190,7 +4190,7 @@ function module_code(library_namespace) {
 		: PATTERN_invalid_page_name_characters,
 		PATTERN_wikilink : PATTERN_wikilink,
 		PATTERN_wikilink_global : PATTERN_wikilink_global,
-		PATTERN_page_name : PATTERN_page_name,
+		// PATTERN_page_name : PATTERN_page_name,
 		PATTERN_file_prefix : PATTERN_file_prefix,
 		PATTERN_URL_WITH_PROTOCOL_GLOBAL : PATTERN_URL_WITH_PROTOCOL_GLOBAL,
 		PATTERN_category_prefix : PATTERN_category_prefix,

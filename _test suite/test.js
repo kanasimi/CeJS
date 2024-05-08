@@ -3596,8 +3596,9 @@ function test_wiki() {
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[l]]b'; parsed = CeL.wiki.parser(wikitext).parse();
+		assert(['link', parsed[1].type], 'parse link type');
 		parsed.each('link', function (token, index, parent) { return '{{t}}'; }, true);
-		assert(['a{{t}}b', parsed.toString()]);
+		assert(['a{{t}}b', parsed.toString()], 'Modify link');
 
 		wikitext = '[[a|a{{!}}b]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.link #1');
@@ -3957,43 +3958,48 @@ function test_wiki() {
 		assert(['Template:Text', parsed.page_title], 'wiki.parse.transclusion #40-2');
 		wikitext = '{{Template:}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41');
-		assert([wikitext, parsed], 'wiki.parse.transclusion #40-1');
+		assert([wikitext, parsed], 'wiki.parse.transclusion #41-1');
 
 		wikitext = '{{text| {{ {{<s> }} }} </s> }}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #40');
-		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #40-1');
-		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #40-2');
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #42');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #42-1');
+		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #42-2');
 		var matched = undefined;
 		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'tag', function (token) { matched = token; });
-		assert(['<s> }} }} </s>', matched && matched.toString()], 'wiki.parse.transclusion #40-3');
+		assert(['<s> }} }} </s>', matched && matched.toString()], 'wiki.parse.transclusion #42-3');
 
 		// TODO:
 		// "{{text| {{ {{<s title="{{s}}"> }} }} </s> }}"
 		// "{{text| {{ {{<s>}} </s> }}"
 		wikitext = '{{text| {{ {{<s>}} }}</s> }}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #40');
-		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #40-1');
-		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #40-2');
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #43');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #43-1');
+		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #43-2');
 		var matched = undefined;
 		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'tag', function (token) { matched = token; });
-		assert(['<s>}} }}</s>', matched && matched.toString()], 'wiki.parse.transclusion #40-3');
+		assert(['<s>}} }}</s>', matched && matched.toString()], 'wiki.parse.transclusion #43-3');
 
 		wikitext = '{{a{{_|text}} | a }}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #43');
-		assert(['plain', parsed.type], 'wiki.parse.transclusion #43-1');
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #44');
+		assert(['plain', parsed.type], 'wiki.parse.transclusion #44-1');
 		var count = 0;
 		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'transclusion', function (token) { count++; });
 		assert([0, count], 'wiki.parse.transclusion #43-2');
 
 		wikitext = '{{[[t]]}}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #44');
-		assert(['plain', parsed.type], 'wiki.parse.transclusion #44-1');
-		assert(['link', parsed[1].type], 'wiki.parse.transclusion #44-2');
-
-		wikitext = '{{<s>t</s>}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #45');
 		assert(['plain', parsed.type], 'wiki.parse.transclusion #45-1');
-		assert(['tag', parsed[1].type], 'wiki.parse.transclusion #45-2');
+		assert(['link', parsed[1].type], 'wiki.parse.transclusion #45-2');
+
+		wikitext = '{{<s>t</s>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #46');
+		assert(['plain', parsed.type], 'wiki.parse.transclusion #46-1');
+		assert(['tag', parsed[1].type], 'wiki.parse.transclusion #46-2');
+
+		wikitext = '{{tl\n \n <!-- -->\n |a}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #47');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #47-1');
+		assert(['plain', parsed[0].type], 'wiki.parse.transclusion #47-2');
 
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();

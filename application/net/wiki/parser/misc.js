@@ -650,6 +650,10 @@ function module_code(library_namespace) {
 				// remove the parameter
 				template_token.splice(index, 1);
 				replace_to = wiki_API.parse(template_token.toString());
+				if (!replace_to || replace_to.type !== 'transclusion') {
+					throw new Error('replace_parameter: Parse error for '
+							+ template_token);
+				}
 				Object.clone(replace_to, false, template_token);
 			}
 			return 1;

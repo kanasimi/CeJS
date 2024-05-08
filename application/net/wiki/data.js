@@ -1573,13 +1573,14 @@ function module_code(library_namespace) {
 						.warn('wikidata_entity_value: 未取得 entity.claims！');
 				value = null;
 			} else if (Array.isArray(value)) {
-				library_namespace
-						.log('wikidata_entity_value: 自多個屬性項目中選擇第一個有屬性的"'
-								+ property + '": ' + value.join(', ') + '。');
 				var property_list = value;
 				for (var index = 0; index < property_list.length; index++) {
-					if (property_list[index] in this.claims) {
-						value = this.claims[property_list[index]];
+					var property_name = property_list[index];
+					if (property_name in this.claims) {
+						value = this.claims[property_name];
+						library_namespace
+								.log('wikidata_entity_value: 自多個 "'
+										+ property + '" 同名屬性中 (' + property_list.join(', ') + ')，選擇第一個有屬性值的 ' + property_name + '。');
 						break;
 					}
 				}
