@@ -5362,6 +5362,12 @@ function test_wiki() {
 
 		wikitext = 'a\n p\n  2\n {{t}}\n  [[a]]\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: pre #1');
+		var filtered_elements = [];
+		wikitext = 'a\n <!-- 1 -->\n <!-- . -->  \n a<!-- 2 --> \n b<!-- 3 -->'; parsed = CeL.wiki.parser(wikitext).parse();
+		parsed.each('pre', function(token) { filtered_elements.push(token); });
+		assert([wikitext, parsed.toString()], 'wiki.parse: pre #2');
+		assert([1, filtered_elements.length], 'wiki.parse: pre #2-1');
+		assert([" a<!-- 2 --> \n b<!-- 3 -->", filtered_elements.toString()], 'wiki.parse: pre #2-1');
 
 		wikitext = 'a\n----\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: hr #1');

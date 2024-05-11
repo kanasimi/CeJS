@@ -4509,6 +4509,25 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			if (Array.isArray(line)
+			//
+			&& !(line.type === 'plain' ? line : [ line ])
+			//
+			.some(function(sub_token) {
+				return typeof sub_token === 'string' ? sub_token.trim()
+				//
+				: sub_token.type !== 'comment';
+			})) {
+				if (line.type === 'plain')
+					line.unshift(' ');
+				else
+					line = _set_wiki_type([ ' ', line ], 'plain');
+				queue.push(line);
+				lines_without_style.push(include_mark + (queue.length - 1)
+						+ end_mark);
+				return;
+			}
+
 			list_now = _set_wiki_type([ line ], 'pre');
 
 			queue.push(list_now);
