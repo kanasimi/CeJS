@@ -83,6 +83,40 @@ function module_code(library_namespace) {
 		.replace(/\r?\n/g, '\n').replace(/\n{3,}/g, '\n\n');
 	}
 
+	// decode page title / section title
+	// @see [[mw:Manual:PAGENAMEE encoding#Encodings compared]]
+	function decode_title(title, original_title) {
+		if (!/%[\dA-F]{2}/i.test(title)) {
+			return original_title;
+		}
+
+		try {
+			// @see HTML_to_Unicode()
+			title = decodeURIComponent(title.replace_till_stable(
+			// MediaWiki 採用了非標準的 decodeURIComponent()，
+			// 可能是只 replace(/%([\s\S]{2}|$)/g)？
+			// [[#1%]] 不會像 decodeURIComponent() 一般 throw。
+			/%([\s\S]{2}|$)/g, function(all, code) {
+				return /^[\dA-F]{2}$/i.test(code) ? all
+						: encodeURIComponent('%') + code;
+			}));
+		} catch (e) {
+			// e.g., error after convert /\.([\dA-F]{2})/g
+			return original_title;
+			// 可能是非 UTF-8 編碼？
+			// TODO: 無法解碼可能會被辨識為普通文字而非 wikilink。
+			// e.g., "[[Francisco_Hern%E1ndez_de_C%F3"... @
+			// [[w:en:Talk:Francisco_Hernández_de_Córdoba_(Yucatán_conquistador)]]
+		}
+
+		if (/[\x00-\x1F\x7F]/.test(title)) {
+			// e.g. [[w:ja:エヴァンゲリオン (架空の兵器)#Mark.09]]
+			return original_title;
+		}
+
+		return title;
+	}
+
 	// --------------------------------------------------------------------------------------------
 
 	/**
@@ -2254,6 +2288,15 @@ function module_code(library_namespace) {
 					parameters.is_link = true;
 				}
 
+				parameters.page_title = wiki_API.normalize_title(
+				// parameters[0]
+				page_name.toString(), Object.assign({
+					// preserve_head_colon : true,
+					no_convert_interface_message : true
+				}, options));
+				parameters.page_title = decode_title(parameters.page_title)
+						|| parameters.page_title;
+
 				if (false) {
 					// NG: Array.isArray(pipe_separator) for file
 					pipe_separator = parse_wikitext(pipe_separator, options,
@@ -2269,25 +2312,8 @@ function module_code(library_namespace) {
 					anchor = anchor.replace(/\.([\dA-F]{2})/g, '%$1');
 				}
 				// console.log([ original_hash, anchor ]);
-				if (/%[\dA-F]{2}/i.test(anchor)) {
-					try {
-						// @see HTML_to_Unicode()
-						anchor = decodeURIComponent(anchor);
-						if (/[\x00-\x1F\x7F]/.test(anchor)) {
-							// e.g. [[w:ja:エヴァンゲリオン (架空の兵器)#Mark.09]]
-							anchor = original_hash;
-						}
-					} catch (e) {
-						// e.g., error after convert /\.([\dA-F]{2})/g
-						anchor = original_hash;
-						// 可能是非 UTF-8 編碼？
-						// TODO: 無法解碼可能會被辨識為普通文字而非 wikilink。
-						// e.g., "[[Francisco_Hern%E1ndez_de_C%F3"... @
-						// [[w:en:Talk:Francisco_Hernández_de_Córdoba_(Yucatán_conquistador)]]
-					}
-				} else {
-					anchor = original_hash;
-				}
+				anchor = decode_title(anchor) || original_hash;
+
 				// console.log(anchor);
 				// wikilink_token.anchor without "#" 網頁錨點 section_title
 				parameters.anchor = wiki_API.parse.anchor.normalize_anchor(
@@ -2296,6 +2322,7 @@ function module_code(library_namespace) {
 				.slice(1)
 				// 只去除結尾的空白(前面的.trimEnd())，保留前面的一個。
 				.replace(/^\s+/, ' ');
+
 				if (hash_sign)
 					parameters.hash_sign = hash_sign || '#';
 				// TODO: [[Special:]]

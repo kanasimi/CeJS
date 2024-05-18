@@ -80,11 +80,29 @@ function module_code(library_namespace) {
 		token = wiki_API.repeatedly_expand_template_token(token, options);
 		// console.trace(token);
 
+		if (token.has_shell && !token.type && token.length === 1) {
+			token = token[0];
+			// console.trace(token);
+		}
+
 		// ------------------------
 
+		if (token.type === 'pre') {
+			var new_token = [];
+			// @see wiki_element_toString.pre
+			token.forEach(function(sub_token) {
+				new_token.push('\n ', sub_token);
+			});
+			new_token[0] = ' ';
+			token = wiki_API.parse.set_wiki_type(new_token, 'plain');
+			// free
+			new_token = null;
+		}
+
 		if (token.type in {
-			plain : true,
-			tag_inner : true
+			tag_inner : true,
+			parameter_unit : true,
+			plain : true
 		}) {
 			for_each_subelement.call(token, function(sub_token, index, parent) {
 				// console.trace(sub_token);
@@ -1890,6 +1908,16 @@ function module_code(library_namespace) {
 					}));
 					// Also show .imprecise_tokens
 					console.trace(section_title_token);
+					if (section_title_link.tokens_maybe_handlable) {
+						console.trace('tokens_maybe_handlable:',
+						//
+						section_title_link.tokens_maybe_handlable);
+					}
+					if (section_title_link.imprecise_tokens) {
+						console.trace('imprecise_tokens:',
+						//
+						section_title_link.imprecise_tokens);
+					}
 					imprecise_anchor_count++;
 				} else {
 					library_namespace.warn(

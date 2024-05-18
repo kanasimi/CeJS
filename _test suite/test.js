@@ -3647,6 +3647,14 @@ function test_wiki() {
 		wikitext = '[[wikt:頁%23{{#language:zh|en}}|頁]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.link #15');
 		assert(["{{#language:zh|en}}", parsed.anchor], 'wiki.parse.link #15-1');
+		wikitext = '[[%E9%AB%981%%E5%A4%9A#%E9%AB%981%%E5%A4%9A]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #16');
+		assert(["高1%多", parsed.anchor], 'wiki.parse.link #16-1');
+		assert(["高1%多", parsed.page_title], 'wiki.parse.link #16-2');
+		wikitext = '[[%E9%AB%981%#%E9%AB%981%]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #17');
+		assert(["高1%", parsed.anchor], 'wiki.parse.link #17-1');
+		assert(["高1%", parsed.page_title], 'wiki.parse.link #17-2');
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #1');
