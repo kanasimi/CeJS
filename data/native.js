@@ -3909,6 +3909,7 @@ function module_code(library_namespace) {
 			backtrack(from_index, to_index, all_list);
 		} catch (e) {
 			if (options.no_throw_when_stack_size_is_exceeded) {
+				library_namespace.error('LCS: stack size is exceeded: ' + e);
 				all_list.error = e;
 				return all_list;
 			}

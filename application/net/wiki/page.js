@@ -2576,7 +2576,7 @@ function module_code(library_namespace) {
 
 				if (rows.length > 0) {
 					// console.trace(rows);
-					library_namespace.log_temporary('add_listener.with_diff: '
+					library_namespace.log_temporary('add_listener: '
 							+ 'Fetching ' + rows.length
 							+ ' page(s) starting from page '
 							+ wiki_API.title_link_of(rows[0]));
@@ -2584,7 +2584,7 @@ function module_code(library_namespace) {
 					library_namespace.debug('Fetching ' + rows.length
 							+ ' recent page(s):\n' + rows.map(function(row) {
 								return row.revid;
-							}), 2, 'add_listener.with_diff');
+							}), 2, 'add_listener');
 
 					// 比較頁面修訂差異。
 					if (options.with_diff || options.with_content >= 2) {
