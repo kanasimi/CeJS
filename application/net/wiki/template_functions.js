@@ -1176,6 +1176,7 @@ function module_code(library_namespace) {
 			function_config.properties = Object.create(null);
 		}
 		Object.assign(function_config.properties, template_properties);
+		// console.trace(function_config.properties);
 	}
 
 	// ------------------------------------------

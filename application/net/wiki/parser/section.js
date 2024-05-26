@@ -1984,53 +1984,96 @@ function module_code(library_namespace) {
 					template_token.expand ]);
 				}
 
+				function process_template_page(resolve, reject) {
+					var parse_template_anchors__chain
+					//
+					= options.parse_template_anchors__chain;
+					if (false) {
+						console.trace([ template_token.name,
+								options.parse_template_anchors__chain ]);
+					}
+					if (Array.isArray(parse_template_anchors__chain)) {
+						parse_template_anchors__chain
+						//
+						= parse_template_anchors__chain.slice();
+						parse_template_anchors__chain
+						//
+						.push(template_token.name);
+					} else {
+						parse_template_anchors__chain
+						//
+						= [ template_token.name ];
+					}
+					var _options = Object.assign(Object.clone(options), {
+						parse_template_anchors__chain
+						//
+						: parse_template_anchors__chain
+					});
+					wiki_API.page(template_token.name,
+					//
+					function(page_data, error) {
+						if (error) {
+							console.trace([ template_token.toString(),
+									template_token ]);
+							reject(error);
+							return;
+						}
+
+						function set_transclusion_page_anchors(_anchors) {
+							// console.trace(template_token, _anchors);
+							var anchors = [];
+							_anchors.map(function(anchor) {
+								anchor = register_anchor(anchor,
+								//
+								template_token);
+								if (anchor) {
+									anchors_in_transcluded_pages[anchor]
+									//
+									= template_token.name;
+									anchors.push(anchor);
+								}
+							});
+							transcluded_pages[template_token.name] = {
+								page_data : page_data,
+								anchors : anchors
+							};
+							resolve();
+						}
+
+						// console.trace(page_data);
+						var wikitext = wiki_API.content_of(page_data);
+						var anchors = get_all_anchors(wikitext, _options);
+						if (library_namespace.is_thenable(anchors)) {
+							anchors.then(set_transclusion_page_anchors,
+
+							reject);
+						} else {
+							set_transclusion_page_anchors(anchors);
+						}
+					}, options);
+				}
+
 				if (template_token.name === template_token.page_title
 						&& options.try_to_expand_templates) {
-					// 處理嵌入正常頁面中的 anchors。
-					// e.g., [[w:en:List of Latin phrases (Q)]]
-					// TODO: 一次處理所有頁面，別一個個處理。
-					var promise = new Promise(function(resolve, reject) {
-						wiki_API.page(template_token.name, function(page_data,
-								error) {
-							if (error) {
-								console.trace([ template_token.toString(),
-										template_token ]);
-								reject(error);
-								return;
-							}
 
-							function set_transclusion_page_anchors(_anchors) {
-								// console.trace(template_token, _anchors);
-								var anchors = [];
-								_anchors.map(function(anchor) {
-									anchor = register_anchor(anchor,
-											template_token);
-									if (anchor) {
-										anchors_in_transcluded_pages[anchor]
-										//
-										= template_token.name;
-										anchors.push(anchor);
-									}
-								});
-								transcluded_pages[template_token.name] = {
-									page_data : page_data,
-									anchors : anchors
-								};
-								resolve();
-							}
+					if (!options.parse_template_anchors__chain
+							|| !options.parse_template_anchors__chain
+									.includes(template_token.name)) {
+						// 處理嵌入正常頁面中的 anchors。
+						// e.g., [[w:en:List of Latin phrases (Q)]]
+						// TODO: 一次處理所有頁面，別一個個處理。
+						return new Promise(process_template_page);
+					}
 
-							// console.trace(page_data);
-							var wikitext = wiki_API.content_of(page_data);
-							var anchors = get_all_anchors(wikitext, _options);
-							if (library_namespace.is_thenable(anchors)) {
-								anchors.then(set_transclusion_page_anchors,
-										reject);
-							} else {
-								set_transclusion_page_anchors(anchors);
-							}
-						}, options);
-					});
-					return promise;
+					library_namespace.warn('get_all_anchors: '
+					// 循環參照
+					+ 'Circular transcluded page '
+							+ wiki_API.title_link_of(template_token.name)
+							+ ': ' + options.parse_template_anchors__chain
+							// e.g., [[Wikipedia:メインページ新着投票所/新しい項目候補]]
+							.map(function(page_title) {
+								return wiki_API.title_link_of(page_title);
+							}).join('\n⭢'));
 				}
 
 				var anchors = wiki_API.repeatedly_expand_template_token(

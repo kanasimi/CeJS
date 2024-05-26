@@ -109,6 +109,7 @@ function module_code(library_namespace) {
 			return token[0];
 		}, true);
 
+		// console.trace([ has_complex_parameter_name, parsed.toString() ]);
 		if (has_complex_parameter_name) {
 			has_complex_parameter_name = parsed.toString();
 			if (!wikitext || wikitext !== has_complex_parameter_name) {
@@ -123,6 +124,7 @@ function module_code(library_namespace) {
 
 		if (have_template_parameters)
 			parsed.have_template_parameters = true;
+		// console.trace([ has_complex_parameter_name, parsed.toString() ]);
 		return parsed;
 	}
 
@@ -208,6 +210,7 @@ function module_code(library_namespace) {
 			// console.trace(transclusion_config);
 			transclusion_config.usage_times++;
 			var wikitext = transclusion_config.simplified_template_wikitext;
+			// console.trace(transclusion_config);
 			return transclusion_config.need_evaluate ? simplify_transclusion(
 					wikitext, this, options) : wikitext;
 		};
@@ -230,6 +233,7 @@ function module_code(library_namespace) {
 	function simplify_transclusion(wikitext, template_token_called, options,
 			level) {
 		// console.trace(template_token_called);
+		// console.trace(template_token_called[0].toString(), level);
 		var parameters = template_token_called.parameters;
 		var page_data, transclusion_config;
 		if (wiki_API.is_page_data(wikitext)) {
@@ -240,9 +244,13 @@ function module_code(library_namespace) {
 		if (!wikitext)
 			return wikitext;
 
+		// Error.stackTraceLimit = Infinity;
+		// console.trace(wikitext);
+		// Error.stackTraceLimit = 10;
 		var parsed = convert_parameter(wikitext, parameters, options);
+		// console.trace(page_data);
 		if (page_data) {
-			// cache
+			// cache template code
 			var session = wiki_API.session_of_options(options);
 			// 只在第一次執行時(!!page_data=true)顯示訊息。
 			options = Object.assign({
@@ -258,11 +266,13 @@ function module_code(library_namespace) {
 					title : page_data.title,
 					// page_data : page_data,
 					need_evaluate : parsed.have_template_parameters,
+					// cache simplified wikitext
 					simplified_template_wikitext : wikitext,
 					// 引用次數
 					usage_times : 1,
 					fetch_date : Date.now()
 				};
+				// console.trace(page_data.title, wiki_API.template_functions);
 				if (wiki_API.template_functions) {
 					wiki_API.template_functions.set_proto_properties(
 					//
@@ -271,6 +281,11 @@ function module_code(library_namespace) {
 						//
 						generate_expand_template_function(transclusion_config)
 					}, options);
+				} else {
+					library_namespace.debug(
+					//
+					'建議 include application.net.wiki.template_functions', 1,
+							'simplify_transclusion');
 				}
 				if (transclusion_config.need_evaluate)
 					transclusion_config = null;
@@ -370,10 +385,10 @@ function module_code(library_namespace) {
 							null, options);
 					// console.trace([ token, token.expand, options ]);
 				} else {
-					library_namespace
-							.debug(
-									'建議 include application.net.wiki.template_functions',
-									1, 'repeatedly_expand_template_token');
+					library_namespace.debug(
+					//
+					'建議 include application.net.wiki.template_functions', 1,
+							'repeatedly_expand_template_token');
 				}
 				if (typeof token.expand !== 'function') {
 					break;
@@ -397,7 +412,8 @@ function module_code(library_namespace) {
 					});
 				}
 				library_namespace
-						.error('repeatedly_expand_template_token: Using async function + options.allow_promise to expand: '
+						.error('repeatedly_expand_template_token: '
+								+ 'Using async function + options.allow_promise to expand: '
 								+ token);
 				// Error.stackTraceLimit = Infinity;
 				// console.trace(token);
@@ -406,6 +422,9 @@ function module_code(library_namespace) {
 			}
 
 			if (token.expand.incomplete) {
+				// e.g., @
+				// CeL.application.net.wiki.template_functions.general_functions
+
 				// 生成未完全實作的註解。
 				promise = '<!-- Incomplete expansion of '
 						+ token.page_title
@@ -415,14 +434,17 @@ function module_code(library_namespace) {
 				// console.trace(promise);
 			}
 
-			token = wiki_API.parse(promise, options);
+			// console.trace(promise);
+
+			// re-parse
+			token = wiki_API.parse(promise.toString(), options);
 		}
 
 		return token;
 	}
 
 	// 類似 wiki_API_expandtemplates()
-	// ** 僅能提供簡單的演算功能，但提供 cache，不必每次傳輸資料回伺服器。
+	// ** 僅能提供簡單的演算功能，但提供 cache，不必每次從伺服器重新取得嵌入的頁面。
 	// [[Special:ExpandTemplates]]
 	// 使用上注意: 應設定 options[KEY_on_page_title_option]
 	// 可考慮是否採用 CeL.wiki.wikitext_to_plain_text()
@@ -541,12 +563,13 @@ function module_code(library_namespace) {
 				console.trace(token);
 				var some_sub_token_not_evaluated;
 				for_each_subelement.call(token, 'magic_word_function',
-						function(magic_word_function) {
-							if (magic_word_function.not_evaluated) {
-								some_sub_token_not_evaluated = true;
-								return for_each_subelement.exit;
-							}
-						});
+				//
+				function(magic_word_function) {
+					if (magic_word_function.not_evaluated) {
+						some_sub_token_not_evaluated = true;
+						return for_each_subelement.exit;
+					}
+				});
 				console.trace(some_sub_token_not_evaluated);
 			}
 			var page_title = token.page_title.toString();
@@ -587,6 +610,7 @@ function module_code(library_namespace) {
 				}
 
 				page_title = session.to_namespace(page_title, 'Template');
+				// console.trace(page_title);
 
 				// 盡量避免網路操作。
 				if (!session.templates_now_fetching)
@@ -614,13 +638,15 @@ function module_code(library_namespace) {
 				}
 				library_namespace.log_temporary('fetch_and_resolve_template: '
 						+ wiki_API.title_link_of(page_title));
-				Error.stackTraceLimit = Infinity;
+				// Error.stackTraceLimit = Infinity;
+				// console.trace(page_title);
 				session.register_redirects(page_title,
 				//
 				function(page_data, error) {
 					// console.trace([ page_data, page_title, error ]);
 					session.page(page_data || page_title, function(page_data,
 							error) {
+						// console.trace([ page_data, page_title, error ]);
 						var evaluate_list
 						//
 						= session.templates_now_fetching[page_title];
@@ -633,7 +659,7 @@ function module_code(library_namespace) {
 					// namespace : 'Template',
 					no_message : true
 				});
-				Error.stackTraceLimit = 10;
+				// Error.stackTraceLimit = 10;
 			});
 		}
 

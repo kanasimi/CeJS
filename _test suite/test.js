@@ -4570,6 +4570,11 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #10');
 		wanted_token = null; parsed.each('convert', function (token) { wanted_token = token; return parsed.each.exit; });
 		assert(!wanted_token, 'wiki.parse: HTML tag pre #10-1');
+		// [[w:ja:アスキーアート]]
+		wikitext = "<pre><nowiki>''a'''b''</nowiki></pre>"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #11');
+		wikitext = "<pre>''a'''b''</pre>"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #12');
 
 		wikitext = '1<nowiki>\n==t==\nw\n</nowiki>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #1');
@@ -5667,6 +5672,7 @@ function test_wiki() {
 		});
 
 
+
 		var jawiki = new CeL.wiki(null, null, 'ja');
 
 		jawiki.run(function () {
@@ -5678,6 +5684,33 @@ function test_wiki() {
 
 			_finish_test(test_name);
 		});
+
+		jawiki.run(function test_expand_transclusion_jawiki() {
+			var test_name = 'jawiki: expand_transclusion';
+			_setup_test(test_name);
+
+			var options = CeL.wiki.add_session_to_options(jawiki, { on_page_title: 'ABC', allow_promise: true,
+			// for await CeL.wiki.parse.anchor()
+			try_to_expand_templates: true, ignore_variable_anchors: true });
+			var promise = Promise.resolve();
+
+			promise = promise.then(function () {
+				return CeL.wiki.parse.anchor('=== {{Particle|ABC}} ===\n', options);
+			}).then(function (anchors) {
+				//console.trace(anchors);
+				assert(anchors.includes('ABC（ノート / 履歴 / ログ / リンク元）'), 'CeL.wiki.parse.anchor(): {{Particle}} first');
+			}).then(function () {
+				return CeL.wiki.parse.anchor('=== {{Particle|DEF}} ===\n', options);
+			}).then(function (anchors) {
+				//console.trace(anchors);
+				assert(anchors.includes('DEF（ノート / 履歴 / ログ / リンク元）'), 'CeL.wiki.parse.anchor(): {{Particle}} cached');
+			});
+
+			return promise.then(function (parsed) {
+				_finish_test(test_name);
+			});
+		});
+
 
 
 		var zhwiki = new CeL.wiki(null, null, 'zh');
@@ -5801,14 +5834,15 @@ function test_wiki() {
 			});
 
 			promise = promise.then(function () {
+				// [[w:zh:Template:Country data United States]]
 				return CeL.wiki.parse.anchor('=={{USA}} USA==', { session: zhwiki, on_page_title: '美国驻华大使列表', try_to_expand_templates: true });
 			}).then(function (anchor_list) {
-				assert([' 美國 USA', anchor_list.join()], 'CeL.wiki.parse.anchor() {try_to_expand_templates: true} #1');
+				assert([' 美国 USA', anchor_list.join()], 'CeL.wiki.parse.anchor() {try_to_expand_templates: true} #1');
 			}).then(function () {
 				return CeL.wiki.parse.anchor('=={{USA}} USA==', { session: zhwiki, on_page_title: '美国驻华大使列表', try_to_expand_templates: true });
 			}).then(function (anchor_list) {
 				// 第二次取值也必須正確。
-				assert([' 美國 USA', anchor_list.join()], 'CeL.wiki.parse.anchor() {try_to_expand_templates: true} #2');
+				assert([' 美国 USA', anchor_list.join()], 'CeL.wiki.parse.anchor() {try_to_expand_templates: true} #2');
 			});
 
 			promise.then(function () { }, function (error) {

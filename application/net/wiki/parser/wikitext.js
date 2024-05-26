@@ -430,8 +430,11 @@ function module_code(library_namespace) {
 			// [[mw:Manual:Extensions]]
 			// configurations.extensiontags
 			+ 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem',
-	// <nowiki>不允許內部再解析，但這幾個都內部得再解析。
+	// <nowiki>不允許內部再解析，但這幾個的內部得再解析。
 	wiki_extensiontags_must_parse_inner = {
+		// e.g., "<pre><nowiki>''a'''b''</nowiki></pre>"
+		pre : true,
+
 		onlyinclude : true,
 		includeonly : true,
 		noinclude : true
@@ -3147,6 +3150,11 @@ function module_code(library_namespace) {
 			var _options;
 			for (var index = 0; index < token.length; index++) {
 				var sub_token = token[index];
+				if (!sub_token) {
+					// sub_token 可能是 undefined。
+					// e.g., "<pre>''a'''b''</pre>"
+					continue;
+				}
 				if (sub_token.type === 'tag_inner'
 				// e.g., `<nowiki>-{zh-cn:这;zh-tw:這}-</nowiki>` inside <pre>
 				// re-parse for finding functional tokens
@@ -4156,6 +4164,9 @@ function module_code(library_namespace) {
 				if (need_create_next_token) {
 					// assert: this_token === undefined
 					// without start quote
+
+					// 注意: 這會造成 parse_wikitext() 其他操作時 token[0] === undefined。
+					// e.g., "<pre>''a'''b''</pre>"
 					this_token = _set_wiki_type([ , '' ],
 							need_create_next_token.type);
 					need_create_next_token.following_content = this_token;
