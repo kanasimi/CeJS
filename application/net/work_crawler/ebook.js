@@ -273,10 +273,13 @@ function module_code(library_namespace) {
 	https://www.piaotia.com/html/15/15579/11116769.html	我在田宗剑道成仙 第140章 最难甚解（加2）
 	&nbsp;&nbsp;&nbsp;&nbsp;第140章 __最难甚解（加2）<br /><br />
 
+	https://www.piaotia.com/html/15/15579/11117183.html	我在田宗剑道成仙 第554章 鉴天镜地书姜思白
+	&nbsp;&nbsp;&nbsp;&nbsp;第554章 鉴天镜+地书+姜思白<br /><br />
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~\/\-—々·\s_]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\/+\-—々·\s_]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
