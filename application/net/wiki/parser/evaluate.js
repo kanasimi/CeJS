@@ -25,7 +25,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.parser.evaluate',
 	// for_each_subelement
-	require : 'application.net.wiki.parser.',
+	require : 'application.net.wiki.parser.'
+	// strftime
+	+ '|data.date.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -37,7 +39,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var wiki_API = library_namespace.application.net.wiki, for_each_subelement = wiki_API.parser.parser_prototype.each;
+	var wiki_API = library_namespace.application.net.wiki, for_each_subelement = wiki_API.parser.parser_prototype.each, strftime = library_namespace.date.Date_to_String.parser.strftime;
 
 	// --------------------------------------------------------------------------------------------
 
@@ -921,6 +923,98 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function wiki_date_to_String(date_value, format, options) {
+		var session = wiki_API.session_of_options(options);
+		var locale = wiki_API.site_name(session);
+
+		var conversion = strftime.get_conversion(locale);
+		if (!conversion) {
+			locale = wiki_date_to_String.default_locale;
+			conversion = strftime.get_conversion(locale);
+		}
+
+		var search_pattern = wiki_date_to_String.search_pattern[locale];
+		if (!search_pattern) {
+			search_pattern = wiki_date_to_String.search_pattern[locale] = new RegExp(
+					'("[^"]*"|' + Object.keys(conversion).join('|') + ')', 'g');
+		}
+
+		// "Y" → "%Y"
+		format = format.replace(search_pattern, function(all, conversion) {
+			if (/^"/.test(conversion))
+				return conversion;
+			return '%' + conversion;
+		});
+
+		if (/\w/.test(format.replace(/%\w/g, ''))) {
+			// 警告不能完全模擬的功能。
+			// console.trace([ format, format.replace(/[-\s]/g, '') ]);
+			return new wiki_error('NYI');
+		}
+
+		options = Object.assign(Object.clone(options), {
+			locale : locale
+		});
+
+		// console.trace([ date_value, format, locale, options ]);
+		return strftime(date_value, format, locale, options);
+	}
+
+	wiki_date_to_String.default_locale = 'enwiki';
+	wiki_date_to_String.search_pattern = Object.create(null);
+
+	var gettext_date = library_namespace.gettext.date;
+	// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##time
+	// https://www.php.net/manual/en/datetimeimmutable.createfromformat.php
+	strftime.set_conversion({
+		Y : function(date_value) {
+			return date_value.getUTCFullYear();
+		},
+		y : function(date_value) {
+			return date_value.getUTCYear();
+		},
+		L : function(date_value) {
+			var year = date_value.getUTCFullYear();
+			return library_namespace.date.is_leap_year(year);
+		},
+		n : function(date_value, options) {
+			return 1 + date_value.getUTCMonth();
+		},
+		m : function(date_value, options) {
+			return (1 + date_value.getUTCMonth()).pad(2);
+		},
+		j : function(date_value, options) {
+			return date_value.getUTCDate();
+		},
+		d : function(date_value, options) {
+			return date_value.getUTCDate().pad(2);
+		},
+		F : function(date_value, options) {
+			return gettext_date.month(1 + date_value.getUTCMonth(), 'en');
+		}
+	// others: TODO
+	}, wiki_date_to_String.default_locale, {
+		no_gettext : true
+	});
+
+	// --------------------------------------------------------------------------------------------
+
+	// https://stackoverflow.com/questions/1382107/whats-a-good-way-to-extend-error-in-javascript
+	function wiki_error(message) {
+		// Error.call(this, message);
+		this.message = message;
+		// https://groups.google.com/g/mozilla.dev.tech.js-engine/c/rxlcWq-_yzI
+		this.stack = (new Error).stack;
+	}
+
+	wiki_error.prototype = Object.assign(Object.create(Error.prototype), {
+		name : 'wiki_error',
+		// is_wiki_error : true,
+		constructor : wiki_error
+	});
+
+	// --------------------------------------------------------------------------------------------
+
 	var buggy_toLocaleString = (1234).toLocaleString('en') !== '1,234';
 	if (false && buggy_toLocaleString) {
 		// e.g., node.js 0.10
@@ -1308,14 +1402,16 @@ function module_code(library_namespace) {
 
 		case '#dateformat':
 		case '#formatdate':
-			var date = new Date(get_parameter_String(1));
+			var date = new Date(get_parameter_String(1) + ' UTC');
 			var type = get_parameter_String(2);
-			// console.trace([ date, type ]);
+			// console.trace([ get_parameter_String(1), date, type ]);
 
 			// TODO: 此為有缺陷的極精簡版。
 			switch (type) {
 			case 'ISO 8601':
-				return date.format('%Y-%2m-%2d');
+				return date.format('%Y-%2m-%2d', {
+					zone : 0
+				});
 
 			case 'ymd':
 				type = '%Y %B %d';
@@ -1335,6 +1431,7 @@ function module_code(library_namespace) {
 			}
 			return date.format({
 				format : type,
+				zone : 0,
 				locale : 'en'
 			});
 
@@ -1343,21 +1440,21 @@ function module_code(library_namespace) {
 			// {{#time: format string | date/time object | language code | local
 			// }}
 			var argument_2 = get_parameter_String(2);
+			var date;
 			if (!argument_2 || argument_2 === 'now') {
-				argument_2 = new Date;
-				return get_parameter_String(1).replace(/Y/g,
-						argument_2.getUTCFullYear())
-				//
-				.replace(/n/g, argument_2.getUTCMonth() + 1)
-				//
-				.replace(/m/g, (argument_2.getUTCMonth() + 1).pad(2))
-				//
-				.replace(/j/g, argument_2.getUTCDate())
-				//
-				.replace(/d/g, argument_2.getUTCDate().pad(2));
-				// TODO
+				date = new Date;
+			} else {
+				date = new Date(argument_2 + ' UTC');
+				if (!date) {
+					return new wiki_error('Error: Invalid time.');
+				}
+				date = new Date(date);
 			}
-			return NYI();
+			// console.trace([ argument_2, new Date(date) ]);
+			date = wiki_date_to_String(date, get_parameter_String(1), options);
+			if (date instanceof wiki_error)
+				return NYI();
+			return date;
 
 			// ----------------------------------------------------------------
 
