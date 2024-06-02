@@ -418,7 +418,7 @@ function module_code(library_namespace) {
 								+ 'Using async function + options.allow_promise to expand: '
 								+ token);
 				// Error.stackTraceLimit = Infinity;
-				// console.trace(token);
+				console.trace(token);
 				// delete token.expand;
 				break;
 			}

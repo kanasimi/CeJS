@@ -1569,7 +1569,8 @@ function module_code(library_namespace) {
 		conversion = strftime.conversion[locale]
 				|| strftime.conversion[strftime.null_domain],
 		/**
-		 * 所須搜尋的 conversion specifications (轉換規格) pattern.
+		 * 所須搜尋的 conversion specifications (轉換規格) pattern.<br />
+		 * .search_pattern
 		 */
 		search = strftime.search[locale]
 				|| strftime.search[strftime.null_domain];
@@ -1590,22 +1591,27 @@ function module_code(library_namespace) {
 		}
 
 		function convertor(s) {
-			return s.replace(search, function($0, $1, $2) {
+			return s.replace(search, function(all, pad_count, use_conversion) {
 				// 可以在 conversion 中，用
 				// this[conversion name].apply(this, arguments)
 				// 來取得另一 conversion 之結果。
-				var v = $2 in original_Date ? original_Date[$2]
-				// original_Date[$2] 為物件本身之特殊屬性，應當排在泛用函數 conversion[$2] 之前。
-				: typeof (v = conversion[$2]) === 'function' ? conversion[$2](
-						date_value, options)
+				var v = use_conversion in original_Date
+				//
+				? original_Date[use_conversion]
+				// original_Date[use_conversion] 為物件本身之特殊屬性，應當排在泛用函數
+				// conversion[use_conversion] 之前。
+				: typeof (v = conversion[use_conversion])
+				//
+				=== 'function' ? conversion[use_conversion]
+						(date_value, options)
 				//
 				: v in original_Date ? original_Date[v]
 				// 將之當作 format。
 				: /%/.test(v) ? parse_escape(v, convertor)
 				//
 				: v;
-				// library_namespace.debug([v, $1, $2]);
-				return $1 ? pad(v, $1) : v;
+				// library_namespace.debug([v, pad_count, use_conversion]);
+				return pad_count ? pad(v, pad_count) : v;
 			});
 		}
 
@@ -1614,6 +1620,16 @@ function module_code(library_namespace) {
 
 	// .toISOString(): '%4Y-%2m-%2dT%2H:%2M:%2S.%fZ'
 	strftime.default_format = '%Y/%m/%d %H:%M:%S.%f';
+
+	strftime.get_conversion = function get_conversion(locale, options) {
+		var locale_conversion;
+		if (!(locale in (locale_conversion = strftime.conversion))) {
+			return;
+		}
+
+		locale_conversion = locale_conversion[locale];
+		return locale_conversion;
+	};
 
 	/**
 	 * 設定支援的 conversion specifications (轉換規格).<br />
@@ -1634,7 +1650,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {RegExp} 所須搜尋的 conversion specifications (轉換規格) pattern。
 	 */
-	strftime.set_conversion = function(conversion, locale, options) {
+	strftime.set_conversion = function set_conversion(conversion, locale,
+			options) {
 		var i, v, locale_conversion, gettext = library_namespace.gettext,
 		// escape special char.
 		escape_string = function(s) {
