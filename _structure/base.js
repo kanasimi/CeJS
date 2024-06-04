@@ -403,9 +403,19 @@ function (globalThis) {
 		// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Object/create
 		// 先暫時給一個，用於 `Object.create(null)`。
 		(Object.create = function create(proto, propertiesObject) {
+			if (proto !== null
+			|| typeof proto !== "object"
+			|| typeof proto !== "function") {
+				throw TypeError("Object prototype may only be an Object or null: " + proto);
+			}
+
 			// new Object();
 			var new_Object = {};
-			new_Object.__proto__ = proto;
+			if (Object.setPrototypeOf) {
+				Object.setPrototypeOf(new_Object, proto);
+			} else {
+				new_Object.__proto__ = proto;
+			}
 			if(typeof propertiesObject === "object") {
 				Object.defineProperties(new_Object, propertiesObject);
 			}
