@@ -404,14 +404,14 @@ function (globalThis) {
 		// 先暫時給一個，用於 `Object.create(null)`。
 		(Object.create = function create(proto, propertiesObject) {
 			if (proto !== null
-			|| typeof proto !== "object"
-			|| typeof proto !== "function") {
+			&& typeof proto !== "object"
+			&& typeof proto !== "function") {
 				throw TypeError("Object prototype may only be an Object or null: " + proto);
 			}
 
 			// new Object();
 			var new_Object = {};
-			if (Object.setPrototypeOf) {
+			if (Object.setPrototypeOf && !Object.setPrototypeOf[KEY_not_native]) {
 				Object.setPrototypeOf(new_Object, proto);
 			} else {
 				new_Object.__proto__ = proto;

@@ -210,41 +210,45 @@ function module_code(library_namespace) {
 		}
 
 	if (!Object.setPrototypeOf) {
-		var Object_getPrototypeOf, Object_setPrototypeOf;
+		(function() {
+			var Object_getPrototypeOf, Object_setPrototypeOf;
 
-		// test prototype chain
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain
-		if (typeof {}.__proto__ === 'object') {
-			// http://ejohn.org/blog/objectgetprototypeof/
-			// https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/GetPrototypeOf
-			// http://perfectionkills.com/how-ecmascript-5-still-does-not-allow-to-subclass-an-array/
-			Object_getPrototypeOf = function(object) {
-				return object.__proto__;
-			};
-			Object_setPrototypeOf = function(object, prototype) {
-				object.__proto__ = prototype;
-				return object;
-			};
+			// test prototype chain
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain
+			if ({
+				__proto__ : []
+			} instanceof Array) {
+				// http://ejohn.org/blog/objectgetprototypeof/
+				// https://github.com/zloirock/core-js/blob/master/packages/core-js/internals/object-set-prototype-of.js
+				// https://github.com/wesleytodd/setprototypeof/blob/master/index.js
+				// https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/GetPrototypeOf
+				// http://perfectionkills.com/how-ecmascript-5-still-does-not-allow-to-subclass-an-array/
+				Object_getPrototypeOf = function get__proto__Of(object) {
+					return object.__proto__;
+				};
+				Object_setPrototypeOf = function set__proto__Of(object,
+						prototype) {
+					object.__proto__ = prototype;
+					return object;
+				};
 
-			set_method(Object, {
-				getPrototypeOf : Object_getPrototypeOf,
-				setPrototypeOf : Object_setPrototypeOf
-			});
+			} else if ({}.constructor && {}.constructor.prototype) {
+				Object_getPrototypeOf = function(object) {
+					return object.constructor.prototype;
+				};
+				Object_setPrototypeOf = function(object, prototype) {
+					object.constructor.prototype = prototype;
+					return object;
+				};
+			}
 
-		} else if ({}.constructor && {}.constructor.prototype) {
-			Object_getPrototypeOf = function(object) {
-				return object.constructor.prototype;
-			};
-			Object_setPrototypeOf = function(object, prototype) {
-				object.constructor.prototype = prototype;
-				return object;
-			};
-
-			set_method(Object, {
-				getPrototypeOf : Object_getPrototypeOf,
-				setPrototypeOf : Object_setPrototypeOf
-			});
-		}
+			if (Object_getPrototypeOf) {
+				set_method(Object, {
+					getPrototypeOf : Object_getPrototypeOf,
+					setPrototypeOf : Object_setPrototypeOf
+				});
+			}
+		})();
 	}
 
 	// IE 8, JScript 5.8.23141 中，DOM 可能沒有 .hasOwnProperty()。
