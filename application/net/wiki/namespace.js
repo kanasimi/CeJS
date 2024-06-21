@@ -2490,10 +2490,11 @@ function module_code(library_namespace) {
 		if (need_escape) {
 			title = ':' + title;
 		}
+
 		// TODO: for template transclusion, use {{title}}
 		return '[[' + title + (display_text && display_text !== title ? '|'
 		// library_namespace.Unicode_to_HTML()
-		+ display_text.replace(/[\[\]]/g, function(char) {
+		+ String(display_text).replace(/[\[\]]/g, function(char) {
 			return '&#' + char.charCodeAt(0) + ';';
 		}) : '') + ']]';
 	}
