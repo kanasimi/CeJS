@@ -1578,9 +1578,10 @@ function module_code(library_namespace) {
 					var property_name = property_list[index];
 					if (property_name in this.claims) {
 						value = this.claims[property_name];
-						library_namespace
-								.log('wikidata_entity_value: 自多個 "'
-										+ property + '" 同名屬性中 (' + property_list.join(', ') + ')，選擇第一個有屬性值的 ' + property_name + '。');
+						library_namespace.log('wikidata_entity_value: 自多個 "'
+								+ property + '" 同名屬性中 ('
+								+ property_list.join(', ') + ')，選擇第一個有屬性值的 '
+								+ property_name + '。');
 						break;
 					}
 				}
@@ -2289,6 +2290,7 @@ function module_code(library_namespace) {
 
 	// @inner
 	// 為欲刪除之index。
+	// TODO: 查無此值時顯示警告。
 	function value_is_to_remove(value) {
 		// {key:{remove:true}}
 		return library_namespace.is_Object(value)
