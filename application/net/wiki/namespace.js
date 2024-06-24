@@ -178,13 +178,13 @@ function module_code(library_namespace) {
 	 *            value to test. 要測試的值。
 	 * @param {Boolean|String}[type]
 	 *            test type: true('simple'), 'language', 'URL'
-	 * @param {Boolean|String}[ignore_api]
-	 *            ignore API, 'set': set API
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {Boolean}value 為 [ {String}API_URL/language, {String}title or
 	 *          {Object}page_data ]
 	 */
-	function is_api_and_title(value, type, ignore_api) {
+	function is_api_and_title(value, type, options) {
 		// console.trace(value);
 
 		if (!Array.isArray(value) || value.length !== 2
@@ -196,6 +196,14 @@ function module_code(library_namespace) {
 		}
 
 		var API_URL = value[0];
+		/** {Boolean|String} ignore API test, 'set': set API */
+		var ignore_API_test;
+		if (typeof options === 'object') {
+			ignore_API_test = options.ignore_API_test;
+		} else {
+			ignore_API_test = options;
+			options = null;
+		}
 
 		if (type === true) {
 			// type === true: simple test, do not test more.
@@ -213,7 +221,7 @@ function module_code(library_namespace) {
 		// 處理 is_id。
 		&& (!(title > 0)
 		// 注意：這情況下即使是{Natural}page_id 也會pass!
-		|| typeof ignore_api !== 'object' || !ignore_api.is_id)) {
+		|| !options || !options.is_id)) {
 			library_namespace.debug('輸入的是問題頁面 title: ' + title, 2,
 					'is_api_and_title');
 			return false;
@@ -221,20 +229,19 @@ function module_code(library_namespace) {
 
 		// test API_URL: {String}API_URL/language
 		if (!API_URL) {
-			if (typeof ignore_api === 'object') {
+			if (options) {
 				library_namespace.debug('嘗試從 options[KEY_SESSION] 取得 API_URL。',
 						2, 'is_api_and_title');
-				// console.log(ignore_api);
-				// console.log(API_URL_of_options(ignore_api));
+				// console.log(options);
+				// console.log(API_URL_of_options(options));
 
-				// ignore_api 當作原函數之 options。
-				API_URL = API_URL_of_options(ignore_api);
+				API_URL = API_URL_of_options(options);
 				if (API_URL) {
 					value[0] = API_URL;
 				}
 				// 接下來繼續檢查 API_URL。
 			} else {
-				return !!ignore_api;
+				return !!ignore_API_test;
 			}
 		}
 
@@ -246,7 +253,16 @@ function module_code(library_namespace) {
 
 		// for property = [ {String}language, {String}title or {Array}titles ]
 		if (type === 'language') {
-			return PATTERN_PROJECT_CODE_i.test(API_URL);
+			var metched = PATTERN_PROJECT_CODE_i.test(API_URL);
+			if (options && options.multi === false) {
+				// 明確指定 `title` 為單一標題，{Array} 只能解釋為 [ language, title ]。
+				if (!metched) {
+					library_namespace.warn('is_api_and_title: 強制將 "' + API_URL
+							+ '" 視為語言代碼 [' + value + ']');
+				}
+				return true;
+			}
+			return metched;
 		}
 
 		// 處理 [ {String}API_URL/language, {String}title or {Object}page_data ]
@@ -1447,8 +1463,9 @@ function module_code(library_namespace) {
 	}
 
 	function namespace_of_options(options) {
+		var namespace = Array.isArray(options) ? options
 		// 必須預防 {Object}options。
-		var namespace = !options ? 0 : typeof options === 'number' ? options
+		: !options ? 0 : typeof options === 'number' ? options
 				: typeof options === 'string' ? library_namespace
 						.is_digits(options) ? +options : options
 						: options.namespace;
@@ -1458,6 +1475,7 @@ function module_code(library_namespace) {
 	// TODO: is_namespace(page_title, 'Wikipedia|User')
 	function page_title_is_namespace(page_title, options) {
 		var namespace = namespace_of_options(options);
+
 		var page_ns;
 		// console.trace(namespace, wiki_API.is_page_data(page_title));
 		if (wiki_API.is_page_data(page_title)) {
@@ -1469,9 +1487,19 @@ function module_code(library_namespace) {
 				is_page_title : true
 			}, options));
 		}
-		return page_ns === get_namespace(namespace, Object.assign({
-			is_page_title : false
-		}, options));
+
+		function check_namespace(namespace) {
+			return page_ns === get_namespace(namespace, Object.assign({
+				is_page_title : false
+			}, options));
+		}
+
+		if (Array.isArray(namespace)) {
+			// e.g., `CeL.wiki.is_namespace('User:user', ['Wikipedia', 'User'])`
+			return namespace.some(check_namespace);
+		}
+
+		return check_namespace(namespace);
 	}
 
 	function convert_page_title_to_namespace(page_title, options) {
@@ -3954,7 +3982,7 @@ function module_code(library_namespace) {
 
 				if (_key in action && action[_key] === value) {
 					// e.g., 設定 query_props : 'pageprops', @
-					// 20160517.解消済み仮リンクをリンクに置き換える.js
+					// 20160517.interlanguage_link_to_wikilinks.js
 					// 由於 props : 'pageprops' 應該是給 action=query 用的，
 					// ppprops 不該採用同樣的值。
 					return;

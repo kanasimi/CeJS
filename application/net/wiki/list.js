@@ -2302,7 +2302,9 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.langlinks = function(title, callback, to_lang, options) {
 		var from_lang;
-		if (is_api_and_title(title, 'language', true)) {
+		if (is_api_and_title(title, 'language', Object.assign({
+			ignore_API_test : true
+		}, options))) {
 			from_lang = title[0];
 			title = title[1];
 		}

@@ -164,7 +164,7 @@ function module_code(library_namespace) {
 			}
 			// TODO: 在這即使 rollback 了 action，
 			// 還是可能出現丟失 next[2].page_to_edit 的現象。
-			// e.g., @ 20160517.解消済み仮リンクをリンクに置き換える.js
+			// e.g., @ 20160517.interlanguage_link_to_wikilinks.js
 
 			// 直到 .edit 動作才會出現 badtoken，
 			// 因此在 wiki_API.login 尚無法偵測是否 badtoken。

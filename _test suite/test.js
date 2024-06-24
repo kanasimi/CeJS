@@ -5577,6 +5577,7 @@ function test_wiki() {
 			assert(enwiki.is_namespace('Talk:ABC', 'talk'), 'enwiki.is_namespace() #2');
 			assert(!enwiki.is_namespace('Wikipedia', 'Wikipedia'), 'enwiki.is_namespace() #3');
 			assert(!enwiki.is_namespace('File', 'file'), 'enwiki.is_namespace() #4');
+			assert(enwiki.is_namespace('Talk:ABC', ['Wikipedia', 'Talk']), 'enwiki.is_namespace() #3');
 
 			var link = CeL.wiki.parse('[[Page title#anchor|display text]]');
 			assert(['[[Page title#anchor|display text]]', CeL.wiki.title_link_of(link)], 'CeL.wiki.title_link_of(link) #1');
