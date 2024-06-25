@@ -1007,6 +1007,7 @@
 	"%1 WikiProject {{PLURAL:%1|template|templates}}.": "%1\u500b\u5c08\u984c{{PLURAL:%1|\u6a21\u7248}}\u3002",
 	"%1 {{PLURAL:%1|page|pages}} modified": "\u5df2\u4fee\u6539 %1 \u500b{{PLURAL:%1|\u9801\u9762}}",
 	"Fixing broken anchor": "\u4fee\u6b63\u5931\u6548\u7684\u7db2\u9801\u9328\u9ede",
+	"Remove %1 {{PLURAL:%1|notification|notifications}}": "\u522a\u9664 %1 \u500b{{PLURAL:%1|\u63d0\u9192}}",
 	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "\u79fb\u9664%1\u500b\u975e\u5931\u6548\u7db2\u9801{{PLURAL:%1|\u9328\u9ede}}",
 	"Anchor %1 links to a specific web page: %2.": "\u7db2\u9801\u9328\u9ede %1 \u9023\u7d50\u5230\u5c08\u5c6c\u9801\u9762\uff1a%2\u3002",
 	"The anchor (%2) [[Special:Diff/%1|has been deleted]].": "\u9328\u9ede\uff08%2\uff09[[Special:Diff/%1|\u5df2\u88ab\u522a\u9664]]\u3002",

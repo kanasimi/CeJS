@@ -1005,6 +1005,7 @@
 	"$1-wikiproject-templates": "%1 WikiProject {{PLURAL:%1|template|templates}}.",
 	"$1-pages-modified": "%1 {{PLURAL:%1|page|pages}} modified",
 	"fixing-broken-anchor": "Fixing broken anchor",
+	"remove-$1-notifications": "Remove %1 {{PLURAL:%1|notification|notifications}}",
 	"remove-$1-non-defunct-anchors": "Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "Anchor %1 links to a specific web page: %2.",
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": "The anchor (%2) [[Special:Diff/%1|has been deleted]].",

@@ -1017,6 +1017,7 @@
 	"$1-wikiproject-templates": "%1個專題{{PLURAL:%1|模版}}。",
 	"$1-pages-modified": "已修改 %1 個{{PLURAL:%1|頁面}}",
 	"fixing-broken-anchor": "修正失效的網頁錨點",
+	"remove-$1-notifications": "刪除 %1 個{{PLURAL:%1|提醒}}",
 	"remove-$1-non-defunct-anchors": "移除%1個非失效網頁{{PLURAL:%1|錨點}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "網頁錨點 %1 連結到專屬頁面：%2。",
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": "錨點（%2）[[Special:Diff/%1|已被刪除]]。",
