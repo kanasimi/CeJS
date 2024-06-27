@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Polid\u00e9 l'argistr",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Smon-e / st\u00ebrm\u00e9 l'argistr",
 	"Load failed": "Cariament fal\u00ec",
@@ -1007,6 +1007,7 @@
 	"%1 WikiProject {{PLURAL:%1|template|templates}}.": "%1 {{PLURAL:%1|stamp}} \u00ebd WikiProject.",
 	"%1 {{PLURAL:%1|page|pages}} modified": "%1 {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} modific\u00e0",
 	"Fixing broken anchor": "Coression \u00ebd l'ancra rota",
+	"Remove %1 {{PLURAL:%1|notification|notifications}}": "Gav\u00e9 %1 {{PLURAL:%1|not\u00ecfica|not\u00ecfiche}}",
 	"Remove %1 non-defunct {{PLURAL:%1|anchor|anchors}}": "Ch'as visa \u00ebd gav\u00e9 %1 {{PLURAL:%1|ancra nen m\u00f2rta|ancre nen m\u00f2rte}}",
 	"Anchor %1 links to a specific web page: %2.": "L\u2019ancra %1 a l'\u00e9 lij\u00e0 a na p\u00e0gina spess\u00ecfica an sl'aragn\u00e0\u202f: %2.",
 	"The anchor (%2) [[Special:Diff/%1|has been deleted]].": "L'\u00e0ncora (%2) [[Special:Diff/%1|a l'\u00e9 st\u00e0ita d\u00ebscancel\u00e0]].",
