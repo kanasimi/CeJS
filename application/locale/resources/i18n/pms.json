@@ -1011,6 +1011,7 @@
 	"$1-wikiproject-templates": "%1 {{PLURAL:%1|stamp}} ëd WikiProject.",
 	"$1-pages-modified": "%1 {{PLURAL:%1|pàgina|pàgine}} modificà",
 	"fixing-broken-anchor": "Coression ëd l'ancra rota",
+	"remove-$1-notifications": "Gavé %1 {{PLURAL:%1|notìfica|notìfiche}}",
 	"remove-$1-non-defunct-anchors": "Ch'as visa ëd gavé %1 {{PLURAL:%1|ancra nen mòrta|ancre nen mòrte}}",
 	"anchor-$1-links-to-a-specific-web-page-$2": "L’ancra %1 a l'é lijà a na pàgina spessìfica an sl'aragnà : %2.",
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": "L'àncora (%2) [[Special:Diff/%1|a l'é stàita dëscancelà]].",
