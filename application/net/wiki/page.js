@@ -1250,8 +1250,11 @@ function module_code(library_namespace) {
 
 				page_list.revisions_parameters = action[1];
 			}
-			// console.trace(page_list);
-			// console.trace(options);
+
+			if (library_namespace.is_debug(9)) {
+				// console.trace(page_list);
+				// console.trace(options);
+			}
 
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}

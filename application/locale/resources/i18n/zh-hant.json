@@ -985,6 +985,7 @@
 	"the-corresponding-foreign-language-page-does-not-exist": "所對應的外語條目不存在。",
 	"the-corresponding-foreign-language-page-is-a-disambiguation-page": "所對應的外語頁面為消歧義頁。",
 	"the-corresponding-foreign-language-page-is-redirected-to-a-section": "所對應的外語頁面重定向到了條目章節。",
+	"links-to-non-main-namespace": "連結到非文章。",
 	"syntax-error-in-the-interlanguage-link-template": "跨語言連結模板的語法錯誤。",
 	"could-not-retrieve-the-foreign-page.-i-will-retry-next-time": "無法取得所對應的外語條目。將於下次執行時再做嘗試。",
 	"no-registered-interwiki-link-templates-were-found": "未發現已登記之跨語言連結模板。",

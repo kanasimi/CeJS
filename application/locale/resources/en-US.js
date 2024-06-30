@@ -975,6 +975,7 @@
 	"The corresponding foreign language page does not exist.": "The corresponding foreign language page does not exist.",
 	"The corresponding foreign language page is a disambiguation page.": "The corresponding foreign language page is a disambiguation page.",
 	"The corresponding foreign language page is redirected to a section.": "The corresponding foreign language page is redirected to a section.",
+	"Links to non-main namespace.": "Links to non-main namespace.",
 	"Syntax error in the interlanguage link template.": "Syntax error in the interlanguage link template.",
 	"Could not retrieve the foreign page. I will retry next time.": "Could not retrieve the foreign page. I will retry next time.",
 	"No registered interwiki link templates were found.": "No registered interwiki link templates were found.",
