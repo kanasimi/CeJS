@@ -969,6 +969,7 @@
 	"the-task-does-not-process-talk-pages": "Ël travaj a trata nen le pàgine ëd ciaciarade",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "Ël bërsaj dla liura local a ponta vers l'istessa pàgina. [[MOS:CIRCULAR]]?",
 	"the-local-page-is-too-new.-will-try-again-next-time": "La pàgina local a l'é tròp recenta. As provrà torna pi tard.",
+	"links-to-non-main-namespace": "Liure vers lë spassi ëd nòm nen prinsipal",
 	"missing-converted-local-page-or-the-foreign-local-page-is-not-link-to-wikidata": "La pàgina local convertìa a manca, opura la pàgina strangera o local a l'é pa na liura vers wikidata.",
 	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title-but-the-foreign-page-directs-to-a-different-local-title": "Ël tìtol local ant lë stamp antërlenga a l'é l'istess dël tìtol an lenga strangera, ma la pàgina strangera a manda a 'n tìtol local diferent.",
 	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title": "Ël tìtol local ant lë stamp antërlenghe a l'é l'istess che ël tìtol an lenga strangera.",

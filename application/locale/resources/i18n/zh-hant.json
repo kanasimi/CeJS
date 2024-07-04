@@ -975,7 +975,7 @@
 	"the-task-does-not-process-talk-pages": "本任務不處理對話頁",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "所對應的中文條目重定向到了頁面本身。[[WP:CIRCULAR]]或可擴充重定向？",
 	"the-local-page-is-too-new.-will-try-again-next-time": "中文條目過新，將過幾天再測試。",
-	"links-to-non-main-namespace": "連結到非文章。",
+	"links-to-non-main-namespace": "連結到非主命名空間。",
 	"missing-converted-local-page-or-the-foreign-local-page-is-not-link-to-wikidata": "缺少轉換後的本地頁面，或者外部/本地頁面未鏈接到維基數據。",
 	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title-but-the-foreign-page-directs-to-a-different-local-title": "跨語言模板的本地標題與外語標題相同，但外語頁面導向不同的本地標題。",
 	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title": "跨語言模板的本地標題與外語標題相同",
