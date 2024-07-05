@@ -38,6 +38,7 @@ split epubs based on groups / size
  * 
  * @since 2017/1/24 11:55:51
  * @see [[en:file format]], [[document]], [[e-book]], [[EPUB]], [[Open eBook]]
+ *      https://www.w3.org/TR/epub/
  *      http://www.idpf.org/epub/31/spec/epub-packages.html
  *      https://www.w3.org/Submission/2017/SUBM-epub-packages-20170125/
  *      http://epubzone.org/news/epub-3-validation http://validator.idpf.org/

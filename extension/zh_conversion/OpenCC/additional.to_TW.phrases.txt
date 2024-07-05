@@ -532,6 +532,8 @@
 // 《女侠且慢》	只能拼爆发力、 (~拚<COO>v:猜 ~拚<role.type:ARGM-ADV>只能 d:只能+v:拼+n:爆发力+wp:、)
 // 《女侠且慢》	正面和同境刺客拼爆发， (~拚<SBV>v:无异 ~拚<role.type:ARGM-ADV>正面 ~拚<role.type:A0-CRD>和同境刺客 ~拚<role.type:A1>爆发 d:正面+p:和+n:同境+n:刺客+v:拼+v:爆发+wp:，)
 拼爆發	拚爆發
+// 《女侠且慢》	夜惊堂跑直线拼冲刺， (~拚<COO>v:跑 ~拚<role.type:ARGM-DIS>虽然 ~拚<role.type:A0>夜惊堂 ~拚<role.type:ARGM-DIS>就 ~拚<role.type:ARGM-ADV>已经 ~拚<role.type:A1>冲刺 nh:夜惊堂+v:跑+n:直线+v:拼+v:冲刺+wp:，)
+拼衝刺	拚衝刺
 // 《从红月开始》	现在我跟你拼理智！ (~拚<role.type:ARGM-TMP>现在 ~拚<role.type:A0>我 ~拚<role.type:A0>跟你 ~拚<role.type:A1>理智 nt:现在+r:我+p:跟+r:你+v:拼+n:理智+wp:！)
 拼理智	拚理智
 // 《开局奖励一亿条命》	拼武技， (~拚<role.type:A1>武技 v:拼+n:武技+wp:，)
