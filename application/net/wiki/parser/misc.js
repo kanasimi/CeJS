@@ -2137,9 +2137,12 @@ function module_code(library_namespace) {
 	function parse_lua_object_code(lua_code, options) {
 		options = library_namespace.setup_options(options);
 		lua_code = wiki_API.content_of(lua_code);
+		// e.g., `require('Module:Module wikitext')._addText('{{vfd|...}}')`
+		// @ [[w:zh:Module:CGroup/足球俱乐部]]
+		lua_code = lua_code.replace(/(?:\n|^)\s*require\([^)]+\)[^\n]*/g, '');
 		if (!options.force_parse
 				&& !/^[;\s\n]*return[\s\n]*{/.test(lua_code.replace(
-						/(\n|^)[;\s]*--[^\n]*/g, ''))) {
+						/(?:\n|^)[;\s]*--[^\n]*/g, ''))) {
 			library_namespace.warn('parse_lua_object_code: Invalid lua code? '
 			//
 			+ (typeof lua_code === 'string' && lua_code.length > 200
