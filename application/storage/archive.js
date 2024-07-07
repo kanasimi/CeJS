@@ -450,6 +450,7 @@ function module_code(library_namespace) {
 			command.push(FSO_list);
 		}
 
+		// console.trace(command);
 		command = command.join(' ');
 		library_namespace.debug({
 			// gettext_config:{"id":"working-directory-$1"}
@@ -649,6 +650,10 @@ function module_code(library_namespace) {
 			extra : function(value) {
 				if (value)
 					return value;
+			},
+			list_file : function(value) {
+				if (value)
+					return add_fso_path_quote('-i@' + value);
 			}
 		},
 		zip : {
@@ -714,6 +719,10 @@ function module_code(library_namespace) {
 						= apply_switches_handler[program_type][switch_name]
 						//
 						.call(this, options[switch_name]);
+					} else if (false) {
+						library_namespace.warn(
+						//
+						'Switch unchanged [' + switch_name + ']');
 					}
 				}
 			}
@@ -1031,6 +1040,9 @@ function module_code(library_namespace) {
 				// type : 'zip',
 				files : options
 			};
+		} else {
+			// archive_options
+			options = library_namespace.setup_options(options);
 		}
 
 		// https://www.7-zip.org/faq.html
@@ -1052,8 +1064,33 @@ function module_code(library_namespace) {
 		var archive_file = is_Archive_file(archive_file_path) ? archive_file_path
 				: new Archive_file(archive_file_path, options),
 		//
-		files_to_archive = options && options.files || '.';
+		files_to_archive = options.files || '.', list_file_name, list_file_path;
+		if (Array.isArray(files_to_archive)
+				&& files_to_archive.join('" "').length > 7800) {
+			list_file_name = '!list_file.tmp.lst';
+			if (false) {
+				// Now under source_directory
+				list_file_path = library_namespace.append_path_separator(
+						source_directory, list_file_name);
+			}
+			list_file_path = list_file_name;
+			library_namespace.info([ archive_under.name + ': ', {
+				T : '檔案列表過長，寫入列表檔以壓縮 [' + list_file_path + ']。'
+			} ]);
+			library_namespace.write_file(list_file_path, files_to_archive
+					.join('\n'));
+			options.list_file = list_file_path;
+			files_to_archive = [];
+			delete options.files;
+			if (false) {
+				console.trace([ library_namespace.storage.working_directory(),
+						source_directory, options ]);
+			}
+		}
 		archive_file.update(files_to_archive, options);
+		if (list_file_name) {
+			library_namespace.remove_file(list_file_path);
+		}
 		// recover working directory.
 		library_namespace.storage.working_directory(original_working_directory);
 		return archive_file;

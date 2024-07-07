@@ -2646,17 +2646,32 @@ function module_code(library_namespace) {
 		// On computers running Microsoft Windows XP or later, the maximum
 		// length of the string that you can use at the command prompt is 8191
 		// characters.
-		if (Array.isArray(file_list) && file_list.join('" "').length > 7800) {
-			library_namespace.warn([ archive_to_ZIP.name + ': ', {
-				// gettext_config:{"id":"the-file-list-is-too-long-so-it-is-changed-to-compress-the-entire-directory"}
-				T : '檔案列表過長，改成壓縮整個目錄。'
-			} ]);
-			// 當 epub 電子書非本工具產生時，可能有不同的目錄，必須重新讀取。
-			file_list = library_namespace.read_directory(this.path.root)
-			// archive all directory without mimetype
-			.filter(function(fso_name) {
-				return fso_name !== mimetype_filename;
-			});
+		var list_file_name;
+		if (false && Array.isArray(file_list)
+				&& file_list.join('" "').length > 7800) {
+			list_file_name = '!list_file.tmp.lst';
+			library_namespace.write_file(this.path.root + list_file_name,
+					file_list.join('\n'));
+			file_list = [];
+
+			if (false) {
+				library_namespace.warn([ archive_to_ZIP.name + ': ', {
+					// gettext_config:{"id":"the-file-list-is-too-long-so-it-is-changed-to-compress-the-entire-directory"}
+					T : '檔案列表過長，改成壓縮整個目錄。'
+				} ]);
+				// 當 epub 電子書非本工具產生時，可能有不同的目錄，必須重新讀取。
+				file_list = library_namespace.read_directory(this.path.root)
+				// archive all directory without mimetype
+				.filter(function(fso_name) {
+					return fso_name !== mimetype_filename;
+				});
+				if (file_list.join('" "').length > 7800) {
+					library_namespace.error([
+							archive_to_ZIP.name + ': ',
+							'檔案列表仍然過長，總長' + file_list.join('" "').length
+									+ '位元組。' ]);
+				}
+			}
 
 		} else if (!file_list) {
 			file_list = [ container_directory_name,
@@ -2669,17 +2684,23 @@ function module_code(library_namespace) {
 		// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
 		archive_file.rename([ mimetype_filename, mimetype_first_order_name ]);
 
-		// console.log([ this.path, file_list ]);
-		library_namespace.storage.archive.archive_under(this.path.root,
-		// archive others.
-		archive_file, {
+		var archive_options = {
 			// set MAX lavel
 			level : 9,
 			files : file_list,
 			recurse : true,
 			extra : (remove ? '-sdel ' : ''),
 			type : 'zip'
-		});
+		};
+
+		if (list_file_name) {
+			archive_options.list_file = list_file_name;
+		}
+
+		// console.log([ this.path, file_list ]);
+		library_namespace.storage.archive.archive_under(this.path.root,
+		// archive others.
+		archive_file, archive_options);
 
 		// recover mimetype
 		archive_file.rename([ mimetype_first_order_name, mimetype_filename ]);
