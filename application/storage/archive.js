@@ -1075,16 +1075,24 @@ function module_code(library_namespace) {
 			}
 			list_file_path = list_file_name;
 			library_namespace.info([ archive_under.name + ': ', {
-				T : '檔案列表過長，寫入列表檔以壓縮 [' + list_file_path + ']。'
+				T : '檔案列表過長，寫入列表檔 [' + list_file_path + '] 以壓縮。'
 			} ]);
-			library_namespace.write_file(list_file_path, files_to_archive
-					.join('\n'));
-			options.list_file = list_file_path;
-			files_to_archive = [];
-			delete options.files;
-			if (false) {
-				console.trace([ library_namespace.storage.working_directory(),
-						source_directory, options ]);
+			if (library_namespace.write_file(list_file_path, files_to_archive
+					.join('\n'))) {
+				library_namespace.error([ archive_under.name + ': ', {
+					T : [ '檔案列表過長，寫入列表檔案失敗: %1', list_file_path ]
+				} ]);
+				list_file_name = list_file_path = null;
+
+			} else {
+				options.list_file = list_file_path;
+				files_to_archive = [];
+				delete options.files;
+				if (false) {
+					console.trace([
+							library_namespace.storage.working_directory(),
+							source_directory, options ]);
+				}
 			}
 		}
 		archive_file.update(files_to_archive, options);

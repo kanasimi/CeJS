@@ -402,7 +402,7 @@ function module_code(library_namespace) {
 				.slice(0, title_start_index));
 		content_before_title = content_before_title.replace(
 				trim_start_title.PATTERN_non_content, '');
-		// console.trace(content_before_title);
+		// console.trace([ content_before_title ]);
 
 		// 正文標題前面還有東西就不去除。
 		if (content_before_title)
@@ -414,15 +414,29 @@ function module_code(library_namespace) {
 		var content_after_title = first_line.slice(title_start_index
 				+ (full_title || title).length);
 		// console.trace([ content_after_title ]);
+
+		/**
+		 * <code>
+
+		https://www.piaotian.com/html/5/5982/3239153.html	随波逐流之一代军师 外传 清梵曲
+		&nbsp;&nbsp;&nbsp;&nbsp;清梵曲作者：加兰<br/><br/>
+
+		</code>
+		 */
 		if (content_after_title.includes('作者')) {
-			/**
-			 * <code>
+			return text;
+		}
 
-			https://www.piaotian.com/html/5/5982/3239153.html	随波逐流之一代军师 外传 清梵曲
-			&nbsp;&nbsp;&nbsp;&nbsp;清梵曲作者：加兰<br/><br/>
+		/**
+		 * <code>
 
-			</code>
-			 */
+		https://www.quanben5.com/n/wanming/11557.html	晚明 第九章 秦淮渔唱
+		<p>第九章秦淮渔唱末更的钟鼓声远远传来，陈新精神抖擞的早早起床，
+
+		</code>
+		 */
+		// /[\u4e00-\u9fa5]/: 匹配中文字 RegExp。
+		if (/^.*?[，。！]/.test(content_after_title)) {
 			return text;
 		}
 
@@ -469,6 +483,16 @@ function module_code(library_namespace) {
 		}
 		// 切掉 full_title。
 		new_text = new_text.slice(title_start_index + full_title.length);
+		/**
+		 * <code>
+
+		https://www.quanben5.com/n/huidaoshangouquzhongtian/26783.html	回到山沟去种田 第一章 辞职
+		<p>第一章辞职</p><p>“老天爷！你是不是要这样玩我！”</p>
+
+		</code>
+		 */
+		new_text = new_text
+				.replace(/^(?:\s*<(\w)+>\s*<\/(\1)>)*\s*<\/\w+>/, '');
 		if (false && title.includes('—')) {
 			console.trace([ title_start_index, new_text.slice(0, 200) ]);
 		}
@@ -791,10 +815,19 @@ function module_code(library_namespace) {
 				&& this.convert_text_language_using.cecc;
 		// console.trace(cecc);
 		if (cecc && cecc.load_text_to_check) {
+			// console.trace(work_data);
+			if (false && work_data.original_work_title
+					&& work_data.title !== work_data.original_work_title) {
+				library_namespace.warn('create_ebook: 標題變種:\n\t'
+						+ work_data.title + '\n\t'
+						+ work_data.original_work_title);
+			}
 			var promise_load_text_to_check = cecc.load_text_to_check({
 				// 設定 work_title 可載入 watch_target.* 辭典修訂測試集。
-				// .original_work_title: 字典檔檔名以沒加料的作品名稱為準。
-				work_title : work_data.original_work_title || work_data.title,
+				work_title : work_data.title,
+				// input_title : work_data.input_title,
+				// .original_work_title: 有些字典檔檔名以沒加料的作品名稱為準。
+				original_work_title : work_data.original_work_title,
 				convert_to_language : this.convert_to_language
 			}, {
 				reset : true
@@ -1162,7 +1195,7 @@ function module_code(library_namespace) {
 
 	// 找出段落開頭。
 	// '&nbsp;' 已經被 normailize_contents() @CeL.EPUB 轉換為 '&#160;'
-	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<\/?(?:br|p)(?:[^a-z][^<>]*)?>)(?:&#160;|[\s　]){4,}([^\s　\n&])/ig,
+	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<\/?(?:br|p)(?:[^\w][^<>]*)?>)(?:&#160;|[\s　]){4,}([^\s　\n&])/ig,
 	//
 	PATTERN_PARAGRAPH_START_JP = new RegExp(PATTERN_PARAGRAPH_START_CMN.source
 			.replace('{4,}', '{2,}'), PATTERN_PARAGRAPH_START_CMN.flags);
@@ -1268,7 +1301,7 @@ function module_code(library_namespace) {
 		var _this = this;
 		var language = work_data.language
 		// e.g., 'cmn-Hans-CN'
-		&& work_data.language.match(/^(ja|(?:zh-)?cmn)(?:$|[^a-z])/)
+		&& work_data.language.match(/^(ja|(?:zh-)?cmn)(?:$|[^\w])/)
 		// e.g., xshuyaya.js
 		|| this.language && [ , this.language ];
 		if (language) {
@@ -1468,7 +1501,7 @@ function module_code(library_namespace) {
 			// allow .milestone_extension = true
 			? _this.milestone_extension : '.milestone') + '$1',
 			// 舊檔比較大!!將之標註成里程碑紀念/紀錄。
-			rename_to = last_file.replace(/(.[a-z\d\-]+)$/i, extension);
+			rename_to = last_file.replace(/(.[\w\-]+)$/i, extension);
 			// assert: PATTERN_ebook_file.test(rename_to) === false
 			// 不應再被納入檢測。
 			library_namespace.info(library_namespace.display_align([
@@ -1510,36 +1543,37 @@ function module_code(library_namespace) {
 						+ ')，可能導致先前 cache 無用。');
 			}
 			// e.g., "(一般小説) [author] title [site 20170101 1話].id.epub"
-			file_name = [
-					'(一般小説) [',
-					this.convert_text_language(work_data.author
-					// , options
-					),
-					'] ',
-					this.convert_text_language(work_data.title),
-					' [',
-					this.convert_text_language(work_data.site_name
-					// , options
-					),
-					work_data.last_update_Date ? ' '
-							+ work_data.last_update_Date.format('%Y%2m%2d')
-							: '',
-					work_data.chapter_count >= 1
-					//
-					? ' ' + work_data.chapter_count
-					//
-					+ (work_data.chapter_unit || this.chapter_unit) : '',
-					']',
-					this.RTL_writing ? ' ('
-							+ (/^ja/.test(work_data.language) ? '縦書き' : '縱書')
-							+ ')' : '',
-					this.convert_to_language ? ' ('
-							+ library_namespace.gettext.to_standard(
-							//
-							this.convert_to_language) + ')' : '', '.',
-					typeof work_data.directory_id === 'function'
-					// 自行指定作品放置目錄與 ebook 用的 work id。
-					&& work_data.directory_id() || work_data.id, '.epub' ];
+			file_name = [ '(一般小説) [',
+			//
+			this.convert_text_language(work_data.author), '] ',
+			// , options
+			this.convert_text_language(work_data.title), ' [',
+			//
+			this.convert_text_language(work_data.site_name
+			// , options
+			), work_data.last_update_Date
+			//
+			? ' ' + work_data.last_update_Date.format('%Y%2m%2d') : '',
+			//
+			work_data.chapter_count >= 1
+			//
+			? ' ' + work_data.chapter_count
+			//
+			+ (work_data.chapter_unit || this.chapter_unit)
+			//
+			: '', ']', this.RTL_writing ? ' ('
+			//
+			+ (/^ja/.test(work_data.language) ? '縦書き' : '縱書') + ')' : '',
+			//
+			this.convert_to_language ? ' ('
+			//
+			+ library_namespace.gettext.to_standard(this.convert_to_language)
+			//
+			+ ')' : '', '.',
+			//
+			typeof work_data.directory_id === 'function'
+			// 自行指定作品放置目錄與 ebook 用的 work id。
+			&& work_data.directory_id() || work_data.id, '.epub' ];
 
 			file_name = file_name.join('');
 		}

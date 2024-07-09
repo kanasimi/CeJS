@@ -904,7 +904,7 @@ function add_localization_marks(script_file_path) {
 	for (const [message_id, qqq_data] of qqq_data_Map.entries()) {
 		const message = qqq_data.message;
 		if (!message || message.length < 3
-			// /[\u4e00-\u9fa5]/: 匹配中文。
+			// /[\u4e00-\u9fa5]/: 匹配中文字 RegExp。
 			|| message.length < 4 && !/[\u4e00-\u9fffぁ-んーァ-ヶ]/.test(message) || ignore_messages.has(message))
 			continue;
 		add_localization_mark("'" + message.replace(/'/g, "\\'") + "'", message_id);
