@@ -5379,7 +5379,7 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: pre #1');
 		var filtered_elements = [];
 		wikitext = 'a\n <!-- 1 -->\n <!-- . -->  \n a<!-- 2 --> \n b<!-- 3 -->'; parsed = CeL.wiki.parser(wikitext).parse();
-		parsed.each('pre', function(token) { filtered_elements.push(token); });
+		parsed.each('pre', function (token) { filtered_elements.push(token); });
 		assert([wikitext, parsed.toString()], 'wiki.parse: pre #2');
 		assert([1, filtered_elements.length], 'wiki.parse: pre #2-1');
 		assert([" a<!-- 2 --> \n b<!-- 3 -->", filtered_elements.toString()], 'wiki.parse: pre #2-1');
@@ -5692,9 +5692,11 @@ function test_wiki() {
 			var test_name = 'jawiki: expand_transclusion';
 			_setup_test(test_name);
 
-			var options = CeL.wiki.add_session_to_options(jawiki, { on_page_title: 'ABC', allow_promise: true,
-			// for await CeL.wiki.parse.anchor()
-			try_to_expand_templates: true, ignore_variable_anchors: true });
+			var options = CeL.wiki.add_session_to_options(jawiki, {
+				on_page_title: 'ABC', allow_promise: true,
+				// for await CeL.wiki.parse.anchor()
+				try_to_expand_templates: true, ignore_variable_anchors: true
+			});
 			var promise = Promise.resolve();
 
 			promise = promise.then(function () {
@@ -5795,10 +5797,16 @@ function test_wiki() {
 			});
 
 			promise = promise.then(function () {
-				return CeL.wiki.expand_transclusion('{{支持}}\n{{新增條文|條文}}\n{{反对}}', options);
+				return CeL.wiki.expand_transclusion('{{支持}}\n{{新增條文|條文}}\n{{反對}}', options);
 			}).then(function (parsed) {
 				//console.trace(parsed.toString());
-				assert(["<span style=\"font-weight:bold;\">(＋)</span>'''<span class=\"zhwpVoteSupport\">-{支持}-</span>'''\n<span style=\"background-color: #ccffcc;\">條文</span>\n<span class=\"zhwpVoteOppose\" style=\"font-weight:bold;\">(－)</span>'''反对'''", parsed.toString()], 'CeL.wiki.expand_transclusion() fetch multiple pages');
+				var wikitext_支持 = "<span class=skin-invert style=\"font-weight:bold;\">(＋)</span>'''<span class=\"zhwpVoteSupport\">-{支持}-</span>'''",
+					wikitext_條文 = "<span class=skin-invert style=\"background-color: #ccffcc;\">條文</span>",
+					wikitext_反對 = "<span class=\"zhwpVoteOppose skin-invert\" style=\"font-weight:bold;\">(－)</span>'''反对'''"
+				assert([wikitext_支持 + '\n' + wikitext_條文 + '\n' + wikitext_反對, parsed.toString()], 'CeL.wiki.expand_transclusion() fetch multiple pages');
+				assert([wikitext_支持, CeL.wiki.expand_transclusion('{{支持}}', options).toString()], 'CeL.wiki.expand_transclusion() using cache');
+				assert([wikitext_條文, CeL.wiki.expand_transclusion('{{新增條文|條文}}', options).toString()], 'CeL.wiki.expand_transclusion() using cache');
+				assert([wikitext_反對, CeL.wiki.expand_transclusion('{{反对}}', options).toString()], 'CeL.wiki.expand_transclusion() using cache');
 			});
 
 			promise = promise.then(function () {
