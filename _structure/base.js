@@ -445,7 +445,7 @@ function (globalThis) {
 	 * @since 2016/3/13 13:58:9
 	 */
 	function _setup_options(options, new_one) {
-		if (options && !new_one) {
+		if (options && (!new_one || Array.isArray(options))) {
 			return options;
 		}
 

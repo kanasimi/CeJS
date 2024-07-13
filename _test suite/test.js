@@ -5679,6 +5679,15 @@ function test_wiki() {
 		var jawiki = new CeL.wiki(null, null, 'ja');
 
 		jawiki.run(function () {
+			var test_name = 'wiki: jawiki base functions';
+			_setup_test(test_name);
+
+			assert(!jawiki.is_namespace('title', ['Draft', 'Template']), 'jawiki is_namespace(Draft)');
+
+			_finish_test(test_name);
+		});
+
+		jawiki.run(function () {
 			var test_name = 'wiki: jawiki template_functions';
 			_setup_test(test_name);
 

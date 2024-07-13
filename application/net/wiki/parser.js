@@ -1731,8 +1731,11 @@ function module_code(library_namespace) {
 
 			end_matter : [
 			// succession templates
-			'S-start', 'Start box', 'Succession box', 'End box', 'S-end',
+			'S-start', 'Start box', 'Succession box',
+			//
+			'S-end', 'End box', 'End',
 			// navigation templates
+			// TODO: other navigation templates
 			'Navbox', 'Navboxes', 'Portal bar', 'Taxonbar',
 			// authority control template
 			'Authority control', 'Coord', 'Coord missing', 'DEFAULTSORT' ]
