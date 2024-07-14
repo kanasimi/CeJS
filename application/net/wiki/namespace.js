@@ -1489,9 +1489,13 @@ function module_code(library_namespace) {
 		}
 
 		function check_namespace(namespace) {
-			return page_ns === get_namespace(namespace, Object.assign({
+			// 預防 jawiki.namespace('Draft') === undefined 這情況下被當作 true。
+			var namespace_to_test = get_namespace(namespace, Object.assign({
 				is_page_title : false
 			}, options));
+			if (namespace_to_test === undefined)
+				namespace_to_test = namespace;
+			return page_ns === namespace_to_test;
 		}
 
 		if (Array.isArray(namespace)) {
