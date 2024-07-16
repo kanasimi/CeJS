@@ -617,6 +617,8 @@ function module_code(library_namespace) {
 
 		// 坦坦荡荡
 		.replace(/(空|浩浩|坦坦)\*{2,4}/g, '$1荡荡')
+		// 荡漾
+		.replace(/([^*])\*{2}漾/g, '$1荡漾')
 
 		/**
 		 * TODO<code>
