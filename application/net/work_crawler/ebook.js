@@ -583,27 +583,22 @@ function module_code(library_namespace) {
 		 */
 		.replace(/东躲xz/ig, '东躲西藏')
 
+		// 被无尽虚空的混乱力量绞杀，
+		.replace(/混\*{2}力量/g, '混乱力量')
+
 		/**
 		 * <code>
 
+		// 肉眼凡胎
 		// https://www.piaotian.com/html/14/14229/9757030.html	修仙三百年突然发现是武侠 第一百二十五章 飞剑千里取人头
 		我渡法马上就要彻底蜕去这**凡胎，成就罗汉金身了！
 
-		// 肉眼凡胎
+		被无尽虚空的混乱力量绞杀，
+		乱
 
 		</code>
 		 */
-		.replace(/([^*])\*{2}凡胎/g, '$1肉体凡胎')
-
-		/**
-		 * <code>
-
-		// https://www.ptwxz.com/html/6/6682/3851642.html	最仙遊 正文 第一百二十六章 强敌 （谢盟更之一）
-		其所说十有*为真。
-
-		</code>
-		 */
-		.replace(/十有\*{1,2}([^*])/g, '十有八九$1')
+		.replace(/([^*])\*{2}(力量|凡胎)/g, '$1肉体$2')
 
 		/**
 		 * <code>
@@ -614,6 +609,15 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		.replace(/([^*])\*{2}不离十/g, '$1八九不离十')
+		/**
+		 * <code>
+
+		// https://www.ptwxz.com/html/6/6682/3851642.html	最仙遊 正文 第一百二十六章 强敌 （谢盟更之一）
+		其所说十有*为真。
+
+		</code>
+		 */
+		.replace(/十有\*{1,2}([^*])/g, '十有八九$1')
 
 		// 赤裸裸
 		.replace(/\*{2,4}裸/g, '赤裸裸').replace(/赤\*{2,4}/g, '赤裸裸')
@@ -627,20 +631,30 @@ function module_code(library_namespace) {
 		/**
 		 * TODO<code>
 
-			// https://www.quanben5.com/n/gouzaixianwuquqichangsheng/10.html	《苟在仙武娶妻长生》第010章 照顾师兄妻女
-			// https://www.quanben5.com/n/sutongxiuxian_/82.html	速通修仙！ 第八十二章 怎么，你不服气吗
-			// https://www.quanben5.com/n/sutongxiuxian_/76.html	速通修仙！ 第七十六章 杀魔女，踩剑仙
-			在云床上大笑了起来
+		// https://www.quanben5.com/n/gouzaixianwuquqichangsheng/10.html	《苟在仙武娶妻长生》第010章 照顾师兄妻女
+		// https://www.quanben5.com/n/sutongxiuxian_/82.html	速通修仙！ 第八十二章 怎么，你不服气吗
+		// https://www.quanben5.com/n/sutongxiuxian_/76.html	速通修仙！ 第七十六章 杀魔女，踩剑仙
+		在云床上大笑了起来
 
-			</code>
+		</code>
 		 */
 		.replace(/(躺在|躺到|[病云])\*{2,4}/g, '$1床上')
 
-		// 很有诱惑力。 还是成圣的诱惑太大了。 女儿国国王的诱惑再大，
-		.replace(/\*{2,4}(力|太大|再大)/g, '诱惑$1')
+		// 还是成圣的诱惑太大了。 女儿国国王的诱惑再大，
+		.replace(/\*{2,4}(太大|再大)/g, '诱惑$1')
+
+		// 电流向四面八方激射，精准连接到天花板、
+		.replace(/激\*{3}准/, '激射，精准')
 
 		/**
 		 * TODO<code>
+
+		// 很有诱惑力。
+		诱惑
+		// 以大法力睁开天眼，
+		大法
+		// 造个竞技场不就能让他们发泄精力吗，
+		泄精
 
 		更是将战火推到了最高潮。
 		战争刚刚开始，便已经进入高潮。
@@ -702,6 +716,12 @@ function module_code(library_namespace) {
 		还那么……风骚，
 		风骚
 
+		眼眸深处却闪过赤裸裸的欲望。
+		欲望
+
+		迷魂烟可曾带着。
+		迷魂
+
 		</code>
 		 */
 
@@ -721,8 +741,17 @@ function module_code(library_namespace) {
 		.replace(/([^*])\*{2}([漾平尽产]|魔杵|然无存)/g, '$1荡$2')
 		// 坦坦荡荡
 		.replace(/(空|浩浩|坦坦)\*{2,4}/g, '$1荡荡')
-		// 回荡 震荡 赤诚坦荡 风流浪荡
-		.replace(/([回坦浪震晃扫激动涤浩闯游飘动])\*{2}/g, '$1荡')
+		// 回荡 震荡
+		.replace(/([回坦震晃扫激涤浩闯游飘])\*{2}/g, '$1荡')
+		// 赤诚坦荡 风流浪荡 前些天正好出现过浪**涌之相，
+		.replace(/浪\*{2}([^涌])/g, '浪荡$1')
+		// 能惊动大法师的， 但平白请动大法师，
+		// 大法
+		// 这里不再那条不敢乱动乱拿规矩的范畴之内了，
+		// 这里不再那条不敢**动**拿规矩的范畴之内了，
+		// 同时发动欲望能力干扰射击。
+		// 欲望
+		.replace(/([^惊发请*]动)\*{2}/g, '$1荡')
 		// 低低凹凹随流荡，
 
 		;
