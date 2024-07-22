@@ -5434,7 +5434,8 @@ function module_code(library_namespace) {
 
 			// 設定className與position
 			// popup left,popup top初始值
-			sPopP.left = 0, sPopP.top = 20;
+			sPopP.left = 0;
+			sPopP.top = 20;
 			if (!oPos || typeof oPos != 'object') {
 				// popup 在滑鼠指標處
 				// see: add_listener()
@@ -5516,7 +5517,8 @@ function module_code(library_namespace) {
 					oTxt = oTxt.replace(brReg, brT);
 				// 這是一種註解功能，在mouseout後，假定讀者繼續讀下去，所以就讓popup
 				// object消失。想要多看一點的，會去按他，這時才讓popup object繼續存在。
-				sPopP.window.document.body.innerHTML = // oTxt=
+				sPopP.window.document.body.innerHTML =
+				// oTxt =
 				'<div style="'
 						+ sPopP.popupS
 						+ '" onblur="parent.sPopP.window.hide();" title="reference">[<b style="color:peru;cursor:pointer;" onclick="parent.sPopP.window.hide();">'
@@ -5542,6 +5544,7 @@ function module_code(library_namespace) {
 			}
 			if (false)
 				alert(sPopP.width + ',' + sPopP.height);
+			alert(sPopP.window.document.body.innerHTML);
 			if (flag & sPopF.clearPop)
 				sPopP.window.hide();
 			else
@@ -5597,32 +5600,62 @@ function module_code(library_namespace) {
 			else if (false)
 				t += ' @ [<a href="' + location.href + '">' + location.pathname
 						+ '<\/a>]';
+
+			t =
+			/**
+			 * <code>
+			'<?xml version="1.1" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="content-type" content="text/html;charset=utf-8" /><title>'
+			+ _t + '<\/title><script type="text/javascript">window.onblur=function(){window.close();};<\/script><\/head><body><b style="color:#11f;">' + t + ':<\/b>'
+			</code>
+			 */
+			'<script type="text/javascript">'
+			//
+			+ 'window.onblur=function(){window.close();};<\/script>'
+
+			+ '<b style="color:#11f;">' + t + ':<\/b>'
+
+			// "white-space:normal;width:500px;" :useless **
+			// 這邊會對<b title="..等造成影響！
+			+ (oPos.innerHTML
+			//
+			? '<div id="s" style="color:#488;background-color:#FF8;">\n'
+			//
+			+ oPos.innerHTML.replace(/\n/g, '<br />')
+			//
+			.replace(/ /g, '&nbsp;') + '\n<\/div><hr />' : '')
+
+			+ '<div id="c" style="color:#404;background-color:#8FF;">\n'
+
+			+ oTxt.replace(/<[\/\w][^<>]*>|[ \n]/g, function(text_to_escape) {
+				if (text_to_escape.startsWith('<')) {
+					if (!/<\//.test(text_to_escape)
+					//
+					&& !/\starget=/.test(text_to_escape)) {
+						text_to_escape = text_to_escape
+						//
+						.replace(/>$/, ' target="_blank">');
+					}
+					return text_to_escape;
+				}
+
+				// 以不換行(pre)的方式顯示.patch
+				return {
+					' ' : '&nbsp;',
+					'\n' : '<br />'
+				}[text_to_escape];
+			})
+
+			+ '\n<\/div><hr />'
+
+			+ '[ <b style="cursor:pointer;color:#40f;"'
+			//
+			+ ' onclick="javascript:opener.focus();self.close();">'
+			//
+			+ sPopP.close_message + '<\/b> ]'
+			// + '</body></html>'
+
 			w.document.open();
-			w.document
-					.write(
-					/**
-					 * <code>'<?xml version="1.1" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="content-type" content="text/html;charset=utf-8" /><title>'
-					+ _t + '<\/title><script type="text/javascript">window.onblur=function(){window.close();};<\/script><\/head><body><b style="color:#11f;">' + t + ':<\/b>'
-					</code>
-					 */
-					'<script type="text/javascript">window.onblur=function(){window.close();};<\/script><b style="color:#11f;">'
-							+ t
-							+ ':<\/b>'
-							// "white-space:normal;width:500px;" :useless **
-							// 這邊會對<b title="..等造成影響！
-							+ (oPos.innerHTML ? '<div id="s" style="color:#488;background-color:#FF8;">\n'
-									+ oPos.innerHTML.replace(/\n/g, '<br />')
-											.replace(/ /g, '&nbsp;')
-									+ '\n<\/div><hr />'
-									: '')
-							+ '<div id="c" style="color:#404;background-color:#8FF;">\n'
-							+ oTxt
-							// 以不換行(pre)的方式顯示.patch
-							.replace(/ /g, '&nbsp;').replace(/\n/g, '<br />')
-							+ '\n<\/div><hr />[ <b style="cursor:pointer;color:#40f;" onclick="javascript:opener.focus();self.close();">'
-							+ sPopP.close_message + '<\/b> ]'
-					// + '</body></html>'
-					);
+			w.document.write(t);
 			w.document.close();
 			w.document.title = _t;
 			w.focus();
