@@ -1296,6 +1296,23 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
+	// 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]] / 匿名IP用戶 is_anonymous_user
+	// [[m:Special:MyLanguage/Tech/News/2021/05]]
+	// 在diffs中，IPv6位址被寫成了小寫字母。這導致了死連結，因為Special:使用者貢獻只接受大寫的IP。這個問題已經被修正。
+	// https://www.mediawiki.org/wiki/Trust_and_Safety_Product/Temporary_Accounts/FAQ#What_does_a_temporary_username_look_like?
+	function parse_temporary_username(username) {
+		// 從 testwiki 可發現 "~2024-2133" 也是正規臨時帳戶名稱。
+		var matched = username.trim().match(/^~(\d{4})-(\d+)/);
+		if (!matched)
+			return;
+
+		return {
+			// 臨時編號
+			temporary_NO : +matched[1],
+			year : +matched[1]
+		};
+	}
+
 	/**
 	 * 使用者/用戶對話頁面所符合的匹配模式。
 	 * 
@@ -1473,6 +1490,8 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.parse.user.all === wiki_API.parse.user.all
 	parse_user.all = parse_all_user_links;
+	// CeL.wiki.parse.user.parse_temporary_username()
+	parse_user.parse_temporary_username = parse_temporary_username;
 
 	/**
 	 * redirect/重定向頁所符合的匹配模式。 Note that the redirect link must be explicit – it
