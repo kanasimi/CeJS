@@ -915,7 +915,7 @@
 	"treat-$1-as-language-$2": "將 %1 視為語言：%2。",
 	"cannot-detect-language-of-$1": "無法識別 %1 的語言！",
 	"invalid-task_configuration-(should-be-$2)-{$3}-$1": "無效的任務設定（應該是 %2）：{%3} %1",
-	"get-parameter-$1=$2-from-command-line": "從命令列獲得參數 %1=%2",
+	"get-parameter-$1=$2-from-command-line": "從命令列獲取參數值 %1=%2",
 	"get-section-title-from-command-line-argument-$1": "從命令行參數獲取章節標題：%1",
 	"get-section-title-from-task-file-name-$1": "從任務檔案名稱中獲取章節標題: %1",
 	"change-section-title": "更改章節標題：",
