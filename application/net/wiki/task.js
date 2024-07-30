@@ -1069,7 +1069,9 @@ function module_code(library_namespace) {
 						//
 						= _this.redirects_data[page_title];
 					}
-					return page_title && !(page_title in redirects_data);
+					return page_title && !(page_title in redirects_data)
+					//
+					&& !(page_title in _this.nonexistent_pages);
 				}).unique();
 				if (next[1].length === 0) {
 					// next[2] : callback(root_page_data, error)
@@ -1082,6 +1084,11 @@ function module_code(library_namespace) {
 					console.trace('已處理過 have registered, use cache: ' + next[1]
 							+ '→' + redirects_data[next[1]]);
 				}
+				// next[2] : callback(root_page_data, error)
+				this.next(next[2]);
+				break;
+
+			} else if (next[1] in this.nonexistent_pages) {
 				// next[2] : callback(root_page_data, error)
 				this.next(next[2]);
 				break;
@@ -1193,6 +1200,8 @@ function module_code(library_namespace) {
 							+ wiki_API.title_link_of(target_page_title) + ': ';
 
 					if (is_missing) {
+						// 避免重複 call。
+						_this.nonexistent_pages[page_title] = true;
 						message += 'Missing';
 						library_namespace.warn(message);
 						return;

@@ -965,7 +965,7 @@
 	"The task does not process talk pages": "La t\u00e2che ne traite pas les pages de discussion",
 	"The local link target links back to the page itself. [[MOS:CIRCULAR]]?": "La cible du lien local pointe vers la page elle-m\u00eame. [[MOS:CIRCULAR|Lien circulaire]]\u202f?",
 	"The local page is too new. Will try again next time.": "La page locale est trop r\u00e9cente. Essaiera \u00e0 nouveau plus tard.",
-	"Links to non-main namespace": "Liens vers l'espace de noms non principal.",
+	"Links to non-main namespace": "Liens vers l\u2019espace de noms non principal",
 	"\u7f3a\u5c11\u8f49\u63db\u5f8c\u7684\u672c\u5730\u9801\u9762\uff0c\u6216\u8005\u5916\u90e8/\u672c\u5730\u9801\u9762\u672a\u93c8\u63a5\u5230\u7dad\u57fa\u6578\u64da\u3002": "La page locale convertie est manquante, ou bien la page \u00e9trang\u00e8re ou locale n\u2019est pas un lien vers Wikidata.",
 	"\u8de8\u8a9e\u8a00\u6a21\u677f\u7684\u672c\u5730\u6a19\u984c\u8207\u5916\u8a9e\u6a19\u984c\u76f8\u540c\uff0c\u4f46\u5916\u8a9e\u9801\u9762\u5c0e\u5411\u4e0d\u540c\u7684\u672c\u5730\u6a19\u984c\u3002": "Le titre local dans le mod\u00e8le interlinguiste est le m\u00eame que le titre de langue \u00e9trang\u00e8re, mais la page \u00e9trang\u00e8re redirige vers un titre local diff\u00e9rent.",
 	"\u8de8\u8a9e\u8a00\u6a21\u677f\u7684\u672c\u5730\u6a19\u984c\u8207\u5916\u8a9e\u6a19\u984c\u76f8\u540c": "Le titre local dans le mod\u00e8le interlangue est le m\u00eame que le titre en langue \u00e9trang\u00e8re",

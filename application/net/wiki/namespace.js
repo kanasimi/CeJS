@@ -3191,7 +3191,9 @@ function module_code(library_namespace) {
 					last_update : Date.now()
 				});
 			}
-			// latest raw task raw configuration
+			// parse latest raw task configurations using function
+			// parse_configuration(wikitext, options) @
+			// CeL.application.net.wiki.parser.misc
 			var configuration = wiki_API.parse.configuration(page_data);
 			// console.trace(configuration);
 			// TODO: valid configuration 檢測數值是否合適。
@@ -3431,6 +3433,16 @@ function module_code(library_namespace) {
 					break;
 				case wiki_session.redirect_target_of(template_name_3):
 					break;
+				}
+			});
+
+			// or:
+
+			parsed.each(function(token, index, parent) {
+				if (token.type === 'transclusion'
+				// ↑ typeof token !== 'string' 也可能通過測試。
+				&& wiki_session.is_template(template_name, token)) {
+					// ...
 				}
 			});
 		});
@@ -4133,7 +4145,7 @@ function module_code(library_namespace) {
 		is_namespace : function is_namespace(page_title, options) {
 			if (typeof options !== 'object') {
 				options = {
-					namespace : options || 0
+					namespace : options
 				};
 			} else if (wiki_API.is_page_data(options)) {
 				options = {
@@ -4146,7 +4158,7 @@ function module_code(library_namespace) {
 		to_namespace : function to_namespace(page_title, options) {
 			if (typeof options !== 'object') {
 				options = {
-					namespace : options || 0
+					namespace : options
 				};
 			}
 			return convert_page_title_to_namespace(page_title,

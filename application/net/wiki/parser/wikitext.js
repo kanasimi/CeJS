@@ -4341,6 +4341,10 @@ function module_code(library_namespace) {
 				// 將 .list_prefix 結合在 list_item 之上。
 				// (list_item_token.list_prefix)。
 				item.list_prefix = list_prefix;
+				// ; term : definition
+				if (/[;:]$/.test(list_prefix)) {
+					item.is_term = list_prefix.endsWith(';');
+				}
 				if (latest_list) {
 					// Will be used by function remove_token_from_parent()
 					item.parent = latest_list;

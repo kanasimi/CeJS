@@ -584,8 +584,9 @@ function module_code(library_namespace) {
 				if ((!type
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
 				|| type === (Array.isArray(token) ? token.type : 'plain'))
-						&& (!token_name || (session ? session.is_template(
-								token_name, token) : token.name === token_name))) {
+						&& (!token_name || (session ? token.type === 'transclusion'
+								&& session.is_template(token_name, token)
+								: token.name === token_name))) {
 					// options.set_index
 					if (options.add_index && token && typeof token === 'object') {
 						// 假如需要自動設定 .parent, .index 則必須特別指定。
@@ -2392,7 +2393,7 @@ function module_code(library_namespace) {
 
 		var insert_after_templates = options.insert_after_templates;
 		// Guess insert_after_templates
-		if (!insert_after_templates) {
+		if (!insert_after_templates && token.type === 'transclusion') {
 			var template_order_of_layout_of_location = get_template_order_of_layout(
 					session, location);
 			if (template_order_of_layout_of_location) {

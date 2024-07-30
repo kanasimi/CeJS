@@ -275,6 +275,8 @@ function module_code(library_namespace) {
 		// @see CeL.application.net.wiki.task ,
 		// CeL.application.net.wiki.namespace
 		this.redirects_data = Object.create(null);
+		// 不存在的頁面。 non-existent pages
+		this.nonexistent_pages = Object.create(null);
 
 		// @see wiki_API.check_stop()
 		this.task_control_status = Object.create(null);

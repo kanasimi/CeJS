@@ -1608,7 +1608,7 @@ function module_code(library_namespace) {
 
 	// const
 	// ! 變數名 (不可更改) !! 變數值 !! 注解說明
-	var NAME_INDEX = 0, VALUE_INDEX = 1;
+	var CONFIGURATION_NAME_INDEX = 0, CONFIGURATION_VALUE_INDEX = 1;
 	var KEY_ORIGINAL_ARRAY = typeof Symbol === 'function' ? Symbol('KEY_ORIGINAL_ARRAY')
 			: '|ORIGINAL_ARRAY';
 
@@ -1697,10 +1697,11 @@ function module_code(library_namespace) {
 					}
 				}
 				value = token.toString.call(value);
-				if (token.type === 'list')
+				if (token.type === 'list') {
 					token.value = value;
-				else
+				} else {
 					return value;
+				}
 			}
 			return token;
 		}
@@ -1710,6 +1711,7 @@ function module_code(library_namespace) {
 			// console.trace(JSON.stringify(value));
 			// console.trace(JSON.stringify(filter_tags(value)));
 			value = filter_tags(value);
+			// console.trace(value);
 			var JS_value = value.toString().trim();
 
 			if (false) {
@@ -1791,13 +1793,72 @@ function module_code(library_namespace) {
 						return;
 					}
 					var row = [];
-					line.forEach(function(cell) {
+					line.some(function(cell, index) {
 						if (cell.type !== 'table_cell') {
 							// e.g., cell.type !== 'table_attributes'
 							return;
 						}
 
+						if (index > CONFIGURATION_NAME_INDEX
+								&& index > CONFIGURATION_VALUE_INDEX) {
+							// Skip comments
+							return true;
+						}
+
 						// TODO: data-sort-type in table head
+
+						function parse_list_value(token) {
+							if (has_list) {
+								// append value
+								has_list.append(token.map(normalize_value));
+								has_list.plain_list_count++;
+							} else {
+								has_list = token.map(normalize_value);
+								has_list.plain_list_count = 1;
+							}
+
+							if (token.list_type === wiki_API.DEFINITION_LIST) {
+								has_list.plain_list_count--;
+								if (!has_list.hash)
+									has_list.hash = Object.create(null);
+								var key = null;
+								token.forEach(function(item) {
+									var item_value = normalize_value(item);
+									if (item.is_term) {
+										if (key !== null) {
+											library_namespace.warn(
+											//
+											'parse_configuration: '
+											//
+											+ 'Skip key with no value: ' + key
+													+ '\n→ next key: '
+													+ item_value);
+										}
+										key = item_value;
+									} else if (key) {
+										// assert: item.is_term === true
+										if (has_list.hash[key]) {
+											has_list.hash[key]
+											//
+											.push(item_value);
+										} else {
+											has_list.hash[key]
+											//
+											= [ item_value ];
+										}
+										key = null;
+									} else {
+										// assert: item.is_term === true
+										library_namespace
+												.warn('parse_configuration: '
+												//
+												+ 'Skip value without key: '
+														+ item_value);
+										// console.trace(item);
+									}
+								});
+							}
+						}
 
 						var data_type, has_list, has_non_empty_token;
 						// console.log(cell);
@@ -1825,6 +1886,7 @@ function module_code(library_namespace) {
 								data_type = data_type[2] || data_type[1];
 							}
 						}).map(filter_tags);
+
 						if (!has_list) {
 							// console.log(cell);
 							cell.toString = function() {
@@ -1843,16 +1905,25 @@ function module_code(library_namespace) {
 							// console.trace(cell);
 							cell.forEach(function(token) {
 								if (token.type === 'list') {
-									if (has_list) {
-										has_list.append(token
-												.map(normalize_value));
-									} else {
-										has_list = token.map(normalize_value);
-									}
+									parse_list_value(token);
 								}
 								// 只取 list 中的值。
 							});
-							cell = has_list;
+
+							if (!has_list.hash
+									|| library_namespace
+											.is_empty_object(has_list.hash)) {
+								cell = has_list;
+							} else if (has_list.plain_list_count === 0) {
+								cell = has_list.hash;
+							} else {
+								library_namespace.warn('parse_configuration: '
+								// 包含多種不同類型的列表：
+								+ 'Contains different types of lists: '
+								//
+								+ cell);
+								cell = has_list;
+							}
 						}
 
 						// console.log([ data_type, cell ]);
@@ -1876,10 +1947,10 @@ function module_code(library_namespace) {
 					// console.log(line);
 					if (row.length >= 2) {
 						// ! 變數名 (不可更改) !! 變數值 !! 注解說明
-						var name = row[NAME_INDEX];
+						var name = row[CONFIGURATION_NAME_INDEX];
 						if (name && typeof name === 'string') {
 							// TODO: "false" → false
-							value_hash[name] = row[VALUE_INDEX];
+							value_hash[name] = row[CONFIGURATION_VALUE_INDEX];
 						}
 					}
 				});

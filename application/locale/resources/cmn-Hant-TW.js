@@ -905,7 +905,7 @@
 	"Treat %1 as language: %2.": "\u5c07 %1 \u8996\u70ba\u8a9e\u8a00\uff1a%2\u3002",
 	"Cannot detect language of %1!": "\u7121\u6cd5\u8b58\u5225 %1 \u7684\u8a9e\u8a00\uff01",
 	"Invalid task_configuration (should be %2): {%3} %1": "\u7121\u6548\u7684\u4efb\u52d9\u8a2d\u5b9a\uff08\u61c9\u8a72\u662f %2\uff09\uff1a{%3} %1",
-	"Get parameter %1=%2 from command line": "\u5f9e\u547d\u4ee4\u5217\u7372\u5f97\u53c3\u6578 %1=%2",
+	"Get parameter %1=%2 from command line": "\u5f9e\u547d\u4ee4\u5217\u7372\u53d6\u53c3\u6578\u503c %1=%2",
 	"Get section title from command line argument: %1": "\u5f9e\u547d\u4ee4\u884c\u53c3\u6578\u7372\u53d6\u7ae0\u7bc0\u6a19\u984c\uff1a%1",
 	"Get section title from task file name: %1": "\u5f9e\u4efb\u52d9\u6a94\u6848\u540d\u7a31\u4e2d\u7372\u53d6\u7ae0\u7bc0\u6a19\u984c: %1",
 	"Change section title:": "\u66f4\u6539\u7ae0\u7bc0\u6a19\u984c\uff1a",
