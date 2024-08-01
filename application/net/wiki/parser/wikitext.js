@@ -5110,16 +5110,37 @@ function module_code(library_namespace) {
 		options = wiki_API.add_session_to_options(session, Object
 				.clone(options));
 
-		var parsed = parse_wikitext(options.replace_by_wikitext
-				|| token.toString(), options);
+		var parsed = options.replace_by_wikitext || token;
+		if (!parsed)
+			return parsed;
+
+		// 去除空參數。 Remove empty parameters.
+		if (options.remove_empty_parameters && parsed.type === 'transclusion') {
+			var toString = parsed.toString;
+			// clone element
+			parsed = parsed.slice();
+			parsed.toString = toString;
+
+			var index = 1;
+			while (index < parsed.length) {
+				if (parsed[index] || parsed[index] === 0)
+					index++;
+				else
+					parsed.splice(index, 1);
+			}
+		}
+
+		parsed = parse_wikitext(parsed.toString(), options);
 
 		if (token.type !== parsed.type) {
-			throw new Error('token.type: ' + token.type + '⭢' + parsed.type);
+			throw new Error('inplace_reparse_element: token.type: '
+					+ token.type + '⭢' + parsed.type);
 		}
 
 		token.truncate();
 
 		Object.assign(token, parsed);
+		return token;
 	}
 
 	// ------------------------------------------------------------------------
