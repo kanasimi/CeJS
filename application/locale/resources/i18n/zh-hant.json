@@ -1297,5 +1297,6 @@
 	"usage": "用法：",
 	"work-title-work-id": "作品標題或 id",
 	"work-list-file": "作品列表檔案",
-	"options": "選項："
+	"options": "選項：",
+	"panel_label__summary": "提要"
 }

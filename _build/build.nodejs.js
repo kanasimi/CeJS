@@ -11,6 +11,7 @@
 node build.nodejs.js add_mark generate_plural_rules
 
 各原始碼庫設定檔: source_repositories.json
+會從 source_repositories.json 讀取所有 repositories。
 
 TODO:
 Sorting message id by reference.
@@ -1326,16 +1327,16 @@ async function modify_source_files() {
 	//console.log(source_repositories);
 
 	for (let [source_base_path, source_data] of Object.entries(source_repositories)) {
-		if (typeof source_data !== 'object')
-			source_data = { base_GitHub_path: source_data };
+		if (!source_data || typeof source_data !== 'object')
+			source_data = source_data && typeof source_data === 'string' ? { base_GitHub_path: source_data } : { source_repository_data: source_data };
 		const base_GitHub_path = source_data.base_GitHub_path;
 		let ignore_file_paths = source_data.ignore_file_paths || [];
 		await new Promise((resolve, reject) => {
-			source_base_path = CeL.simplify_path(CeL.append_path_separator(CeL.env.script_base_path + source_base_path));
+			source_base_path = CeL.simplify_path(CeL.append_path_separator(CeL.env.script_base_path + source_base_path)).replace(/\\/g, '/');
 			//console.trace(source_base_path);
 			CeL.storage.traverse_file_system(source_base_path, fso_path => {
-				const normalized_fso_path = fso_path.replace(/\\/g, '/');
-				if (default_PATTERN_ignore_file_path.test(normalized_fso_path)) {
+				const normalized_fso_path = fso_path;
+				if (default_PATTERN_ignore_file_path.test(normalized_fso_path) && !default_PATTERN_ignore_file_path.test(source_base_path)) {
 					return;
 				}
 				for (const path_pattern of ignore_file_paths) {

@@ -1285,5 +1285,6 @@
 	"usage": "Usage:",
 	"work-title-work-id": "work title / work id",
 	"work-list-file": "work list file",
-	"options": "Options:"
+	"options": "Options:",
+	"panel_label__summary": "summary"
 }

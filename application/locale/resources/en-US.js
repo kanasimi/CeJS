@@ -1287,6 +1287,7 @@
 	"Usage:": "Usage:",
 	"\u4f5c\u54c1\u6a19\u984c\u6216 id": "work title / work id",
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "work list file",
-	"Options:": "Options:"
+	"Options:": "Options:",
+	"summary": "summary"
 },
 "en-US");

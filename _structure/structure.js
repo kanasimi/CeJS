@@ -69,8 +69,11 @@ if (typeof CeL !== 'function') {
  * @since	JavaScript 1.2
  * @since	2010/1/9 00:01:52 建立
  * @author	kanasimi@gmail.com
- * @version	$Id: ce.js,v 0.2 2009/11/26 18:37:11 kanashimi Exp $
+ * @version	$Id: ce.js,v 0.2 2009/11/26 18:37:11 kanashimi $
  */
+
+// The "Id" above: see [http://ms11.voip.edu.tw/~mac/research/document/rcs.htm RCS IdKeyword]
+// https://dywang.csie.cyut.edu.tw/dywang/linuxProgram/node118.html
 
 
 /**<code>

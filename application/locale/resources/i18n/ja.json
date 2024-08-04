@@ -654,5 +654,6 @@
 	"usage": "使用方法:",
 	"work-title-work-id": "題名 / 作品ID",
 	"work-list-file": "作品一覧",
-	"options": "オプション:"
+	"options": "オプション:",
+	"panel_label__summary": "要約"
 }

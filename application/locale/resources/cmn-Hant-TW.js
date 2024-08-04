@@ -1287,6 +1287,7 @@
 	"Usage:": "\u7528\u6cd5\uff1a",
 	"\u4f5c\u54c1\u6a19\u984c\u6216 id": "\u4f5c\u54c1\u6a19\u984c\u6216 id",
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "\u4f5c\u54c1\u5217\u8868\u6a94\u6848",
-	"Options:": "\u9078\u9805\uff1a"
+	"Options:": "\u9078\u9805\uff1a",
+	"summary": "\u63d0\u8981"
 },
 "cmn-Hant-TW");
