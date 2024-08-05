@@ -1291,5 +1291,6 @@
 	"usage": "Usagi:",
 	"work-title-work-id": "tìtol o identificativ dël travaj",
 	"work-list-file": "archivi ëd lista ëd travaj",
-	"options": "Opsion:"
+	"options": "Opsion:",
+	"panel_label__summary": "resumé"
 }

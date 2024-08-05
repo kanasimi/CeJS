@@ -8,6 +8,7 @@
 			"I'm mender",
 			"Kanashimi",
 			"MacOS Weed",
+			"Méthodes Bulebe Hangi",
 			"Nom d'User",
 			"Oujon",
 			"SleaY",
@@ -1300,5 +1301,6 @@
 	"usage": "Utilisation :",
 	"work-title-work-id": "titre ou identifiant du travail",
 	"work-list-file": "fichier de liste de travaux",
-	"options": "Options :"
+	"options": "Options :",
+	"panel_label__summary": "Résumé"
 }
