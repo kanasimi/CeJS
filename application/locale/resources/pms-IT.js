@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Polid\u00e9 l'argistr",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Smon-e / st\u00ebrm\u00e9 l'argistr",
 	"Load failed": "Cariament fal\u00ec",
@@ -1287,6 +1287,7 @@
 	"Usage:": "Usagi:",
 	"\u4f5c\u54c1\u6a19\u984c\u6216 id": "t\u00ectol o identificativ d\u00ebl travaj",
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "archivi \u00ebd lista \u00ebd travaj",
-	"Options:": "Opsion:"
+	"Options:": "Opsion:",
+	"summary": "resum\u00e9"
 },
 "pms-IT");

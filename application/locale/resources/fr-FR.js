@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "Calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "4",
+	"untranslated message count": "3",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -1284,6 +1284,7 @@
 	"Usage:": "Utilisation\u202f:",
 	"\u4f5c\u54c1\u6a19\u984c\u6216 id": "titre ou identifiant du travail",
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "fichier de liste de travaux",
-	"Options:": "Options\u202f:"
+	"Options:": "Options\u202f:",
+	"summary": "R\u00e9sum\u00e9"
 },
 "fr-FR");
