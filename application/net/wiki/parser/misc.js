@@ -1822,6 +1822,7 @@ function module_code(library_namespace) {
 								if (!has_list.hash)
 									has_list.hash = Object.create(null);
 								var key = null;
+								// console.trace(token);
 								token.forEach(function(item) {
 									var item_value = normalize_value(item);
 									if (item.is_term) {

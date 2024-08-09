@@ -1093,7 +1093,9 @@ function module_code(library_namespace) {
 	// <tag> 不會截斷 italic, bold
 	template_PATTERN_text_apostrophe_unit = /([^\n]*?)('(?:(?:token_mark)*')+|\n|$)/.source,
 	// [ all, text, apostrophes(''+) ]
-	default_PATTERN_text_apostrophe_unit = generate_token_pattern(template_PATTERN_text_apostrophe_unit);
+	default_PATTERN_text_apostrophe_unit = generate_token_pattern(template_PATTERN_text_apostrophe_unit),
+	// is_dt
+	PATTERN_prefix_is_description_term = /;\s*$/;
 
 	/**
 	 * parse The MediaWiki markup language (wikitext / wikicode). 解析維基語法。
@@ -4342,8 +4344,9 @@ function module_code(library_namespace) {
 				// (list_item_token.list_prefix)。
 				item.list_prefix = list_prefix;
 				// ; term : definition
-				if (/[;:]$/.test(list_prefix)) {
-					item.is_term = list_prefix.endsWith(';');
+				if (/[;:]\s*$/.test(list_prefix)) {
+					item.is_term = PATTERN_prefix_is_description_term
+							.test(list_prefix);
 				}
 				if (latest_list) {
 					// Will be used by function remove_token_from_parent()
@@ -4402,7 +4405,8 @@ function module_code(library_namespace) {
 					// console.log([ position, line ]);
 					// '\n': from `wikitext.split('\n')`
 					list_prefix = '\n' + line.slice(0, position);
-					is_dt = list_prefix.endsWith(';');
+					is_dt = PATTERN_prefix_is_description_term
+							.test(list_prefix);
 					line = line.slice(position);
 					matched = line.match(/^\s+/);
 					if (matched) {
@@ -4437,7 +4441,7 @@ function module_code(library_namespace) {
 			if (position > 0) {
 				// '\n': from `wikitext.split('\n')`
 				list_prefix = '\n' + line.slice(0, position);
-				if (list_prefix.endsWith(';')) {
+				if (PATTERN_prefix_is_description_term.test(list_prefix)) {
 					// line is not push_list_item() still,
 					// when the `line` push_list_item(), its index will be
 					// latest_list.length.
@@ -4490,7 +4494,7 @@ function module_code(library_namespace) {
 			});
 
 			// console.trace(latest_list);
-			is_dt = list_prefix.endsWith(';');
+			is_dt = PATTERN_prefix_is_description_term.test(list_prefix);
 
 			// matched[2]: 將空白字元放在 .list_prefix 可以減少很多麻煩。
 			list_prefix += matched[2];
