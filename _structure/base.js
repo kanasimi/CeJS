@@ -636,12 +636,27 @@ function (globalThis) {
 		
 		try {
 			while (i < l) {
-				// _.debug('to [' + variable_name_array[i] + ']: ' +
-				// v[variable_name_array[i]]),
-				if (variable_name_array[i] in v)
-					v = v[variable_name_array[i++]];
-				else
+				var variable_name = variable_name_array[i++];
+				if (false) {
+					_.debug('to [' + variable_name + ']: '
+					//+ v[variable_name]
+					);
+				}
+
+				if (!(variable_name in v))
 					return cannot_travel_down();
+
+				if (platform.nodejs && typeof v === 'function'
+				// TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them
+				&& variable_name in {
+					'caller' : true,
+					'callee' : true,
+					'arguments' : true
+				}) {
+					return cannot_travel_down();
+				}
+
+				v = v[variable_name];
 			}
 
 			if (do_set) {

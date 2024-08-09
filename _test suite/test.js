@@ -5641,10 +5641,10 @@ function test_wiki() {
 			var promise = Promise.resolve();
 
 			promise = promise.then(function () {
-				return CeL.wiki.expand_transclusion('{{w|ABC}}', options);
+				return CeL.wiki.expand_transclusion('{{w|ABC}}{{w|ABC|DEF}}', options);
 			}).then(function (parsed) {
 				//console.trace(parsed);
-				assert(['[[ABC|ABC]]', parsed.toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{w}}');
+				assert(['[[ABC]][[ABC|DEF]]', parsed.toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{w}}');
 			});
 
 			return promise.then(function (parsed) {
