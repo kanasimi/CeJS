@@ -3262,6 +3262,7 @@ function module_code(library_namespace) {
 							// TODO: handle exception
 						}
 					}
+
 					if (!options.no_write_info) {
 						library_namespace.info([
 								'get_URL_cache_node.cache: ',
@@ -3270,17 +3271,32 @@ function module_code(library_namespace) {
 									T : [ 'Write data to cache file [%1].',
 											file_name ]
 								} ]);
+						// console.trace(data);
+
 						try {
 							library_namespace.debug({
 								// gettext_config:{"id":"the-data-to-cache-$1"}
 								T : [ 'The data to cache: %1...',
-								// JSON.stringify(data) maybe throw.
-								data && JSON.stringify(data).slice(0, 190) ]
+								//
+								typeof data === 'string'
+								//
+								&& data.length < 200000
+								/**
+								 * <code>
+
+								JSON.stringify(data) may be thrown and does not be caught.
+
+								FATAL ERROR: invalid table size Allocation failed - JavaScript heap out of memory
+
+								</code>
+								 */
+								&& JSON.stringify(data).slice(0, 190) || data ]
 							}, 3, 'get_URL_cache_node');
 						} catch (e) {
 							// TODO: handle exception
 						}
 					}
+
 					try {
 						node_fs.writeFileSync(file_name, data, encoding);
 					} catch (error) {
