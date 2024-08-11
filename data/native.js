@@ -2592,6 +2592,8 @@ function module_code(library_namespace) {
 			try {
 				Array.prototype.push.apply(this, list);
 			} catch (e) {
+				// e.g., 'Maximum call stack size exceeded'
+				index = 0;
 				while (index < list.length)
 					Array.prototype.push.call(this, list[index++]);
 			}

@@ -182,14 +182,40 @@ function module_code(library_namespace) {
 
 		// console.trace(this);
 		if (!this.conversions) {
-			// 尚未執行 Converter_initialization(options)。
-			// 將在 Converter_initialization() 一起載入。
+			library_namespace
+					.debug(
+							'尚未執行 Converter_initialization(options)。將在 Converter_initialization() 一起載入。',
+							1, 'add_conversions');
 			return;
+		}
+
+		var tailored_key = options.tailored_key || options.work_title;
+		if (tailored_key) {
+			if (!this.tailored_conversions[tailored_key]) {
+				// initialization
+				this.tailored_conversions[tailored_key] = new Convert_Pairs(
+						null, options);
+			}
+			/**
+			 * 警告: 載入特設辭典後無法卸除! 必須在轉換文字時設定 options.tailored_key 才能使用完整特設辭典。
+			 * 
+			 * 但就算沒設定
+			 * options.tailored_key，依然會採用特設辭典中與一般性辭典(Converter.options)沒衝突的部分。
+			 * 
+			 * this.tailored_conversions 放置的只有衝突的部分。
+			 */
+			options.filter_existing_key_on_set = function(key, original_value,
+					value) {
+				this.tailored_conversions[tailored_key]
+						.add(key, value, options);
+				return false;
+			}.bind(this);
 		}
 
 		options.path = file_path_list;
 
 		var use_conversion = this.conversions[options.sort];
+
 		if (use_conversion && use_conversion.pair_Map_by_length
 				&& !use_conversion.pair_Map) {
 			library_namespace
@@ -230,6 +256,8 @@ function module_code(library_namespace) {
 		}
 
 		this.conversions = [];
+		// 特設辭典對應集
+		this.tailored_conversions = Object.create(null);
 		// @see add_conversions()
 		this.files.forEach(function(file_list) {
 			var _options = {
@@ -335,20 +363,21 @@ function module_code(library_namespace) {
 
 	// convert text
 	function convert_text(text, options) {
+		options = library_namespace.setup_options(options);
+
 		if (!this.conversions) {
 			this.initialization(options);
 		}
 
 		// 事前轉換表。
-		if (options && options.prefix_conversions) {
+		if (options.prefix_conversions) {
 			text = (new Convert_Pairs(options.prefix_conversions, {
 				flags : options.flags || REPLACE_FLAG
 			})).convert(text);
 		}
 
 		var for_each_conversion;
-		if (!options) {
-		} else if (options.mode === 'word') {
+		if (options.mode === 'word') {
 			// 僅轉換完全相符的詞彙 key。
 			for_each_conversion = function(_text, conversion) {
 				// console.log(conversion.pair)
@@ -366,7 +395,11 @@ function module_code(library_namespace) {
 			};
 		}
 
-		text = this.conversions.reduce(for_each_conversion
+		var tailored_key = options.tailored_key || options.work_title;
+		text = (tailored_key && this.tailored_conversions[tailored_key]
+		// 先處理衝突部分。
+		? [ this.tailored_conversions[tailored_key] ].append(this.conversions)
+				: this.conversions).reduce(for_each_conversion
 				|| function(_text, conversion) {
 					return conversion.convert(_text, options);
 				}, text);
@@ -391,7 +424,7 @@ function module_code(library_namespace) {
 		}
 
 		// 事後轉換表。
-		if (options && options.postfix_conversions) {
+		if (options.postfix_conversions) {
 			text = (new Convert_Pairs(options.postfix_conversions, {
 				flags : options.flags || REPLACE_FLAG
 			})).convert(text);

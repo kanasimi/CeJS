@@ -171,6 +171,62 @@ function module_code(library_namespace) {
 		return pair_Map && pair_Map.get(key);
 	}
 
+	function set_pair_Map_value(pair_Map, key, value, options) {
+		if (value === Convert_Pairs.KEY_REMOVE) {
+			if (!pair_Map.has(key) || options.filter_existing_key_on_delete
+			// 當存在 key 時，決定是否刪除此 key。
+			&& !options.filter_existing_key_on_delete(key)) {
+				return false;
+			}
+
+			library_namespace.debug('Remove [' + key + ']: ' + pair_Map[key],
+					0, 'set_pair_Map_value');
+			// if (pair_Map.has(key)) { }
+			pair_Map['delete'](key);
+			return true;
+		}
+
+		// --------------------------------------
+
+		if (options.key_is_number && !isNaN(key))
+			key = +key;
+		if (options.value_is_number && !isNaN(value))
+			value = +value;
+
+		if (pair_Map.has(key)) {
+			var dictionary_path = this.path;
+			var original_value = pair_Map.get(key);
+			if (value === original_value) {
+				library_namespace.info('set_pair_Map_value: 重複設定相同的['
+				//
+				+ key + ']=[' + value + ']'
+				//
+				+ (dictionary_path ? ' (' + dictionary_path + ')' : ''));
+				return false;
+			}
+
+			if (options.filter_existing_key_on_set
+			// 當存在 key 時，決定是否設定此 key。
+			&& !options.filter_existing_key_on_set(key, original_value, value)) {
+				return false;
+			}
+
+			// 後來的會覆蓋前面的。
+			if (library_namespace.is_debug(2)) {
+				library_namespace.warn(
+				//
+				'set_pair_Map_value: Duplicated key [' + key
+				//
+				+ '], value will be changed: [' + original_value
+				//
+				+ '] → [' + String(value) + ']');
+			}
+		}
+
+		pair_Map.set(key, value);
+		return true;
+	}
+
 	function Convert_Pairs__add(source, options) {
 		// 前置處理。
 		options = library_namespace.setup_options(options);
@@ -179,10 +235,8 @@ function module_code(library_namespace) {
 
 		if (library_namespace.is_Object(source)) {
 			for ( var key in source) {
-				if (value === Convert_Pairs.KEY_REMOVE)
-					pair_Map['delete'](key, source[key]);
-				else
-					pair_Map.set(key, source[key]);
+				set_pair_Map_value.call(this, pair_Map, key, source[key],
+						options);
 			}
 			delete this.special_keys_Map;
 			return this;
@@ -230,10 +284,6 @@ function module_code(library_namespace) {
 		no_the_same_key_value = options.no_the_same_key_value,
 		// key / value 分隔符號。
 		separator = options.separator || this.separator,
-		//
-		key_is_number = options.key_is_number,
-		//
-		value_is_number = options.value_is_number,
 		//
 		item_processor = typeof options.item_processor === 'function'
 				&& options.item_processor,
@@ -308,48 +358,14 @@ function module_code(library_namespace) {
 				// 長度為 1 的沒有轉換必要。
 				if (no_the_same_key_value !== false && key.length === 1) {
 					// 後來的會覆蓋前面的。
-					if (pair_Map.has(key))
-						pair_Map['delete'](key);
-					return;
+					// Will do set_pair_Map_value()
+					value = Convert_Pairs.KEY_REMOVE;
 				}
 				// 可能是為了確保不被改變而設定。
 			}
 
-			if (value === Convert_Pairs.KEY_REMOVE) {
-				library_namespace.debug('Remove [' + key + ']: '
-						+ pair_Map[key], 0, 'Convert_Pairs.add');
-				// if (pair_Map.has(key)) { }
-				pair_Map['delete'](key);
-				return;
-			}
-
-			if (key_is_number && !isNaN(key))
-				key = +key;
-			if (value_is_number && !isNaN(value))
-				value = +value;
-
-			if (pair_Map.has(key)) {
-				if (value === pair_Map.get(key)) {
-					library_namespace.info('Convert_Pairs.add: 重複設定相同的['
-					//
-					+ key + ']=[' + value + ']'
-					//
-					+ (dictionary_path ? ' (' + dictionary_path + ')' : ''));
-					return;
-				}
-				// 後來的會覆蓋前面的。
-				if (library_namespace.is_debug(2)) {
-					library_namespace.warn(
-					//
-					'Convert_Pairs.add: Duplicated key [' + key
-					//
-					+ '], value will be changed: [' + pair_Map.get(key)
-					//
-					+ '] → [' + String(value) + ']');
-				}
-			}
-			pair_Map.set(key, value);
-		});
+			set_pair_Map_value.call(this, pair_Map, key, value, options);
+		}, this);
 
 		delete this.special_keys_Map;
 		return this;
@@ -358,6 +374,9 @@ function module_code(library_namespace) {
 	function Convert_Pairs__remove(key_hash, options) {
 		if (!key_hash)
 			return this;
+
+		// 前置處理。
+		options = library_namespace.setup_options(options);
 
 		if (typeof key_hash === 'string')
 			key_hash = [ key_hash ];
@@ -369,14 +388,20 @@ function module_code(library_namespace) {
 				key_hash[tmp[i]] = null;
 		}
 
-		var remove_matched_path = options && options.remove_matched_path;
-		var pair_Map = this.pair_Map, path = this.path, changed;
-		// console.trace([ path, key_hash ]);
+		var pair_Map = this.pair_Map, dictionary_path = this.path, changed;
+		// console.trace([ dictionary_path, key_hash ]);
 		for ( var search_key in key_hash) {
 			// key_hash[key]: ignore path
-			if (key_hash[search_key] === path) {
-				if (remove_matched_path)
-					delete key_hash[search_key];
+			if (key_hash[search_key] === dictionary_path) {
+				if (options.remove_matched_path) {
+					if (search_key in key_hash) {
+						delete key_hash[search_key];
+					} else if (!options.no_remove_warning) {
+						library_namespace.warn('Convert_Pairs__remove: '
+								+ 'The key does not exist: [' + search_key
+								+ ']');
+					}
+				}
 				continue;
 			}
 
@@ -384,14 +409,14 @@ function module_code(library_namespace) {
 			if (pattern) {
 				pattern = new RegExp(pattern[1], pattern[2] || options.flags);
 				library_namespace.debug('Remove pattern: ' + pattern + ' of '
-						+ path, 2, 'Convert_Pairs__remove');
+						+ dictionary_path, 2, 'Convert_Pairs__remove');
 				var keys_to_remove = [];
 				pair_Map.forEach(function(value, key) {
 					if (pattern.test(key) || pattern.test(value))
 						keys_to_remove.push(key);
 				});
 				if (keys_to_remove.length > 0) {
-					library_namespace.debug(path + '\tRemove '
+					library_namespace.debug(dictionary_path + '\tRemove '
 							+ keys_to_remove.length + ' keys.', 2,
 							'Convert_Pairs__remove');
 					// console.trace(keys_to_remove);
@@ -417,12 +442,13 @@ function module_code(library_namespace) {
 		// 前置處理。
 		options = library_namespace.setup_options(options);
 
-		var path = options.path;
-		if (Array.isArray(path)) {
-			if (path.length < 2 && typeof path[0] === 'string') {
-				path = path[0];
+		var dictionary_path = options.path;
+		if (Array.isArray(dictionary_path)) {
+			if (dictionary_path.length < 2
+					&& typeof dictionary_path[0] === 'string') {
+				dictionary_path = dictionary_path[0];
 			} else {
-				path.forEach(function(file_path) {
+				dictionary_path.forEach(function(file_path) {
 					var _options = library_namespace.new_options(options);
 					if (library_namespace.is_Object(file_path)) {
 						// e.g., for .remove_comments
@@ -437,49 +463,50 @@ function module_code(library_namespace) {
 			}
 		}
 
-		// assert: typeof path === 'string'
-		// `path` is file path
-		if (!path || typeof options.file_filter === 'function'
-				&& !options.file_filter(path)) {
+		// assert: typeof dictionary_path === 'string'
+		// `dictionary_path` is file path
+		if (!dictionary_path || typeof options.file_filter === 'function'
+				&& !options.file_filter(dictionary_path)) {
 			return this;
 		}
 
 		var source;
 		try {
 			// 注意:此方法不可跨 domain!
-			source = library_namespace.get_file(path);
+			source = library_namespace.get_file(dictionary_path);
 		} catch (e) {
 			// TODO: handle exception
 		}
 
 		if (source) {
-			this.path = path;
+			this.path = dictionary_path;
 			// 載入 resources。
 			this.add(source, options);
 		} else {
 			library_namespace
 					.warn('Convert_Pairs.add_path: Cannot get contents of ['
-							+ path + ']!');
+							+ dictionary_path + ']!');
 		}
 		return this;
 	}
 
-	function Convert_Pairs__save(path, encoding, save_new) {
+	function Convert_Pairs__save(dictionary_path, encoding, save_new) {
 		if (!library_namespace.write_file)
 			throw new Error('Please include CeL.application.storage first!');
 
-		if (path !== this.path) {
-			path = this.path;
+		if (dictionary_path !== this.path) {
+			dictionary_path = this.path;
 		} else if (!save_new && this.remove_comments) {
 			library_namespace.warn('移除注解後再存檔，會失去原先的注解！請考慮設定 save_new flag。');
 		}
 
 		if (!encoding) {
 			encoding = library_namespace.guess_encoding
-					&& library_namespace.guess_encoding(path)
+					&& library_namespace.guess_encoding(dictionary_path)
 					|| library_namespace.open_format.TristateTrue;
 		}
-		library_namespace.debug([ '(' + encoding, ') [', path, ']' ], 2,
+		library_namespace.debug(
+				[ '(' + encoding, ') [', dictionary_path, ']' ], 2,
 				'Convert_Pairs.save');
 
 		var pair_Map = this.pair_Map;
@@ -493,11 +520,11 @@ function module_code(library_namespace) {
 			})
 
 			library_namespace.debug([ save_new ? 'Appending ' : 'Writing ',
-					data.length, ' data to (' + encoding, ') [', path, ']' ],
-					2, 'Convert_Pairs.save');
+					data.length, ' data to (' + encoding, ') [',
+					dictionary_path, ']' ], 2, 'Convert_Pairs.save');
 			library_namespace.debug(data.join('<br />'), 3,
 					'Convert_Pairs.save');
-			library_namespace.write_file(path,
+			library_namespace.write_file(dictionary_path,
 			//
 			data.join(this.field_separator
 					|| library_namespace.env.line_separator), encoding,
@@ -510,7 +537,7 @@ function module_code(library_namespace) {
 			a : 'save again',
 			href : '#',
 			onclick : function() {
-				this.save(path, encoding, save_new);
+				this.save(dictionary_path, encoding, save_new);
 				return false;
 			}.bind(this)
 		}, ']' ]);
@@ -518,8 +545,8 @@ function module_code(library_namespace) {
 		return this;
 	}
 
-	function Convert_Pairs__save_new(path, encoding) {
-		return this.save(path, encoding, true);
+	function Convert_Pairs__save_new(dictionary_path, encoding) {
+		return this.save(dictionary_path, encoding, true);
 	}
 
 	// re-generate pattern, this.get_sorted_keys()
@@ -689,11 +716,13 @@ function module_code(library_namespace) {
 				var map = pair_Map_by_length[text_to_convert_length];
 				if (map && map.has(text_to_convert)) {
 					// Found.
-					if (show_matched) {
+					var convert_to_text = map.get(text_to_convert);
+					if (typeof show_matched === 'function' ? show_matched(
+							text_to_convert, convert_to_text) : show_matched) {
 						library_namespace.info(text_to_convert + '→'
-								+ map.get(text_to_convert));
+								+ convert_to_text);
 					}
-					converted_text_slice += map.get(text_to_convert);
+					converted_text_slice += convert_to_text;
 					break;
 				}
 
@@ -831,14 +860,15 @@ function module_code(library_namespace) {
 		var converted_text = text_String;
 		this.special_keys_Map.forEach(function(value, key) {
 			// var pattern = value[0], replace_to = value[1];
-			if (show_matched && value[0].test(converted_text)) {
-				library_namespace.info(value[0] + ': '
-				//
-				+ converted_text + '→'
-						+ converted_text.replace(value[0], value[1]));
+			var convert_to_text = converted_text.replace(value[0], value[1]);
+			if ((typeof show_matched === 'function' ? show_matched(
+					converted_text, convert_to_text, value[0]) : show_matched)
+					&& value[0].test(converted_text)) {
+				library_namespace.info(value[0] + ': ' + converted_text + '→'
+						+ convert_to_text);
 			}
 			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
-			converted_text = converted_text.replace(value[0], value[1]);
+			converted_text = convert_to_text;
 			// 在這裡呼叫 split_text_by_demarcation_points() 可增加精準度，但大大降低效能。
 		});
 
