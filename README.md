@@ -15,7 +15,7 @@ http://stackshare.io/continuous-integration
 [![Dependency Status](https://david-dm.org/kanasimi/CeJS.svg)](https://david-dm.org/kanasimi/CeJS)
 -->
 
-# [Colorless echo](http://lyrics.meicho.com.tw/) JavaScript kit
+# [Colorless echo](https://colorlessecho.github.io/reviews/) JavaScript kit
 The project aims to develop a JavaScript module framework that is simple to use with some interesting features.
 本計畫目標是建立一個簡單上手的 JavaScript 程式庫架構。<!-- toolkit -->
 
@@ -190,14 +190,14 @@ See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/co
 * 本 library 將使用到 global 變數 ```CeL```。
 
 ## Concepts 模組概念
-詳細請參閱[概念介紹頁](http://lyrics.meicho.com.tw/reviews/review.pl?seg=CeJS)。
+詳細請參閱[概念介紹頁](https://colorlessecho.github.io/reviews/articles/CeJS.html)。
 
 ## Contact 聯絡我們
 Contact us at [GitHub](https://github.com/kanasimi/CeJS/issues).
 
 (This document is written by [GitHub Flavored Markdown](https://help.github.com/categories/writing-on-github/).)
 
-[![logo](https://raw.githubusercontent.com/kanasimi/CeJS/master/_test%20suite/misc/logo.jpg)](http://lyrics.meicho.com.tw/)
+[![logo](https://raw.githubusercontent.com/kanasimi/CeJS/master/_test%20suite/misc/logo.jpg)](https://colorlessecho.github.io/reviews/)
 
 <!--
 Markdown comment: need check under github and npmjs
