@@ -523,12 +523,16 @@ function module_code(library_namespace) {
 	// set: work_data.inverted_order = true;
 	// this.reverse_chapter_list_order(work_data);
 	// @see work_crawler/hhcool.js
-	function reverse_chapter_list_order(work_data) {
+	function reverse_chapter_list_order(work_data, options) {
 		var chapter_list = work_data.chapter_list;
 		if (!Array.isArray(chapter_list) || !(chapter_list.length > 1)) {
 			return;
 		}
 		// console.log(chapter_list);
+
+		if (options && options.auto_detect_if_need) {
+			// TODO
+		}
 
 		// 即使只有一個 part，也得處理 NO_in_part, chapter_NO 的問題。
 		if (!chapter_list.part_NO)
@@ -1332,6 +1336,7 @@ function module_code(library_namespace) {
 							|| Array.isArray(work_data.chapter_list)
 							// default chapter_data
 							&& work_data.chapter_list[chapter_NO - 1];
+
 					if (chapter_data === _this.REGET_PAGE) {
 						// 當重新讀取章節內容的時候，可以改變網址。
 
@@ -1369,6 +1374,18 @@ function module_code(library_namespace) {
 							reget_chapter_data();
 						}
 						return;
+					}
+
+					// reset
+					// delete work_data.merged_into_previous_chapter;
+					// TODO: 處理一個章節分成兩個頁面的狀況。合併至上一個章節。
+					// 注意: 這會在 preserve_chapter_page 時出問題，不建議採用。
+					if (false && chapter_data === _this.MERGE_INTO_PREVIOUS_CHAPTER) {
+						// 必須自行處理合併作業。
+						work_data.chapter_list.splice(chapter_NO, 1);
+						// 重新設定章節數量。
+						work_data.chapter_count = work_data.chapter_list.length;
+						work_data.merged_into_previous_chapter = true;
 					}
 
 					if (!chapter_data && Array.isArray(work_data.chapter_list)) {
@@ -1809,9 +1826,13 @@ function module_code(library_namespace) {
 			this.after_download_chapter(work_data, chapter_NO);
 		}
 
-		// 增加章節計數，準備下載下一個章節。
-		chapter_NO = crawler_namespace.get_next_chapter_NO_item(work_data,
-				chapter_NO + 1);
+		if (work_data.merged_into_previous_chapter) {
+			delete work_data.merged_into_previous_chapter;
+		} else {
+			// 增加章節計數，準備下載下一個章節。
+			chapter_NO = crawler_namespace.get_next_chapter_NO_item(work_data,
+					chapter_NO + 1);
+		}
 
 		// 欲直接跳過本作品，可設定：
 		// <code>work_data.jump_to_chapter = work_data.chapter_count + 1;</code>
