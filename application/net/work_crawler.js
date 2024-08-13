@@ -188,6 +188,7 @@ function module_code(library_namespace) {
 			this.setup_value('MIN_LENGTH', 'default');
 		}
 
+		// @see function this_get_URL() @ CeL.application.net.work_crawler.task
 		this.get_URL_options = {
 			// start_time : Date.now(),
 			no_protocol_warn : true,

@@ -1176,14 +1176,6 @@ function module_code(library_namespace) {
 		REGET_PAGE : typeof Symbol === 'function' ? Symbol('REGET_PAGE') : {
 			REGET_PAGE : true
 		},
-		MERGE_INTO_PREVIOUS_CHAPTER
-		// TODO: 處理一個章節分成兩個頁面的狀況。需要合併至上一個章節的時候使用。
-		// 注意: 這會在 preserve_chapter_page 時出問題，不建議採用。
-		: typeof Symbol === 'function' ? Symbol('MERGE_INTO_PREVIOUS_CHAPTER')
-		//
-		: {
-			MERGE_INTO_PREVIOUS_CHAPTER : true
-		},
 
 		work_URL : function work_URL(work_id) {
 			// default work_URL: this.base_URL + work_id + '/'

@@ -161,6 +161,10 @@ function module_code(library_namespace) {
 	var KEY_last_fetch_timevalue = 'last_fetch_timevalue';
 
 	function set_chapter_time_interval(XMLHttp) {
+		if (false) {
+			console.trace([ XMLHttp.responseURL, !XMLHttp.get_from_cache,
+					this[KEY_last_fetch_timevalue] ]);
+		}
 		// 可能是從 library_namespace.get_URL_cache() 過來的。
 		if (XMLHttp && XMLHttp.responseURL && !XMLHttp.get_from_cache) {
 			this[KEY_last_fetch_timevalue] = Date.now();
@@ -182,7 +186,10 @@ function module_code(library_namespace) {
 	 * @returns {Integer|Undefined}下載章節資訊/章節內容前的等待時間 (ms)。
 	 */
 	function get_chapter_time_interval(argument_1, work_data) {
-		if (work_data && work_data.reget_chapter === false) {
+		// 就算設定了 work_data.reget_chapter === false
+		// 例如 this.regenerate === true
+		// 還是可能 fetch 網頁，不能以 work_data.reget_chapter 判斷。
+		if (false && work_data && work_data.reget_chapter === false) {
 			// 不重新擷取。
 			return;
 		}
@@ -198,7 +205,7 @@ function module_code(library_namespace) {
 				.to_millisecond(chapter_time_interval);
 
 		if (chapter_time_interval >= 0) {
-			var delta = Date.now() - this[KEY_last_fetch_timevalue];
+			var delta = Date.now() - (this[KEY_last_fetch_timevalue] || 0);
 			if (delta > 0)
 				chapter_time_interval -= delta;
 			return chapter_time_interval;
@@ -218,6 +225,52 @@ function module_code(library_namespace) {
 		}
 
 		return chapter_NO;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	/**
+	 * 去掉章節標題的前導數字。
+	 * 
+	 * @param {Object}chapter_data
+	 *            章節資料 chapter_data or work_data。
+	 * @param {Number}[chapter_NO]
+	 *            章節編號。
+	 * @returns
+	 */
+	function trim_chapter_NO_prefix(chapter_data, chapter_NO) {
+		if (!chapter_data.title)
+			return;
+
+		if (Array.isArray(chapter_data.chapter_list)) {
+			// Inpus chapter_data as work_data.
+			var work_data = chapter_data;
+
+			work_data.chapter_list.forEach(function(chapter_data, index) {
+				trim_chapter_NO_prefix(chapter_data, index + 1);
+			});
+
+			return;
+		}
+
+		var matched = chapter_data.title.match(/^(\d{1,4})\.(第(\d+)章?.+)$/);
+		if (matched
+				&& (+matched[1] === chapter_NO || +matched[1] === +matched[3])) {
+			/**
+			 * <code>
+			// https://69shuba.cx/book/24028/	孺子帝
+			// https://69shuba.cx/book/52895/	别人练级我修仙，苟到大乘再出山
+			// https://www.xsw.tw/book/1613447/243600895.html	別人練級我修仙，苟到大乘再出山第1章 我綁定了修仙模擬器
+			// https://klxs.tw/49/	别人练级我修仙，苟到大乘再出山
+			</code>
+			 */
+
+			// 裁剪章節編號之前的標題。
+			// chapter_data.title_with_NO = chapter_data.title;
+			chapter_data.title = matched[2];
+			return;
+		}
+
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -359,7 +412,10 @@ function module_code(library_namespace) {
 		chapter_time_interval = this.get_chapter_time_interval(chapter_NO,
 				work_data);
 
-		// console.trace([ work_data.reget_chapter, chapter_time_interval ]);
+		if (false) {
+			console.trace([ work_data.reget_chapter, chapter_time_interval,
+					this[KEY_last_fetch_timevalue] ]);
+		}
 		var next = chapter_time_interval > 0 ? (function() {
 			var message = [ this.id, ': ', work_data.title + ': ',
 			// gettext_config:{"id":"waiting-for-$3-before-downloading-$1-$2"}
@@ -1376,18 +1432,6 @@ function module_code(library_namespace) {
 						return;
 					}
 
-					// reset
-					// delete work_data.merged_into_previous_chapter;
-					// TODO: 處理一個章節分成兩個頁面的狀況。合併至上一個章節。
-					// 注意: 這會在 preserve_chapter_page 時出問題，不建議採用。
-					if (false && chapter_data === _this.MERGE_INTO_PREVIOUS_CHAPTER) {
-						// 必須自行處理合併作業。
-						work_data.chapter_list.splice(chapter_NO, 1);
-						// 重新設定章節數量。
-						work_data.chapter_count = work_data.chapter_list.length;
-						work_data.merged_into_previous_chapter = true;
-					}
-
 					if (!chapter_data && Array.isArray(work_data.chapter_list)) {
 						// 照理來說多少應該要有資訊，因此不應用 `this.skip_error` 跳過。
 						// gettext_config:{"id":"parse-out-empty-page-information"}
@@ -1603,6 +1647,7 @@ function module_code(library_namespace) {
 				// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL獲取名稱的於目錄中。
 				library_namespace.get_URL_cache(chapter_URL, function(data,
 						error, XMLHttp) {
+					// console.trace(XMLHttp, error);
 					pre_parse_chapter_data(XMLHttp, error);
 				}, {
 					no_write_info : true,
@@ -1826,13 +1871,9 @@ function module_code(library_namespace) {
 			this.after_download_chapter(work_data, chapter_NO);
 		}
 
-		if (work_data.merged_into_previous_chapter) {
-			delete work_data.merged_into_previous_chapter;
-		} else {
-			// 增加章節計數，準備下載下一個章節。
-			chapter_NO = crawler_namespace.get_next_chapter_NO_item(work_data,
-					chapter_NO + 1);
-		}
+		// 增加章節計數，準備下載下一個章節。
+		chapter_NO = crawler_namespace.get_next_chapter_NO_item(work_data,
+				chapter_NO + 1);
 
 		// 欲直接跳過本作品，可設定：
 		// <code>work_data.jump_to_chapter = work_data.chapter_count + 1;</code>
@@ -1937,7 +1978,9 @@ function module_code(library_namespace) {
 		// {Natural|String|Function}當網站不允許太過頻繁的訪問讀取/access時，可以設定下載章節資訊/章節內容前的等待時間。
 		// chapter_time_interval : '1s',
 		set_chapter_time_interval : set_chapter_time_interval,
-		get_chapter_time_interval : get_chapter_time_interval
+		get_chapter_time_interval : get_chapter_time_interval,
+
+		trim_chapter_NO_prefix : trim_chapter_NO_prefix
 	});
 
 	// 不設定(hook)本 module 之 namespace，僅執行 module code。

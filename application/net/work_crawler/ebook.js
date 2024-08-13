@@ -276,10 +276,13 @@ function module_code(library_namespace) {
 	https://www.piaotia.com/html/15/15579/11117183.html	我在田宗剑道成仙 第554章 鉴天镜地书姜思白
 	&nbsp;&nbsp;&nbsp;&nbsp;第554章 鉴天镜+地书+姜思白<br /><br />
 
+	https://69shuba.cx/txt/52895/34488506	别人練級我修仙，苟到大乘再出山 > 第99章 人生模拟器30版本，新一批的能量介质！
+	第99章 人生模拟器3.0版本，新一批的能量介质！
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~\/+\-—々·\s_]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\/+\-—々·\s_.]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
@@ -305,7 +308,7 @@ function module_code(library_namespace) {
 		if (false) {
 			text = text.replace(new RegExp(/^(?:&nbsp;|\s)*/.source
 					+ library_namespace.to_RegExp_pattern(title)
-					+ /\s*(?:<br\s*\/?>)+/.source), '');
+					+ /\s*(?:<br(?:[\s\/][^<>]*)?>)+/.source), '');
 		}
 
 		/** {Number}第一行結束的index @ text。 */
@@ -649,6 +652,9 @@ function module_code(library_namespace) {
 		/**
 		 * TODO<code>
 
+		// 板荡识诚臣
+		荡
+
 		// 很有诱惑力。
 		诱惑
 		// 以大法力睁开天眼，
@@ -829,8 +835,8 @@ function module_code(library_namespace) {
 	 */
 	function fix_general_ADs(text) {
 		text = text.replace(
-				/(?:<br[^<>]*>)*(?:&nbsp;)*看[^\s\n<>]+?最新章节到[^\s\n<>]+?文学\s*/,
-				'');
+		// <br(?:[\s\/][^<>]*)?>
+		/(?:<br[^<>]*>)*(?:&nbsp;)*看[^\s\n<>]+?最新章节到[^\s\n<>]+?文学\s*/, '');
 
 		text = text.replace(PATTERN_AD_cfwx, function(all, previous) {
 			// 必須保留前面的換行。 e.g., http://www.shuyy8.com/read/1242/1276134.html
@@ -967,6 +973,7 @@ function module_code(library_namespace) {
 
 		work_data.convert_options = {
 			work_title : work_data.title,
+			original_work_title : work_data.original_work_title,
 			// only for debug CeCC 繁簡轉換。
 			cache_directory : library_namespace
 					.append_path_separator(work_data.directory + '繁簡轉換 cache'),
@@ -1122,7 +1129,7 @@ function module_code(library_namespace) {
 			subject : subject,
 			description : crawler_namespace.get_label(work_data.description
 			// .description 中不可存在 tag。
-			.replace(/\n*<br[^<>]*>\n*/ig, '\n'))
+			.replace(/\n*<br(?:[\s\/][^<>]*)?>\n*/ig, '\n'))
 		};
 
 		text_list = [ work_data.author, setup_ebook_options.description,
@@ -1237,7 +1244,7 @@ function module_code(library_namespace) {
 		// remove all new-lines
 		.replace(/[\r\n]+/g, '')
 		// "<br />", "<br/>" → "\n"
-		.replace(/\s*<br(?:[^\w<>][^<>]*)?>[\r\n]*/ig, '\n')
+		.replace(/\s*<br(?:[\s\/][^<>]*)?>[\r\n]*/ig, '\n')
 		// .trim()
 		), true);
 

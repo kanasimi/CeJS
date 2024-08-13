@@ -469,14 +469,15 @@ function module_code(library_namespace) {
 				// || search_url_data==={URL:'',charset:''}
 				// TODO: .replace(/%t/g, work_title)
 				search_url_data = _this.full_URL(search_url_data);
-				// 對 {Object}search_url_data，不可動到 search_url_data。
-				search_URL_string = (search_url_data.URL || search_url_data)
-				//
-				+ crawler_namespace.encode_URI_component(
+				search_URL_string = crawler_namespace.encode_URI_component(
 				// e.g., 找不到"隔离带 2"，須找"隔离带"。
 				work_title.replace(/\s+\d{1,2}$/, '')
 				// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
 				.replace(/&/g, ''), search_url_data.charset || _this.charset);
+				// console.trace(search_URL_string);
+				// 對 {Object}search_url_data，不可動到 search_url_data。
+				search_URL_string = (search_url_data.URL || search_url_data)
+						+ search_URL_string;
 			}
 
 			// console.log(search_url_data);
@@ -521,10 +522,12 @@ function module_code(library_namespace) {
 			//
 			post_data, Object.assign({
 				error_retry : _this.MAX_ERROR_RETRY
-			}, get_URL_options), search_url_data.charset);
+			}, get_URL_options), search_url_data.charset
+			// e.g., @ xsw.tw.js
+			|| get_URL_options && get_URL_options.charset || _this.charset);
 		}
 
-		function handle_search_response(XMLHttp) {
+		function handle_search_response(XMLHttp, error) {
 			if (_this.search_work_interval)
 				_this.latest_search_time = Date.now();
 
@@ -859,6 +862,29 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			function do_get_work_URL() {
+				// console.trace(_this.work_URL_charset);
+				_this.get_URL(work_URL, process_work_data, null, null,
+						_this.work_URL_charset);
+			}
+
+			// TODO: work_time_interval
+			var chapter_time_interval = _this.get_chapter_time_interval(
+					work_URL, work_data);
+
+			if (chapter_time_interval > 0) {
+				library_namespace.log_temporary([ 'get_work_page: ', {
+					// gettext_config:{"id":"wait-for-$2-and-then-acquiring-the-work-information-page-$1"}
+					T : [ '等待 %2 之後取得作品資訊頁面：%1', work_URL,
+					//
+					library_namespace.age_of(0, chapter_time_interval, {
+						digits : 1
+					}) ]
+				} ]);
+				setTimeout(do_get_work_URL, chapter_time_interval);
+				return;
+			}
+
 			// this.reget_chapter 要在 function process_chapter_list_data(html)
 			// 才設定好，這邊的是預設值。因此必須處理特殊情況，例如 _this.regenerate。
 			if (_this.regenerate || !_this.reget_chapter) {
@@ -879,24 +905,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// TODO: work_time_interval
-			var chapter_time_interval = _this.get_chapter_time_interval(
-					work_URL, work_data);
-			if (chapter_time_interval > 0) {
-				library_namespace.log_temporary([ 'get_work_page: ', {
-					// gettext_config:{"id":"wait-for-$2-and-then-acquiring-the-work-information-page-$1"}
-					T : [ '等待 %2 之後取得作品資訊頁面：%1', work_URL,
-					//
-					library_namespace.age_of(0, chapter_time_interval, {
-						digits : 1
-					}) ]
-				} ]);
-				setTimeout(function() {
-					_this.get_URL(work_URL, process_work_data);
-				}, chapter_time_interval);
-			} else {
-				_this.get_URL(work_URL, process_work_data);
-			}
+			do_get_work_URL();
 		}
 
 		get_work_page();
@@ -1311,6 +1320,7 @@ function module_code(library_namespace) {
 				// CeL.application.net.work_crawler.chapter
 				library_namespace.get_URL_cache(chapter_list_URL, function(
 						data, error, XMLHttp) {
+					// console.trace(XMLHttp, error);
 					pre_process_chapter_list_data(XMLHttp, error);
 				}, {
 					no_write_info : true,

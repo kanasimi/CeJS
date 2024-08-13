@@ -146,13 +146,14 @@ function module_code(library_namespace) {
 				<div class="section-title" data-v-6f225890>章節目錄</div>
 				<code>
 				 */
-				var part_title = text.between('>', '</div>');
+				var part_title = text.between('>', '</div>').trim();
 				// 最新章節 最新章节
 				if (/^最新章[節节]$/.test(part_title)
 				// 假如只有一個 part，那就必須留下最新章節。 e.g., 妖精种植手册黑白轮回篇
 				&& (skip_latest_chapters = part_count > 1)) {
 					return;
 				}
+				// console.trace(part_title);
 				_this.set_part(work_data, part_title);
 				// console.log(text);
 				var matched;

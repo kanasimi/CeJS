@@ -254,6 +254,9 @@ function module_code(library_namespace) {
 				delete work_data.image;
 			}
 
+			if (this.parse_work_data_postfix)
+				this.parse_work_data_postfix(html, get_label, work_data);
+
 			// console.log(work_data);
 			return work_data;
 		},
@@ -320,10 +323,15 @@ function module_code(library_namespace) {
 						title : matched.between('title="', '"')
 								|| get_label(matched.between('>'))
 					};
+					if (chapter_data.title.startsWith(work_data.title)) {
+						chapter_data.title = chapter_data.title.slice(
+								work_data.title.length).trimStart();
+					}
 					// this.add_chapter(work_data, chapter_data);
 					work_data.chapter_list.push(chapter_data);
 				}
 			}
+
 			// console.log(work_data.chapter_list);
 		},
 
@@ -342,8 +350,9 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			var has_next_page_to_merge
 			// 在取得小說章節內容的時候，若發現有章節被目錄漏掉，則將之補上。
-			this.check_next_chapter(work_data, chapter_NO, html,
+			= this.check_next_chapter(work_data, chapter_NO, html,
 					this.PATTERN_next_chapter);
 
 			var chapter_data = work_data.chapter_list[chapter_NO - 1],
@@ -358,10 +367,11 @@ function module_code(library_namespace) {
 			// 去除掉廣告。
 			// e.g., 88dushu.js
 			|| html.between('<div class="yd_text2">', '</div>')).replace(
-					/<script[^<>]*>[^<>]*<\/script>/g, ''),
-			//
-			KEY_interval_cache = 'original_chapter_time_interval';
+					/<script[^<>]*>[^<>]*<\/script>/g, '');
 
+			// --------------------------------------------
+			// 有些頁面過幾秒重讀就能獲得資料。
+			var KEY_interval_cache = 'original_chapter_time_interval';
 			if (is_server_error(sub_title) && text.length < 2000) {
 				this[KEY_interval_cache] = this.chapter_time_interval;
 				// 當網站不允許太過頻繁的訪問/access時，可以設定下載之前的等待時間(ms)。
@@ -377,12 +387,17 @@ function module_code(library_namespace) {
 				}
 				delete this[KEY_interval_cache];
 			}
+			// --------------------------------------------
+
+			if (sub_title.startsWith(work_data.title)) {
+				sub_title = sub_title.slice(work_data.title.length).trimStart();
+			}
 
 			if (this.remove_ads) {
 				text = this.remove_ads(text, chapter_data);
 				if (typeof text !== 'string') {
-					library_namespace
-							.error('parse_chapter_data: .remove_ads() do not return {String}!');
+					library_namespace.error('parse_chapter_data: '
+							+ '.remove_ads() do not return {String}!');
 				}
 			}
 			// console.log(text);

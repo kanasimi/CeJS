@@ -211,7 +211,7 @@ function module_code(library_namespace) {
 			// it is a URL object, it will be automatically converted to an
 			// ordinary options object.
 
-			// console.log(URL_to_fetch);
+			// console.trace([ URL_to_fetch, charset ]);
 			URL_to_fetch = library_namespace.URI(URL_to_fetch, null, {
 				charset : charset
 			});
@@ -1498,7 +1498,7 @@ function module_code(library_namespace) {
 
 			} else {
 				post_data = library_namespace.Search_parameters(post_data)
-						.toString(charset)
+						.toString(options.post_data_charset || charset)
 						|| FORCE_POST;
 			}
 		}

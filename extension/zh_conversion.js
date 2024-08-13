@@ -189,7 +189,10 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var tailored_key = options.tailored_key || options.work_title;
+		var tailored_key = options.tailored_key || options.work_title
+		// @see work_data.convert_options @
+		// CeL.application.net.work_crawler.ebook
+		|| options.original_work_title;
 		if (tailored_key) {
 			if (!this.tailored_conversions[tailored_key]) {
 				// initialization
@@ -206,8 +209,9 @@ function module_code(library_namespace) {
 			 */
 			options.filter_existing_key_on_set = function(key, original_value,
 					value) {
-				this.tailored_conversions[tailored_key]
-						.add(key, value, options);
+				var source = Object.create(null);
+				source[key] = value;
+				this.tailored_conversions[tailored_key].add(source, options);
 				return false;
 			}.bind(this);
 		}
@@ -233,6 +237,12 @@ function module_code(library_namespace) {
 			if (convert_Pairs.pair_Map.size > 0) {
 				this.conversions.unshift(convert_Pairs);
 			}
+		}
+
+		if (tailored_key
+				&& this.tailored_conversions[tailored_key].pair_Map.size === 0) {
+			// 特設辭典無內容，或已全部納入一般辭典。
+			delete this.tailored_conversions[tailored_key];
 		}
 
 		delete this.max_convert_word_length;
@@ -395,11 +405,24 @@ function module_code(library_namespace) {
 			};
 		}
 
-		var tailored_key = options.tailored_key || options.work_title;
-		text = (tailored_key && this.tailored_conversions[tailored_key]
-		// 先處理衝突部分。
-		? [ this.tailored_conversions[tailored_key] ].append(this.conversions)
-				: this.conversions).reduce(for_each_conversion
+		var use_conversions = this.conversions;
+		// @see work_data.convert_options @
+		// CeL.application.net.work_crawler.ebook
+		// @see function convert_paragraph(paragraph, options) @
+		// Chinese_converter.js
+		[ 'tailored_key', 'work_title', 'original_work_title' ].some(function(
+				key) {
+			var tailored_key = options[key];
+			var conversions = tailored_key
+					&& this.tailored_conversions[tailored_key];
+			if (conversions) {
+				// 先處理衝突部分。
+				use_conversions = [ conversions ].append(use_conversions);
+				return true;
+			}
+		}, this);
+
+		text = use_conversions.reduce(for_each_conversion
 				|| function(_text, conversion) {
 					return conversion.convert(_text, options);
 				}, text);

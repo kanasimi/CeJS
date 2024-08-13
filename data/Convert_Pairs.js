@@ -686,7 +686,12 @@ function module_code(library_namespace) {
 
 	// @inner
 	function convert_using_pair_Map_by_length(text, options) {
-		var pair_Map_by_length = this.pair_Map_by_length, max_key_length = pair_Map_by_length.length,
+		var pair_Map_by_length = this.pair_Map_by_length,
+		// pair_Map_by_length = [ , Map of length 1, Map of length 2, ...]
+		// 2014/8 pair_Map_by_length.length === 17, 但只到 pair_Map_by_length[16]
+		// pair_Map_by_length[pair_Map_by_length.length] 必為
+		// undefined，只要擷取最大長度16即可。
+		max_key_length = pair_Map_by_length.length - 1,
 		// node.js v17.4.0 採用字串的方法 converted_text_slice += '' 與採用陣列的方法 .push()
 		// 速度差不多。
 		converted_text_list, converted_text_slice = '',

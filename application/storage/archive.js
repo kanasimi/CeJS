@@ -515,7 +515,7 @@ function module_code(library_namespace) {
 			}
 			if (typeof callback === 'function')
 				callback(null, e);
-			return;
+			return e;
 		}
 	}
 
@@ -970,7 +970,7 @@ function module_code(library_namespace) {
 
 		delete options.exec_options;
 		// @see archive_file_execute()
-		var output = this.execute(switches,
+		var output_or_error = this.execute(switches,
 		//
 		callback && _postfix ? function(output, error) {
 			// console.log(output.toString());
@@ -983,7 +983,8 @@ function module_code(library_namespace) {
 			using_archive_file.archive_file_path = original_archive_file_path;
 		}
 
-		return _postfix ? _postfix.call(this, output) : output;
+		return _postfix ? _postfix.call(this, output_or_error)
+				: output_or_error;
 	}
 
 	Archive_file.prototype = {

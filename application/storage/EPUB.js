@@ -1271,25 +1271,28 @@ function module_code(library_namespace) {
 		// .replace(/\n/g, '\r\n')
 
 		//
-		.replace(/<hr(?:\s[^<>]*)?>/ig, '<hr />')
+		.replace(/<hr(?:[\s\/][^<>]*)?>/ig, '<hr />')
 		// <BR> → <br />
-		.replace(/<br(?:[^\w<>][^<>]*)?>/ig, '<br />')
+		// <br[^<>]*>
+		.replace(/<br(?:[\s\/][^<>]*)?>/ig, '<br />')
+
+		// .replace(/(?:<br \/>)+<\/p>/ig, '</p>')
 
 		// .trim(), remove head/tail <BR>
-		.replace(/^(?:<br *\/>|[\s\n]|&nbsp;|&#160;)+/ig, '')
+		.replace(/^(?:<br \/>|[\s\n]|&nbsp;|&#160;)+/ig, '')
 		// 這會卡住:
 		// .replace(/(?:<br *\/>|[\s\n]+)+$/ig, '')
-		.replace(/(?:<br *\/>|[\s\n]|&nbsp;|&#160;)+$/ig, '')
+		.replace(/(?:<br \/>|[\s\n]|&nbsp;|&#160;)+$/ig, '')
 
-		// for ALL <img>
-		.replace(/(<img ([^<>]+)>)(\s*<\/img>)?/ig,
-		// 改正明顯錯誤。
-		function(all, opening_tag, inner) {
-			inner = inner.trim();
-			if (inner.endsWith(' \/')) {
+		// 改正 <img> 錯誤: <img></img> → <img />
+		.replace(/(<img\s([^<>]+)>)(\s*<\/img>)?/ig,
+		//
+		function(all, opening_tag, opening_inner) {
+			opening_inner = opening_inner.trim();
+			if (opening_inner.endsWith('\/')) {
 				return opening_tag;
 			}
-			return '<img ' + inner.replace(/[\s\/]+$/g, '') + ' \/>';
+			return '<img ' + opening_inner.replace(/[\s\/]+$/g, '') + ' \/>';
 		})
 
 		// 去掉單純的空連結 <a ...></a>。
@@ -2673,10 +2676,19 @@ function module_code(library_namespace) {
 		// assert: mimetype_filename.length === mimetype_first_order_name.length
 
 		// 請注意： rename 必須先安裝 7-Zip **16.04 以上的版本**。
-		archive_file.rename([ mimetype_filename, mimetype_first_order_name ]);
+		var error, result = archive_file.rename([ mimetype_filename,
+				mimetype_first_order_name ]);
+		if (result instanceof Error)
+			error = result;
+
+		// if error occurred, do not remove directory.
+		if (typeof remove === 'function')
+			remove = remove(error);
 
 		// console.log([ this.path, file_list ]);
-		library_namespace.storage.archive.archive_under(this.path.root,
+		result = library_namespace.storage.archive.archive_under(
+		//
+		this.path.root,
 		// archive others.
 		archive_file,
 		// archive_options
@@ -2688,9 +2700,14 @@ function module_code(library_namespace) {
 			extra : (remove ? '-sdel ' : ''),
 			type : 'zip'
 		});
+		if (result instanceof Error)
+			error = result;
 
-		// recover mimetype
-		archive_file.rename([ mimetype_first_order_name, mimetype_filename ]);
+		// console.trace('recover mimetype');
+		result = archive_file.rename([ mimetype_first_order_name,
+				mimetype_filename ]);
+		if (result instanceof Error)
+			error = result;
 
 		library_namespace.debug({
 			// gettext_config:{"id":"the-e-book-is-created-$1"}
@@ -2699,16 +2716,21 @@ function module_code(library_namespace) {
 
 		// 若需要留下/重複利用media如images，請勿remove。
 		if (remove) {
+			library_namespace.debug({
+				// gettext_config:{"id":"removing-directory-$1"}
+				T : [ 'Removing directory: %1', this.path.root ]
+			}, 1, 'archive_to_ZIP');
 			// rd /s /q this.path.root
 			// 這會刪除整個目錄，包括未被 index 的檔案。
-			var error = library_namespace
-					.remove_directory(this.path.root, true);
-			if (error) {
+			result = library_namespace.remove_directory(this.path.root, true);
+			if (result) {
+				error = error || result;
 				// the operatoin failed
-				library_namespace.error(error);
+				library_namespace.error(result);
 			}
 		}
-		typeof callback === 'function' && callback();
+		typeof callback === 'function' && callback(error);
+		return error;
 	}
 
 	Ebook.prototype = {
