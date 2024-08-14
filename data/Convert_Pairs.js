@@ -79,6 +79,8 @@ function module_code(library_namespace) {
 		// 前置處理。
 		options = library_namespace.setup_options(options);
 
+		this.file_path_loaded_Set = new Set;
+
 		var _this = this;
 		function copy_properties_from_options() {
 			// 單一 instance 僅能設定一個 replace_flags。
@@ -228,7 +230,7 @@ function module_code(library_namespace) {
 	}
 
 	function Convert_Pairs__add(source, options) {
-		// 前置處理。
+		// single_conversion_options
 		options = library_namespace.setup_options(options);
 
 		var pair_Map = this.pair_Map;
@@ -280,9 +282,9 @@ function module_code(library_namespace) {
 		// --------------------------------------------------------------------
 
 		var length = source.length,
-		// options: 僅納入 key 與 value 不同之 pair。
+		/** {Boolean}options: 僅納入 key 與 value 不同之 pair。 */
 		no_the_same_key_value = options.no_the_same_key_value,
-		// key / value 分隔符號。
+		/** {String}key / value 分隔符號。 */
 		separator = options.separator || this.separator,
 		//
 		item_processor = typeof options.item_processor === 'function'
@@ -439,7 +441,7 @@ function module_code(library_namespace) {
 	// add the content of file path
 	function Convert_Pairs__add_path(options) {
 		// console.trace(options);
-		// 前置處理。
+		// conversion_group_options
 		options = library_namespace.setup_options(options);
 
 		var dictionary_path = options.path;
@@ -451,7 +453,8 @@ function module_code(library_namespace) {
 				dictionary_path.forEach(function(file_path) {
 					var _options = library_namespace.new_options(options);
 					if (library_namespace.is_Object(file_path)) {
-						// e.g., for .remove_comments
+						// e.g., for .remove_comments,
+						// .filter_existing_key_on_set
 						Object.assign(_options, file_path);
 						file_path = file_path.file_path || file_path.path;
 					}
@@ -463,12 +466,27 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// ------------------------------------------------
+
 		// assert: typeof dictionary_path === 'string'
 		// `dictionary_path` is file path
 		if (!dictionary_path || typeof options.file_filter === 'function'
 				&& !options.file_filter(dictionary_path)) {
 			return this;
 		}
+
+		// 跳過已經載入過的資源。不重複載入 file。
+		if (typeof dictionary_path !== 'string') {
+			// console.trace(file_path);
+		}
+		if (this.file_path_loaded_Set.has(dictionary_path)
+				&& !options.force_load) {
+			library_namespace
+					.log('Convert_Pairs.add_path: Skip dictionary file loaded: ['
+							+ dictionary_path + ']');
+			return this;
+		}
+		this.file_path_loaded_Set.add(dictionary_path);
 
 		var source;
 		try {
@@ -479,7 +497,15 @@ function module_code(library_namespace) {
 		}
 
 		if (source) {
-			this.path = dictionary_path;
+			if (!this.path) {
+				this.path = dictionary_path;
+			} else {
+				library_namespace.debug('Load [' + dictionary_path + '] into ['
+						+ this.path + ']', 1, 'Convert_Pairs.add_path');
+				if (!this.path_list)
+					this.path_list = [ this.path ];
+				this.path_list.push(dictionary_path);
+			}
 			// 載入 resources。
 			this.add(source, options);
 		} else {

@@ -122,132 +122,289 @@ function module_code(library_namespace) {
 		return item;
 	}
 
-	// CeL.zh_conversion.CN_to_TW[CeL.zh_conversion.KEY_converter].add_conversions(file_path)
-	function add_conversions(file_path_list) {
-		var options = {
-			// remove_comments : true,
-			item_processor : default_item_processor,
-			may_remove_pair_Map : true
-		};
-		if (library_namespace.is_Object(file_path_list)) {
-			Object.assign(options, file_path_list);
-			file_path_list = options.file_path;
-		}
+	/** @inner */
+	function to_full_file_path(file_path) {
+		return /[\\\/]/.test(file_path) ? file_path : dictionary_base
+				+ file_path + '.txt';
+	}
 
-		if (!this.file_path_loaded_Set)
-			this.file_path_loaded_Set = new Set;
-		if (!Array.isArray(file_path_list))
-			file_path_list = [ file_path_list ];
-		// 不重複載入 conversions file。
-		file_path_list = file_path_list.filter(function(file_path) {
-			if (!this.file_path_loaded_Set.has(file_path)) {
-				this.file_path_loaded_Set.add(file_path);
-				return true;
-			}
-		}, this);
-		if (file_path_list.length === 0) {
-			return;
-		}
-		// console.trace(file_path_list);
+	/**
+	 * @param {Object|Array}conversion_group_options
+	 *            conversion group configuration
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @example <code>
 
-		var file_options = {
-			file_path : file_path_list,
-			remove_comments : options.remove_comments
-		};
+	CeL.zh_conversion.CN_to_TW[CeL.zh_conversion.KEY_converter].add_conversions(file_path)
+	</code>
+	 * @alias add_conversion_group
+	 */
+	function add_conversions(/* const */conversion_group_options, options) {
+		/** {Boolean}正在初始化。 */
+		var is_initializing = this.conversions
+		// assert: Array.isArray(this.conversions
+		&& this.conversions.length < this.files.length;
+
+		// insert at
+		var sort_index = conversion_group_options.sort;
 		// 警告: .add_conversions({sort:}) 必須配合 Converter.options @
 		// CeL.zh_conversion！
-		if (options.sort) {
-			this.files.some(function(file_list, index) {
-				if (file_list.sort_name === options.sort
-				// Array.isArray(file_list)
-				|| file_list[0] && file_list[0].sort_name === options.sort) {
-					library_namespace.debug('.sort_name ' + options.sort + '→'
-							+ index + ': ' + file_list, 1, 'add_conversions');
-					options.sort = index;
+		// assert: this.files[] 一一對應 this.conversions[]。
+		if (sort_index && typeof sort_index === 'string') {
+			// sort_name → sort_index
+			this.files.some(function(__conversion_group_options, index) {
+				if (__conversion_group_options.sort_name === sort_index
+				// 只取第一個 single_conversion_options，
+				|| Array.isArray(__conversion_group_options)
+				//
+				&& __conversion_group_options[0]
+				// 當作 conversion_group_options.sort_name。
+				&& __conversion_group_options[0].sort_name === sort_index) {
+					library_namespace.debug('.sort_name ' + sort_index + '→'
+							+ index + ': ' + __conversion_group_options, 1,
+							'add_conversions');
+					sort_index = index;
 					return true;
 				}
 			});
 		}
-		if (options.sort >= 0) {
-			if (!Array.isArray(this.files[options.sort]))
-				this.files[options.sort] = [ this.files[options.sort] ];
-			this.files[options.sort].push(file_options);
-		} else {
-			if (options.sort !== undefined) {
-				library_namespace.error('add_conversions: Invalid sort: '
-						+ options.sort);
+		if (sort_index >= 0) {
+			if (!is_initializing) {
+				// 將 conversion_group_options 插入 this.files[] 以確保與
+				// this.conversions[] 一一對應。
+				if (!Array.isArray(this.files[sort_index]))
+					this.files[sort_index] = [ this.files[sort_index] ];
+				this.files[sort_index].push(conversion_group_options);
+			} else if (this.files[sort_index] !== conversion_group_options) {
+				library_namespace
+						.error('add_conversions: 初始化過程中設定了不相容的 sort_index: '
+								+ sort_index + ' ('
+								+ JSON.stringify(conversion_group_options)
+								+ ')');
+				throw new Error('add_conversions: 初始化過程中設定了不相容的 sort_index: '
+						+ sort_index);
 			}
-			this.files.push(file_options);
+		} else {
+			if (sort_index !== undefined
+					&& (sort_index >= 0 || typeof sort_index === 'string')) {
+				library_namespace.error('add_conversions: sort not found: '
+						+ sort_index);
+			}
+			if (!is_initializing) {
+				this.files.push(conversion_group_options);
+			}
 		}
 
 		// console.trace(this);
 		if (!this.conversions) {
-			library_namespace
-					.debug(
-							'尚未執行 Converter_initialization(options)。將在 Converter_initialization() 一起載入。',
-							1, 'add_conversions');
+			library_namespace.debug('尚未執行 Converter_initialization()。'
+					+ '將在 Converter_initialization() 一起載入。', 2,
+					'add_conversions');
+			// console.trace(conversion_group_options);
 			return;
 		}
 
-		var tailored_key = options.tailored_key || options.work_title
-		// @see work_data.convert_options @
-		// CeL.application.net.work_crawler.ebook
-		|| options.original_work_title;
-		if (tailored_key) {
-			if (!this.tailored_conversions[tailored_key]) {
-				// initialization
-				this.tailored_conversions[tailored_key] = new Convert_Pairs(
-						null, options);
+		// --------------------------------------------------------------------
+		// is_initializing || 為初始化完後的補充。
+
+		// console.trace(conversion_group_options);
+
+		var file_path_list = conversion_group_options;
+		if (library_namespace.is_Object(file_path_list)) {
+			if (!file_path_list.file_path) {
+				library_namespace
+						.error('add_conversions: Invalid file_path_list: '
+								+ JSON.stringify(file_path_list));
+				return;
 			}
-			/**
-			 * 警告: 載入特設辭典後無法卸除! 必須在轉換文字時設定 options.tailored_key 才能使用完整特設辭典。
-			 * 
-			 * 但就算沒設定
-			 * options.tailored_key，依然會採用特設辭典中與一般性辭典(Converter.options)沒衝突的部分。
-			 * 
-			 * this.tailored_conversions 放置的只有衝突的部分。
-			 */
-			options.filter_existing_key_on_set = function(key, original_value,
-					value) {
-				var source = Object.create(null);
-				source[key] = value;
-				this.tailored_conversions[tailored_key].add(source, options);
-				return false;
-			}.bind(this);
+
+			file_path_list = file_path_list.file_path;
 		}
 
-		options.path = file_path_list;
+		if (!Array.isArray(file_path_list))
+			file_path_list = [ file_path_list ];
+		// console.trace(file_path_list);
 
-		var use_conversion = this.conversions[options.sort];
+		/**
+		 * 用於 new Convert_Pairs(null, convert_pairs_path_options); 或
+		 * use_conversion.add_path(convert_pairs_path_options);
+		 */
+		var convert_pairs_path_options = {
+			// 這邊不能先設定欲載入的 resources。
+			// path : file_path_list,
+
+			file_filter : this.file_filter,
+
+			remove_comments : conversion_group_options.remove_comments,
+
+			// no_the_same_key_value : !Array.isArray(file_path_list)
+			// || file_path_list.length < 2,
+
+			item_processor : default_item_processor,
+			// 在 convert_text() 開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。
+			may_remove_pair_Map : !options
+			// @see convert_text(text, options)
+			|| !options.mode
+		};
+
+		var new_tailored_key_Set = new Set;
+		new_tailored_key_Set.main_tailored_key = conversion_group_options.tailored_key
+				// @see work_data.convert_options @
+				// CeL.application.net.work_crawler.ebook
+				|| conversion_group_options.work_title
+		// || conversion_group_options.original_work_title
+		;
+
+		/**
+		 * Build convert_pairs_path_options
+		 * 
+		 * @param {Object|String}single_conversion_options
+		 *            single conversion configuration
+		 * @returns
+		 */
+		function add_single_conversion(single_conversion_options) {
+			if (typeof single_conversion_options === 'string') {
+				// Treat single_conversion_options as file_path.
+				return to_full_file_path(single_conversion_options);
+			}
+
+			// assert: library_namespace.is_Object(single_conversion_options)
+			if (single_conversion_options.sort_name) {
+				if (file_path_list.sort_name) {
+					library_namespace
+							.error('add_single_conversion: sort_name: '
+									+ file_path_list.sort_name + '→'
+									+ single_conversion_options.sort_name);
+				}
+				file_path_list.sort_name = single_conversion_options.sort_name;
+			}
+
+			// e.g., for .remove_comments
+			if (!single_conversion_options.file_path
+					&& !single_conversion_options.path
+					&& single_conversion_options.file_name) {
+				single_conversion_options = library_namespace
+						.new_options(single_conversion_options);
+				single_conversion_options.file_path
+				//
+				= to_full_file_path(single_conversion_options.file_name);
+			}
+
+			if (!single_conversion_options.file_path) {
+				// e.g., {"sort_name":"主要繁簡轉換"}
+				if (!single_conversion_options.sort_name
+						|| Object.keys(single_conversion_options).length !== 1) {
+					library_namespace
+							.error('add_single_conversion: Invalid single_conversion_options: '
+									+ JSON.stringify(single_conversion_options));
+				}
+				return;
+			}
+
+			// ------------------------------------------
+
+			var tailored_key = single_conversion_options.tailored_key
+					|| single_conversion_options.work_title
+					// || single_conversion_options.original_work_title
+					|| new_tailored_key_Set.main_tailored_key;
+
+			if (tailored_key) {
+				var tailored_conversion = this.tailored_conversions[tailored_key];
+				if (!tailored_conversion) {
+					// initialization an empty {Convert_Pairs}
+					tailored_conversion = this.tailored_conversions[tailored_key] = new Convert_Pairs(
+							null, convert_pairs_path_options);
+					new_tailored_key_Set.add(tailored_key);
+				}
+
+				var tailored_single_conversion_options = single_conversion_options;
+				single_conversion_options = library_namespace
+						.new_options(single_conversion_options);
+				/**
+				 * 警告: 載入特設辭典後無法卸除! 必須在轉換文字時設定
+				 * conversion_group_options.tailored_key 才能使用完整特設辭典。
+				 * 
+				 * 但就算沒設定
+				 * conversion_group_options.tailored_key，依然會採用特設辭典中與一般性辭典(Converter.options)沒衝突的部分。
+				 * 
+				 * this.tailored_conversions 放置的只有衝突的部分。
+				 */
+				single_conversion_options.filter_existing_key_on_set = function(
+						key, original_value, value) {
+					var source = Object.create(null);
+					source[key] = value;
+					tailored_conversion.add(source,
+							tailored_single_conversion_options);
+					return false;
+				};
+			}
+
+			// ------------------------------------------
+
+			return single_conversion_options;
+		}
+
+		convert_pairs_path_options.path = file_path_list.map(
+				add_single_conversion, this);
+		// console.trace(convert_pairs_path_options);
+
+		var use_conversion
+		// assert: this.files[] 一一對應 this.conversions[]。
+		// this.conversions && this.conversions.length >= this.files
+		// this.conversions = [ {Convert_Pairs}, {Convert_Pairs}, ... ]
+		= sort_index >= 0 && this.conversions[sort_index];
 
 		if (use_conversion && use_conversion.pair_Map_by_length
 				&& !use_conversion.pair_Map) {
-			library_namespace
-					.error('add_conversions: 先前未保留 .pair_Map，忽略 .sort 設定!');
+			library_namespace.error('add_conversions: '
+					+ '先前未保留 .pair_Map，忽略 .sort 設定! 這可能造成執行時錯誤!');
+			// 問題在: this.files[] 一一對應 this.conversions[]
 			use_conversion = null;
 		}
 
 		if (use_conversion) {
-			use_conversion.add_path(options);
+			use_conversion.add_path(convert_pairs_path_options);
 		} else {
-			var convert_Pairs = new Convert_Pairs(null, options);
+			use_conversion = new Convert_Pairs(null, convert_pairs_path_options);
 			// console.trace(this);
-			// console.trace(convert_Pairs);
-			// console.trace(convert_Pairs.pair_Map.size);
-			if (convert_Pairs.pair_Map.size > 0) {
-				this.conversions.unshift(convert_Pairs);
+			// console.trace(use_conversion);
+			// console.trace(use_conversion.pair_Map.size);
+
+			// 確認有東西才加入此 conversion。
+			if (use_conversion.pair_Map.size === 0) {
+				library_namespace.warn('add_conversions: 空的轉換: '
+						+ JSON.stringify(conversion_group_options));
 			}
+
+			// console.trace([ use_conversion.pair_Map.get('猜拳斗酒') ]);
+
+			// 注意: 沒指定 conversion_group_options.sort
+			// 時，預設會加在最後，其他轉換都完成後才會處理這些轉換。
+			this.conversions.push(use_conversion);
 		}
 
-		if (tailored_key
-				&& this.tailored_conversions[tailored_key].pair_Map.size === 0) {
-			// 特設辭典無內容，或已全部納入一般辭典。
-			delete this.tailored_conversions[tailored_key];
-		}
+		new_tailored_key_Set.forEach(function(tailored_key) {
+			var tailored_conversion = this.tailored_conversions[tailored_key];
+			if (tailored_conversion.pair_Map.size === 0) {
+				// 特設辭典無內容，或已全部納入一般辭典。
+				delete this.tailored_conversions[tailored_key];
+			} else {
+				library_namespace.info('add_conversions: ' + '特色辭典 ['
+						+ tailored_key + '] 與主要繁簡轉換辭典重複的轉換詞:');
+				tailored_conversion.pair_Map.forEach(function(value, key) {
+					library_namespace.log(key + '→' + value);
+				});
+			}
+		}, this);
 
+		// 加入了新辭典，可能有新詞，需要重新計算 this.max_convert_word_length。
 		delete this.max_convert_word_length;
 	}
 
+	// --------------------------------
+
+	/** @inner */
 	function Converter_initialization(options) {
 		// console.trace(this.files);
 
@@ -260,63 +417,16 @@ function module_code(library_namespace) {
 			return '';
 		}
 
-		function to_full_file_path(file_path) {
-			return /[\\\/]/.test(file_path) ? file_path : dictionary_base
-					+ file_path + '.txt';
-		}
-
+		// Will reset
 		this.conversions = [];
-		// 特設辭典對應集
+		// 特設辭典對應集。
 		this.tailored_conversions = Object.create(null);
 		// @see add_conversions()
-		this.files.forEach(function(file_list) {
-			var _options = {
-				file_filter : this.file_filter,
-
-				// no_the_same_key_value : !Array.isArray(file_list)
-				// || file_list.length < 2,
-
-				item_processor : default_item_processor,
-				// 在開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。
-				may_remove_pair_Map : !options || !options.mode
-			};
-
-			if (!Array.isArray(file_list))
-				file_list = [ file_list ];
-
-			// 載入 resources。
-			_options.path = [];
-			file_list.forEach(function(file_path) {
-				if (typeof file_path === 'string') {
-					_options.path.push(to_full_file_path(file_path));
-					return;
-				}
-				// assert: library_namespace.is_Object(file_path)
-				if (file_path.sort_name) {
-					file_list.sort_name = file_path.sort_name;
-				}
-				var __options = file_path;
-				// e.g., for .remove_comments
-				if (!__options.file_path && !__options.path
-				//
-				&& __options.file_name) {
-					__options.file_path
-					//
-					= to_full_file_path(__options.file_name);
-				}
-				if (__options.file_path)
-					_options.path.push(__options);
-			});
-			// console.trace(_options);
-
-			var convert_Pairs = new Convert_Pairs(null, _options);
-			// console.trace(convert_Pairs);
-			// console.trace(convert_Pairs.pair_Map.size);
-			if (convert_Pairs.pair_Map.size > 0) {
-				// console.trace([ convert_Pairs.pair_Map.get('猜拳斗酒') ]);
-				this.conversions.push(convert_Pairs);
-			}
+		this.files.forEach(function(conversion_group_options) {
+			this.add_conversions(conversion_group_options, options);
 		}, this);
+		// assert: this.files[] 一一對應 this.conversions[]。
+
 		delete this.file_filter;
 		// console.log(this.conversions);
 		// console.trace(this.conversions[0].pair_Map.size);
@@ -429,10 +539,12 @@ function module_code(library_namespace) {
 		// console.trace(text);
 
 		if (!(this.max_convert_word_length >= 0)) {
+			// 計算 this.max_convert_word_length。
 			// console.trace(this);
 			var may_remove_pair_Map = this.may_remove_pair_Map;
 			if (may_remove_pair_Map) {
-				library_namespace.debug('在開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。', 1,
+				library_namespace.debug(
+						'在 convert_text() 開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。', 1,
 						'Convert_Pairs__convert');
 			}
 			this.max_convert_word_length = this.conversions.reduce(function(
