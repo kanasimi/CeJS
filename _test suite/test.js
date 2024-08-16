@@ -903,6 +903,9 @@ function test_locale() {
 		[['23/4', CeL.gettext("%2|3/4", 1, 2)], 'gettext() #3'],
 		[['2|3/4', CeL.gettext("%2||3/4", 1, 2)], 'gettext() #4'],
 		[['2|=3/4', CeL.gettext("%2|=3/4", 1, 2)], 'gettext() #5'],
+
+		[['<h1>t</h1>', CeL.gettext('<h1>%1</h1>', 't')], 'gettext() #6'],
+		[['<h2>t</h2>', CeL.gettext('<h2>%1</h2>', 't')], 'gettext() #7'],
 	]);
 
 
@@ -6396,6 +6399,7 @@ function finish_test(type) {
 	}
 
 	// add gettext format [error]
+	// @see {{PLURAL:%1|is|are}}
 	CeL.gettext.conversion['error'] = ['no %n', '1 %n', '%d %ns'];
 	node_info(['CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', all_error_count),
 		'-fg;-bg']);

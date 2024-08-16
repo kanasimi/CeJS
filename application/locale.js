@@ -729,17 +729,19 @@ function module_code(library_namespace) {
 			var conversion = matched[0];
 
 			if (matched[2]) {
+				// e.g., 'prefix%%...'
+				// assert: matched[3] 之後全都沒東西。
 				text_list.push(conversion);
 				continue;
 			}
 
-			var NO = +matched[6], format = matched[4];
+			var NO = +matched[6], format = matched[4], _matched;
 			if (NO < length && (!(format || (format = matched[5]))
 			// 有設定 {String}format 的話，就必須在 gettext.conversion 中。
 			|| (format in gettext.conversion))) {
-				if (NO === 0)
+				if (NO === 0) {
 					conversion = text_id;
-				else {
+				} else {
 					var domain_specified = matched[3],
 					//
 					domain_used = domain_specified
@@ -757,16 +759,38 @@ function module_code(library_namespace) {
 						domain_name = origin_domain_name;
 						domain = origin_domain;
 					} else {
+						if (domain_specified) {
+							library_namespace.warn('gettext: '
+									+ 'Unknown domain [' + domain_specified
+									+ ']');
+						}
 						conversion = convert(value_list[NO]);
 					}
 				}
 
-				if (format)
+				if (format) {
 					conversion = Array.isArray(NO = gettext.conversion[format])
 					//
 					? gettext_conversion_Array(conversion, NO, format)
 					// assert: gettext.conversion[format] is function
 					: NO(conversion, domain_specified || domain_name);
+				}
+
+			} else if (format && matched[3]
+			// The same index passern as conversion_pattern
+			&& (_matched = matched[3].match(/(\d{1,2})/))
+					&& _matched[0] < length) {
+				// e.g., CeL.gettext('<h1>%1</h1>', 't')
+				format = null;
+				NO = _matched[0];
+				last_index =
+				// reset.
+				// assert: last_index === matched[0].length
+				// last_index - matched[0].length +
+				//
+				// 加回這次處理的部分。 1: 前導 '%'.length
+				1 + matched[1].length + NO.length;
+				conversion = convert(value_list[NO]);
 
 			} else {
 				library_namespace.warn('gettext: '
