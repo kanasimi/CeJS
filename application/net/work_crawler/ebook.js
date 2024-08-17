@@ -1081,7 +1081,7 @@ function module_code(library_namespace) {
 					output : ebook_directory
 				});
 			} else if (this.regenerate) {
-				library_namespace.error('create_ebook: '
+				library_namespace.warn('create_ebook: '
 						+ '設定了 .regenerate，但不存在可用的舊電子書！');
 			}
 		}

@@ -1518,12 +1518,8 @@ function module_code(library_namespace) {
 				}
 
 				if (this.run_after_initializing) {
-					try {
-						library_namespace.debug(
-								'It is now initializing. 添加初始程序: ' + args, 1,
-								'wiki_API_prototype_methods');
-					} catch (e) {
-					}
+					library_namespace.debug('It is now initializing. 添加初始程序: '
+							+ args[0], 1, 'wiki_API_prototype_methods');
 				}
 
 				// ----------------------------------------

@@ -367,6 +367,9 @@ function module_code(library_namespace) {
 			use_conversion.add_path(convert_pairs_path_options);
 		} else {
 			use_conversion = new Convert_Pairs(null, convert_pairs_path_options);
+			if (file_path_list.sort_name)
+				use_conversion.sort_name = file_path_list.sort_name;
+
 			// console.trace(this);
 			// console.trace(use_conversion);
 			// console.trace(use_conversion.pair_Map.size);
@@ -390,8 +393,13 @@ function module_code(library_namespace) {
 				// 特設辭典無內容，或已全部納入一般辭典。
 				delete this.tailored_conversions[tailored_key];
 			} else {
-				library_namespace.info('add_conversions: ' + '特色辭典 ['
-						+ tailored_key + '] 與主要繁簡轉換辭典重複的轉換詞:');
+				library_namespace.info('add_conversions: '
+				//
+				+ '特色辭典 [' + tailored_key + '] 與'
+				//
+				+ (use_conversion.sort_name ? ' ['
+				//
+				+ use_conversion.sort_name + '] ' : '主要轉換') + '辭典重複的轉換詞:');
 				tailored_conversion.pair_Map.forEach(function(value, key) {
 					library_namespace.log(key + '→' + value);
 				});

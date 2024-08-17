@@ -274,12 +274,18 @@ function module_code(library_namespace) {
 
 			// console.trace(next_chapter_url);
 			this.get_URL(next_chapter_url, function(XMLHttp, error) {
+				if (!XMLHttp.responseText && !error)
+					error = 'No content get';
+				if (error) {
+					callback(XMLHttp, error);
+					return;
+				}
 				if (!chapter_data.next_chapter_HTMLs)
 					chapter_data.next_chapter_HTMLs = [];
 				chapter_data.next_chapter_HTMLs.push(XMLHttp.responseText);
 				this.pre_parse_chapter_data(XMLHttp, work_data, callback,
 						chapter_NO);
-			});
+			}.bind(this));
 		},
 		// 取得每一個章節的各個影像內容資料。 get_chapter_data()
 		parse_chapter_data : function(html, work_data, get_label, chapter_NO) {
