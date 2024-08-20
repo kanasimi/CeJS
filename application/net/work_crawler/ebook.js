@@ -71,8 +71,12 @@ function module_code(library_namespace) {
 		// TODO: {Array}this.chapter_URL()
 		this.chapter_URL(work_data, chapter_NO).replace(/[^\/]+$/, ''))
 				.toString();
-		if (!next_url)
+		if (!next_url
+		// https://www.xiaoshubao.net/read/463699/713.html 我的超能力每周刷新 新书计划！
+		// <a href="javascript:alert('已经是最后一章了');">下一章</a>
+		|| next_url.startsWith('javascript:')) {
 			return;
+		}
 
 		var full_next_url = this.full_URL(next_url),
 		//
