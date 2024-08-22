@@ -1313,9 +1313,15 @@ function module_code(library_namespace) {
 								// 沒有任何變體。
 								return;
 							}
+							// assert: variants_list.length === 2:
+							// [ 'zh-tw', 'zh-cn' ] or [ 'zh-hant', 'zh-hans' ]
 
+							if (false) {
+								console.trace(variants_list, variants_list[0]
+										.chars());
+							}
 							var char_list = variants_list.shift().chars()
-							//
+							// 先取第一個為基準。
 							.map(function(char) {
 								return [ char ];
 							});
@@ -1338,6 +1344,7 @@ function module_code(library_namespace) {
 								//
 								'register_variants_pattern: 跳過長度不同的變體 '
 										+ register_target + ' ← '
+										// + char_list.join('') + '|'
 										+ variants_list.join('|'));
 								return;
 							}
@@ -1350,10 +1357,32 @@ function module_code(library_namespace) {
 							pattern = pattern.join('');
 
 							var pattern_hash;
-							char_list[_this.namespace(register_target, {
+							var namespace = _this.namespace(register_target, {
 								is_page_title : true,
 								get_name : true
-							}).length + 1].forEach(function(first_char) {
+							});
+							if (false) {
+								console.trace([ register_target, namespace,
+										char_list ]);
+							}
+							// 跳過 namespace + ':'
+							if (false && namespace) {
+								if (!char_list[namespace.length]
+								//
+								|| char_list[namespace.length].length !== 1
+								//
+								|| char_list[namespace.length][0] !== ':') {
+									console.error([ register_target, namespace,
+											char_list ]);
+									throw new Error(
+											'register_variants_pattern: '
+													+ '解析 namespace 出錯！');
+								}
+							}
+
+							(namespace ? char_list[namespace.length + 1]
+									: char_list).forEach(function(first_char) {
+
 								if (!redirects_variants_patterns[first_char]) {
 									if (!pattern_hash) {
 										pattern_hash = Object.create(null);
@@ -1458,6 +1487,10 @@ function module_code(library_namespace) {
 						//
 						= redirects_data[original_list[index]];
 
+						if (original_list.start_index) {
+							index += original_list.start_index;
+						}
+
 						if (false) {
 							library_namespace
 									.log('register_redirect_list_via_mapper: ['
@@ -1478,6 +1511,7 @@ function module_code(library_namespace) {
 						}
 					});
 
+					// console.trace(variants_of_target);
 				}
 
 				var promise = Promise.resolve();
@@ -1558,6 +1592,10 @@ function module_code(library_namespace) {
 					.replace(/[\w\s:"']/g, '').chars().unique().join(','));
 				}
 
+				var accumulated_length
+				// 完成一階段，reset 前必須設定 .start_index = 累積的長度 accumulated_length，預防
+				// register_redirect_list_via_mapper() 登記到先前的 index。
+				= page_list_to_check_variants.length;
 				[ 'zh-tw',
 				// zh-cn: e.g., "Template:軟體專題" ⭠ "Template:软件专题"
 				'zh-cn' ].forEach(add_variant_of_page_list);
@@ -1565,10 +1603,16 @@ function module_code(library_namespace) {
 				promise.then(function() {
 					// reset
 					page_list_to_check_variants = [];
+					page_list_to_check_variants
+					//
+					.start_index = accumulated_length;
 					check_big_variations();
 					if (page_list_to_check_variants.length > 0) {
 						// e.g., "Template:独联体专题" ⭠ "Template:獨立國協專題"
 						// console.trace(page_list_to_check_variants);
+						accumulated_length
+						//
+						+= page_list_to_check_variants.length;
 						[ 'zh-hant', 'zh-hans' ]
 								.forEach(add_variant_of_page_list);
 					}

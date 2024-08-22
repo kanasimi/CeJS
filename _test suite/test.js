@@ -2543,6 +2543,7 @@ function test_date() {
 		[['20分', CeL.date.age_of(-20 * 60 * 1000, 0)]],
 		[['18小時', CeL.date.age_of(0, 18 * 60 * 60 * 1000)]],
 
+		[['30分前', CeL.date.indicate_date_time(Date.now() - 30 * 60 * 1000)]],
 		[['30分前', CeL.date.indicate_date_time(0, { base_date: 30 * 60 * 1000 })]],
 		[['大後天0時0分', CeL.date.indicate_date_time(new Date(2000, 1, 4), { base_date: new Date(2000, 1, 1) })]],
 		[['後天20時3分', CeL.date.indicate_date_time(new Date(2000, 1, 3, 20, 3), { base_date: new Date(2000, 1, 1) })]],
@@ -5733,7 +5734,7 @@ function test_wiki() {
 		var zhwiki = new CeL.wiki(null, null, 'zh');
 
 		zhwiki.run(function () {
-			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software', 'Template:WikiProject CIS'], function test_register_redirects() {
+			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software', 'Template:WikiProject CIS', '赵孟俯'], function test_register_redirects() {
 				var test_name = 'wiki: register_redirects';
 				_setup_test(test_name);
 
@@ -5746,6 +5747,8 @@ function test_wiki() {
 				assert(zhwiki.is_template('软件专题', '軟體專題'), 'zhwiki.is_template() #3-1');
 
 				assert(zhwiki.is_template('獨立國協專題', '獨聯體專題'), 'zhwiki.is_template() #4-1');
+
+				assert([zhwiki.redirect_target_of('赵体'), '趙孟頫'], 'zhwiki.redirect_target_of() #1-1');
 
 				_finish_test(test_name);
 			});
