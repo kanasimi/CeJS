@@ -399,7 +399,7 @@ function module_code(library_namespace) {
 				//
 				+ (use_conversion.sort_name ? ' ['
 				//
-				+ use_conversion.sort_name + '] ' : '主要轉換') + '辭典重複的轉換詞:');
+				+ use_conversion.sort_name + '] ' : '主要轉換') + '辭典衝突的轉換詞:');
 				tailored_conversion.pair_Map.forEach(function(value, key) {
 					library_namespace.log(key + '→' + value);
 				});
