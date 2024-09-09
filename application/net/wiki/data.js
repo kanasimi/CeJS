@@ -1802,7 +1802,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 盡可能模擬 wikidata (wikibase) 之 JSON 資料結構。
+	 * 盡可能模擬 wikidata (wikibase) 之 snak 之 JSON 資料結構。
 	 * 
 	 * TODO: callback
 	 * 
@@ -1893,9 +1893,8 @@ function module_code(library_namespace) {
 						&& value.value || value;
 				if (matched && entity_id && !/^[PQ]\d{1,10}$/.test(entity_id)) {
 					if (typeof value === 'object') {
-						library_namespace.error(
-						//
-						'normalize_wikidata_value: Invalid object value!');
+						library_namespace.error('normalize_wikidata_value: '
+								+ 'Invalid object value!');
 						console.trace([ value, datatype, options.property ]);
 						normalize_wikidata_value(value, datatype, options,
 								argument_to_pass);
@@ -3653,7 +3652,7 @@ function module_code(library_namespace) {
 		claim_action = [ get_data_API_URL(options), {
 			action : 'wbcreateclaim'
 		} ],
-		// process to what index of {Array}claims
+		/** {Number}process to what index of {Array}claims */
 		claim_index = 0;
 
 		if (!POST_data.entity) {
@@ -4942,6 +4941,77 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
+	function normalize_wbeditentity_data(data, entity, options, callback) {
+		normalize_labels_aliases(data, entity, options);
+
+		/** {Number}process to what index of {Array}claims */
+		var claim_index = 0;
+
+		function normalize_next_claim() {
+			var claims = data.claims;
+			if (claim_index === claims.length) {
+				callback();
+				return;
+			}
+
+			var property_data = claims[claim_index];
+			normalize_wikidata_properties(property_data.qualifiers,
+			//
+			function(qualifiers) {
+				if (data.qualifiers) {
+					// console.trace(property_data.qualifiers, qualifiers);
+					property_data.qualifiers = qualifiers;
+				}
+				normalize_wikidata_properties(property_data.references,
+				//
+				function(references) {
+					if (property_data.references) {
+						// console.trace(property_data.references, references);
+						property_data.references = references;
+					}
+
+					claim_index++;
+					normalize_next_claim();
+				}, Object.create(null), options);
+			}, Object.create(null), options);
+		}
+
+		options = Object.assign({
+			language : data.language,
+		// [KEY_SESSION]
+		// session : session
+		}, options);
+
+		// 先正規化再 edit。
+		// @see set_claims()
+		normalize_wikidata_properties(data.claims, function(claims) {
+			if (!Array.isArray(claims)) {
+				if (claims) {
+					library_namespace.error('normalize_wbeditentity_data:'
+							+ ' Invalid claims: ' + JSON.stringify(claims));
+				} else {
+					// assert: 本次沒有要設定 claim 的資料。
+				}
+				callback();
+				return;
+			}
+
+			// e.g.,
+			// claims:[{P1:'',language:'zh'},{P2:'',references:{}}]
+			data.claims = claims;
+
+			// console.trace(claims);
+			// console.trace(JSON.stringify(claims));
+			normalize_next_claim();
+		}, entity && entity.claims
+		// 確保會設定 .remove / .exists_index = duplicate_index。
+		|| Object.create(null), options);
+
+	}
+
+	// ----------------------------------------------------
+
 	/**
 	 * @example<code>
 	//	2021/7/3 18:9:28
@@ -5262,17 +5332,26 @@ function module_code(library_namespace) {
 			token = token.csrftoken;
 		}
 
-		function do_wbeditentity() {
+		function preparing_wbeditentity() {
 			for ( var key in data) {
 				if (Array.isArray(data[key]) ? data[key].length === 0
 						: library_namespace.is_empty_object(data[key])) {
 					delete data[key];
 				}
 			}
+
 			if (library_namespace.is_empty_object(data) && !options['new']) {
 				callback(data);
 				return;
 			}
+
+			normalize_wbeditentity_data(data, entity, options, do_wbeditentity);
+		}
+
+		function do_wbeditentity() {
+			// console.trace(data);
+
+			// e.g., {"descriptions":{"en":{"language":"en","value":""}}}
 
 			var POST_data = Object.clone(options);
 			delete POST_data.data_API_URL;
@@ -5289,6 +5368,7 @@ function module_code(library_namespace) {
 			POST_data.token = token;
 
 			// console.trace(POST_data);
+
 			wiki_API.query(action, function handle_result(data, error) {
 				error = wiki_API.query.handle_error(data, error);
 				// 檢查伺服器回應是否有錯誤資訊。
@@ -5327,7 +5407,7 @@ function module_code(library_namespace) {
 		if (false && Array.isArray(data)) {
 			// TODO: 按照內容分類。
 			library_namespace
-					.warn('wikidata_edit.do_wbeditentity: Treat {Array}data as {claims:data}!');
+					.warn('wikidata_edit: Treat {Array}data as {claims:data}!');
 			data = {
 				claims : data
 			};
@@ -5345,8 +5425,9 @@ function module_code(library_namespace) {
 		// https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_changeop_serializations.html
 		|| options.wbeditentity_only) {
 			delete options.wbeditentity_only;
-			// 直接呼叫 wbeditentity
-			do_wbeditentity();
+			// 直接呼叫 wbeditentity。
+			// TODO: 經過 set_labels()...set_sitelinks() 等一連串動作，不做編輯只 parse。
+			preparing_wbeditentity();
 			return;
 		}
 
@@ -5368,8 +5449,8 @@ function module_code(library_namespace) {
 					set_claims(data, token, function() {
 						library_namespace.debug('Run set_sitelinks', 2,
 								'wikidata_edit');
-						set_sitelinks(data, token, do_wbeditentity, options,
-								session, entity);
+						set_sitelinks(data, token, preparing_wbeditentity,
+								options, session, entity);
 					}, options, session, entity);
 				}, options, session, entity);
 			}, options, session, entity);
