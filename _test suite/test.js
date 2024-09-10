@@ -3301,6 +3301,8 @@ function test_wiki() {
 		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC')], 'normalize_title #21'],
 		[["Talk:ABC", CeL.wiki.normalize_title('talk:aBC', { is_page_title: true })], 'normalize_title #22'],
 		[["Talk:ß", CeL.wiki.normalize_title('talk:ß', { is_page_title: true })], 'normalize_title #23'],
+		[["Help:Wikipedia: A", CeL.wiki.normalize_title('Help:Wikipedia: A', { is_page_title: true })], 'normalize_title #25'],
+		[["Help:Wikipedia: a", CeL.wiki.normalize_title('Help:Wikipedia: a', { is_page_title: true })], 'normalize_title #26'],
 
 		// Should use CeL.wiki.title_of(page_data, options);
 		[['Wikipedia:ABC', CeL.wiki.title_of('Wikipedia:ABC')], 'title_of #1'],
@@ -3315,7 +3317,7 @@ function test_wiki() {
 
 	]);
 
-	all_error_count += CeL.test('wiki: CeL.wiki.normalize_title()', [
+	all_error_count += CeL.test('wiki: CeL.wiki.site_name()', [
 		[['enwiki', CeL.wiki.site_name('en')], 'site_name #1'],
 		[['zhwiki', CeL.wiki.site_name('https://zh.wikipedia.org/w/api.php')], 'site_name #2'],
 		[['zhmoegirl', CeL.wiki.site_name('https://zh.moegirl.org/api.php')], 'site_name #3'],
@@ -3388,6 +3390,7 @@ function test_wiki() {
 		[[false, CeL.wiki.is_talk_namespace('ABC')], 'wiki.is_talk_namespace #2'],
 		[[false, CeL.wiki.is_talk_namespace('Wikipedia:NAME')], 'wiki.is_talk_namespace #3'],
 		[[true, CeL.wiki.is_talk_namespace('Wikipedia talk:NAME')], 'wiki.is_talk_namespace #4'],
+
 		[['Talk:ABC', CeL.wiki.to_talk_page('ABC')], 'wiki.to_talk_page #1'],
 		[['Talk:ABC', CeL.wiki.to_talk_page('talk:ABC')], 'wiki.to_talk_page #2'],
 		[['Wikipedia talk:NAME', CeL.wiki.to_talk_page('Wikipedia:NAME')], 'wiki.to_talk_page #3'],
@@ -3396,6 +3399,12 @@ function test_wiki() {
 		[['Module talk:NAME', CeL.wiki.to_talk_page('模块:NAME')], 'wiki.to_talk_page #6'],
 		[["Talk:1,1':2',1'':3'',1'''-四联苯", CeL.wiki.to_talk_page("Talk:1,1':2',1'':3'',1'''-四联苯")], 'wiki.to_talk_page #7'],
 		[['Talk:ß', CeL.wiki.to_talk_page('talk:ß')], 'wiki.to_talk_page #8'],
+		// [[Help talk:Wikipedia: The Missing Manual/Collaborating with other editors/Lending other editors a hand]]
+		[['Help talk:Wikipedia: A', CeL.wiki.to_talk_page('Help:Wikipedia: A')], 'wiki.to_talk_page #9'],
+		[['Help talk:Wikipedia: A', CeL.wiki.to_talk_page('Help talk:Wikipedia: A')], 'wiki.to_talk_page #10'],
+		[['Help talk:Wikipedia: a', CeL.wiki.to_talk_page('Help:Wikipedia: a')], 'wiki.to_talk_page #11'],
+		[['Help talk:Wikipedia: a', CeL.wiki.to_talk_page('Help talk:Wikipedia: a')], 'wiki.to_talk_page #12'],
+
 		[!CeL.wiki.to_talk_page('topic:NAME'), 'wiki.to_talk_page: There is no talk page for Topic.'],
 		[['NAME', CeL.wiki.talk_page_to_main('NAME')], 'wiki.talk_page_to_main #1'],
 		[['NAME', CeL.wiki.talk_page_to_main('talk:NAME')], 'wiki.talk_page_to_main #2'],

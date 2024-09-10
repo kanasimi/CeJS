@@ -2005,9 +2005,11 @@ function module_code(library_namespace) {
 				&& get_namespace(section, _options);
 				// console.trace([ index, section, namespace ]);
 				if (has_namespace) {
-					// Wikipedia namespace
+					// `section` is Wikipedia namespace
 					page_name[index] = use_underline ? has_namespace.replace(
 							/ /g, '_') : has_namespace.replace(/_/g, ' ');
+					// 進入 namespace 後，剩下的皆為頁面名稱，不再容許語言標記。
+					has_language = true;
 					return false;
 				}
 			}
