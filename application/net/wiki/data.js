@@ -4941,6 +4941,29 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// [ {property:'P1',value:'v1'}, {property:'P1',value:'v2'},
+	// {property:'P2',value:'v'} ]
+	// →
+	// { P1:[ {property:'P1',value:'v1'}, {property:'P1',value:'v2'} ], P2:[
+	// {property:'P2',value:'v'} ] }
+	// @inner
+	function group_by_properties(property_list) {
+		if (!property_list || property_list.length === 0)
+			return;
+		// assert: Array.isArray(property_list)
+
+		var property_group = Object.create(null);
+
+		property_list.forEach(function(property_data) {
+			var property_id = property_data.property;
+			if (!property_group[property_id])
+				property_group[property_id] = [];
+			property_group[property_id].push(property_data);
+		});
+
+		return property_group;
+	}
+
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 	function normalize_wbeditentity_data(data, entity, options, callback) {
 		normalize_labels_aliases(data, entity, options);
@@ -4951,6 +4974,9 @@ function module_code(library_namespace) {
 		function normalize_next_claim() {
 			var claims = data.claims;
 			if (claim_index === claims.length) {
+				// assert: claims.length > 0
+				// console.trace(claims, group_by_properties(claims));
+				data.claims = group_by_properties(claims);
 				callback();
 				return;
 			}
@@ -4959,16 +4985,26 @@ function module_code(library_namespace) {
 			normalize_wikidata_properties(property_data.qualifiers,
 			//
 			function(qualifiers) {
-				if (data.qualifiers) {
+				qualifiers = group_by_properties(qualifiers);
+				if (qualifiers) {
 					// console.trace(property_data.qualifiers, qualifiers);
 					property_data.qualifiers = qualifiers;
+				} else {
+					// e.g.,
+					// library_namespace.is_empty_object(property_data.qualifiers)
+					delete property_data.qualifiers;
 				}
 				normalize_wikidata_properties(property_data.references,
 				//
 				function(references) {
-					if (property_data.references) {
+					references = group_by_properties(references);
+					if (references) {
 						// console.trace(property_data.references, references);
 						property_data.references = references;
+					} else {
+						// e.g.,
+						// library_namespace.is_empty_object(property_data.references)
+						delete property_data.references;
 					}
 
 					claim_index++;
@@ -5345,6 +5381,9 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// TODO:
+			// Will get wikidata_edit.do_wbeditentity Error:
+			// [invalid-claim] undefined [wikibase-api-invalid-claim] [""]
 			normalize_wbeditentity_data(data, entity, options, do_wbeditentity);
 		}
 
@@ -5354,6 +5393,9 @@ function module_code(library_namespace) {
 			// e.g., {"descriptions":{"en":{"language":"en","value":""}}}
 
 			var POST_data = Object.clone(options);
+			// 去掉非 API 之 parameters。
+			delete POST_data.search_without_cache;
+			delete POST_data.no_skip_attributes_note;
 			delete POST_data.data_API_URL;
 			delete POST_data[KEY_SESSION];
 			// data 會在 set_claims() 被修改，因此不能提前設定。
@@ -5416,7 +5458,7 @@ function module_code(library_namespace) {
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
 
-		// console.trace(data);
+		// console.trace(JSON.stringify(data));
 		// console.trace(options);
 		// console.trace(entity);
 
