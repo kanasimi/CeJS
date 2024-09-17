@@ -3977,8 +3977,8 @@ function module_code(library_namespace) {
 			// e.g., claims:[{P1:'',language:'zh'},{P2:'',references:{}}]
 			data.claims = claims;
 
-			// console.log(claims);
-			// console.trace(JSON.stringify(claims));
+			// console.log(data.claims);
+			// console.trace(JSON.stringify(data.claims));
 			set_next_claim();
 		}, entity && entity.claims
 		// 確保會設定 .remove / .exists_index = duplicate_index。
@@ -4976,7 +4976,7 @@ function module_code(library_namespace) {
 			if (claim_index === claims.length) {
 				// assert: claims.length > 0
 				// console.trace(claims, group_by_properties(claims));
-				data.claims = group_by_properties(claims);
+				// data.claims = group_by_properties(claims);
 				callback();
 				return;
 			}
@@ -5000,7 +5000,9 @@ function module_code(library_namespace) {
 					references = group_by_properties(references);
 					if (references) {
 						// console.trace(property_data.references, references);
-						property_data.references = references;
+						property_data.references = [ {
+							snaks : references
+						} ];
 					} else {
 						// e.g.,
 						// library_namespace.is_empty_object(property_data.references)
@@ -5033,12 +5035,27 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// e.g.,
-			// claims:[{P1:'',language:'zh'},{P2:'',references:{}}]
-			data.claims = claims;
+			// claims: e.g.,
+			// claims:[{property:'P1',qualifiers:{P2:''}},{property:'P3',references:{P4:''}}]
+			data.claims = claims.map(function(claim) {
+				var property_data = {
+					type : 'statement',
+					rank : 'normal',
+					mainsnak : claim
+				};
+				if (claim.qualifiers) {
+					property_data.qualifiers = claim.qualifiers;
+					delete claim.qualifiers;
+				}
+				if (claim.references) {
+					property_data.references = claim.references;
+					delete claim.references;
+				}
+				return property_data;
+			});
 
-			// console.trace(claims);
-			// console.trace(JSON.stringify(claims));
+			// console.trace(data.claims);
+			// console.trace(JSON.stringify(data.claims));
 			normalize_next_claim();
 		}, entity && entity.claims
 		// 確保會設定 .remove / .exists_index = duplicate_index。
