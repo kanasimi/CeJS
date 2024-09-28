@@ -2,3 +2,8 @@ Please puts the dictionary files of OpenCC here.
 
 You may download the files at:
 https://github.com/BYVoid/OpenCC/tree/master/data/dictionary
+
+
+Then execute:
+node generate_additional_table.js to_CN
+node generate_additional_table.js to_TW
