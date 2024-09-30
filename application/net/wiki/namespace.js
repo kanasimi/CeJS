@@ -1952,7 +1952,7 @@ function module_code(library_namespace) {
 		? page_name.replace(/ /g, '_') : page_name.replace(/_/g, ' ');
 
 		page_name = page_name.split(':');
-		var has_language, has_namespace;
+		var skip_language, skip_namespace;
 		var session = session_of_options(options);
 		var interwiki_pattern = session
 		// session === wiki_API?
@@ -1999,22 +1999,22 @@ function module_code(library_namespace) {
 				return true;
 			}
 
-			if (!has_namespace) {
-				has_namespace = isNaN(section)
+			if (!skip_namespace) {
+				skip_namespace = isNaN(section)
 				//
 				&& get_namespace(section, _options);
 				// console.trace([ index, section, namespace ]);
-				if (has_namespace) {
+				if (skip_namespace) {
 					// `section` is Wikipedia namespace
-					page_name[index] = use_underline ? has_namespace.replace(
-							/ /g, '_') : has_namespace.replace(/_/g, ' ');
+					page_name[index] = use_underline ? skip_namespace.replace(
+							/ /g, '_') : skip_namespace.replace(/_/g, ' ');
 					// 進入 namespace 後，剩下的皆為頁面名稱，不再容許語言標記。
-					has_language = true;
+					skip_language = true;
 					return false;
 				}
 			}
 
-			if (has_language) {
+			if (skip_language) {
 				if (session && interwiki_pattern.test(section)) {
 					// e.g., 'EN' → 'en'
 					page_name[index] = section.toLowerCase();
@@ -2039,7 +2039,7 @@ function module_code(library_namespace) {
 			// treat `section` as language code, all lowercased
 			section = language_code.toLowerCase();
 			// lang code
-			has_language = true;
+			skip_language = true;
 			if (use_underline) {
 				section = section.replace(/_/g, '-');
 			}

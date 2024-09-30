@@ -1247,7 +1247,9 @@ function module_code(library_namespace) {
 				// console.trace(redirects_data);
 
 				if (library_namespace.is_Object(
-				//
+				// 將 {Object}options.update_page_name_hash 之 value 視為 page name
+				// 並更新其 value 成為 redirect target。
+				// TODO: 另外提出成為 function
 				next[3].update_page_name_hash)) {
 					var update_page_name_hash = next[3].update_page_name_hash;
 					for ( var key in update_page_name_hash) {

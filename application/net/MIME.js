@@ -117,6 +117,7 @@ function module_code(library_namespace) {
 		case '3gpp':
 		case 'ac3':
 		case 'ogg':
+		case 'wav':
 			return 'audio/' + extension;
 
 			// ---------------------------------------------

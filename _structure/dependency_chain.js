@@ -517,6 +517,8 @@ if (typeof CeL === 'function')
 								has_hash = set[1];
 								value_of_id = Object.create(null);
 								size = 0;
+								if (!has_native_Object_defineProperty)
+									this.size = 0;
 							}
 						});
 						// 初始化。
