@@ -6583,7 +6583,10 @@ function module_code(library_namespace) {
 
 			// 避免如 "三月庚子" 被解析成 "太祖庚子"
 			// 避免如 "十二月丁未" 被解析成 "丁先皇帝太平"
-			if (紀年_list && 紀年_list.size > 0 && !年 && 月 && 干支_PATTERN.test(日)) {
+			if (紀年_list && 紀年_list.size > 0
+			// 避免 資治通鑑/卷022#征和二年（庚寅，公元前九一年）
+			// https://zh.wikisource.org/wiki/User_talk:Kanashimi/era_note.js#%E5%85%B3%E4%BA%8E%E6%AD%A4%E5%B7%A5%E5%85%B7
+			&& (options.base || !年 && 月) && 干支_PATTERN.test(日)) {
 				// console.log([ date, 年, 月, 日 ]);
 				紀年_list.forEach(function(era) {
 					if (era.name.some(function(name) {
@@ -7881,6 +7884,12 @@ function module_code(library_namespace) {
 				if (!date[1])
 					return;
 
+				// 避免 資治通鑑/卷022#征和二年（庚寅，公元前九一年）
+				// https://zh.wikisource.org/wiki/User_talk:Kanashimi/era_note.js#%E5%85%B3%E4%BA%8E%E6%AD%A4%E5%B7%A5%E5%85%B7
+				if (original_era && original_era.name.includes(date[4])) {
+					original_era = null;
+				}
+
 				// 檢查本節點有幾項資料。
 				previous_date_to_check = [];
 				date.slice(2).forEach(function(name, index) {
@@ -8355,6 +8364,9 @@ function module_code(library_namespace) {
 		是[年月日]
 		《清華大學藏戰國竹簡（貳）·繫年》周惠王立十又七年
 		歲 次丙子四月丁卯
+
+		TODO:
+		公元前九一年
 
 		</code>
 		 */
