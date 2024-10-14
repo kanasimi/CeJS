@@ -1194,6 +1194,12 @@ function module_code(library_namespace) {
 				return session.interface_messages.get(message_id);
 
 			return new Promise(function(resolve, reject) {
+				/**
+				 * <code>
+				[[w:en:WP:MWN#Technical details]]
+				The difference between {{MediaWiki:}} and {{int:}} is that {{MediaWiki:}} transcludes using the default language of the Wiki (i.e. English), whereas {{int:}} transcludes using the language set by the user's preferences.
+				</code>
+				 */
 				session.page('MediaWiki:' + message_id, function(page_data,
 						error) {
 					if (false && error) {

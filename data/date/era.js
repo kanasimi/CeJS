@@ -8513,7 +8513,7 @@ function module_code(library_namespace) {
 		日 : '(日名)',
 
 		// 重新定義 (override)
-		// 東漢四分曆以前，用歲星紀年和太歲紀年（歲星:木星）。到現在來用干支紀年。
+		// 東漢四分曆前，用歲星紀年和太歲紀年（歲星:木星）。以來用干支紀年。
 		// 干支紀年萌芽於西漢，始行於王莽，通行於東漢後期。
 		歲次 : function(date_value, options) {
 			return (options
