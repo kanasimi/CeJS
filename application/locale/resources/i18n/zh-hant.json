@@ -8,7 +8,8 @@
 			"Willy1018",
 			"Winston Sung",
 			"列维劳德",
-			"捍粵者"
+			"捍粵者",
+			"沈澄心"
 		]
 	},
 	"españa": "西班牙",
@@ -911,7 +912,7 @@
 	"no-text-set-$1": "未設定文字：%1",
 	"this-rule-seems-unnecessary": "這條規則似乎沒有必要",
 	"cannot-move-to-$1": "無法移到%1",
-	"close-$1-requests-$2": "關閉 %1 {{PLURAL:%1|請求}}：%2",
+	"close-$1-requests-$2": "關閉 %1 個{{PLURAL:%1|請求}}：%2",
 	"treat-$1-as-language-$2": "將 %1 視為語言：%2。",
 	"cannot-detect-language-of-$1": "無法識別 %1 的語言！",
 	"invalid-task_configuration-(should-be-$2)-{$3}-$1": "無效的任務設定（應該是 %2）：{%3} %1",
