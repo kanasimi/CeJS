@@ -901,7 +901,7 @@
 	"\u672a\u8a2d\u5b9a\u6587\u5b57\uff1a%1": "\u672a\u8a2d\u5b9a\u6587\u5b57\uff1a%1",
 	"\u9019\u689d\u898f\u5247\u4f3c\u4e4e\u6c92\u6709\u5fc5\u8981": "\u9019\u689d\u898f\u5247\u4f3c\u4e4e\u6c92\u6709\u5fc5\u8981",
 	"Cannot move to %1": "\u7121\u6cd5\u79fb\u5230%1",
-	"Close %1 {{PLURAL:%1|request|requests}}: %2": "\u95dc\u9589 %1 {{PLURAL:%1|\u8acb\u6c42}}\uff1a%2",
+	"Close %1 {{PLURAL:%1|request|requests}}: %2": "\u95dc\u9589 %1 \u500b{{PLURAL:%1|\u8acb\u6c42}}\uff1a%2",
 	"Treat %1 as language: %2.": "\u5c07 %1 \u8996\u70ba\u8a9e\u8a00\uff1a%2\u3002",
 	"Cannot detect language of %1!": "\u7121\u6cd5\u8b58\u5225 %1 \u7684\u8a9e\u8a00\uff01",
 	"Invalid task_configuration (should be %2): {%3} %1": "\u7121\u6548\u7684\u4efb\u52d9\u8a2d\u5b9a\uff08\u61c9\u8a72\u662f %2\uff09\uff1a{%3} %1",
