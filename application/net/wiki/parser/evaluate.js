@@ -1995,6 +1995,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// @see [[Module:Yesno]], [[Template:Yesno]]
+	// 可以 `typeof CeL.wiki.Yesno(value) === 'boolean'` 判別為 valid value。
 	function Yesno(value, default_value) {
 		if (value === undefined)
 			return;
