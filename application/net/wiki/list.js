@@ -1793,6 +1793,12 @@ function module_code(library_namespace) {
 					categorymembers_options.namespace, options)
 					+ '|' + NS_Category) : category_tree.default_namespace;
 
+			if (options.depth > 0
+					&& typeof categorymembers_options.cmtype === 'string'
+					&& !categorymembers_options.cmtype.includes('subcat')) {
+				categorymembers_options.cmtype += '|subcat';
+			}
+
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			options = library_namespace.new_options(options);
 		}
@@ -1952,7 +1958,14 @@ function module_code(library_namespace) {
 
 				var page_name = session.remove_namespace(page_data, options);
 				var cached_tree_list = tree_of_category[page_name];
+				if (cached_tree_list) {
+					// using cache: 已取得 tree_of_category[page_name] 的資料。
+					// The shallowest category will be selected.
+					return false;
+				}
 
+				// page_data maybe {String}page_title.
+				// So should use (page_data.title || page_data)
 				if (category_filter && !category_filter(page_data)) {
 					// 直接除名。
 					library_namespace.debug('Skip non-eligibled category:'
@@ -1962,12 +1975,6 @@ function module_code(library_namespace) {
 
 				// 登記 subcategory。將會在 build_category_tree() 重新指定。
 				subcategories[page_name] = null;
-
-				if (cached_tree_list) {
-					// using cache: 已取得 tree_of_category[page_name] 的資料。
-					// The shallowest category will be selected.
-					return false;
-				}
 
 				// 註記需要取得這個 subcategory 的資料。
 				if (!next_category_queue[page_name]
@@ -2184,15 +2191,18 @@ function module_code(library_namespace) {
 			// console.trace(tree_of_category);
 
 			root_category_list = root_category_list
-			//
+			// 根節點
 			.map(function(root_category) {
 				var category_name = session.remove_namespace(root_category,
 						options);
 				var cached_tree_list = tree_of_category[category_name];
 				if (!cached_tree_list) {
-					library_namespace.error(
-					//
-					'category_tree: Cannot get data of ' + category_name);
+					library_namespace.error('category_tree: '
+							+ 'Cannot get data of root ' + root_category);
+					if (category_filter) {
+						library_namespace.error('category_tree: '
+								+ '或許必須讓 root category 篩過 category_filter？');
+					}
 					return;
 				}
 				// console.assert(cached_tree_list.depth === 0);
