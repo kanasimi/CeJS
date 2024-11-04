@@ -1787,11 +1787,18 @@ function module_code(library_namespace) {
 			Object.assign(categorymembers_options, options);
 			// 採用 page_filter 會與 get_list() 中之 page_filter 衝突。
 			delete categorymembers_options.page_filter;
-			categorymembers_options.namespace = 'namespace' in categorymembers_options
-			// 確保一定有 NS_Category。
-			? wiki_API.namespace(wiki_API.namespace(
-					categorymembers_options.namespace, options)
-					+ '|' + NS_Category) : category_tree.default_namespace;
+			if ('namespace' in categorymembers_options) {
+				// 確保一定有 NS_Category。
+				categorymembers_options.namespace = wiki_API.namespace(
+						categorymembers_options.namespace, options);
+				if (categorymembers_options.namespace !== '*') {
+					categorymembers_options.namespace = wiki_API.namespace(
+							categorymembers_options.namespace + '|'
+									+ NS_Category, options)
+				}
+			} else {
+				categorymembers_options.namespace = category_tree.default_namespace;
+			}
 
 			if (options.depth > 0
 					&& typeof categorymembers_options.cmtype === 'string'
@@ -1834,7 +1841,7 @@ function module_code(library_namespace) {
 				subcats : true
 			};
 
-			if (options.namespace) {
+			if (options.namespace && options.namespace !== '*') {
 				// console.trace(session.namespace(options.namespace));
 				// console.trace(session.namespace('File|Category'));
 				String(session.namespace(options.namespace)).split('|')
@@ -1950,7 +1957,7 @@ function module_code(library_namespace) {
 					} catch (e) {
 						library_namespace.error(e);
 					}
-					// console.log(page_data.title);
+					// console.trace(page_data.title);
 					return true;
 				}
 
@@ -1988,6 +1995,7 @@ function module_code(library_namespace) {
 			var subcategories = Object.create(null);
 			var filtered_page_list = page_list.filter(all_page_filter);
 			copy_list_attributes(page_list, filtered_page_list);
+			// console.trace(page_list, filtered_page_list);
 			if (!library_namespace.is_empty_object(subcategories))
 				filtered_page_list[wiki_API.KEY_subcategories] = subcategories;
 
@@ -2115,6 +2123,7 @@ function module_code(library_namespace) {
 
 		function get_categorymembers(category_page_data) {
 			// 每次只能處理單一個 category。
+			// console.trace(category_page_data, categorymembers_options);
 			wiki_API.list(category_page_data, for_categorymember_list,
 					categorymembers_options);
 		}
