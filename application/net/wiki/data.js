@@ -2294,7 +2294,11 @@ function module_code(library_namespace) {
 		// {key:{remove:true}}
 		return library_namespace.is_Object(value)
 		// {Function}Array.prototype.remove
-		&& (value.remove || value.remove === 0);
+		&& (value.remove || value.remove === 0
+		// TODO:
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
+		// || value.remove === ''
+		);
 	}
 
 	// @inner
@@ -2406,9 +2410,13 @@ function module_code(library_namespace) {
 		if (options.process_sub_property)
 			properties = properties[options.process_sub_property];
 
-		library_namespace.debug('normalize properties: '
-				+ JSON.stringify(properties), 3,
-				'normalize_wikidata_properties');
+		try {
+			library_namespace.debug('normalize properties: '
+					+ JSON.stringify(properties), 3,
+					'normalize_wikidata_properties');
+		} catch (e) {
+			// RangeError: Maximum call stack size exceeded
+		}
 
 		// console.log('-'.repeat(40));
 		// console.log(properties);
@@ -2751,7 +2759,7 @@ function module_code(library_namespace) {
 						library_namespace.debug(
 								'test 刪除時，需要存在此 property 才有必要處置。', 1,
 								'normalize_wikidata_properties');
-						// console.trace(exists_property_list);
+						// console.trace(property_data, exists_property_list);
 						if (!exists_property_list) {
 							library_namespace.debug('Skip '
 							//
@@ -2806,12 +2814,22 @@ function module_code(library_namespace) {
 						// 若有必要刪除，從最後一個相符的刪除起。
 						var duplicate_index = wikidata_datavalue.get_index(
 								exists_property_list, value, -1);
-						// console.log(exists_property_list);
-						// console.log(value);
-						// console.trace(duplicate_index);
+						if (false) {
+							// console.log(exists_property_list);
+							// console.log(value);
+							console.trace(property_data, duplicate_index,
+									exists_property_list[duplicate_index]);
+						}
 
 						if (duplicate_index !== NOT_FOUND) {
 							// delete property_data.value;
+
+							property_data.id
+							// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
+							// for "code": "invalid-claim",
+							// "info": "Cannot remove a claim with no GUID",
+							// @see normalize_wbeditentity_data()
+							= exists_property_list[duplicate_index].id;
 							property_data.remove = duplicate_index;
 							return true;
 						}
@@ -5010,7 +5028,9 @@ function module_code(library_namespace) {
 					}
 
 					claim_index++;
-					normalize_next_claim();
+					// 直接 normalize_next_claim(); 的話，有時（同一 property 過多項？）會造成
+					// RangeError: Maximum call stack size exceeded 。
+					setTimeout(normalize_next_claim, 0);
 				}, Object.create(null), options);
 			}, Object.create(null), options);
 		}
@@ -5021,6 +5041,7 @@ function module_code(library_namespace) {
 		// session : session
 		}, options);
 
+		var exists_property_hash = entity && entity.claims;
 		// 先正規化再 edit。
 		// @see set_claims()
 		normalize_wikidata_properties(data.claims, function(claims) {
@@ -5035,14 +5056,52 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			data.claims = [];
+
 			// claims: e.g.,
 			// claims:[{property:'P1',qualifiers:{P2:''}},{property:'P3',references:{P4:''}}]
-			data.claims = claims.map(function(claim) {
-				var property_data = {
-					type : 'statement',
-					rank : 'normal',
-					mainsnak : claim
-				};
+			claims.forEach(function(claim) {
+				var property_data;
+				if (value_is_to_remove(claim) && claim.id) {
+					property_data = claim;
+				} else {
+					property_data = {
+						type : 'statement',
+						rank : 'normal',
+						mainsnak : claim
+					};
+
+					// Detect duplicate
+					if (exists_property_hash) {
+						var exists_property_list
+						//
+						= exists_property_hash[claim.property];
+						var duplicate_index = wikidata_datavalue.get_index(
+								exists_property_list, claim);
+						if (false) {
+							console.trace(claim, duplicate_index,
+									exists_property_list);
+						}
+
+						if (duplicate_index !== NOT_FOUND) {
+							if (claim.qualifiers || claim.references) {
+								library_namespace.warn(
+								// 警告: 這邊 wbeditentity_only: true 的行為與
+								// wbeditentity_only: false
+								// @ process_property_id_list(property_id_list)
+								// 的不同!!
+								'normalize_wbeditentity_data: '
+								//
+								+ '[[' + entity.id + ']]: 此屬性已存在相同值。'
+								//
+								+ 'Skip set .qualifiers or .references of '
+										+ JSON.stringify(claim))
+							}
+							return;
+						}
+					}
+				}
+
 				if (claim.qualifiers) {
 					property_data.qualifiers = claim.qualifiers;
 					delete claim.qualifiers;
@@ -5051,13 +5110,13 @@ function module_code(library_namespace) {
 					property_data.references = claim.references;
 					delete claim.references;
 				}
-				return property_data;
+				data.claims.push(property_data);
 			});
 
 			// console.trace(data.claims);
 			// console.trace(JSON.stringify(data.claims));
 			normalize_next_claim();
-		}, entity && entity.claims
+		}, exists_property_hash
 		// 確保會設定 .remove / .exists_index = duplicate_index。
 		|| Object.create(null), options);
 
@@ -5426,6 +5485,7 @@ function module_code(library_namespace) {
 			// the token should be sent as the last parameter.
 			POST_data.token = token;
 
+			// console.trace(POST_data.data);
 			// console.trace(POST_data);
 
 			wiki_API.query(action, function handle_result(data, error) {
