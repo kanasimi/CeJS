@@ -876,15 +876,16 @@ function module_code(library_namespace) {
 		}
 		// console.trace(language);
 		// console.trace(in_session);
+
 		// 正規化。
 		language = String(language
 		// || in_session && in_session.language
 		|| get_first_domain_name_of_session(in_session)
 		// else use default language
 		// 警告: 若是沒有輸入，則會直接回傳預設的語言。因此您或許需要先檢測是不是設定了 language。
-		|| wiki_API.language).trim().toLowerCase()
+		|| wiki_API.language).trim().toLowerCase();
 		// zh_yue → zh-yue
-		.replace(/[_ ]/g, '-');
+		language = language.replace(/[_ ]/g, '-');
 		// console.trace(language);
 
 		var API_URL;

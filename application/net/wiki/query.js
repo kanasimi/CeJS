@@ -1059,10 +1059,31 @@ function module_code(library_namespace) {
 
 		if (data.warnings) {
 			for ( var action in data.warnings) {
-				library_namespace.warn('handle_error: '
-						+ data.warnings[action]['*']);
+				if (data.warnings[action]['*']) {
+					library_namespace.warn('handle_error: '
+							+ data.warnings[action]['*']);
+
+				} else if (Array.isArray(data.warnings[action].messages)) {
+					library_namespace.warn('handle_error: '
+					/**
+					 * <code>
+
+					{"wbeditentity":{"messages":[{"name":"wikibase-conflict-patched","parameters":[],"html":{"*":"Your edit was patched into the latest version."},"type":"warning"}]}}
+					// https://github.com/wikimedia/mediawiki-extensions-Wikibase/blob/master/repo/i18n/zh-hant.json
+
+					</code>
+					 */
+					+ data.warnings[action].messages.map(function(line) {
+						var message = '[' + line.name + ']';
+						var text = line.html && line.html['*'];
+						if (text)
+							message += ' ' + text;
+						return message;
+					}).join('\n'));
+				}
+
 			}
-			console.trace(data.warnings);
+			console.trace(JSON.stringify(data.warnings));
 		}
 
 		// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
