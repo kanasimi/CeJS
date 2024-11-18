@@ -971,7 +971,7 @@
 	"a-total-of-$1-occurrences": "共發生了%1次",
 	"report-generation-date-$1": "報告生成日期：%1",
 	"cleanup-report-for-interlanguage-link-templates": "跨語言連結清理報告",
-	"convert-$1-to-wikilink": "清理跨語言連結%1成為內部連結:編輯摘要的紅色內部連結乃正常現象，經繁簡轉換後存在，非bot錯誤編輯",
+	"convert-$1-to-wikilink": "清理跨語言連結%1成為內部連結:編輯摘要的紅色連結經繁簡轉換後存在，非bot錯誤編輯",
 	"preserve-interlanguage-links-because-of-the-preserve-parameter-is-set": "指定了強制顯示參數，不做修改。",
 	"the-task-does-not-process-talk-pages": "本任務不處理對話頁",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "所對應的中文條目重定向到了頁面本身。[[WP:CIRCULAR]]或可擴充重定向？",

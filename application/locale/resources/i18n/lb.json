@@ -122,6 +122,7 @@
 	"$1-bytes": "%1 {{PLURAL:%1|Byte|Byten}}",
 	"archived": "archivéiert:",
 	"work_data.author": "Auteur",
+	"work_data.description": "Beschreiwung",
 	"work_data.last_update": "Lescht Aktualiséierung",
 	"work_data.status": "Status",
 	"work_data.title": "Arbechtstitel",
