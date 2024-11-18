@@ -2000,9 +2000,9 @@ function module_code(library_namespace) {
 		if (value === undefined)
 			return;
 		value = String(value).replace(/<!--[\s\S]*?-->/g, '').trim();
-		if (/^(?:[nf否关關]|no|false|off)$/i.test(value))
+		if (/^(?:[0nf否关關]|no|false|off)$/i.test(value))
 			return false;
-		if (/^(?:[yt是开開]|yes|true|on)$/i.test(value))
+		if (/^(?:[1yt是开開]|yes|true|on)$/i.test(value))
 			return true;
 		// 須注意有特別的元素時可能回傳整個字串!
 		return default_value === undefined ? value : default_value;
