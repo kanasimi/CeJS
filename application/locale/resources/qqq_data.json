@@ -2650,14 +2650,14 @@
 		"message": "跳過 %2 之 %1 設定，因數值已存在且未設定 %3。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: claim items (qualifiers, references, rank). %2: \"property = value\". %3: property of options",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3017}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3035}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"Comma-separator": {
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <bdi><code>{{int:Comma-separator}}</code></bdi> ([[translatewiki:MediaWiki:Comma-separator]]).\nBe careful to the presence of a trailing space when appropriate for your language (if it is needed, you can input it as <code>&amp;#32;</code> to avoid its trimming when editing this message.\nSee also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3029}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1508}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L168}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1836}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L668}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3275}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3282}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3289}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L618}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3047}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1508}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L168}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1836}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L668}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3380}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3387}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3394}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L618}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"check-the-emergency-stop-page-$1": {
@@ -2786,7 +2786,7 @@
 		"message": "%1 is not exist in %2.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page title, %2: site name,",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L2780}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L2799}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-title-$1": {
@@ -2799,14 +2799,14 @@
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3180}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3181}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3215}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3216}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2814,14 +2814,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3295}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3296}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3888}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3889}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -7932,7 +7932,7 @@
 		"message": "Total %1 {{PLURAL:%1|article|articles}}.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number of articles",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L480}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L502}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2169}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2218}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L480}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L502}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2232}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2281}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"number-of-templates": {
@@ -8004,7 +8004,7 @@
 	"archiving-operation": {
 		"message": "Archiving operation",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160323.archive_bot_logs.js#L288}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L275}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160323.archive_bot_logs.js#L288}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L280}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"archive-$1-chars": {
@@ -8334,37 +8334,37 @@
 	"update-section-counters-and-article-assessment-icons": {
 		"message": "Update section counters and article assessment icons",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L683}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L699}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-list-of-vital-articles": {
 		"message": "Update list of vital articles",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2167}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2185}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2216}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2230}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2248}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2279}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"keep-different-ratings-in-$2": {
 		"message": "Keep %1 different {{PLURAL:%1|rating|ratings}} in %2.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2887}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2957}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-the-same-ratings-as-template-wpbs-in-$2": {
 		"message": "Remove %1 same {{PLURAL:%1|rating|ratings}} as {{WPBS}} in %2.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2905}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2975}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-wikiproject-templates": {
 		"message": "%1 WikiProject {{PLURAL:%1|template|templates}}.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3163}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3239}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"vital-articles-update-report": {
 		"message": "Vital articles update report",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3390}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3496}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-pages-modified": {
@@ -8465,14 +8465,14 @@
 		"message": "Append %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L286}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L291}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-$1-topics": {
 		"message": "Remove %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L300}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L305}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"updating-$1": {
