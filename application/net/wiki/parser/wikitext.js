@@ -432,9 +432,6 @@ function module_code(library_namespace) {
 			+ 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem',
 	// <nowiki>不允許內部再解析，但這幾個的內部得再解析。
 	wiki_extensiontags_must_parse_inner = {
-		// e.g., "<pre><nowiki>''a'''b''</nowiki></pre>"
-		pre : true,
-
 		onlyinclude : true,
 		includeonly : true,
 		noinclude : true
@@ -3304,11 +3301,13 @@ function module_code(library_namespace) {
 			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
 					'parse_wikitext.tag');
 			attributes = parse_tag_attributes(attributes);
-			if (tag.toLowerCase() in wiki_extensiontags_must_parse_inner) {
+			if (tag.toLowerCase() === 'pre'
+			// ↑ e.g., "<pre><nowiki>''a'''b''</nowiki></pre>"
+			|| tag.toLowerCase() in wiki_extensiontags_must_parse_inner) {
 				inner = parse_wikitext(inner,
 				// 重新造一個 options 以避免污染。
 				Object.assign(Object.clone(options), {
-					parse_inner_extensiontags : true,
+					parse_inner_extensiontags : tag.toLowerCase(),
 					target_array : null
 				}), queue);
 			} else {
@@ -4651,283 +4650,295 @@ function module_code(library_namespace) {
 		// [[w:zh:Help:模板]]
 		// 在模板頁面中，用三個大括弧可以讀取參數。
 
-		// 有些需要反覆解析。
-		// e.g., '{{{t|{{u}}}}}', '{{{q|{{w|{{{t|{{u}}}}}}}}}}'
-		while (!options.inside_transclusion) {
-			var original_wikitext = wikitext;
+		// 在 <pre> 中這些語法無作用。
+		if (!options.parse_inner_extensiontags
+				|| (options.parse_inner_extensiontags in wiki_extensiontags_must_parse_inner)) {
+			// 有些需要反覆解析。
+			// e.g., '{{{t|{{u}}}}}', '{{{q|{{w|{{{t|{{u}}}}}}}}}}'
+			while (!options.inside_transclusion) {
+				var original_wikitext = wikitext;
 
-			// {{{...}}} 需在 {{...}} 之前解析。
-			// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}}
-			// }} }}
-			wikitext = wikitext.replace_till_stable(
-					PATTERN_for_template_parameter, parse_template_parameter);
+				// {{{...}}} 需在 {{...}} 之前解析。
+				// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{
+				// {{XYZ}}
+				// }} }}
+				wikitext = wikitext.replace_till_stable(
+						PATTERN_for_template_parameter,
+						parse_template_parameter);
+
+				// ----------------------------------------------------
+				// 模板（英語：Template，又譯作「樣板」、「範本」）
+				// {{Template name|}}
+				wikitext = wikitext.replace_till_stable(
+				//
+				PATTERN_for_transclusion, parse_transclusion);
+
+				if (original_wikitext === wikitext)
+					break;
+			}
 
 			// ----------------------------------------------------
-			// 模板（英語：Template，又譯作「樣板」、「範本」）
-			// {{Template name|}}
-			wikitext = wikitext.replace_till_stable(
-			//
-			PATTERN_for_transclusion, parse_transclusion);
 
-			if (original_wikitext === wikitext)
-				break;
-		}
+			// 在章節標題、表格 td/th 或 template parameter 結束時，
+			// e.g., "| t || <del>... || </del> || <s>... || </s> ||",
+			// "{{t|p=v<s>...|p2=v}}</s>"
+			// HTML font style tag 會被表格截斷，自動重設屬性，不會延續下去。
+			// 所以要先處理表格再處理 HTML tag。
 
-		// ----------------------------------------------------
+			// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
+			// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
 
-		// 在章節標題、表格 td/th 或 template parameter 結束時，
-		// e.g., "| t || <del>... || </del> || <s>... || </s> ||",
-		// "{{t|p=v<s>...|p2=v}}</s>"
-		// HTML font style tag 會被表格截斷，自動重設屬性，不會延續下去。
-		// 所以要先處理表格再處理 HTML tag。
+			// ----------------------------------------------------
+			// external link
+			// [http://... ...]
 
-		// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
-		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
+			// TODO:
+			// [{{URL template}} ...]
+			// [<!-- --><!-- -->ht<!-- -->tp://... ...]
+			// @see
+			// https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
 
-		// ----------------------------------------------------
-		// external link
-		// [http://... ...]
-
-		// TODO:
-		// [{{URL template}} ...]
-		// [<!-- --><!-- -->ht<!-- -->tp://... ...]
-		// @see
-		// https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
-
-		// 不可跨行。
-		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
-				parse_external_link);
-
-		// ----------------------------------------------------
-		// plain url
-
-		// PATTERN_external_link_global 必須偵測 url pattern，因此必須
-		// parse_external_link() → parse_wikilink()
-		// 又因為 "[[http://example.com]]" 會被解析成 external_link，因此必須
-		// parse_external_link() or parse_external_link() → parse_wikilink()
-		if (!options.inside_url) {
 			// 不可跨行。
 			wikitext = wikitext.replace_till_stable(
-					PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_url);
-		}
-
-		// ----------------------------------------------------
-		// language conversion -{}- 以後來使用的為主。
-		// TODO: -{R|里}-
-		// TODO: -{zh-hans:<nowiki>...</nowiki>;zh-hant:<nowiki>...</nowiki>;}-
-		// TODO: 特別注意語法中帶有=>的單向轉換規則 [[w:zh:模組:CGroup/IT]]
-		// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
-		// https://zh.wikipedia.org/wiki/Help:中文维基百科的繁简、地区词处理#常用的轉換工具語法
-		// [[w:zh:H:Convert]], [[w:zh:H:AC]]
-		// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
-		// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
-		// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
-
-		// https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/languages/data/ZhConversion.php
-		// https://github.com/wikimedia/mediawiki/blob/master/includes/languages/data/ZhConversion.php
-		// https://doc.wikimedia.org/mediawiki-core/master/php/ZhConversion_8php_source.html
-
-		// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
-		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
-		// TODO:
-		// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
-
-		wikitext = wikitext.replace_till_stable(PATTERN_language_conversion,
-				parse_language_conversion);
-
-		// ----------------------------------------------------
-		// wikilink
-		// [[~:~|~]], [[~:~:~|~]]
-
-		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
-
-		// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
-		// 前面檢查，或是使 display_text 不包含 {{}}。
-
-		// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
-		// 可以解析成圖片, Caption: "{{tl|t}}"
-
-		wikitext = wikitext.replace_till_stable(
-		// or use ((PATTERN_link))
-		PATTERN_wikilink_global, parse_wikilink);
-
-		// ----------------------------------------------------
-		// table: \n{| ... \n|}
-		// [[Help:Table]]
-		// TODO: 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]],
-		// [[w:zh:世界大桥列表]]
-
-		// 因為 table 中較可能包含有"|"的 {{Template}}、wikilink，但這些元素少包含 table，
-		// 因此先處理 {{Template}}, wikilink 再處理 table。
-
-		wikitext = wikitext.replace_till_stable(
-		// {|表示表格開始，|}表示表格結束。
-		/\n(\s*:+\s*)?{\|([\s\S]*?)(\n?$|\n\|})/g, parse_table);
-
-		// ----------------------------------------------------
-		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
-		// @see [[w:en:Help:Link#Http: and https:]]
-
-		// console.log('11: ' + JSON.stringify(wikitext));
-
-		// 在 transclusion 中不會被當作 bare / plain URL。
-		if (!options.inside_transclusion) {
+					PATTERN_external_link_global, parse_external_link);
 
 			// ----------------------------------------------------
-			// 處理 / parse list @ wikitext
-			// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
-			// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
-			// ** list 中的標籤跨行也會被截斷，因此 parse_list_line 要在 parse_HTML_tag 之前。
+			// plain url
 
-			// 列表層級。 e.g., ['#','*','#',':']
-			var list_prefixes_now = [], list_now = [],
-			//
-			lines_without_style = [],
-			//
-			list_conversion = {
-				';' : DEFINITION_LIST,
-				':' : DEFINITION_LIST
-			};
-
-			// console.log('12: ' + JSON.stringify(wikitext));
-			// console.log(queue);
-
-			// list 不能跨行。
-			wikitext = wikitext.split('\n');
-			// e.g., for "<b>#ccc</b>"
-			var first_line = !initialized_fix && wikitext.shift();
-
-			wikitext.forEach(parse_list_line);
-			wikitext = lines_without_style;
-
-			// ----------------------------------------------------
-			// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
-			// @see [[w:en:Help:Wikitext#Horizontal rule]]
-			// Their use in Wikipedia articles is deprecated.
-			// They should never appear in regular article prose.
-
-			// reset
-			lines_without_style = [];
-
-			wikitext.forEach(parse_hr_tag);
-			wikitext = lines_without_style;
-
-			// ----------------------------------------------------
-			// parse preformatted text, HTML <pre> element: \n + space
-			// @seealso [[w:en:Help:Wikitext#Pre]]
-
-			// reset
-			lines_without_style = [];
-			// pre_list
-			list_now = null;
-
-			wikitext.forEach(parse_preformatted);
-			wikitext = lines_without_style;
-
-			// Release memory. 釋放被占用的記憶體。
-			lines_without_style = null;
-
-			if (!initialized_fix) {
-				// recover
-				wikitext.unshift(first_line);
+			// PATTERN_external_link_global 必須偵測 url pattern，因此必須
+			// parse_external_link() → parse_wikilink()
+			// 又因為 "[[http://example.com]]" 會被解析成 external_link，因此必須
+			// parse_external_link() or parse_external_link() → parse_wikilink()
+			if (!options.inside_url) {
+				// 不可跨行。
+				wikitext = wikitext.replace_till_stable(
+						PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_url);
 			}
-			wikitext = wikitext.join('\n');
-		}
 
-		// ----------------------------------------------------
-		// [[Help:HTML in wikitext]]
+			// ----------------------------------------------------
+			// language conversion -{}- 以後來使用的為主。
+			// TODO: -{R|里}-
+			// TODO:
+			// -{zh-hans:<nowiki>...</nowiki>;zh-hant:<nowiki>...</nowiki>;}-
+			// TODO: 特別注意語法中帶有=>的單向轉換規則 [[w:zh:模組:CGroup/IT]]
+			// 注意: 有些 wiki，例如 jawiki，並沒有開啟 language conversion。
+			// https://zh.wikipedia.org/wiki/Help:中文维基百科的繁简、地区词处理#常用的轉換工具語法
+			// [[w:zh:H:Convert]], [[w:zh:H:AC]]
+			// [[mw:Help:Magic words]], [[mw:Writing systems/LanguageConverter]]
+			// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageConverter_8php_source.html
+			// https://doc.wikimedia.org/mediawiki-core/master/php/ConverterRule_8php_source.html
 
-		// <del>不採用 global variable，預防 multitasking 並行處理。</del>
-		// reset PATTERN index
-		// PATTERN_WIKI_TAG.lastIndex = 0;
+			// https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/languages/data/ZhConversion.php
+			// https://github.com/wikimedia/mediawiki/blob/master/includes/languages/data/ZhConversion.php
+			// https://doc.wikimedia.org/mediawiki-core/master/php/ZhConversion_8php_source.html
 
-		var PATTERN_non_extensiontags = session
-		// session === wiki_API?
-		&& session.configurations
-				&& session.configurations.PATTERN_non_extensiontags
-				|| PATTERN_non_wiki_extensiontags;
+			// {{Cite web}}漢字不被轉換: 可以使用script-title=ja:。
+			// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
+			// TODO:
+			// 自動轉換程序會自動規避「程式碼」類的標籤，包括<pre>...</pre>、<code>...</code>兩種。如果要將前兩種用於條目內的程式範例，可以使用空轉換標籤-{}-強制啟用轉換。
 
-		// console.log(PATTERN_TAG);
-		// console.trace(PATTERN_non_extensiontags);
-		// console.trace(wikitext);
+			wikitext = wikitext.replace_till_stable(
+					PATTERN_language_conversion, parse_language_conversion);
 
-		// 表格的 cell 可截斷 <b>，因此
-		// parse_table() → PATTERN_non_extensiontags
-		wikitext = wikitext.replace_till_stable(PATTERN_non_extensiontags,
-				parse_HTML_tag);
+			// ----------------------------------------------------
+			// wikilink
+			// [[~:~|~]], [[~:~:~|~]]
 
-		// ----------------------------------------------------
-		// single tags. e.g., <hr />
+			// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
 
-		// reset PATTERN index
-		// PATTERN_WIKI_TAG_VOID.lastIndex = 0;
+			// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
+			// 前面檢查，或是使 display_text 不包含 {{}}。
 
-		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
-		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_VOID,
-				parse_single_tag);
-		// 處理有明確標示為 simgle tag 的。
-		// 但 MediaWiki 現在會將 <b /> 轉成 <b>，因此不再處理這部分。
-		wikitext = wikitext.replace_till_stable(PATTERN_invalid_end_tag,
-				parse_single_tag);
+			// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
+			// 可以解析成圖片, Caption: "{{tl|t}}"
 
-		// ----------------------------------------------------
+			wikitext = wikitext.replace_till_stable(
+			// or use ((PATTERN_link))
+			PATTERN_wikilink_global, parse_wikilink);
 
-		wikitext = wikitext.replace(PATTERN_BEHAVIOR_SWITCH,
-		// 可跨行。
-		parse_behavior_switch);
+			// ----------------------------------------------------
+			// table: \n{| ... \n|}
+			// [[Help:Table]]
+			// TODO:
+			// 在遇到過長過大的表格時，耗時甚久。 [[w:en:List of Leigh Centurions players]],
+			// [[w:zh:世界大桥列表]]
 
-		// 若是要處理<b>, <i>這兩項，也必須調整 wiki_API.section_link()。
+			// 因為 table 中較可能包含有"|"的 {{Template}}、wikilink，但這些元素少包含 table，
+			// 因此先處理 {{Template}}, wikilink 再處理 table。
 
-		// ''''b''''' → <i><b>b</b></i>
-		// 因此先從<b>開始找。
+			wikitext = wikitext.replace_till_stable(
+			// {|表示表格開始，|}表示表格結束。
+			/\n(\s*:+\s*)?{\|([\s\S]*?)(\n?$|\n\|})/g, parse_table);
 
-		// 再解析一次。
-		// e.g., for `[[{{T|P}}]]`, `[[{{#if:A|A|B}}]]`
-		wikitext = wikitext.replace_till_stable(
-		// or use ((PATTERN_link))
-		PATTERN_wikilink_global, parse_wikilink);
+			// ----------------------------------------------------
+			// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
+			// @see [[w:en:Help:Link#Http: and https:]]
 
-		// ----------------------------------------------------
+			// console.log('11: ' + JSON.stringify(wikitext));
 
-		// parse_transclusion(), parse_table() → split_text_apostrophe_unit()
-		// 注意: '''{{font color}}''', '''{{tsl}}''', '''{{text}}'''
+			// 在 transclusion 中不會被當作 bare / plain URL。
+			if (!options.inside_transclusion) {
 
-		if (!options.inside_apostrophe) {
-			// '''~''' ''~'' 不能跨行。
-			wikitext = wikitext.split('\n').map(split_text_apostrophe_unit)
-					.join('\n');
-		}
+				// ----------------------------------------------------
+				// 處理 / parse list @ wikitext
+				// @see [[w:en:MOS:LIST]], [[w:en:Help:Wikitext#Lists]]
+				// 注意: 這裡僅處理在原wikitext中明確指示列表的情況，無法處理以模板型式表現的列表。
+				// ** list 中的標籤跨行也會被截斷，因此 parse_list_line 要在 parse_HTML_tag 之前。
 
-		// ~~~, ~~~~, ~~~~~: 不應該出現
+				// 列表層級。 e.g., ['#','*','#',':']
+				var list_prefixes_now = [], list_now = [],
+				//
+				lines_without_style = [],
+				//
+				list_conversion = {
+					';' : DEFINITION_LIST,
+					':' : DEFINITION_LIST
+				};
 
-		// ----------------------------------------------------
-		// parse_wikitext.section_title
+				// console.log('12: ' + JSON.stringify(wikitext));
+				// console.log(queue);
 
-		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
+				// list 不能跨行。
+				wikitext = wikitext.split('\n');
+				// e.g., for "<b>#ccc</b>"
+				var first_line = !initialized_fix && wikitext.shift();
 
-		var PATTERN_section_title =
-		// 採用 positive lookahead (?=\n|$) 是為了循序匹配 section title，不跳過任何一個。
-		// 不採用則 parse_wiki 處理時若遇到連續章節，不會按照先後順序，造成這邊還不能設定
-		// section_title_hierarchy，只能在 parsed.each_section() 設定。
-		generate_token_pattern(
-				/(^|\n)(={1,6})(.+)\2((?:[ \t]|token_mark)*)(?=\n|$)/g, options);
-		// console.log(PATTERN_section_title);
-		// console.log(JSON.stringify(wikitext));
+				wikitext.forEach(parse_list_line);
+				wikitext = lines_without_style;
 
-		// 不可跨行。
-		// 應該一次遍歷就找出所有的 section title，否則 section_title_hierarchy 會出錯。
-		wikitext = wikitext.replace(PATTERN_section_title, parse_section_title);
+				// ----------------------------------------------------
+				// parse horizontal rule, line, HTML <hr /> element: ----, -{4,}
+				// @see [[w:en:Help:Wikitext#Horizontal rule]]
+				// Their use in Wikipedia articles is deprecated.
+				// They should never appear in regular article prose.
 
-		// console.log('10: ' + JSON.stringify(wikitext));
+				// reset
+				lines_without_style = [];
 
-		if (false) {
-			// another method to parse.
-			wikitext = '{{temp|{{temp2|p{a}r{}}}}}';
-			pattern = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)/g;
-			matched = pattern.exec(wikitext);
-			end_index = wikitext.indexOf('}}', pattern.lastIndex);
+				wikitext.forEach(parse_hr_tag);
+				wikitext = lines_without_style;
 
-			PATTERN_wikilink;
+				// ----------------------------------------------------
+				// parse preformatted text, HTML <pre> element: \n + space
+				// @seealso [[w:en:Help:Wikitext#Pre]]
+
+				// reset
+				lines_without_style = [];
+				// pre_list
+				list_now = null;
+
+				wikitext.forEach(parse_preformatted);
+				wikitext = lines_without_style;
+
+				// Release memory. 釋放被占用的記憶體。
+				lines_without_style = null;
+
+				if (!initialized_fix) {
+					// recover
+					wikitext.unshift(first_line);
+				}
+				wikitext = wikitext.join('\n');
+			}
+
+			// ----------------------------------------------------
+			// [[Help:HTML in wikitext]]
+
+			// <del>不採用 global variable，預防 multitasking 並行處理。</del>
+			// reset PATTERN index
+			// PATTERN_WIKI_TAG.lastIndex = 0;
+
+			var PATTERN_non_extensiontags = session
+			// session === wiki_API?
+			&& session.configurations
+					&& session.configurations.PATTERN_non_extensiontags
+					|| PATTERN_non_wiki_extensiontags;
+
+			// console.log(PATTERN_TAG);
+			// console.trace(PATTERN_non_extensiontags);
+			// console.trace(wikitext);
+
+			// 表格的 cell 可截斷 <b>，因此
+			// parse_table() → PATTERN_non_extensiontags
+			wikitext = wikitext.replace_till_stable(PATTERN_non_extensiontags,
+					parse_HTML_tag);
+
+			// ----------------------------------------------------
+			// single tags. e.g., <hr />
+
+			// reset PATTERN index
+			// PATTERN_WIKI_TAG_VOID.lastIndex = 0;
+
+			// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
+			wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_VOID,
+					parse_single_tag);
+			// 處理有明確標示為 simgle tag 的。
+			// 但 MediaWiki 現在會將 <b /> 轉成 <b>，因此不再處理這部分。
+			wikitext = wikitext.replace_till_stable(PATTERN_invalid_end_tag,
+					parse_single_tag);
+
+			// ----------------------------------------------------
+
+			wikitext = wikitext.replace(PATTERN_BEHAVIOR_SWITCH,
+			// 可跨行。
+			parse_behavior_switch);
+
+			// 若是要處理<b>, <i>這兩項，也必須調整 wiki_API.section_link()。
+
+			// ''''b''''' → <i><b>b</b></i>
+			// 因此先從<b>開始找。
+
+			// 再解析一次。
+			// e.g., for `[[{{T|P}}]]`, `[[{{#if:A|A|B}}]]`
+			wikitext = wikitext.replace_till_stable(
+			// or use ((PATTERN_link))
+			PATTERN_wikilink_global, parse_wikilink);
+
+			// ----------------------------------------------------
+
+			// parse_transclusion(), parse_table()
+			// → split_text_apostrophe_unit()
+			// 注意: '''{{font color}}''', '''{{tsl}}''', '''{{text}}'''
+
+			if (!options.inside_apostrophe) {
+				// '''~''' ''~'' 不能跨行。
+				wikitext = wikitext.split('\n').map(split_text_apostrophe_unit)
+						.join('\n');
+			}
+
+			// ~~~, ~~~~, ~~~~~: 不應該出現
+
+			// ----------------------------------------------------
+			// parse_wikitext.section_title
+
+			// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
+
+			var PATTERN_section_title =
+			// 採用 positive lookahead (?=\n|$) 是為了循序匹配 section title，不跳過任何一個。
+			// 不採用則 parse_wiki 處理時若遇到連續章節，不會按照先後順序，造成這邊還不能設定
+			// section_title_hierarchy，只能在 parsed.each_section() 設定。
+			generate_token_pattern(
+					/(^|\n)(={1,6})(.+)\2((?:[ \t]|token_mark)*)(?=\n|$)/g,
+					options);
+			// console.log(PATTERN_section_title);
+			// console.log(JSON.stringify(wikitext));
+
+			// 不可跨行。
+			// 應該一次遍歷就找出所有的 section title，否則 section_title_hierarchy 會出錯。
+			wikitext = wikitext.replace(PATTERN_section_title,
+					parse_section_title);
+
+			// console.log('10: ' + JSON.stringify(wikitext));
+
+			if (false) {
+				// another method to parse.
+				wikitext = '{{temp|{{temp2|p{a}r{}}}}}';
+				pattern = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)/g;
+				matched = pattern.exec(wikitext);
+				end_index = wikitext.indexOf('}}', pattern.lastIndex);
+
+				PATTERN_wikilink;
+			}
+
 		}
 
 		// ↑ parse sequence finished *EXCEPT FOR* paragraph

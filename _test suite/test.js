@@ -4588,6 +4588,11 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #11');
 		wikitext = "<pre>''a'''b''</pre>"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #12');
+		assert(["''a'''b''", parsed[0][1][0]], 'wiki.parse: HTML tag pre #12-1');
+		wikitext = "<pre>{{t|p=<nowiki><!----></nowiki>}}</pre>"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #13');
+		assert(['{{t|p=', parsed[1][0]], 'wiki.parse: HTML tag pre #13-1');
+		assert(['nowiki', parsed[1][1].tag], 'wiki.parse: HTML tag pre #13-2');
 
 		wikitext = '1<nowiki>\n==t==\nw\n</nowiki>2'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #1');
