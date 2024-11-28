@@ -330,6 +330,8 @@ function module_code(library_namespace) {
 					T : [ 'Recursively removing subdirectories of %1', path ]
 				}, 2, 'remove_fso');
 			}
+			// https://github.com/nodejs/node/issues/56049
+			// console.trace(path, recursive);
 			node_fs.rmSync(path, {
 				recursive : !!recursive
 			});
@@ -562,6 +564,7 @@ function module_code(library_namespace) {
 	 * @returns error
 	 */
 	function fs_writeFileSync(file_path, data, options) {
+		// console.trace(file_path);
 		if (options) {
 			var encoding;
 			if (typeof options === 'string') {
@@ -592,6 +595,7 @@ function module_code(library_namespace) {
 				options.encoding = encoding = _.file_utf16le_mapping[encoding];
 			}
 		}
+		// console.trace(options);
 
 		try {
 			node_fs.writeFileSync(file_path, data, options);
