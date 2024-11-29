@@ -2206,8 +2206,19 @@ function module_code(library_namespace) {
 			}
 			break;
 
-		case 'commonsMedia':
 		case 'url':
+			datavalue_type = 'string';
+			value = String(value);
+			/**
+			 * <code>
+			Error: [modification-failed] URLs are not allowed to contain certain characters like spaces or square brackets: https://doi.org/10.1002/(sici)1098-2825(1997)11:6<315::aid-jcla1>3.0.co;2-4 [wikibase-validator-bad-url] ["https://doi.org/10.1002/(sici)1098-2825(1997)11:6<315::aid-jcla1>3.0.co;2-4"]
+			</code>
+			 */
+			if (/[<>\[\]]/.test(value))
+				value = encodeURI(value);
+			break;
+
+		case 'commonsMedia':
 		case 'external-id':
 		case 'math':
 		case 'string':
@@ -5502,6 +5513,7 @@ function module_code(library_namespace) {
 					+ error);
 					try {
 						console.trace([ action, POST_data ]);
+						// console.log(POST_data.data);
 					} catch (e) {
 						library_namespace.warn('action: '
 						//
