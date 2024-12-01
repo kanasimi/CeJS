@@ -283,10 +283,13 @@ function module_code(library_namespace) {
 	https://69shuba.cx/txt/52895/34488506	别人練級我修仙，苟到大乘再出山 > 第99章 人生模拟器30版本，新一批的能量介质！
 	第99章 人生模拟器3.0版本，新一批的能量介质！
 
+	https://69shuba.cx/txt/52895/34767212	别人练级我修仙，苟到大乘再出山 > 159.第157章 顶级嘲讽，小小的也很可爱哦（5k）
+	第157章 顶级嘲讽，小小的也很可爱哦!（5k）
+
 	</code>
 	 */
 	/** {RegExp}標題中的特殊字元。 */
-	trim_start_title.PATTERN_special_chars = /[~\/+\-—々·\s_.]|&nbsp;|&emsp;/g;
+	trim_start_title.PATTERN_special_chars = /[~\/+!\-—々·\s_.]|&nbsp;|&emsp;/g;
 	/** {RegExp}非內容。例如空白字元或HTML標籤。 */
 	trim_start_title.PATTERN_non_content = /<\/?\w[^<>]*>|\s+/g;
 	/** {RegExp}搜尋新行新段落用。 */
