@@ -1054,7 +1054,7 @@ function module_code(library_namespace) {
 			 */
 			|| html.between(' id="cp_img">', '</div>')
 			//
-			.replace(/<!--[\s\S]*?-->/g, '');
+			.replace(/<\!--[\s\S]*?-->/g, '');
 
 			// console.log(html);
 

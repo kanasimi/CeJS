@@ -137,7 +137,7 @@ function module_code(library_namespace) {
 		// // ...
 		.replace(/\/\/[^\r\n]*/g, '');
 
-		// text.replace(/<!--[\s\S]*?-->/g, '');
+		// text.replace(/<\!--[\s\S]*?-->/g, '');
 
 		// TODO: /^#/
 	}

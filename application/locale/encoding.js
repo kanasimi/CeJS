@@ -915,20 +915,20 @@ function module_code(library_namespace) {
 				library_namespace.debug('<em>2.</em> '
 						+ text.length
 						+ ' characters: ['
-						+ text.replace(/<!--[\s\S]*?-->/g, '').replace(/</g,
+						+ text.replace(/<\!--[\s\S]*?-->/g, '').replace(/</g,
 								'&lt;') + ']');
 				library_namespace.debug('<em>3.</em> '
 						+ text.length
 						+ ' characters: ['
-						+ text.replace(/<!--[\s\S]*?-->/g, '').replace(
+						+ text.replace(/<\!--[\s\S]*?-->/g, '').replace(
 								/<script([\s\n][^>]*)?>[\s\S]*?<\/script>/ig,
 								'').replace(/</g, '&lt;') + ']');
 			}
 
 			// 去掉 markup (<> 標籤)，僅留 contents。
 			text = text
-			// 去掉 comments.
-			.replace(/<!--[\s\S]*?-->/g, '').replace(
+			// 去除註解。 Remove comments. "<!-- comment -->"
+			.replace(/<\!--[\s\S]*?-->/g, '').replace(
 					/<script([\s\n][^>]*)?>[\s\S]*?<\/script>/ig, '').replace(
 					/[\s\n]*<[\w?!\/][^>]*>/g, '')
 			// 把最後未完結的 tag 刪掉。

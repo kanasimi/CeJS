@@ -293,7 +293,7 @@ function module_code(library_namespace) {
 				// 採用比較寬鬆的標準。
 				return !(token.type in {
 					parameter : true,
-					// e.g., {{=}}
+					// e.g., {{!}} {{=}}
 					magic_word_function : true,
 					transclusion : true,
 					comment : true
@@ -1731,8 +1731,8 @@ function module_code(library_namespace) {
 			// wikilink → page title
 			.replace(/^\[\[ *:?([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/,
 					'$1')
-			// Remove comments
-			.replace(/<!--[\s\S]*?-->/g, '');
+			// 去除註解。 Remove comments. "<!-- comment -->"
+			.replace(/<\!--[\s\S]*?-->/g, '');
 
 			// console.trace([ JS_value, wiki_API.parse(JS_value), value ]);
 

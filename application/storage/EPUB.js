@@ -484,7 +484,7 @@ function module_code(library_namespace) {
 
 		resources.forEach(function(resource, index) {
 			if (typeof resource === 'string') {
-				var matched = resource.match(/<!--\s*({.+})\s*-->/);
+				var matched = resource.match(/<\!--\s*({.+?})\s*-->/);
 				if (matched
 				//
 				&& library_namespace.is_Object(resources[--index])) {

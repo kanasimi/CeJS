@@ -1852,7 +1852,7 @@ function module_code(library_namespace) {
 				// 罕見情況下，有可能 data === undefined
 				data = data.text['*']
 				// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
-				.replace(/<!--[\s\S]*?-->/g, '')
+				.replace(/<\!--[\s\S]*?-->/g, '')
 				// 去掉前後包覆。 e.g., <p> or <pre>
 				.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
 

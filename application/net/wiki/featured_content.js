@@ -228,7 +228,7 @@ function module_code(library_namespace) {
 
 			if (matched[3]) {
 				// 分類/類別。
-				catalog = matched[3].replace(/<!--[\s\S]*?-->/g, '').trim()
+				catalog = matched[3].replace(/<\!--[\s\S]*?-->/g, '').trim()
 						.replace(/\s*（\d+）$/, '');
 				continue;
 			}

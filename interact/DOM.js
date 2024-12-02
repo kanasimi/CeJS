@@ -8652,9 +8652,9 @@ _
 			}) ? $0 : '';
 		};
 		if (false) {
-			if (m = t.match(/<!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->/))
+			if (m = t.match(/<\!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->/))
 				sl(m[0].replace(/</g, '&lt;'));
-			if (m = t.match(/<!\[if !vml\]>[\s\S]*?<!\[endif\]>/))
+			if (m = t.match(/<\!\[if !vml\]>[\s\S]*?<!\[endif\]>/))
 				sl(m[0]);
 		}
 

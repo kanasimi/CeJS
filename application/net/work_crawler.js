@@ -656,7 +656,7 @@ function module_code(library_namespace) {
 	// node.innerText
 	function get_label(html) {
 		return html ? library_namespace.HTML_to_Unicode(
-				html.replace(/<!--[\s\S]*?-->/g, '').replace(
+				html.replace(/<\!--[\s\S]*?-->/g, '').replace(
 						/<(script|style)[^<>]*>[\s\S]*?<\/\1>/g, '').replace(
 						/\s*<br(?:[^\w<>][^<>]*)?>[\r\n]*/ig, '\n').replace(
 						/<\/?[a-z][^<>]*>/g, '')

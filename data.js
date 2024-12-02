@@ -492,7 +492,7 @@ function module_code(library_namespace) {
 		// 和perl不同，JScript常抓不到(.*?)之後還接特定字串的東西，大概因為沒有s。(.*?)得改作([\s\S]*?)？
 		// 或者該加/img？
 		if (is_HTML)
-			text = text.replace(/<!--([\s\S]*?)-->/g, '').replace(
+			text = text.replace(/<\!--[\s\S]*?-->/g, '').replace(
 					/<[\s\n]*\/?[\s\n]*[a-z][^<>]*>/gi, '');
 
 		if (flag & 2)
