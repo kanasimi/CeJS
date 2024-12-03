@@ -1295,10 +1295,13 @@ function module_code(library_namespace) {
 		// @ CeL.application.net.wiki.parser.wikitext
 		switch (token.name) {
 
+		// @see prefix_page_name(page_name) @ CeL.application.net.wiki.namespace
 		case '!':
+			// '{{!}}' → '|'
 			return '|';
 
 		case '=':
+			// '{{=}}' → '='
 			return '=';
 
 			// ----------------------------------------------------------------
@@ -1999,7 +2002,7 @@ function module_code(library_namespace) {
 	function Yesno(value, default_value) {
 		if (value === undefined)
 			return;
-		value = String(value).replace(/<!--[\s\S]*?-->/g, '').trim();
+		value = wiki_API.prefix_page_name(value).trim();
 		if (/^(?:[0nf否关關]|no|false|off)$/i.test(value))
 			return false;
 		if (/^(?:[1yt是开開]|yes|true|on)$/i.test(value))

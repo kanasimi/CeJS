@@ -3490,6 +3490,7 @@ function test_wiki() {
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span xml:lang="zh">深圳</span>')], 'wikitext_to_plain_text() #4');
 		assert(['大稻埕', CeL.wiki.wikitext_to_plain_text('大<span lang="zh" xml:lang="zh">稻埕</span>')], 'wikitext_to_plain_text() #5');
 		assert(['H1\tH2\tH3\n11\t12\t13\n21\t22\t23', CeL.wiki.wikitext_to_plain_text('{| class="wikitable"\n|-\n! H1 !! H2 !! H3\n|-\n| 11 || 12 || 13\n|-\n| 21 || 22 || 23\n|}')], 'wikitext_to_plain_text() #6');
+		assert(['| =', CeL.wiki.wikitext_to_plain_text('{{ ! }} {{ = }}')], 'wikitext_to_plain_text() #7');
 
 		wikitext = '\'t\' "t"'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed], 'wiki.parse: quoted text');
@@ -3668,6 +3669,10 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.link #17');
 		assert(["高1%", parsed.anchor], 'wiki.parse.link #17-1');
 		assert(["高1%", parsed.page_title], 'wiki.parse.link #17-2');
+		wikitext = '[[1<!-- -->+1{{=}}1#Nouri Mabrouk and the 1+1{{=}}1 <!---->Revolution]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link #18');
+		assert(["Nouri Mabrouk and the 1+1=1 Revolution", parsed.anchor], 'wiki.parse.link #18-1');
+		assert(["1+1=1", parsed.page_title], 'wiki.parse.link #18-2');
 
 		wikitext = '[[Image:a.svg|thumb|20px|b{{c|d[[e]]f}}]]'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse.file #1');
@@ -4022,6 +4027,11 @@ function test_wiki() {
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #47-1');
 		assert(['plain', parsed[0].type], 'wiki.parse.transclusion #47-2');
 
+		wikitext = '{{{{=}}D}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #48');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #48-1');
+		assert(['=D', parsed.name], 'wiki.parse.transclusion #48-2');
+		assert(['Template:=D', parsed.page_title], 'wiki.parse.transclusion #48-3');
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);

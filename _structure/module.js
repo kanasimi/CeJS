@@ -1293,22 +1293,26 @@ if (typeof CeL === 'function') {
 			) {
 				// TODO: unload 時 delete .script_node
 				// _.script_node = node;
-				var env = _.env, config, matched;
+				var env = _.env, config;
 				try {
-					config = node.innerText || (config = node.firstChild)
-							&& config.nodeValue;
+					config = node.innerText || node.firstChild
+							&& node.firstChild.nodeValue;
 					// IE8 沒有 .innerText || .nodeValue
-					if (!config
-							&& typeof (config = node.innerHTML) === 'string')
-						config = (matched = config
-								.match(/^[\s\n]*<!--(.+?)-->[\s\n]*$/)) ? matched[1]
-								: config.replace(/<!--([\s\S]*?)-->/g, '');
+					if (!config && typeof node.innerHTML === 'string') {
+						config = node.innerHTML;
+						var matched = config
+								.match(/^[\s\n]*<\!--(.+?)-->[\s\n]*$/);
+						config = matched ? matched[1]
+						//
+						: config.replace(/<\!--[\s\S]*?-->/g, '');
+					}
 					if (config) {
 						// http://www.whatwg.org/specs/web-apps/current-work/multipage/scripting-1.html#inline-documentation-for-external-scripts
 						// If there is a src attribute, the element must be
 						// either empty or contain only script documentation
 						// that also matches script content restrictions.
-						if (matched = config.match(/\/\*([\s\S]+?)\*\//))
+						var matched = config.match(/\/\*([\s\S]+?)\*\//);
+						if (matched)
 							config = matched[1];
 						if (config = (typeof JSON === 'object' && JSON.parse || eval_parse)
 								(config.replace(/[\s\r\n]*\/\//g, '')))

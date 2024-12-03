@@ -3025,6 +3025,16 @@ function module_code(library_namespace) {
 			// parameters.splice = template_token__splice;
 			// parameters.push = template_token__push;
 
+			if (false && matched
+			// [[mw:Help:Magic words#Escaped characters]]
+			// TODO: '{{!|}}' 其實會呼叫 [[Template:!]]
+			&& parameters.length > 1 && parameters.name in {
+				'!' : true,
+				'=' : true
+			}) {
+				// matched = false;
+			}
+
 			_set_wiki_type(parameters, matched ? 'magic_word_function'
 					: 'transclusion');
 			queue.push(parameters);

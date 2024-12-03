@@ -113,6 +113,7 @@ function module_code(library_namespace) {
 			return token;
 		}
 
+		// 去除註解。 Remove comments. "<!-- comment -->"
 		if (token.type === 'comment') {
 			return '';
 		}
@@ -386,10 +387,25 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(token);
-		if (token.type in {
-			magic_word_function : true,
-			parameter : true
-		}) {
+
+		if (token.type === 'magic_word_function') {
+			// e.g., {{!}} {{=}}
+			token = wiki_API.evaluate_parser_function_token
+					.call(token, options);
+
+			if (typeof token !== 'object')
+				return token;
+
+			token.unconvertible = true;
+		}
+
+		/**
+		 * TODO: check all <code>
+		[[mw:Help:Advanced editing#Reformatting and/or disabling wikitext interpretation|<nowiki>character</nowiki>]]
+		</code>
+		 */
+
+		if (token.type === 'parameter') {
 			// TODO: return token.evaluate()
 			token.unconvertible = true;
 		}
@@ -1710,7 +1726,9 @@ function module_code(library_namespace) {
 		if (anchor) {
 			anchor =
 			// '&#39;' → "'"
-			library_namespace.HTML_to_Unicode(anchor.toString())
+			library_namespace.HTML_to_Unicode(anchor.toString());
+
+			anchor = wiki_API.prefix_page_name(anchor)
 			/**
 			 * 包括 "\xa0" (&nbsp), "\u206F" 在目錄的網頁錨點中都會被轉為空白字元 "_"。
 			 * 
@@ -1719,6 +1737,7 @@ function module_code(library_namespace) {
 			 * 因此採用"P Q"。
 			 */
 			.replace(/[_\s]/g, ' ');
+
 			if (!preserve_spaces) {
 				// " a " → "a"
 				anchor = anchor.trim();

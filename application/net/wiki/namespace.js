@@ -1145,9 +1145,8 @@ function module_code(library_namespace) {
 		// console.log(namespace);
 		if (typeof namespace === 'string') {
 			var list = [];
-			namespace = namespace
 			// e.g., 'main{{!}}template' → 'main|template'
-			.replace(/{{\s*!\s*}}/g, '|')
+			namespace = prefix_page_name(namespace)
 			// e.g., 'User_talk' → 'User talk'
 			.replace(/[\s_]+/g, ' ');
 			(is_page_title ? [ namespace.toLowerCase() ]
@@ -1724,16 +1723,13 @@ function module_code(library_namespace) {
 			return wikitext;
 		}
 		// TODO: "《茶花女》维基百科词条'''(法语)'''"
-		wikitext = wikitext
-		// 去除註解。 Remove comments.
+		wikitext
 		// e.g., "親会社<!-- リダイレクト先の「[[子会社]]」は、[[:en:Subsidiary]] とリンク -->"
 		// "ロイ・トーマス<!-- 曖昧さ回避ページ -->"
-		.replace(/<\!--[\s\S]*?-->/g, '')
+		= prefix_page_name(wikitext)
 		// 沒先處理的話，也會去除 <br />
 		.replace(/\s*<br(?:[^\s\/][^<>]*)?>/ig, '\n').replace(
 				/<\/?[a-z][^>]*>/g, '')
-		// "{{=}}" → "="
-		.replace(/{{=\s*}}/ig, '=')
 		// e.g., remove "{{En icon}}"
 		.replace(/{{[a-z\s]+}}/ig, '')
 		// e.g., "[[link]]" → "link"
@@ -1812,6 +1808,28 @@ function module_code(library_namespace) {
 			}
 			return initial_char.toUpperCase();
 		});
+	}
+
+	// CeL.wiki.prefix_page_name(page_name)
+	// 前置作業，用以簡化頁面名稱。
+	// or prefix_parameter_name() ?
+	function prefix_page_name(page_name) {
+		page_name = String(page_name);
+
+		// 去除註解。 Remove comments. "<!-- comment -->"
+		page_name = page_name.replace(/<\!--[\s\S]*?-->/g, '');
+
+		// [[mw:Help:Magic words#Escaped characters]]
+		page_name = page_name
+		// '{{!}}' → '|'
+		.replace(/{{\s*!\s*}}/g, '|')
+		// '{{=}}' → '='
+		.replace(/{{\s*=\s*}}/g, '=');
+
+		// CeL.wiki.parse.anchor.normalize_anchor() needs preserving spaces
+		// page_name = page_name.trim();
+
+		return page_name;
 	}
 
 	/** @inner */
@@ -1894,8 +1912,7 @@ function module_code(library_namespace) {
 
 		// true === /^\s$/.test('\uFEFF')
 
-		// 去除註解。 Remove comments.
-		page_name = page_name.replace(/<!--[\s\S]*?-->/g, '');
+		page_name = prefix_page_name(page_name);
 
 		// [[A&quot;A]]→[[A"A]]
 		// fix "&#39;". 由於裡面包含"#"，所以必須在 PATTERN_anchor_of_page_title 之前處理。
@@ -4301,6 +4318,7 @@ function module_code(library_namespace) {
 		title_link_of : get_page_title_link,
 		revision_content : revision_content,
 		content_of : get_page_content,
+		prefix_page_name : prefix_page_name,
 		// normalize_page_title
 		normalize_title : normalize_page_name,
 		normalize_title_pattern : normalize_name_pattern,
