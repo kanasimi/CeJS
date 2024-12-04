@@ -1800,7 +1800,7 @@ function module_code(library_namespace) {
 				categorymembers_options.namespace = category_tree.default_namespace;
 			}
 
-			if (options.depth > 0
+			if (options && options.depth > 0
 					&& typeof categorymembers_options.cmtype === 'string'
 					&& !categorymembers_options.cmtype.includes('subcat')) {
 				categorymembers_options.cmtype += '|subcat';
