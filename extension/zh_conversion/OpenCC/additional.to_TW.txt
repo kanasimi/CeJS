@@ -3866,6 +3866,8 @@
 彻底回复	徹底回復
 // 《开局奖励一亿条命》	重伤垂死时更是能满血回复！ (~回復<COO>v:是 ~回復<role.type:ARGM-ADV>更 ~回復<role.type:ARGM-ADV>满血 n:重伤+v:垂死+n:时+d:更+v:是+v:能+d:满血+v:回复+wp:！)
 满血回复	滿血回復
+// 《别人练级我修仙，苟到大乘再出山》	准备等伤势回复一番后，再进行联系。 (~回復<ATT>nd:后 ~回復<role.type:A1>伤势 ~回復<role.type:ARGM-EXT>一番 v:准备+v:等+n:伤势+v:回复+m:一番+nd:后+wp:，+d:再+v:进行+v:联系+wp:。) 單純 zh_conversion 轉換過程: 回复→回覆
+伤势回复	傷勢回復
 // 《道诡异仙》	所有人的体力回复得不错， (~回復<COO>v:有 b:所有+n:人+u:的+n:体力+v:回复+u:得+a:不错+wp:，)
 体力回复	體力回復
 // 《请公子斩妖》	立刻就体现出真气回复快的好处。 (~回復<ATT>n:好处 d:立刻+d:就+v:体现+v:出+n:真气+v:回复+a:快+u:的+n:好处+wp:。)
@@ -4251,6 +4253,8 @@
 克的到他	剋的到他
 // 《速通修仙！》	红孩儿的三昧真火就很克他。 (~剋<COO>v:是 ~剋<role.type:A0>红孩儿的三昧真火 ~剋<role.type:ARGM-DIS>就 ~剋<role.type:ARGM-ADV>很 ~剋<role.type:A1>他 ~剋<role.type:A1>一个响指 ~剋<role.type:A0>牛魔王 n:红孩儿+u:的+n:三昧+n:真火+d:就+d:很+v:克+r:他+wp:。)
 就很克他	就很剋他
+// 《别人练级我修仙，苟到大乘再出山》	对于龙族的确克制啊！ (~剋制<COO>v:是 ~剋制<role.type:A1>对于龙族 ~剋制<role.type:ARGM-ADV>的确 ~剋制<role.type:A1>要害部位 ~剋制<role.type:ARGM-ADV>更难 ~剋制<role.type:A0>你 p:对于+n:龙族+d:的确+v:克制+u:啊+wp:！) 單純 zh_conversion 轉換過程: 克制→克制
+的确克制啊	的確剋制啊
 // 《我为长生仙》	而代表着众生执念的黄泉死克它。 (~剋<COO>v:为 ~剋<role.type:ARGM-ADV>死 ~剋<role.type:A1>它 c:而+v:代表+u:着+n:众生+v:执念+u:的+n:黄泉+d:死+v:克+r:它+wp:。)
 死克它	死剋它
 // 《最仙遊》	宗主就要反而克之， (~剋<role.type:A0>宗主 ~剋<role.type:ARGM-ADV>就要 ~剋<role.type:ARGM-DIS>反而 ~剋<role.type:A1>之 n:宗主+d:就要+d:反而+v:克+r:之+wp:，)
