@@ -5069,49 +5069,110 @@ function module_code(library_namespace) {
 
 			data.claims = [];
 
+			/**
+			 * value_to_modify. 本次設定的值。<br />
+			 * value_to_set[property_id] = Map{value=>claim}
+			 */
+			var value_to_set = Object.create(null);
+
 			// claims: e.g.,
 			// claims:[{property:'P1',qualifiers:{P2:''}},{property:'P3',references:{P4:''}}]
+
+			// Remove duplicates.
 			claims.forEach(function(claim) {
-				var property_data;
-				if (value_is_to_remove(claim) && claim.id) {
-					property_data = claim;
-				} else {
-					property_data = {
-						type : 'statement',
-						rank : 'normal',
-						mainsnak : claim
-					};
-
-					// Detect duplicate
-					if (exists_property_hash) {
-						var exists_property_list
+				if (value_is_to_remove(claim)) {
+					if (claim.id) {
+						data.claims.push(claim);
+					} else {
+						library_namespace.error('normalize_wbeditentity_data: '
 						//
-						= exists_property_hash[claim.property];
-						var duplicate_index = wikidata_datavalue.get_index(
-								exists_property_list, claim);
-						if (false) {
-							console.trace(claim, duplicate_index,
-									exists_property_list);
-						}
+						+ '[[' + entity.id + ']]: 欲刪除 ' + property_id
+						//
+						+ ' 卻未設定原有 id！' + JSON.stringify(claim));
+						// property_data = claim
+					}
+					return;
+				}
 
-						if (duplicate_index !== NOT_FOUND) {
+				// ------------------------------
+
+				var property_id = claim.property;
+				var value = wikidata_datavalue(claim);
+
+				var property_data = {
+					type : 'statement',
+					rank : 'normal',
+					mainsnak : claim
+				};
+
+				// Detect duplicate
+				if (exists_property_hash) {
+					var exists_property_list
+					//
+					= exists_property_hash[property_id];
+					var duplicate_index = wikidata_datavalue.get_index(
+							exists_property_list, claim);
+					if (false) {
+						console.trace(claim, duplicate_index,
+								exists_property_list);
+					}
+
+					if (duplicate_index !== NOT_FOUND) {
+						if (claim.qualifiers || claim.references) {
+							library_namespace.info(
+							//
+							'normalize_wbeditentity_data: '
+							//
+							+ '[[' + entity.id + ']] 已存在 ' + property_id + '='
+									+ value);
 							if (claim.qualifiers || claim.references) {
 								library_namespace.warn(
 								// 警告: 這邊 wbeditentity_only: true 的行為與
 								// wbeditentity_only: false
 								// @ process_property_id_list(property_id_list)
 								// 的不同!!
-								'normalize_wbeditentity_data: '
-								//
-								+ '[[' + entity.id + ']]: 此屬性已存在相同值。'
-								//
-								+ 'Skip set .qualifiers or .references of '
-										+ JSON.stringify(claim))
+								'Skip set .qualifiers or .references of '
+										+ JSON.stringify(claim));
 							}
-							return;
 						}
+						return;
 					}
 				}
+
+				// ------------------------------
+
+				// console.trace([ property_id, value ]);
+				if (!(property_id in value_to_set)) {
+					// 用 {Map} 以防 {Object}value。
+					value_to_set[property_id] = new Map;
+				} else if (value_to_set[property_id].has(value)) {
+					var claim_to_set = value_to_set[property_id].get(value);
+					// assert: !!claim_to_set === true
+					var new_claim_has_additional = claim.qualifiers
+							|| claim.references;
+					if (!new_claim_has_additional || claim_to_set.qualifiers
+							|| claim_to_set.references) {
+						if (new_claim_has_additional) {
+							library_namespace.warn(
+							//
+							'normalize_wbeditentity_data: '
+							//
+							+ '[[' + entity.id + ']]: 重複設定 '
+							//
+							+ property_id + '=' + value + '。'
+							//
+							+ '僅取 ' + JSON.stringify(this_value_to_set)
+							//
+							+ '\n跳過 ' + JSON.stringify(claim));
+						}
+						return;
+					}
+				}
+
+				// Register the value set this time. 登記本次設定的值。
+				value_to_set[property_id].set(value, claim);
+
+				// ------------------------------
 
 				if (claim.qualifiers) {
 					property_data.qualifiers = claim.qualifiers;
@@ -5121,6 +5182,7 @@ function module_code(library_namespace) {
 					property_data.references = claim.references;
 					delete claim.references;
 				}
+
 				data.claims.push(property_data);
 			});
 
