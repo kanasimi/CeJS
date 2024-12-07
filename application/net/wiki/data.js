@@ -5098,6 +5098,8 @@ function module_code(library_namespace) {
 
 				var property_id = claim.property;
 				var value = wikidata_datavalue(claim);
+				var new_claim_has_additional = claim.qualifiers
+						|| claim.references;
 
 				var property_data = {
 					type : 'statement',
@@ -5118,14 +5120,26 @@ function module_code(library_namespace) {
 					}
 
 					if (duplicate_index !== NOT_FOUND) {
-						if (claim.qualifiers || claim.references) {
-							library_namespace.info(
+						var exists_claim
+						//
+						= exists_property_list[duplicate_index];
+						var exists_claim_has_additional
+						//
+						= exists_claim.qualifiers || exists_claim.references;
+						if (!new_claim_has_additional
+								|| exists_claim_has_additional) {
+							library_namespace.log(
 							//
 							'normalize_wbeditentity_data: '
 							//
-							+ '[[' + entity.id + ']] 已存在 ' + property_id + '='
-									+ value);
-							if (claim.qualifiers || claim.references) {
+							+ '[[' + entity.id + ']] 已存在 '
+							//
+							+ property_id + '=' + value
+
+							+ (exists_claim_has_additional
+							//
+							? ' 且有額外屬性 .qualifiers 或 .references' : ''));
+							if (new_claim_has_additional) {
 								library_namespace.warn(
 								// 警告: 這邊 wbeditentity_only: true 的行為與
 								// wbeditentity_only: false
@@ -5148,8 +5162,6 @@ function module_code(library_namespace) {
 				} else if (value_to_set[property_id].has(value)) {
 					var claim_to_set = value_to_set[property_id].get(value);
 					// assert: !!claim_to_set === true
-					var new_claim_has_additional = claim.qualifiers
-							|| claim.references;
 					if (!new_claim_has_additional || claim_to_set.qualifiers
 							|| claim_to_set.references) {
 						if (new_claim_has_additional) {
