@@ -784,7 +784,7 @@ function module_code(library_namespace) {
 			return value.value;
 		}
 
-		if (!value) {
+		if (!value || typeof value !== 'object') {
 			callback && callback(value);
 			return value;
 		}
@@ -1116,6 +1116,9 @@ function module_code(library_namespace) {
 	// Maximum number of values is 50
 	var MAX_ENTITIES_TO_GET = 50;
 
+	var PATTERN_entity_id = /^Q(\d{1,10})$/i;
+	var PATTERN_property_id = /^P(\d{1,5})$/i;
+
 	/**
 	 * 取得特定實體的特定屬性值。
 	 * 
@@ -1198,7 +1201,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 		// convert property: title to id
-		if (typeof property === 'string' && !/^P\d{1,5}$/.test(property)) {
+		if (typeof property === 'string' && !PATTERN_property_id.test(property)) {
 			if (library_namespace.is_debug(2)
 					&& /^(?:(?:info|sitelinks|sitelinks\/urls|aliases|labels|descriptions|claims|datatype)\|)+$/
 							.test(property + '|'))
@@ -1325,7 +1328,9 @@ function module_code(library_namespace) {
 
 			} else {
 				key = key.map(function(id) {
-					if (/^[PQ]\d{1,10}$/.test(id))
+					if (PATTERN_entity_id.test(id)
+					//
+					|| PATTERN_property_id.test(id))
 						return id;
 					if (library_namespace.is_digits(id))
 						return 'Q' + id;
@@ -1544,7 +1549,7 @@ function module_code(library_namespace) {
 		var value, language = wiki_API.site_name(options, {
 			get_all_properties : true
 		}).language, matched = typeof property === 'string'
-				&& property.match(/^P(\d+)$/i);
+				&& property.match(PATTERN_property_id);
 
 		if (matched) {
 			property = +matched[1];
@@ -1715,7 +1720,7 @@ function module_code(library_namespace) {
 		if (property > 0) {
 			property = 'P' + property;
 		}
-		if (!/^P\d{1,5}$/.test(property)) {
+		if (!PATTERN_property_id.test(property)) {
 			callback(undefined, 'wikidata_datatype: Invalid property: ['
 					+ property + ']');
 			return;
@@ -2438,9 +2443,8 @@ function module_code(library_namespace) {
 
 		} else if (!Array.isArray(properties)) {
 			if (properties) {
-				library_namespace
-						.error('normalize_wikidata_properties: Invalid properties: '
-								+ JSON.stringify(properties));
+				library_namespace.error('normalize_wikidata_properties: '
+						+ 'Invalid properties: ' + JSON.stringify(properties));
 			}
 
 			callback(properties);
@@ -2641,10 +2645,8 @@ function module_code(library_namespace) {
 
 			// 將{Array}屬性名稱列表轉換成{Array}屬性 id 列表 →
 			if (property_id_list.length !== property_corresponding.length) {
-				throw new Error(
-				//
-				'normalize_wikidata_properties: property_id_list.length '
-						+ property_id_list.length
+				throw new Error('normalize_wikidata_properties: '
+						+ 'property_id_list.length ' + property_id_list.length
 						+ ' !== property_corresponding.length '
 						+ property_corresponding.length);
 			}
@@ -2669,10 +2671,9 @@ function module_code(library_namespace) {
 				}
 
 				if (Array.isArray(id) && id.length > 0) {
-					library_namespace.error(
-					//
-					'normalize_wikidata_properties: Get multi properties: '
-							+ id + ' for ' + JSON.stringify(property_data));
+					library_namespace.error('normalize_wikidata_properties: '
+							+ 'Get multi properties: ' + id + ' for '
+							+ JSON.stringify(property_data));
 					return;
 				}
 
@@ -2687,9 +2688,8 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				library_namespace.error(
-				//
-				'normalize_wikidata_properties: Skip invalid property key: '
+				library_namespace.error('normalize_wikidata_properties: '
+						+ 'Skip invalid property key: '
 						+ JSON.stringify(property_data));
 			});
 
@@ -2707,9 +2707,8 @@ function module_code(library_namespace) {
 					//
 					=== 'function') {
 						console.log(property_data[KEY_property_options]);
-						throw new Error(
-						//		
-						'wikidata_search.use_cache: .remove is function');
+						throw new Error('normalize_wikidata_properties: '
+								+ '.remove is function');
 					}
 					property_data.remove
 					// copy configuration.
@@ -2791,9 +2790,9 @@ function module_code(library_namespace) {
 							// 要刪除的值不存在。
 							library_namespace.warn(
 							//
-							'normalize_wikidata_properties: Skip '
+							'normalize_wikidata_properties: '
 							//
-							+ property_id
+							+ 'Skip ' + property_id
 							//
 							+ (value ? '=' + JSON.stringify(value) : '')
 							//
@@ -2811,7 +2810,9 @@ function module_code(library_namespace) {
 						if (property_data.remove !== true) {
 							library_namespace.warn(
 							//
-							'normalize_wikidata_properties: Invalid .remove ['
+							'normalize_wikidata_properties: '
+							//
+							+ 'Invalid .remove ['
 							//
 							+ property_data.remove + ']: ' + property_id
 							//
@@ -2975,11 +2976,12 @@ function module_code(library_namespace) {
 						}
 
 						if (Array.isArray(normalized_value)) {
-							library_namespace.error(
 							// 得到多個值而非單一值。
-							'normalize_next_value: get multiple values instead of just one value: ['
-									+ value + '] → '
-									+ JSON.stringify(normalized_value));
+							library_namespace
+									.error('normalize_next_value: '
+											+ 'get multiple values instead of just one value: ['
+											+ value + '] → '
+											+ JSON.stringify(normalized_value));
 							// console.trace(value);
 
 						} else if (false && normalized_value.error) {
@@ -3163,7 +3165,7 @@ function module_code(library_namespace) {
 		if (!id && id !== 0) {
 			return '';
 		}
-		if (/^P\d+$/.test(id)) {
+		if (PATTERN_property_id.test(id)) {
 			return '[[Property:' + id + ']]';
 		}
 		return '[[' + id + ']]';
@@ -4981,6 +4983,11 @@ function module_code(library_namespace) {
 			return;
 		// assert: Array.isArray(property_list)
 
+		if (property_list[0].snaks) {
+			// assert: 應為已存在的屬性 claim.references。
+			return property_list;
+		}
+
 		var property_group = Object.create(null);
 
 		property_list.forEach(function(property_data) {
@@ -4991,6 +4998,179 @@ function module_code(library_namespace) {
 		});
 
 		return property_group;
+	}
+
+	var KEY_has_new = typeof Symbol === 'function' ? Symbol('options')
+			: '\0KEY_has_new';
+
+	function merge_additional_property(old_property, new_property) {
+		if (!Array.isArray(old_property)) {
+			// assert: {Object}old_property
+			old_property = [ old_property ];
+		} else {
+			old_property = old_property.clone();
+		}
+
+		// for remove duplicate
+		var exist_property_Map = new Map;
+		old_property.forEach(function(property) {
+			var property_Object = library_namespace.is_Object(property.snaks)
+			//
+			? property.snaks : property;
+
+			for ( var property_name in property_Object) {
+				if (!PATTERN_property_id.test(property_name)) {
+					continue;
+				}
+				exist_property_Map.set(property_name,
+						property_Object[property_name]);
+				break;
+			}
+		});
+
+		var insert_to_property_list;
+		if (old_property.length === 1 && old_property[0].snaks) {
+			// assert: old_property 為原先已存在之 property。
+			old_property = old_property[0];
+			// TODO: simplify old_property
+		} else {
+			if (old_property[0].snaks) {
+				throw new Error('Cannot handle with '
+						+ JSON.stringify(old_property));
+			}
+			insert_to_property_list = old_property;
+		}
+
+		if (!Array.isArray(new_property)) {
+			// assert: {Object}new_property
+			new_property = [ new_property ];
+		}
+
+		new_property.forEach(function(property) {
+			var property_Object = library_namespace.is_Object(property.snaks)
+			//
+			? property.snaks : property;
+
+			for ( var property_name in property_Object) {
+				if (!PATTERN_property_id.test(property_name)) {
+					continue;
+				}
+				var value = wikidata_datavalue(property_Object[property_name]);
+				if (exist_property_Map.has(property_name)) {
+					library_namespace.log('merge_additional_property: '
+							+ '跳過已存在的屬性 ' + property_name + '=' + value);
+				} else if (insert_to_property_list) {
+					exist_property_Map.set(property_name,
+							property_Object[property_name]);
+					insert_to_property_list.push(property);
+					old_property[KEY_has_new] = true;
+				} else {
+					library_namespace.log('merge_additional_property: '
+							+ '跳過設定屬性 ' + property_name + '=' + value);
+				}
+				break;
+			}
+		});
+
+		return old_property;
+	}
+
+	function __merge_duplicate_claim(old_claim, new_claim) {
+		// 這個動作也會複製 old_claim.id。
+		new_claim = Object.assign(Object.create(null), old_claim, new_claim);
+
+		if (old_claim.qualifiers) {
+			new_claim.qualifiers = merge_additional_property(
+					old_claim.qualifiers, new_claim.qualifiers);
+		} else if (new_claim.qualifiers) {
+			new_claim.qualifiers[KEY_has_new] = true;
+		}
+
+		if (old_claim.references) {
+			new_claim.references = merge_additional_property(
+					old_claim.references, new_claim.references);
+		} else if (new_claim.references) {
+			new_claim.references[KEY_has_new] = true;
+		}
+
+		// console.trace(new_claim);
+		return new_claim;
+	}
+
+	function default_merge_duplicate_claim(old_claim, new_claim, entity) {
+		// assert: new_claim.id === undefined
+		// && (old_claim.property || old_claim.mainsnak.property) ===
+		// (new_claim.property || new_claim.mainsnak.property)
+		// && wikidata_datavalue(old_claim) === wikidata_datavalue(new_claim)
+
+		var old_claim_id = old_claim.id;
+		var property_id = new_claim.property;
+		var value = wikidata_datavalue(new_claim);
+		var old_claim_has_additional = /* old_claim.rank || */old_claim.qualifiers
+				|| old_claim.references;
+		var new_claim_has_additional = /* new_claim.rank || */new_claim.qualifiers
+				|| new_claim.references;
+
+		// 重複設定 property_id = value
+		if (!new_claim_has_additional) {
+			library_namespace.log([
+			//
+			'default_merge_duplicate_claim: ', {
+				T : [
+				// gettext_config:{"id":"skip-the-$1-for-$2-and-do-not-set-them-because-the-values-already-exist-and-$3-is-not-set"}
+				'跳過 %2 之 %1 設定，因數值已存在且未設定 %3。'
+				//
+				, [ new_claim.rank ? 'rank' : 0,
+				//
+				new_claim.qualifiers ? 'qualifiers' : 0,
+				//
+				new_claim.references ? 'references' : 0
+				//
+				].filter(function(v) {
+					return !!v;
+				})
+				// gettext_config:{"id":"Comma-separator"}
+				.join(gettext('Comma-separator')),
+				//
+				property_id + ' = ' + value,
+				//
+				'options.force_add_sub_properties' ]
+			} ]);
+
+			return;
+		}
+
+		// --------------------------------------
+
+		if (old_claim_id) {
+			library_namespace.log('default_merge_duplicate_claim: '
+			//
+			+ '[[' + entity.id + ']]: 已存在 ' + property_id + '=' + value
+			//
+			+ (old_claim_has_additional ? ' 且有額外屬性 .qualifiers 或 .references'
+			//
+			: '') + '，為其添加額外屬性。');
+
+		} else {
+			library_namespace.log('default_merge_duplicate_claim: ' + '[['
+					+ entity.id + ']]: 重複設定 ' + property_id + '=' + value
+					+ '，合併兩者以採用更完整的資料。');
+		}
+
+		new_claim = __merge_duplicate_claim(old_claim, new_claim);
+		// console.trace(old_claim_id, new_claim);
+		if (new_claim.qualifiers && new_claim.qualifiers[KEY_has_new]
+				|| new_claim.references && new_claim.references[KEY_has_new]) {
+			if (new_claim.qualifiers)
+				delete new_claim.qualifiers[KEY_has_new];
+			if (new_claim.references)
+				delete new_claim.references[KEY_has_new];
+			return new_claim;
+		}
+
+		library_namespace.log('default_merge_duplicate_claim: ' + '[['
+				+ entity.id + ']]: ' + property_id + '=' + value
+				+ ' 無新額外屬性以設定。');
 	}
 
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
@@ -5029,9 +5209,10 @@ function module_code(library_namespace) {
 					references = group_by_properties(references);
 					if (references) {
 						// console.trace(property_data.references, references);
-						property_data.references = [ {
+						property_data.references = library_namespace
+								.is_Object(references) ? [ {
 							snaks : references
-						} ];
+						} ] : references;
 					} else {
 						// e.g.,
 						// library_namespace.is_empty_object(property_data.references)
@@ -5052,6 +5233,9 @@ function module_code(library_namespace) {
 		// session : session
 		}, options);
 
+		var merge_duplicate_claim = options.merge_duplicate_claim
+				|| default_merge_duplicate_claim;
+
 		var exists_property_hash = entity && entity.claims;
 		// 先正規化再 edit。
 		// @see set_claims()
@@ -5063,6 +5247,7 @@ function module_code(library_namespace) {
 				} else {
 					// assert: 本次沒有要設定 claim 的資料。
 				}
+
 				callback();
 				return;
 			}
@@ -5079,43 +5264,44 @@ function module_code(library_namespace) {
 			// claims:[{property:'P1',qualifiers:{P2:''}},{property:'P3',references:{P4:''}}]
 
 			// Remove duplicates.
-			claims.forEach(function(claim) {
-				if (value_is_to_remove(claim)) {
-					if (claim.id) {
-						data.claims.push(claim);
+			claims.forEach(function(new_claim) {
+				if (value_is_to_remove(new_claim)) {
+					if (new_claim.id) {
+						data.claims.push(new_claim);
 					} else {
 						library_namespace.error('normalize_wbeditentity_data: '
 						//
 						+ '[[' + entity.id + ']]: 欲刪除 ' + property_id
 						//
-						+ ' 卻未設定原有 id！' + JSON.stringify(claim));
-						// property_data = claim
+						+ ' 卻未設定原有 id！' + JSON.stringify(new_claim));
+						// property_data = new_claim
 					}
 					return;
 				}
 
 				// ------------------------------
 
-				var property_id = claim.property;
-				var value = wikidata_datavalue(claim);
-				var new_claim_has_additional = claim.qualifiers
-						|| claim.references;
+				var property_id = new_claim.property;
+				if (!property_id) {
+					library_namespace.error('未設定 claim.property！' + '\n'
+							+ JSON.stringify(new_claim));
+					throw new Error('未設定 claim.property！');
+				}
 
-				var property_data = {
-					type : 'statement',
-					rank : 'normal',
-					mainsnak : claim
-				};
+				// 注意: 這邊 wbeditentity_only: true 的行為與
+				// wbeditentity_only: false
+				// @ process_property_id_list(property_id_list)
+				// 的應相同。
 
-				// Detect duplicate
+				// Detect duplicate.
 				if (exists_property_hash) {
 					var exists_property_list
 					//
 					= exists_property_hash[property_id];
 					var duplicate_index = wikidata_datavalue.get_index(
-							exists_property_list, claim);
+							exists_property_list, new_claim);
 					if (false) {
-						console.trace(claim, duplicate_index,
+						console.trace(new_claim, duplicate_index,
 								exists_property_list);
 					}
 
@@ -5123,76 +5309,45 @@ function module_code(library_namespace) {
 						var exists_claim
 						//
 						= exists_property_list[duplicate_index];
-						var exists_claim_has_additional
-						//
-						= exists_claim.qualifiers || exists_claim.references;
-						if (!new_claim_has_additional
-								|| exists_claim_has_additional) {
-							library_namespace.log(
-							//
-							'normalize_wbeditentity_data: '
-							//
-							+ '[[' + entity.id + ']] 已存在 '
-							//
-							+ property_id + '=' + value
-
-							+ (exists_claim_has_additional
-							//
-							? ' 且有額外屬性 .qualifiers 或 .references' : ''));
-							if (new_claim_has_additional) {
-								library_namespace.warn(
-								// 警告: 這邊 wbeditentity_only: true 的行為與
-								// wbeditentity_only: false
-								// @ process_property_id_list(property_id_list)
-								// 的不同!!
-								'Skip set .qualifiers or .references of '
-										+ JSON.stringify(claim));
-							}
-						}
-						return;
+						new_claim = merge_duplicate_claim(exists_claim,
+								new_claim, entity);
+						if (!new_claim)
+							return;
 					}
 				}
 
 				// ------------------------------
 
+				var value = wikidata_datavalue(new_claim);
 				// console.trace([ property_id, value ]);
 				if (!(property_id in value_to_set)) {
 					// 用 {Map} 以防 {Object}value。
 					value_to_set[property_id] = new Map;
 				} else if (value_to_set[property_id].has(value)) {
-					var claim_to_set = value_to_set[property_id].get(value);
-					// assert: !!claim_to_set === true
-					if (!new_claim_has_additional || claim_to_set.qualifiers
-							|| claim_to_set.references) {
-						if (new_claim_has_additional) {
-							library_namespace.warn(
-							//
-							'normalize_wbeditentity_data: '
-							//
-							+ '[[' + entity.id + ']]: 重複設定 '
-							//
-							+ property_id + '=' + value + '。'
-							//
-							+ '僅取 ' + JSON.stringify(this_value_to_set)
-							//
-							+ '\n跳過 ' + JSON.stringify(claim));
-						}
+					new_claim = merge_duplicate_claim(value_to_set[property_id]
+							.get(value), new_claim, entity);
+					if (!new_claim)
 						return;
-					}
 				}
 
 				// Register the value set this time. 登記本次設定的值。
-				value_to_set[property_id].set(value, claim);
+				value_to_set[property_id].set(value, new_claim);
 
 				// ------------------------------
 
-				if (claim.qualifiers) {
-					property_data.qualifiers = claim.qualifiers;
-					delete claim.qualifiers;
+				var property_data = new_claim.mainsnak ? new_claim : {
+					type : 'statement',
+					rank : new_claim.rank || 'normal',
+					mainsnak : new_claim
+				};
+
+				if (new_claim.qualifiers) {
+					property_data.qualifiers = new_claim.qualifiers;
+					// delete new_claim.qualifiers;
 				}
-				if (claim.references) {
-					property_data.references = claim.references;
-					delete claim.references;
+				if (new_claim.references) {
+					property_data.references = new_claim.references;
+					// delete new_claim.references;
 				}
 
 				data.claims.push(property_data);
@@ -5485,7 +5640,7 @@ function module_code(library_namespace) {
 						.debug('未設定 id，您可能需要手動檢查。', 2, 'wikidata_edit');
 
 		} else if (is_entity(id)
-		// && /^Q\d{1,10}$/.test(id.id)
+		// && PATTERN_entity_id.test(id.id)
 		) {
 			options.id = id.id;
 
@@ -5496,7 +5651,7 @@ function module_code(library_namespace) {
 		} else if (id === 'item' || id === 'property') {
 			options['new'] = id;
 
-		} else if (/^Q\d{1,10}$/.test(id)) {
+		} else if (PATTERN_entity_id.test(id)) {
 			// e.g., 'Q1'
 			options.id = id;
 
@@ -5549,7 +5704,13 @@ function module_code(library_namespace) {
 		}
 
 		function do_wbeditentity() {
-			// console.trace(data);
+			// console.trace(data, JSON.stringify(data));
+			if (data.claims && data.claims.length === 0)
+				delete data.claims;
+			if (library_namespace.is_empty_object(data) && !options['new']) {
+				callback(data);
+				return;
+			}
 
 			// e.g., {"descriptions":{"en":{"language":"en","value":""}}}
 
@@ -5558,6 +5719,7 @@ function module_code(library_namespace) {
 			delete POST_data.search_without_cache;
 			delete POST_data.no_skip_attributes_note;
 			delete POST_data.data_API_URL;
+			delete POST_data.force_add_sub_properties;
 			delete POST_data[KEY_SESSION];
 			// data 會在 set_claims() 被修改，因此不能提前設定。
 			POST_data.data = JSON.stringify(data);
@@ -6112,7 +6274,7 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list)
 	 */
 	function wikidata_merge(to, from, token, options, callback) {
-		if (!/^Q\d{1,10}$/.test(to)) {
+		if (!PATTERN_entity_id.test(to)) {
 			wikidata_entity(to, function(entity, error) {
 				if (error) {
 					callback(undefined, error);
@@ -6123,7 +6285,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (!/^Q\d{1,10}$/.test(from)) {
+		if (!PATTERN_entity_id.test(from)) {
 			wikidata_entity(from, function(entity, error) {
 				if (error) {
 					callback(undefined, error);
