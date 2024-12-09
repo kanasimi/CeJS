@@ -5022,6 +5022,9 @@ function module_code(library_namespace) {
 				if (!PATTERN_property_id.test(property_name)) {
 					continue;
 				}
+				if (exist_property_Map.has(property_name)) {
+					// 已存在相同的 property_name。
+				}
 				exist_property_Map.set(property_name,
 						property_Object[property_name]);
 				break;
@@ -5029,15 +5032,9 @@ function module_code(library_namespace) {
 		});
 
 		var insert_to_property_list;
-		if (old_property.length === 1 && old_property[0].snaks) {
-			// assert: old_property 為原先已存在之 property。
-			old_property = old_property[0];
-			// TODO: simplify old_property
+		if (old_property[0].snaks) {
+			insert_to_property_list = [];
 		} else {
-			if (old_property[0].snaks) {
-				throw new Error('Cannot handle with '
-						+ JSON.stringify(old_property));
-			}
 			insert_to_property_list = old_property;
 		}
 
@@ -5071,6 +5068,14 @@ function module_code(library_namespace) {
 				break;
 			}
 		});
+
+		if (insert_to_property_list !== old_property
+				&& insert_to_property_list.length > 0) {
+			old_property.push(insert_to_property_list);
+		} else if (old_property.length === 1 && old_property[0].snaks) {
+			// assert: old_property 為原先已存在之 property。
+			old_property = old_property[0];
+		}
 
 		return old_property;
 	}
