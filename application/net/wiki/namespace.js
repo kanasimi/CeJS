@@ -3882,6 +3882,19 @@ function module_code(library_namespace) {
 					&& data.paraminfo.modules[0];
 			// console.trace(modules);
 			if (!modules) {
+				if (!error && data.warnings && data.warnings.paraminfo
+				/**
+				 * <code>
+
+				{"warnings":{"paraminfo":{"*":"The module \"query\" does not have a submodule \"ids\"."}},"paraminfo":{"helpformat":"none"}}
+
+				</code>
+				 */
+				&& data.warnings.paraminfo['*']) {
+					error = new Error(data.warnings.paraminfo['*']);
+					// console.trace(path, options, callback);
+				}
+
 				callback(undefined, error
 				//
 				|| new Error('Unknown query result'));
