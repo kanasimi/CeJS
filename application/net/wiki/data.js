@@ -2710,6 +2710,7 @@ function module_code(library_namespace) {
 						throw new Error('normalize_wikidata_properties: '
 								+ '.remove is function');
 					}
+					// delete property_data.value;
 					property_data.remove
 					// copy configuration.
 					// 警告: 此屬性應置於個別 claim 中，而非放在參照用設定。
@@ -2725,6 +2726,7 @@ function module_code(library_namespace) {
 				// 若遇刪除此屬性下所有值，必須明確指定 wikidata_edit.remove_all，避免錯誤操作。
 				// && value === undefined
 				) {
+					// delete property_data.value;
 					// 正規化 property_data.remove: 若有刪除操作，必定會設定 .remove。
 					// 注意: 這操作會更改 property_data!
 					property_data.remove = wikidata_edit.remove_all;
@@ -5740,8 +5742,8 @@ function module_code(library_namespace) {
 			// console.trace(POST_data.data);
 			// console.trace(POST_data);
 
-			wiki_API.query(action, function handle_result(data, error) {
-				error = wiki_API.query.handle_error(data, error);
+			wiki_API.query(action, function handle_result(result_data, error) {
+				error = wiki_API.query.handle_error(result_data, error);
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					library_namespace.error(
@@ -5765,14 +5767,21 @@ function module_code(library_namespace) {
 						library_namespace.warn('data to write: '
 								+ JSON.stringify(POST_data));
 					}
-					callback(data, error);
+					callback(result_data, error);
 					return;
 				}
 
-				if (data.entity) {
-					data = data.entity;
+				if (entity) {
+					entity.had_modified = {
+						// modify_data : data,
+						// result : result_data,
+						time : Date.now()
+					};
 				}
-				callback(data);
+				if (result_data.entity) {
+					result_data = result_data.entity;
+				}
+				callback(result_data);
 			}, POST_data, session);
 		}
 
