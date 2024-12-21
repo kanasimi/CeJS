@@ -3499,6 +3499,7 @@ CeL.era.pass_on = {
 		'/Maha Thammada|1782/12/2~1785/1/2|:ME|關係=Usurper',
 
 		// http://en.wikipedia.org/wiki/List_of_Burmese_monarchs
+		// https://en.wikipedia.org/wiki/List_of_heirs_to_the_Burmese_thrones
 		// http://en.wikipedia.org/wiki/List_of_rulers_of_Toungoo
 		// gettext_config:{"id":"toungoo","mark_type":"part_of_string"}
 		'Toungoo/Thawun Gyi|1279/4/21~|:ME|準=年|在位=21 April 1279–1317|關係=Son of Thawun Letya|注=Vassal of Pagan (1279–1287); independent (1287–1317); assassinated',
@@ -3576,8 +3577,10 @@ CeL.era.pass_on = {
 		'Konbaung exiled/=|1885/11/29~|:CE',
 		'/Myat Paya Lat|1916/12/19~|:CE|疑|關係=Daughter',
 		'/Myat Phaya|1956/4/4~|:CE|疑|關係=Younger sister',
-		'/Taw Phaya|1962/7/20~' + CeL.era.pass_on.last_day
-				+ '|:CE|疑|關係=Second son',
+		'/Taw Phaya|1962/7/21~|:CE|疑|生=1924/3/22|卒=2019/1/12|關係=second son of Princess Myat Phaya Galay',
+		'/Soe Win|2019/1/12~'
+				+ CeL.era.pass_on.last_day
+				+ '|:CE|疑|關係=Second son|注=不清楚王位繼承人是 Taw Phaya 的兒子 Richard Taw Phaya Myat Gyi 還是他的表弟 Soe Win。',
 
 		// https://en.wikipedia.org/wiki/President_of_Myanmar
 		'British Burma|1824/3/5~1948/1/3|:CE|注=First Anglo-Burmese War: 1824/3/5. From 31 January 1862 to 1 May 1897, British Burma was headed by a Chief Commissioner.',
