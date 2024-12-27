@@ -1220,8 +1220,8 @@ function module_code(library_namespace) {
 			options.comment = options.summary;
 		}
 
-		var structured_data = library_namespace
-				.new_options(options.structured_data);
+		var structured_data = Object.assign(Object.create(null),
+				options.structured_data);
 
 		// upload_text: media description
 		if (!options.text) {
@@ -1240,6 +1240,7 @@ function module_code(library_namespace) {
 				other_fields : options.other_fields || options['other fields']
 						|| ''
 			};
+			// inception (P571) 成立或建立時間
 			if (!structured_data.date)
 				structured_data.date = options.text.date;
 		} else {
@@ -1441,6 +1442,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!structured_data.date) {
+				// inception (P571) 成立或建立時間
 				structured_data.date = options.date;
 			}
 			if (structured_data.location
@@ -1533,22 +1535,26 @@ function module_code(library_namespace) {
 	var KEY_summary_name = 'summary_name',
 	// {inner} alias
 	structured_data_mapping = {
-		// 描述地坐標 (P9149) [[Commons:Structured data/Modeling/Location]]
+		// [[Commons:Structured data/Modeling/Location]]
+		// coordinates of depicted place (P9149) 描述地坐標
 		location : 'P9149',
-		// 描繪內容 (P180) [[Commons:Structured data/Modeling/Depiction]]
+		// [[Commons:Structured data/Modeling/Depiction]]
+		// depicts (P180) 描繪內容
 		depicts : 'P180',
 
 		// [[Commons:Structured data/Modeling/Properties table]]
-		// TODO: 文件格式 (P2701)
+		// TODO: file format (P2701) 文件格式
 		'file format' : 'P2701',
-		// TODO: 資料大小 (P3575)
+		// TODO: data size (P3575) 資料大小
 		'data size' : 'P3575',
 
 		'media type' : 'P1163',
 
-		// 成立或建立時間 (P571) [[Commons:Structured data/Modeling/Date]]
+		// [[Commons:Structured data/Modeling/Date]]
+		// inception (P571) 成立或建立時間
 		'created datetime' : 'P571',
-		date : 'P571'
+		date : 'P571',
+		inception : 'P571'
 	}, structured_data_config = Object.create(null);
 	Object.keys(structured_data_mapping).forEach(function(name) {
 		var property_id = structured_data_mapping[name];
