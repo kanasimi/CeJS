@@ -682,6 +682,8 @@
 血本去拼	血本去拚
 // 《速通修仙！》	五五开的时候，祂会去拼， (~拚<COO>v:有 ~拚<role.type:ARGM-TMP>五五开的时候 ~拚<role.type:A0>祂 ~拚<role.type:ARGM-ADV>这样一来 m:五五开+u:的+n:时候+wp:，+r:祂+v:会+v:去+v:拼+wp:，)
 祂會去拼，	祂會去拚，
+// 《长生从宗门杂役开始》	就只能去抢去拼， (~拚<COO>v:抢 ~拚<role.type:ARGM-DIS>但 ~拚<role.type:ARGM-TMP>以后 ~拚<role.type:ARGM-DIS>就 ~拚<role.type:ARGM-ADV>只能 ~拚<role.type:ARGM-ADV>不禁 d:就+v:只能+v:去+v:抢+v:去+v:拼+wp:，)
+去搶去拼	去搶去拚
 // 《一品修仙》	跟小魔佛拼什么命， (~拚<role.type:A0>跟小魔佛 ~拚<role.type:A1>什么命 p:跟+a:小+n:魔佛+v:拼+r:什么+n:命+wp:，)
 拼什麼命	拚什麼命
 // 《长生从宗门杂役开始》	你只剩下元灵一道，拼什么啊…… (~拚<COO>v:剩下 ~拚<role.type:A1>什么 r:你+d:只+v:剩下+nh:元灵+m:一+q:道+wp:，+v:拼+r:什么+u:啊+wp:……)
