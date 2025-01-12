@@ -923,6 +923,25 @@
 -里人
 
 
+// [general.TW.txt]	大师一出手，便知有没有。 (~出手<role.type:ARGM-ADV>一 n:大师+d:一+v:出手+wp:，+d:便+v:知+v:有+d:没+v:有+wp:。) 單純 zh_conversion 轉換過程: 一出→一齣
+// [general.TW.txt]	这话一出。 (~出<role.type:A1>这话 ~出<role.type:ARGM-ADV>一 r:这话+d:一+v:出+wp:。) 單純 zh_conversion 轉換過程: 一出→一齣
+// [general.TW.txt]	此话一出，所有人都临神情凛然。 (~出<role.type:A0>此话 ~出<role.type:ARGM-ADV>一 r:此话+d:一+v:出+wp:，+b:所有+n:人+d:都+v:临+n:神情+z:凛然+wp:。) 單純 zh_conversion 轉換過程: 一出→一齣
+// 《中国历史那些事儿系列套装》	此言一出， (~出<role.type:A1>此言 ~出<role.type:ARGM-ADV>一 r:此言+d:一+v:出+wp:，) 單純 zh_conversion 轉換過程: 一出→一齣
+// 《中国历史那些事儿系列套装》	此诏一出， (~出<role.type:A1>此诏 ~出<role.type:ARGM-ADV>一 r:此+n:诏+d:一+v:出+wp:，) 單純 zh_conversion 轉換過程: 一出→一齣
+// 《中国历史那些事儿系列套装》	诏书一出， (~出<role.type:A1>诏书 ~出<role.type:ARGM-ADV>一 n:诏书+d:一+v:出+wp:，) 單純 zh_conversion 轉換過程: 一出→一齣
+// 《中国历史那些事儿系列套装》	城内守军一出城就进入了罗士信的口袋， (~出<role.type:A0>城内守军 ~出<role.type:ARGM-DIS>一 ~出<role.type:A1>城 nl:城内+n:守军+d:一+v:出+n:城+d:就+v:进入+u:了+nh:罗士信+u:的+n:口袋+wp:，) 單純 zh_conversion 轉換過程: 一出→一齣
+-一出
+
+
+// 《一品修仙》	往日里数十年都没什么大案子， (~往日裡<ATT>q:年 nt:往日里+m:数十+q:年+d:都+v:没什么+a:大+n:案子+wp:，) 單純 zh_conversion 轉換過程: 日里→日里
+// 《一品修仙》	整日里郁郁寡欢。 (~整日裡<ADV>i:郁郁寡欢 d:整日里+i:郁郁寡欢+wp:。) 單純 zh_conversion 轉換過程: 日里→日里
+// 《剑宗旁门》	她真是受够了这种整日里在田间劳作的日子了。 (~整日裡<ADV>v:劳作 r:她+d:真是+v:受够+u:了+r:这种+d:整日里+p:在+nl:田间+v:劳作+u:的+n:日子+u:了+wp:。) 單純 zh_conversion 轉換過程: 日里→日里
+// 《回到过去变成猫》	这也算是连日里来一个有意义的线索。 (~連日裡<ADV>v:来 r:这+d:也+v:算是+d:连日里+v:来+m:一个+v:有+n:意义+u:的+n:线索+wp:。) 單純 zh_conversion 轉換過程: 连→連 日里→日里
+// 解析錯誤 @ 《我不可能是剑神》	我大徒弟，就是前日里北地覆灭黄金州的李楚。 (~前日裡北地覆滅<ATT>nh:李楚 r:我+a:大+n:徒弟+wp:，+d:就是+nt:前日里北地覆灭+ns:黄金州+u:的+nh:李楚+wp:。) 單純 zh_conversion 轉換過程: 日里→日里 灭→滅
+// 解析錯誤 @ 《我为长生仙》	素日里来，人们来去修行， (~裡來<ADV>v:来 n:素日+nd:里来+wp:，+n:人们+v:来+v:去+v:修行+wp:，) 單純 zh_conversion 轉換過程: 日里→日里 来→來
+-日里
+
+
 // ------------------------------------------------------------------------------------------------
 
 
