@@ -2583,6 +2583,7 @@ function test_date() {
 		assert(['2100', CeL.detect_serial_pattern(['filler 1 ABC 1', 1999, 2010])[0].generator(0, '2100/1/1')], 'detect_serial_pattern: year');
 		assert(['2100/8', CeL.detect_serial_pattern(['1 filler', '1999/1', '2010/12'])[0].generator(0, '2100/8/1')], 'detect_serial_pattern: %Y/%m');
 		assert(['2100/08', CeL.detect_serial_pattern(['1999/12', '2010/01', '22 filler'])[0].generator(0, '2100/8/1')], 'detect_serial_pattern: %Y/%2m');
+		assert(['%Y年%m月', CeL.detect_serial_pattern(['2024年9月', '2024年11月'])[0].generator()], 'detect_serial_pattern: %Y年%m月');
 
 		assert(['AA 3 KK', CeL.detect_serial_pattern.parse_generator('AA %1 KK')(3)], 'parse_generator: %1');
 		assert([(new Date('2014/8/9')).format('* %Y/%2m'), CeL.detect_serial_pattern.parse_generator('* %Y/%2m')(0, '2014/8/9')], 'parse_generator: %Y/%2m');

@@ -3670,6 +3670,24 @@ function module_code(library_namespace) {
 			add_serial_token_list(serial_token_list);
 		});
 
+		function maybe_year(digits) {
+			return 1900 <= digits && digits <= 2200;
+		}
+		function maybe_month(digits) {
+			if (1 <= digits && digits <= 12) {
+				if (digits < 10 && digits.length < 2)
+					this[2] = true;
+				return true;
+			}
+		}
+		function maybe_date(digits) {
+			if (1 <= digits && digits <= 31) {
+				if (digits < 10 && digits.length < 2)
+					this[2] = true;
+				return true;
+			}
+		}
+
 		// 掃描: 有相同 digits 的不應歸為 serial。
 		Object.values(pattern_hash).forEach(function(lists) {
 			var need_to_resettle = [];
@@ -3679,6 +3697,23 @@ function module_code(library_namespace) {
 				index_of_lists < lists.length; index_of_lists++) {
 					var serial_token_list = lists[index_of_lists];
 					var digits = serial_token_list[index];
+
+					// e.g., CeL.detect_serial_pattern(['2024年9月', '2024年11月'])
+					// 避免 2024被合併、判別為非 serial。
+					// @see function select_archive_to_page()
+					// @ wikibot/routine/20210429.Auto-archiver.js
+					// https://github.com/kanasimi/wikibot/issues/56
+					switch (serial_token_list[index + 1]) {
+					case '年':
+						if (maybe_year(digits))
+							digits = null;
+						break;
+					case '月':
+						if (maybe_month(digits))
+							digits = null;
+						break;
+					}
+
 					if (!digits) {
 						// assert: lists[*][index] === ''
 						break;
@@ -3773,21 +3808,9 @@ function module_code(library_namespace) {
 
 				// checker = [ typical generator label, checker,
 				// has digits without 0-prefix ]
-				var checker_list = [ [ '%Y', function(digits) {
-					return 1900 <= digits && digits <= 2200;
-				} ], [ '%m', function(digits) {
-					if (1 <= digits && digits <= 12) {
-						if (digits < 10 && digits.length < 2)
-							this[2] = true;
-						return true;
-					}
-				} ], [ '%d', function(digits) {
-					if (1 <= digits && digits <= 31) {
-						if (digits < 10 && digits.length < 2)
-							this[2] = true;
-						return true;
-					}
-				} ] ];
+				var checker_list = [ [ '%Y', maybe_year ],
+				//
+				[ '%m', maybe_month ], [ '%d', maybe_date ] ];
 
 				checker_list = checker_list.filter(function(checker) {
 					return digits_list.every(function(digits) {
