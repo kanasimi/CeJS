@@ -208,10 +208,18 @@ function module_code(library_namespace) {
 
 	function item_to_conversion(item) {
 		// assert: item = {type: 'item', rule: '', original: ''}
+
+		// 每個Item()只能解析為單一規則。
+		// TODO: [[w:zh:Module talk:CGroup/Movie#单向转换简化写法]]
+		// item.rule 一句規則中有不止一個被轉換對象，如 "zh-sg:纵横天下;}--{-|纵横天下}-"
+
+		// https://zh.wikipedia.org/wiki/Module:NoteTA#L-29
+		// table.insert( pieces, '-{H|' .. v.rule .. '}-' )
 		var conversion = wiki_API.parse('-{A|' + item.rule + '}-', {
 			normalize : true,
 			with_properties : true
 		});
+		// TODO: check if conversion is invalid
 		conversion.item = item;
 		return conversion;
 	}

@@ -1510,6 +1510,11 @@ function module_code(library_namespace) {
 					page_title) {
 				return new Promise(function(resolve, reject) {
 					// console.trace([ page_title, token.toString() ]);
+
+					// [[w:zh:Wikipedia:互助客栈/技术#不蓝不绿的绿链问题]]
+					// #ifexist 標題自動簡繁重定向
+					// https://gerrit.wikimedia.org/g/mediawiki/extensions/ParserFunctions/+/b5fbdc5/includes/ParserFunctions.php#350
+					// function ifexistInternal()
 					session.page(page_title, function(page_data, error) {
 						if (error) {
 							// console.trace(error);

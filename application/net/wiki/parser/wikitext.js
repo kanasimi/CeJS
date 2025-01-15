@@ -1365,6 +1365,7 @@ function module_code(library_namespace) {
 			});
 			// console.log(conversion_list);
 			var convert_from_hash = conversion_table && Object.create(null);
+			// 單向轉換 unidirectional_convert_from
 			var unidirectional = [];
 			/**
 			 * [[Help:高级字词转换语法#基本语法]]
