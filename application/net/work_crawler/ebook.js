@@ -896,6 +896,17 @@ function module_code(library_namespace) {
 		/**
 		 * <code>
 
+		// https://69shuba.cx/txt/52895/39004157	别人练级我修仙，苟到大乘再出山 > 新书《我在高武时代掀起修仙狂潮》
+		<p>请...您....收藏_6Ⅰ9Ⅰ书Ⅰ吧（六\\\九\\\书\\\吧!）</p>
+
+		</code>
+		 */
+		text = text.replace(/<p>请[._\\|]*您[._\\|]*收藏[^<>]*?书Ⅰ吧[^<>]*?<\/p>/g,
+				'');
+
+		/**
+		 * <code>
+
 		// https://www.69shuba.com/txt/47114/31439934	苟在仙武娶妻长生 第1章 老祖又纳妾了
 		&emsp;&emsp;(本章完)
 
