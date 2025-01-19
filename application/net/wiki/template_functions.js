@@ -258,6 +258,25 @@ function module_code(library_namespace) {
 				object = object.replace(
 						/(?:\w* )*function Item\s*\([\s\S]+?[\n ]end *\n/, '')
 						.replace(/local\s+Item\s*=[^\n;]+/, '');
+
+				/**
+				 * e.g., [[w:zh:Module:CGroup/NBA]] <code>
+
+				Item('Oklahoma City Thunder',
+				--
+				''..
+				''..
+				--
+				''..
+				''
+				),
+
+				</code>
+				 */
+				object = object.replace(
+						/(['"])\s*(?:--.*\n\s*)*\.\.\s*(?:--.*\n\s*)*\1/g, '');
+				object = object.replace(/,\s*(?:--.*\n\s*)*(['"])/g, ',$1');
+
 				// convert `Item('Alec', 'zh-cn:亚历克; zh-tw:亞歷;')`
 				object = object.replace(PATTERN_Item_function, function(item,
 						prefix, original, rule, additional) {
