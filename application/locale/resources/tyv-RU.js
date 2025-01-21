@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2024.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2025.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Calendrier r\u00e9publicain": "\u0424\u0440\u0430\u043d\u0446\u0443\u0437 \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430\u043d \u041a\u0430\u043b\u0435\u043d\u0434\u0430\u0440",
 	"untranslated message count": "1000+",

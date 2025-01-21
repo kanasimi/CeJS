@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2024.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2025.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spuenien",
 	"untranslated message count": "1000+",
@@ -7,13 +7,17 @@
 	"\u5730\u7406\u5ea7\u6a19\uff1a": "Koordinaten: ",
 	"\u7def\u5ea6\uff1a": "Breedegrad: ",
 	"\u7d93\u5ea6\uff1a": "L\u00e4ngegrad: ",
+	"\u524d\u7db4": "Prefix",
 	"\u6642\u5340\uff1a": "Z\u00e4itzon: ",
+	"\u8acb\u6ce8\u610f\uff1a\u672c\u6b04\u50c5\u4f9b\u958b\u767c\u4eba\u54e1\u4f7f\u7528\u3002": "OPGEPASST: N\u00ebmme fir Entw\u00e9ckler.",
 	"Loading...": "Lueden...",
 	"\u1019\u103c\u1014\u103a\u1019\u102c": "Myanmar",
 	"Vi\u1ec7t Nam": "Vietnam",
 	"\u5206\u985e": "Grupp",
 	"%1 BCE": "%1 v.&nbsp;Chr.",
 	"%1 CE": "%1 n.&nbsp;Chr.",
+	"\u5e74\u8b5c": "Kalennerdatum",
+	"\u66c6\u8b5c": "KALENNERTABELL",
 	"\u5c0e\u89bd\u5217\uff1a": "Navigatioun: ",
 	"\u6240\u6709\u570b\u5bb6": "All L\u00e4nner",
 	"\u6e2c\u8a66\u7bc4\u4f8b": "BEISPILL",
@@ -115,7 +119,8 @@
 	"\u7ae0\u7bc0\u7de8\u865f%1\uff1a": "Kapitel %1: ",
 	"Error: %1": "Feeler: %1",
 	"\u5716\u7247\u7121\u5167\u5bb9\uff1a": "Bild ouni Inhalt:",
-	"\u6a94\u6848\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:%1|Byte|Byten}}",
+	"\u6a94\u6848\u904e\u5c0f\uff0c\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:%1|Byte}}, ze kleng:",
+	"\u6a94\u6848\u50c5 %1 {{PLURAL:%1|\u4f4d\u5143\u7d44}}\uff1a": "%1 {{PLURAL:%1|Byte}}",
 	"\u5df2\u5c01\u5b58\uff1a": "archiv\u00e9iert:",
 	"work_data.author": "Auteur",
 	"work_data.description": "Beschreiwung",
@@ -222,7 +227,8 @@
 	"See also": "Kuckt och",
 	"\u7121\u6a19\u7c64": "Keng Etikett",
 	"%1 does not start with %2": "%1 f\u00e4nkt net mat %2 un",
-	"Revision id %1": "Versioun Id %1",
+	"Revision id %1": "Versiouns-ID %1",
+	"Invalid catalog: %1": "Ong\u00fcltege Katalog: %1",
 	"\u65e5\u672c\u8a9e\u306e\u30a6\u30a7\u30d6\u30b3\u30df\u30c3\u30af": "Japanesch Web-Comics",
 	"local-language-name": "L\u00ebtzebuergesch",
 	"work_crawler-search_result_columns-title": "Titel",
@@ -231,6 +237,7 @@
 	"work_crawler-search_result_columns-completed": "F\u00e4erdeg",
 	"\u6700\u65b0\u7ae0\u7bc0": "Lescht Kapitel",
 	"\u932f\u8aa4\u539f\u56e0": "Grond vum Feeler",
+	"\u53d6\u6d88\u641c\u5c0b": "Sich ofbriechen",
 	"\u53d6\u6d88": "Ofbriechen",
 	"Options:": "Optiounen:"
 },
