@@ -597,7 +597,9 @@ function module_code(library_namespace) {
 				callback : options
 			};
 		} else {
-			options = library_namespace.new_options(options);
+			// 不使用 library_namespace.new_options()，確保造出新的 options，避免汙染。
+			// e.g., `CeL.wiki.wikitext_to_plain_text('==t ==\n[[Category:c]]')`
+			options = Object.clone(options) || Object.create(null);
 			options.use_element_placeholder = true;
 		}
 

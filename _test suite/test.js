@@ -3492,6 +3492,7 @@ function test_wiki() {
 		assert(['大稻埕', CeL.wiki.wikitext_to_plain_text('大<span lang="zh" xml:lang="zh">稻埕</span>')], 'wikitext_to_plain_text() #5');
 		assert(['H1\tH2\tH3\n11\t12\t13\n21\t22\t23', CeL.wiki.wikitext_to_plain_text('{| class="wikitable"\n|-\n! H1 !! H2 !! H3\n|-\n| 11 || 12 || 13\n|-\n| 21 || 22 || 23\n|}')], 'wikitext_to_plain_text() #6');
 		assert(['| =', CeL.wiki.wikitext_to_plain_text('{{ ! }} {{ = }}')], 'wikitext_to_plain_text() #7');
+		assert(['==t ==\n', CeL.wiki.wikitext_to_plain_text('==t ==\n[[Category:c]]')], 'wikitext_to_plain_text() #8');
 
 		wikitext = '\'t\' "t"'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed], 'wiki.parse: quoted text');
