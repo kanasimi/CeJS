@@ -1964,6 +1964,13 @@ function module_code(library_namespace) {
 			if (token.list_type !== wiki_API.DEFINITION_LIST) {
 				if (variable_name) {
 					configuration[variable_name] = token.map(normalize_value);
+					if (false) {
+						configuration[variable_name]
+						// TODO: 必須自行篩選空值。
+						= configuration[variable_name].filter(function(item) {
+							return !!item;
+						});
+					}
 					// 僅採用一個列表。
 					variable_name = null;
 				}

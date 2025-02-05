@@ -396,9 +396,11 @@ function module_code(library_namespace) {
 	 * escape RegExp pattern，以利作為 RegExp source 使用。<br />
 	 * cf. qq// in perl.
 	 * 
+	 * 警告: 假如是在 “[]” 中，需加入 `.replace(/([-])/g, '\\$1')`。
+	 * 
 	 * <code>
-	 * String.prototype.to_RegExp_pattern = function(f) { return to_RegExp_pattern(this.valueOf(), f); };
-	 * </code>
+	String.prototype.to_RegExp_pattern = function(f) { return to_RegExp_pattern(this.valueOf(), f); };
+	</code>
 	 * 
 	 * @param {String}pattern
 	 *            pattern text.

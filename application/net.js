@@ -838,7 +838,7 @@ function module_code(library_namespace) {
 				continue;
 			}
 
-			if (library_namespace.is_debug(2)) {
+			if (library_namespace.is_debug(2) && value !== NO_EQUAL_SIGN) {
 				try {
 					library_namespace.debug('[' + (i + 1) + '/' + l + '] '
 					//
