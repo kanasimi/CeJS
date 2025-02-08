@@ -373,62 +373,87 @@ function module_code(library_namespace) {
 			 */
 			// console.trace(data);
 			// console.trace(data.search);
-			var list;
+			var list = [];
 			if (!Array.isArray(data.search)) {
-				list = [];
-			} else if (!('filter' in options)
-					|| typeof options.filter === 'function') {
-				list = data.search.filter(options.filter ||
-				// default filter
-				function(item) {
-					// 自此結果能得到的資訊有限。
-					// label: 'Universe'
-					// match: { type: 'label', language: 'zh', text: '宇宙' }
-					if (item.match && key.toLowerCase()
-					// .trim()
-					=== item.match.text.toLowerCase()
-					// 通常不會希望取得維基百科消歧義頁。
-					// @see 'Wikimedia disambiguation page' @
-					// [[d:MediaWiki:Gadget-autoEdit.js]]
-					&& !/disambiguation|消歧義|消歧義|曖昧さ回避/.test(item.description)) {
-						return true;
-					}
-				});
-			}
-
-			if (Array.isArray(options.list)) {
-				options.list.push(list);
-			} else {
-				options.list = [ list ];
-			}
-			list = options.list;
-
-			if (!options.limit && data['search-continue'] > 0) {
-				options['continue'] = data['search-continue'];
-				wikidata_search(key, callback, options);
+				after_filter_search_result(list);
 				return;
 			}
 
-			if (Array.isArray(list.length) && list.length > 1) {
-				// clone list
-				list = list.clone();
-			} else {
-				list = list[0];
+			var filter = typeof options.filter === 'function'
+			//
+			? options.filter : wikidata_search.default_filter;
+			if (typeof filter !== 'function') {
+				list = data.search;
+				after_filter_search_result(list);
+				return;
 			}
-			if (options.get_id) {
-				list = list.map(function(item) {
-					return item.id;
-				});
+
+			var index = 0;
+			filter_next();
+
+			function filter_next() {
+				if (!(index < data.search.length)) {
+					after_filter_search_result(list);
+					return;
+				}
+
+				var item = data.search[index++];
+				var result = filter(item, key);
+
+				function test_result(passed) {
+					if (passed) {
+						list.push(item);
+					}
+					setImmediate(filter_next);
+				}
+
+				if (library_namespace.is_thenable(result)) {
+					result.then(test_result,
+					// Ignore error
+					filter_next);
+				} else {
+					test_result(result);
+				}
 			}
-			// multiple pages
-			if (!options.multi && (
-			// options.limit <= 1
-			list.length <= 1)) {
-				list = list[0];
+
+			function after_filter_search_result(list) {
+				// debugger;
+				if (Array.isArray(options.list)) {
+					options.list.push(list);
+				} else {
+					options.list = [ list ];
+				}
+				list = options.list;
+
+				if (!options.limit && data['search-continue'] > 0) {
+					options['continue'] = data['search-continue'];
+					wikidata_search(key, callback, options);
+					return;
+				}
+
+				if (Array.isArray(list.length) && list.length > 1) {
+					// clone list
+					list = list.clone();
+				} else {
+					list = list[0];
+				}
+				if (options.get_id) {
+					list = list.map(function(item) {
+						return item.id;
+					});
+				}
+				// multiple pages
+				if (!options.multi && (
+				// options.limit <= 1
+				list.length <= 1)) {
+					list = list[0];
+				}
+				// console.trace(options);
+				callback(list);
 			}
-			// console.trace(options);
-			callback(list);
+
 		}, null, options);
+
 	}
 
 	// wikidata_search_cache[{String}"zh:隸屬於"] = {String}"P31";
@@ -448,6 +473,26 @@ function module_code(library_namespace) {
 	wikidata_search_cache_entity = Object.create(null);
 
 	// wikidata_search.default_limit = 'max';
+
+	// default filter: CeL.wiki.data.search.default_filter(item)
+	wikidata_search.default_filter = function default_wikidata_search_filter(
+			item, key) {
+		// 自此結果能得到的資訊有限。
+		// label: 'Universe'
+		// match: { type: 'label', language: 'zh', text: '宇宙' }
+
+		// 通常不會希望取得維基百科消歧義頁。
+		// @see 'Wikimedia disambiguation page' @
+		// [[d:MediaWiki:Gadget-autoEdit.js]]
+		if (/disambiguation|消歧義|消歧義|曖昧さ回避/.test(item.description))
+			return false;
+
+		if (item.match && key.toLowerCase()
+		// .trim()
+		=== item.match.text.toLowerCase()) {
+			return true;
+		}
+	};
 
 	// TODO: add more types: form, item, lexeme, property, sense, sense
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
@@ -1679,6 +1724,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// export 導出.
+	// CeL.wiki.data.*
 	Object.assign(wikidata_entity, {
 		search : wikidata_search,
 		// 標籤
@@ -2286,6 +2332,11 @@ function module_code(library_namespace) {
 		language : '',
 		// 警告: 此屬性應置於個別 claim 中。
 		remove : true,
+
+		// options.filter @ wikidata_search()
+		filter : function() {
+		},
+
 		// additional_properties, KEY_property_options
 		// options : {},
 		multi : true,
@@ -2568,7 +2619,9 @@ function module_code(library_namespace) {
 				}
 
 				var value = property[key];
-				if (key in claim_properties) {
+				if (key in claim_properties
+				// || typeof value === 'function'
+				) {
 					additional_properties[key] = value;
 					continue;
 				}
@@ -5692,6 +5745,7 @@ function module_code(library_namespace) {
 		}
 
 		function preparing_wbeditentity() {
+			// debugger;
 			for ( var key in data) {
 				if (Array.isArray(data[key]) ? data[key].length === 0
 						: library_namespace.is_empty_object(data[key])) {
