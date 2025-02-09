@@ -2903,7 +2903,7 @@ function module_code(library_namespace) {
 	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
 	// @see https://noc.wikimedia.org/wiki.php?wiki=jawiktionary
 	function adapt_site_configurations(session, configurations) {
-		// console.log(configurations);
+		// console.trace(configurations);
 		var site_configurations = session.configurations;
 		session.latest_site_configurations = configurations;
 		if (site_configurations === wiki_API.prototype.configurations) {
@@ -3214,19 +3214,29 @@ function module_code(library_namespace) {
 			// parse latest raw task configurations using function
 			// parse_configuration(wikitext, options) @
 			// CeL.application.net.wiki.parser.misc
-			var configuration = wiki_API.parse.configuration(page_data);
-			// console.trace(configuration);
-			// TODO: valid configuration 檢測數值是否合適。
-			session.latest_task_configuration = configuration;
+			var configurations = wiki_API.parse.configuration(page_data);
+			if (configurations && !configurations.general) {
+				// 處理非正規名稱的情況。
+				[ 'General', 'GENERAL' ].some(function(alias) {
+					if (configurations[alias]) {
+						configurations.general = configurations[alias];
+						delete configurations[alias];
+						return true;
+					}
+				});
+			}
+			// console.trace(configurations);
+			// TODO: valid configurations 檢測數值是否合適。
+			session.latest_task_configuration = configurations;
 
 			// 本地化 Localization: load localized messages.
 			// e.g., [[w:en:User:Cewbot/log/20150916/configuration]]
-			if (library_namespace.is_Object(configuration.L10n)) {
+			if (library_namespace.is_Object(configurations.L10n)) {
 				// `gettext.get_domain_name()` for default language
 				var language = gettext.to_standard(session.language
 						|| wiki_API.language);
 				/** {Object}L10n messages. 符合當地語言的訊息內容。 */
-				gettext.set_text(configuration.L10n, language);
+				gettext.set_text(configurations.L10n, language);
 				// console.trace(configuration.L10n);
 				library_namespace.info([ 'adapt_task_configurations: ', {
 					// gettext_config:{"id":"load-$2-$1-messages-for-$3"}
@@ -3234,10 +3244,10 @@ function module_code(library_namespace) {
 					//
 					wiki_API.site_name(session), language,
 					//
-					Object.keys(configuration.L10n).length ]
+					Object.keys(configurations.L10n).length ]
 				} ]);
 				// Release memory. 釋放被占用的記憶體。
-				// delete configuration.L10n;
+				// delete configurations.L10n;
 			}
 
 			if (typeof configuration_adapter === 'function') {
@@ -3247,12 +3257,12 @@ function module_code(library_namespace) {
 				// cache actions, 盡可能即時適用新的設定。
 				var old_actions = session.actions.splice(0,
 						session.actions.length);
-				configuration_adapter.call(session, configuration);
+				configuration_adapter.call(session, configurations);
 				session.actions.append(old_actions);
 				// console.trace([ session.running, session.actions ]);
-				// configuration === wiki_session.latest_task_configuration
+				// configurations === wiki_session.latest_task_configuration
 			}
-			// Object.seal(configuration);
+			// Object.seal(configurations);
 		}
 	}
 
