@@ -150,7 +150,7 @@ function module_code(library_namespace) {
 	function is_entity(value, strict) {
 		return library_namespace.is_Object(value)
 		// {String}id: Q\d+ 或 P\d+。
-		&& (strict ? /^[PQ]\d{1,10}$/.test(value.id) : value.id)
+		&& (strict ? PATTERN_entity_id.test(value.id) : value.id)
 		//
 		&& library_namespace.is_Object(value.labels);
 	}
@@ -357,6 +357,10 @@ function module_code(library_namespace) {
 
 		action = [ API_URL_of_options(options) || wikidata_API_URL, action ];
 
+		var session = wiki_API.session_of_options(options);
+		if (session && session.host)
+			session = session.host;
+
 		wiki_API.query(action, function handle_result(data, error) {
 			error = wiki_API.query.handle_error(data, error);
 			// 檢查伺服器回應是否有錯誤資訊。
@@ -380,7 +384,8 @@ function module_code(library_namespace) {
 			}
 
 			var filter = typeof options.filter === 'function'
-			//
+			// e.g., function add_main_subject() @
+			// routine/20210701.import_PubMed_to_wikidata.js
 			? options.filter : wikidata_search.default_filter;
 			if (typeof filter !== 'function') {
 				list = data.search;
@@ -389,6 +394,8 @@ function module_code(library_namespace) {
 			}
 
 			var index = 0;
+			// TODO: cf. Array.fromAsync()
+			// https://github.com/tc39/proposal-array-from-async
 			filter_next();
 
 			function filter_next() {
@@ -398,6 +405,8 @@ function module_code(library_namespace) {
 				}
 
 				var item = data.search[index++];
+				var run_next_status = session
+						&& session.set_up_if_needed_run_next();
 				var result = filter(item, key);
 
 				function test_result(passed) {
@@ -408,9 +417,11 @@ function module_code(library_namespace) {
 				}
 
 				if (library_namespace.is_thenable(result)) {
-					result.then(test_result,
+					result = result.then(test_result,
 					// Ignore error
 					filter_next);
+					if (session)
+						session.check_and_run_next(run_next_status, result);
 				} else {
 					test_result(result);
 				}
@@ -602,7 +613,7 @@ function module_code(library_namespace) {
 					'wikidata_search.use_cache');
 			key = cached_hash[language_and_key];
 
-			if (/^[PQ]\d{1,10}$/.test(key)) {
+			if (PATTERN_entity_id.test(key)) {
 			}
 			if (options && options.must_callback) {
 				callback(key);
@@ -645,7 +656,7 @@ function module_code(library_namespace) {
 				// console.trace('wikidata_search.use_cache: Nothing found');
 
 			} else if (!options.search_without_cache && typeof id === 'string'
-					&& /^[PQ]\d{1,10}$/.test(id)) {
+					&& PATTERN_entity_id.test(id)) {
 				library_namespace.info('wikidata_search.use_cache: cache '
 				// 搜尋此類型的實體。 預設值：item
 				+ (options && options.type || 'item')
@@ -1161,7 +1172,16 @@ function module_code(library_namespace) {
 	// Maximum number of values is 50
 	var MAX_ENTITIES_TO_GET = 50;
 
-	var PATTERN_entity_id = /^Q(\d{1,10})$/i;
+	// https://www.wikidata.org/wiki/Wikidata:Glossary#Entity
+	// [ all entity ID, entity type, numeric entity ID ]
+	var PATTERN_entity_id = /^([PQL])(\d{1,10})$/;
+	// Lexeme is an entity of Lexicographical data.
+	// TODO: Form and Sense
+
+	// https://www.wikidata.org/wiki/Wikidata:Glossary#QID
+	// QID (or Q number) is the unique identifier of a data item on Wikidata
+	var PATTERN_item_id = /^Q(\d{1,10})$/i;
+	// https://www.wikidata.org/wiki/Wikidata:Glossary#Property
 	var PATTERN_property_id = /^P(\d{1,5})$/i;
 
 	/**
@@ -1373,9 +1393,7 @@ function module_code(library_namespace) {
 
 			} else {
 				key = key.map(function(id) {
-					if (PATTERN_entity_id.test(id)
-					//
-					|| PATTERN_property_id.test(id))
+					if (PATTERN_entity_id.test(id))
 						return id;
 					if (library_namespace.is_digits(id))
 						return 'Q' + id;
@@ -1937,44 +1955,55 @@ function module_code(library_namespace) {
 				&& typeof options.callback === 'function'
 				&& (!('get_type' in options) || options.get_type)) {
 			// 先取得/確認指定 property 之 datatype。
-			wikidata_datatype(options.property, function(datatype) {
-				var matched = datatype
-						&& datatype.match(/^wikibase-(item|property)$/);
-				var entity_id = library_namespace.is_Object(value)
-						&& value.value || value;
-				if (matched && entity_id && !/^[PQ]\d{1,10}$/.test(entity_id)) {
-					if (typeof value === 'object') {
-						library_namespace.error('normalize_wikidata_value: '
-								+ 'Invalid object value!');
-						console.trace([ value, datatype, options.property ]);
-						normalize_wikidata_value(value, datatype, options,
-								argument_to_pass);
-						return;
-					}
+			wikidata_datatype(
+					options.property,
+					function(datatype) {
+						var matched = datatype
+								&& datatype.match(/^wikibase-(item|property)$/);
+						var entity_id = library_namespace.is_Object(value)
+								&& value.value || value;
+						if (matched && entity_id
+								&& !PATTERN_entity_id.test(entity_id)) {
+							if (typeof value === 'object') {
+								library_namespace
+										.error('normalize_wikidata_value: '
+												+ 'Invalid object value!');
+								console.trace([ value, datatype,
+										options.property ]);
+								normalize_wikidata_value(value, datatype,
+										options, argument_to_pass);
+								return;
+							}
 
-					library_namespace.debug('將屬性名稱轉換成 id (' + datatype + '): '
-							+ JSON.stringify(value), 3,
-							'normalize_wikidata_value');
-					// console.log(options);
-					wikidata_search.use_cache(value, function(id, error) {
-						// console.trace(options);
-						// console.trace('' + options.callback);
-						normalize_wikidata_value(id ||
-						// 'normalize_wikidata_value: Nothing found: [' + value
-						// + ']'
-						value, datatype, options, argument_to_pass);
-					}, Object.assign(Object.create(null),
-					// 因wikidata_search.use_cache.default_options包含.type設定，必須將特殊type設定放在匯入default_options後!
-					wikidata_search.use_cache.default_options, {
-						type : matched[1],
-						// 警告: 若是設定 must_callback=false，會造成程序不 callback 而中途跳出!
-						must_callback : true
-					}, options));
-				} else {
-					normalize_wikidata_value(value, datatype || NOT_FOUND,
-							options, argument_to_pass);
-				}
-			}, options);
+							library_namespace.debug('將屬性名稱轉換成 id (' + datatype
+									+ '): ' + JSON.stringify(value), 3,
+									'normalize_wikidata_value');
+							// console.log(options);
+							wikidata_search.use_cache(value,
+									function(id, error) {
+										// console.trace(options);
+										// console.trace('' + options.callback);
+										normalize_wikidata_value(id ||
+										// 'normalize_wikidata_value: Nothing
+										// found: [' + value
+										// + ']'
+										value, datatype, options,
+												argument_to_pass);
+									}, Object.assign(Object.create(null),
+									// 因wikidata_search.use_cache.default_options包含.type設定，必須將特殊type設定放在匯入default_options後!
+									wikidata_search.use_cache.default_options,
+											{
+												type : matched[1],
+												// 警告: 若是設定
+												// must_callback=false，會造成程序不
+												// callback 而中途跳出!
+												must_callback : true
+											}, options));
+						} else {
+							normalize_wikidata_value(value, datatype
+									|| NOT_FOUND, options, argument_to_pass);
+						}
+					}, options);
 			return;
 		}
 
@@ -2564,7 +2593,7 @@ function module_code(library_namespace) {
 				}
 
 				var property_key = property_data.property;
-				if (!/^[PQ]\d{1,10}$/.test(property_key)) {
+				if (!PATTERN_entity_id.test(property_key)) {
 					// 有些設定在建構property_data時尚存留於((property))，這時得要自其中取出。
 
 					// console.log(property);
@@ -2731,7 +2760,7 @@ function module_code(library_namespace) {
 				}
 
 				// 沒找到的時候，id 為 undefined。
-				if (/^[PQ]\d{1,10}$/.test(id)) {
+				if (PATTERN_entity_id.test(id)) {
 					if (!('value' in property_data)) {
 						property_data.value
 						//
@@ -5700,7 +5729,7 @@ function module_code(library_namespace) {
 						.debug('未設定 id，您可能需要手動檢查。', 2, 'wikidata_edit');
 
 		} else if (is_entity(id)
-		// && PATTERN_entity_id.test(id.id)
+		// && PATTERN_item_id.test(id.id)
 		) {
 			options.id = id.id;
 
@@ -5711,7 +5740,7 @@ function module_code(library_namespace) {
 		} else if (id === 'item' || id === 'property') {
 			options['new'] = id;
 
-		} else if (PATTERN_entity_id.test(id)) {
+		} else if (PATTERN_item_id.test(id)) {
 			// e.g., 'Q1'
 			options.id = id;
 
@@ -6342,7 +6371,7 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list)
 	 */
 	function wikidata_merge(to, from, token, options, callback) {
-		if (!PATTERN_entity_id.test(to)) {
+		if (!PATTERN_item_id.test(to)) {
 			wikidata_entity(to, function(entity, error) {
 				if (error) {
 					callback(undefined, error);
@@ -6353,7 +6382,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (!PATTERN_entity_id.test(from)) {
+		if (!PATTERN_item_id.test(from)) {
 			wikidata_entity(from, function(entity, error) {
 				if (error) {
 					callback(undefined, error);
