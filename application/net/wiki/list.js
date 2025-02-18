@@ -1662,7 +1662,8 @@ function module_code(library_namespace) {
 							return action.slice(0, 1);
 						}) ]);
 					}
-					if (this.actions.length > 1) {
+					if (this.actions.length > 1 || this.host
+							&& this.host.length > 1) {
 						library_namespace.debug(method + ': 正在執行中 ('
 						//
 						+ this.thread_count + ', ' + this.actions.length
@@ -1672,6 +1673,11 @@ function module_code(library_namespace) {
 						+ this.actions.slice(0, 9).map(function(action) {
 							return action.slice(0, 1);
 						}), 3, 'wiki_API_prototype_methods');
+
+						library_namespace.debug('當 promise 在此中斷跳出，'
+						//
+						+ '您可能需設置 `session.set_up_if_needed_run_next()`。', 1,
+								'wiki_API_prototype_methods');
 					}
 					if (library_namespace.is_debug(6)) {
 						console.trace(method);

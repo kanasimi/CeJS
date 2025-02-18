@@ -3217,13 +3217,16 @@ function module_code(library_namespace) {
 			var configurations = wiki_API.parse.configuration(page_data);
 			if (configurations && !configurations.general) {
 				// 處理非正規名稱的情況。
-				[ 'General', 'GENERAL' ].some(function(alias) {
+				if (![ 'General', 'GENERAL' ].some(function(alias) {
 					if (configurations[alias]) {
 						configurations.general = configurations[alias];
 						delete configurations[alias];
 						return true;
 					}
-				});
+				})) {
+					library_namespace.warn('adapt_task_configurations: '
+							+ 'General configurations are not set.');
+				}
 			}
 			// console.trace(configurations);
 			// TODO: valid configurations 檢測數值是否合適。

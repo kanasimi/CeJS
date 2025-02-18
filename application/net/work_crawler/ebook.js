@@ -974,7 +974,9 @@ function module_code(library_namespace) {
 				// console.trace(promise_load_text_to_check);
 				// 先初始化完畢後再重新執行。
 				return promise_load_text_to_check.then(create_ebook.bind(this,
-						work_data));
+						work_data)
+				// TODO: for error
+				);
 			}
 		}
 

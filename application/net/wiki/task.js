@@ -3,7 +3,7 @@
  * 
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用程式庫的子程式庫。
  * 
- * TODO:<code>
+ * TODO: 以 {Promise} 與 OOP ({Site}, {Page}) 重寫。 <code>
 
 
 </code>
@@ -89,6 +89,11 @@ function module_code(library_namespace) {
 	// e.g.,
 	// node 20201008.fix_anchor.js use_language=zh archives
 	function set_up_if_needed_run_next(run_next_status) {
+		if (this && this.host) {
+			library_namespace.warn('set_up_if_needed_run_next: '
+					+ '你想執行的可能是 `session.host.set_up_if_needed_run_next()`？');
+		}
+
 		run_next_status = Object.assign(run_next_status || Object.create(null),
 		// this: wiki session
 		{
@@ -118,10 +123,12 @@ function module_code(library_namespace) {
 		var index_of_old_tail = last_action && this.actions.length > 0
 				&& this.actions.lastIndexOf(last_action) || undefined;
 		// console.trace([ index_of_old_tail, this.actions.length ]);
+		if (index_of_old_tail >= 0
 		// 若有新添加的 actions，由於這些 actions 全被 push 進 queue，不會被執行到，
 		// 因此必須手動執行 this.next()。
-		if (index_of_old_tail >= 0 ? this.actions.length - index_of_old_tail > 1
-				: this.actions.length > 0) {
+		? this.actions.length - index_of_old_tail > 1
+		//
+		: this.actions.length > 0) {
 			// console.trace(this.actions);
 			run_next_status.needed_run_next = true;
 			return true;
@@ -132,7 +139,7 @@ function module_code(library_namespace) {
 	 * session.check_if_needed_run_next(run_next_status) 可以執行多次。
 	 * session.check_and_run_next() 只能在 promise 之後馬上執行一次。
 	 * 
-	 * e.g., Inside session instance functions:<code>
+	 * e.g., Inside session instance functions: <code>
 
 	var run_next_status = session && session.set_up_if_needed_run_next();
 
@@ -144,6 +151,7 @@ function module_code(library_namespace) {
 		session.check_and_run_next(run_next_status, promise);
 	// 直接跳出。之後會等 promise 出結果才繼續執行。
 	return;
+
 	</code>
 	 */
 	function check_and_run_next(run_next_status, promise, no_check) {
