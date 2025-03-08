@@ -958,6 +958,11 @@ function module_code(library_namespace) {
 				if (page_data.original_title) {
 					// 對於 invalid title，.original_title 可能是 undefined。
 					title_data_map[page_data.original_title] = page_data;
+					if (false) {
+						index_of_title[page_data.original_title]
+						//
+						= page_list.length;
+					}
 				}
 				page_list.push(page_data);
 			}
@@ -1627,7 +1632,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 
-	CeL.wiki.redirect_to('史記', function(redirect_data, page_data) {
+	CeL.wiki.redirect_to('史記', function(redirect_data, page_data, error) {
 		CeL.show_value(redirect_data);
 	});
 

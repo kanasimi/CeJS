@@ -2635,7 +2635,9 @@ function module_code(library_namespace) {
 			// wiki_API.parse.redirect(wiki_API.content_of(page_data)) ||
 
 			// 若是 convert 過則採用新的 title。
-			if (Array.isArray(title)) {
+			if (!page_data) {
+				// assert: !!error === true
+			} else if (Array.isArray(title)) {
 				// aassert: Array.isArray(page_data)
 				// && title.length === page_data.length
 
@@ -2673,7 +2675,7 @@ function module_code(library_namespace) {
 				// title.raw_result
 				title.original_result = page_data;
 			} else {
-				title = page_data && page_data.title || title;
+				title = /* page_data && */page_data.title || title;
 			}
 
 			// console.error(error);
