@@ -1095,8 +1095,8 @@ function module_code(library_namespace) {
 	PATTERN_prefix_is_description_term = /;\s*$/;
 
 	/**
-	 * parse The MediaWiki markup language (wikitext / wikicode). 解析維基語法。
-	 * 維基語法解析器
+	 * MediaWiki wikitext parser: parse The MediaWiki markup language (wikitext /
+	 * wikicode). 解析維基語法。 維基語法解析器
 	 * 
 	 * TODO:<code>
 
@@ -2325,6 +2325,9 @@ function module_code(library_namespace) {
 				.slice(1)
 				// 只去除結尾的空白(前面的.trimEnd())，保留前面的一個。
 				.replace(/^\s+/, ' ');
+				matched = parse_comment_anchor(parameters.anchor);
+				if (matched)
+					parameters.comment_anchor = matched;
 
 				if (hash_sign)
 					parameters.hash_sign = hash_sign || '#';
@@ -5167,6 +5170,78 @@ function module_code(library_namespace) {
 
 		Object.assign(token, parsed);
 		return token;
+	}
+
+	// ------------------------------------------------------------------------
+
+	var PATTERN_comment_anchor__timestamp
+	// 似乎曾有舊格式:
+	// [[w:zh:Wikipedia:申请成为管理员/和平奮鬥救地球/第3次#c-鱼头炮-2020-12-26T13:50:00.000Z-反對]]
+	// [[w:zh:Wikipedia_talk:命名常规/存档10#c-三猎-2012-10-07T09:46:00.000Z-Wangxuan8331800-2012-10-07T09:11:00.000Z]]
+	= /20[23]\d[01]\d[0-3]\d[0-2]\d[0-5]\d[0-5]\d|20[0-3]\d-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.000Z/,
+	/** {RegExp} #c-username-timestamp-topic title */
+	PATTERN_comment_anchor__reply = new RegExp(
+			/^c-(.+?)-timestamp-(.+?)-timestamp$/.source.replace(/timestamp/g,
+					'(' + PATTERN_comment_anchor__timestamp.source + ')')),
+	/** {RegExp} #username-timestamp-topic title */
+	PATTERN_comment_anchor__new_topic = new RegExp(
+			/^c-(.+?)-timestamp-(.+)$/.source.replace(/timestamp/g, '('
+					+ PATTERN_comment_anchor__timestamp.source + ')')),
+	/** {RegExp} #topic title */
+	PATTERN_comment_anchor__topic_only = /^c-([^\n\-]+)$/;
+
+	/**
+	 * 解析討論工具固定連結（permalinks of Discussion Tools 擴展的永久連結）的 anchor。
+	 * 
+	 * @param {String}anchor
+	 *            anchor
+	 * @returns {Object|Undefined} data of comment anchor
+	 * 
+	 * @see [[mw:Help:DiscussionTools#Talk pages permalinking]]<br />
+	 *      [[mw:Extension:DiscussionTools/How it works#Discussion item
+	 *      database]]<br />
+	 *      [[mw:Talk pages project/Permalinks]]
+	 */
+	function parse_comment_anchor(anchor) {
+		if (!anchor || !/^c-/.test(anchor = String(anchor)))
+			return;
+
+		var matched = anchor.match(PATTERN_comment_anchor__reply);
+		if (matched) {
+			return {
+				// The original poster
+				poster : {
+					username : matched[1],
+					timestamp : matched[2]
+				},
+				replier : {
+					username : matched[3],
+					timestamp : matched[4]
+				}
+			};
+		}
+
+		matched = anchor.match(PATTERN_comment_anchor__new_topic);
+		if (matched) {
+			return {
+				// 作者、時間戳記
+				poster : {
+					username : matched[1],
+					timestamp : matched[2]
+				},
+				// reduced new topic title 新話題標題
+				topic_part : matched[3]
+			};
+		}
+
+		matched = anchor.match(PATTERN_comment_anchor__topic_only);
+		if (matched) {
+			return {
+				// reduced topic title
+				topic_part : matched[1]
+			};
+		}
+
 	}
 
 	// ------------------------------------------------------------------------
