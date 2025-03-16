@@ -2741,8 +2741,10 @@ function module_code(library_namespace) {
 								&& revisions && revisions[0]
 										&& !revisions[0].flagged) {
 									library_namespace.log(
-									// 在有審核機制的 wiki project 中，沒經過審核的版本。
-									'add_listener: ' + '跳過頁面未經審核的版本: '
+									// 在有審核機制的 wiki project 中，
+									// 沒經過審核的版本 pending edits。
+									// 跳過頁面未經審核的版本
+									'add_listener: ' + '跳過待審版本: '
 									// 未經審核的版本對於未登入者來說是不可見的。
 									+ wiki_API.title_link_of(page_data));
 									run_next();
@@ -4827,6 +4829,120 @@ function module_code(library_namespace) {
 			download_next_file();
 		}, wiki_API.add_session_to_options(session, file_info_options));
 	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * @description Find comment by talk page title and anchor.
+	 * 
+	 * @example <code>
+
+	const comment_list = await wiki.find_comment(token);
+
+	</code>
+	 * 
+	 * @param {String|Array}talk_page_and_anchor
+	 *            talk page and anchor: "title#anchor" | [title,anchor]
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {Promise|Undefined} resolve({Array}comment_list)
+	 */
+	function find_comment(talk_page_and_anchor, options) {
+		if (!talk_page_and_anchor) {
+			// No anchor to find.
+			return;
+		}
+
+		if (wiki_API.is_parsed_element(talk_page_and_anchor)
+				&& talk_page_and_anchor.type === 'link') {
+			talk_page_and_anchor = [ talk_page_and_anchor[0],
+					talk_page_and_anchor[1] ];
+		}
+
+		var matched = Array.isArray(talk_page_and_anchor) ? [ ,
+				talk_page_and_anchor[0],
+				String(talk_page_and_anchor[1]).replace(/^#/, '') ] : String(
+				talk_page_and_anchor).trim().match(/^([^#\n]*)#(.+)$/)
+				|| [ , '', talk_page_and_anchor ];
+
+		if (!matched[2] || /[#\|]/.test(matched[2])) {
+			library_namespace
+					.error('find_comment: Invalid talk page and anchor: '
+							+ talk_page_and_anchor);
+			return;
+		}
+
+		// ----------------------------------------------------------
+
+		// assert: this === session
+		var session = this;
+
+		/** {Object}Search parameters passed to the MediaWiki API. */
+		var parameters = {
+			// https://www.mediawiki.org/w/api.php?action=help&modules=discussiontoolsfindcomment
+			action : 'discussiontoolsfindcomment',
+			page : matched[1]
+		};
+
+		matched[2] = String(matched[2]).replace(/ /g, '_');
+		if (/^c-/.test(matched[2]))
+			parameters.idorname = matched[2];
+		else
+			parameters.heading = matched[2];
+
+		var promise = new Promise(function(resolve, reject) {
+
+			function handle_result(data, error) {
+				// console.trace(data);
+
+				if (wiki_API.query.handle_error(data, error)) {
+					reject(data && data.error || data);
+					return;
+				}
+
+				var comment_list = data.discussiontoolsfindcomment;
+				if (Array.isArray(comment_list)) {
+					// 加工處理。
+					comment_list.shouldredirect = [];
+					comment_list.couldredirect = [];
+					comment_list.forEach(function(comment_data) {
+						if ('couldredirect' in comment_data)
+							comment_list.couldredirect.push(comment_data);
+						if ('shouldredirect' in comment_data)
+							comment_list.shouldredirect.push(comment_data);
+					});
+					if (comment_list.shouldredirect.length === 1) {
+						// `comment_list.shouldredirect[0]` is the best matched.
+					} else {
+						// delete comment_list.shouldredirect;
+					}
+					resolve(comment_list);
+					return;
+				}
+
+				if (library_namespace.is_empty_object(data)) {
+					resolve([]);
+					return;
+				}
+
+				reject(data);
+			}
+
+			try {
+				wiki_API.query([ session.API_URL, parameters ], handle_result,
+						options);
+			} catch (e) {
+				reject(e);
+			}
+		});
+
+		return promise;
+	}
+
+	Object.assign(wiki_API.prototype, {
+		find_comment : find_comment
+	});
 
 	// ------------------------------------------------------------------------
 

@@ -5780,6 +5780,25 @@ function test_wiki() {
 			});
 		});
 
+		zhwiki.run(function test_misc_functions() {
+			var test_name = 'wiki: misc_functions';
+			_setup_test(test_name);
+
+			var promise = Promise.resolve();
+
+			promise = promise.then(function () {
+				return zhwiki.find_comment(CeL.wiki.parse('[[使用者討論:Kanashimi#您在 萌娘百科 有一則新留言 2021-05-06]]'));
+			}).then(function (comment_list) {
+				//console.trace(comment_list);
+				assert(['User talk:Kanashimi/2021', Array.isArray(comment_list) && comment_list.length === 1 && comment_list[0].title], 'wiki.find_comment() #1');
+				assert(['h-您在_萌娘百科_有一則新留言_2021-05-06-2021-05-05T22:52:00.000Z', Array.isArray(comment_list) && comment_list.length === 1 && comment_list[0].id], 'wiki.find_comment() #2');
+			});
+
+			return promise.then(function () {
+				_finish_test(test_name);
+			});
+		});
+
 		zhwiki.run(function test_template_functions() {
 			var test_name = 'wiki: template_functions';
 			_setup_test(test_name);
