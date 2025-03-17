@@ -3746,7 +3746,7 @@ function module_code(library_namespace) {
 	if (false) {
 		// Place in front of function caller() code:
 		if (wiki_API.need_get_API_parameters(/* action */'path+path', options,
-				caller, arguments)) {
+				this_function, arguments)) {
 			return;
 		}
 
@@ -3760,20 +3760,8 @@ function module_code(library_namespace) {
 		// @see function wiki_API_siteinfo(), wiki_API_edit()
 	}
 
-	var KEY_API_parameters_callback = typeof Symbol === 'function' ? Symbol('API parameters callback')
-			: '\0API parameters callback';
-	// @inner of need_get_API_parameters()
-	function API_parameters__run_callback(session, path) {
-		var callback_queue = session.API_parameters[KEY_API_parameters_callback];
-		// assert: library_namespace.is_Object(session.API_parameters[path])
-		// && Array.isArray(callback_queue[path])
-		callback_queue[path].forEach(function(caller) {
-			// console.trace(caller);
-			// [ caller, _this, caller_arguments ]
-			caller[0].apply(caller[1], caller[2]);
-		});
-		delete callback_queue[path];
-	}
+	var KEY_API_parameters_promise_hash = typeof Symbol === 'function' ? Symbol('API parameters promise hash')
+			: '\0API parameters promise hash';
 
 	// TODO: 'query+*'
 	function need_get_API_parameters(path, options, caller, caller_arguments) {
@@ -3806,44 +3794,49 @@ function module_code(library_namespace) {
 			return false;
 		}
 
-		var callback_queue = session.API_parameters[KEY_API_parameters_callback];
-		if (!callback_queue) {
+		// ------------------------------------------------
+
+		var promise_hash = session.API_parameters[KEY_API_parameters_promise_hash];
+		if (!promise_hash) {
 			// initialization
-			callback_queue = session.API_parameters[KEY_API_parameters_callback] = Object
+			promise_hash = session.API_parameters[KEY_API_parameters_promise_hash] = Object
 					.create(null);
 		}
 
 		// console.trace([ path, caller ]);
-		if (caller) {
-			if (!Array.isArray(caller) || caller_arguments !== undefined) {
-				// [ caller, _this, caller_arguments ]
-				caller = [ caller, null, caller_arguments ];
-			}
 
-			if (callback_queue[path]) {
-				// 登記要執行的 callback。當多行程複數request一同執行時，可避免卡在一起。
-				callback_queue[path].push(caller);
-
-			} else {
-				callback_queue[path] = [ caller ];
-				library_namespace.debug(
-						'Will execute caller later after get API parameters of ['
-								+ path + ']...', 1, 'need_get_API_parameters');
-				// console.trace(path);
+		if (!promise_hash[path]) {
+			promise_hash[path] = new Promise(function(resolve, reject) {
 				get_API_parameters(path,
 				// `options` 是用在原先的函數 caller()，包含許多額外的 parameters，
-				// 會影響 wiki_API.query() @ get_API_parameters()，因此這邊只取 session。
+				// 會影響 wiki_API.query() @ get_API_parameters()，因此這邊只取
+				// session。
 				add_session_to_options(session),
 				//
 				function(modules, error, data) {
 					// console.trace(data);
-					if (error)
-						throw error;
-					API_parameters__run_callback(session, path);
+					delete promise_hash[path];
+					if (error) {
+						reject(error);
+					} else {
+						resolve();
+					}
 				});
-			}
+			});
 		}
-		return true;
+
+		if (caller) {
+			library_namespace.debug(
+					'Will execute caller later after get API parameters of ['
+							+ path + ']...', 2, 'need_get_API_parameters');
+
+			// 登記要執行的 callback。當多行程複數request一同執行時，可避免卡在一起。
+			promise_hash[path] = promise_hash[path].then(function() {
+				return caller.apply(session, caller_arguments);
+			});
+		}
+
+		return promise_hash[path];
 	}
 
 	wiki_API.need_get_API_parameters = need_get_API_parameters;

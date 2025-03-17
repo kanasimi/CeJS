@@ -4875,9 +4875,6 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------------
 
-		// assert: this === session
-		var session = this;
-
 		/** {Object}Search parameters passed to the MediaWiki API. */
 		var parameters = {
 			// https://www.mediawiki.org/w/api.php?action=help&modules=discussiontoolsfindcomment
@@ -4885,13 +4882,26 @@ function module_code(library_namespace) {
 			page : matched[1]
 		};
 
+		options = wiki_API.add_session_to_options(this, options);
+		var promise = wiki_API.need_get_API_parameters(parameters.action,
+				options, find_comment, arguments);
+		if (promise) {
+			return promise;
+		}
+
 		matched[2] = String(matched[2]).replace(/ /g, '_');
 		if (/^c-/.test(matched[2]))
 			parameters.idorname = matched[2];
 		else
 			parameters.heading = matched[2];
 
-		var promise = new Promise(function(resolve, reject) {
+		parameters = wiki_API.extract_parameters(options, parameters, true);
+		// console.trace(parameters);
+
+		// assert: `this` is the session
+		var session = wiki_API.session_of_options(options) || this;
+
+		promise = new Promise(function(resolve, reject) {
 
 			function handle_result(data, error) {
 				// console.trace(data);
@@ -4931,7 +4941,7 @@ function module_code(library_namespace) {
 
 			try {
 				wiki_API.query([ session.API_URL, parameters ], handle_result,
-						options);
+				/* post_data */null, options);
 			} catch (e) {
 				reject(e);
 			}
