@@ -1346,32 +1346,41 @@ function module_code(library_namespace) {
 			// ----------------------------------------------------------------
 
 		case 'FORMATNUM':
+			// [[mw:Help:Magic_words#Formatting]]
 			var number = get_parameter_String(1);
 			var type = get_parameter_String(2);
+
+			var matched = number.match(/^([\s\S]+?)\.(.+)?$/);
+			if (!matched) {
+				// e.g.,
+				// '{{formatnum:abs({{#invoke:String|str_find|source=Wikipedia:互助客栈/其他|:}})-1}}'
+				return NYI();
+			}
+
 			// TODO: 此為有缺陷的極精簡版。
 			if (type === 'R' || type === 'NOSEP')
 				return number.replace(/,/g, '');
-			number = number.match(/^([\s\S]+?)\.(.+)?$/);
+
 			var thousands_separator = THOUSANDS_SEPARATOR[wiki_API.language]
 					|| THOUSANDS_SEPARATOR.ISO;
 			var decimal_separator = DECIMAL_SEPARATOR[wiki_API.language]
 					|| DECIMAL_SEPARATOR.ISO;
 			if (false && !buggy_toLocaleString)
-				return (+number[1]).toLocaleString('en')
-						+ (number[2] ? decimal_separator + number[2] : '');
+				return (+matched[1]).toLocaleString('en')
+						+ (matched[2] ? decimal_separator + matched[2] : '');
 			// digits
-			// number[1] maybe null
-			number[1] = (number[1] || '').chars();
-			for (var index = number[1].length, numbers = 0; index > 0; index--) {
-				if (!/^\d$/.test(number[1][index])) {
+			// matched[1] maybe null
+			matched[1] = (matched[1] || '').chars();
+			for (var index = matched[1].length, numbers = 0; index > 0; index--) {
+				if (!/^\d$/.test(matched[1][index])) {
 					numbers = 0;
 				} else if (++numbers === 3) {
-					number[1].splice(index, 0, thousands_separator);
+					matched[1].splice(index, 0, thousands_separator);
 					numbers = 0;
 				}
 			}
-			return number[1].join('')
-					+ (number[2] ? decimal_separator + number[2] : '');
+			return matched[1].join('')
+					+ (matched[2] ? decimal_separator + matched[2] : '');
 
 			// ----------------------------------------------------------------
 
