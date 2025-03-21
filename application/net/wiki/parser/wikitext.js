@@ -107,6 +107,7 @@ function module_code(library_namespace) {
 			// TODO: 無法解碼可能會被辨識為普通文字而非 wikilink。
 			// e.g., "[[Francisco_Hern%E1ndez_de_C%F3"... @
 			// [[w:en:Talk:Francisco_Hernández_de_Córdoba_(Yucatán_conquistador)]]
+			// e.g., '#220%95%101%209' @ zhwiki
 		}
 
 		if (/[\x00-\x1F\x7F]/.test(title)) {
@@ -950,7 +951,7 @@ function module_code(library_namespace) {
 		return array;
 	}
 
-	// is_wiki_token(), is_token()
+	// Also: is_wiki_element(), is_wiki_token(), is_token()
 	function is_parsed_element(value) {
 		return Array.isArray(value) && (value.type in wiki_element_toString);
 	}
@@ -5191,7 +5192,7 @@ function module_code(library_namespace) {
 	PATTERN_comment_anchor__topic_only = /^c-([^\n\-]+)$/;
 
 	/**
-	 * 解析討論工具固定連結（permalinks of Discussion Tools 擴展的永久連結）的 anchor。
+	 * 解析討論工具固定連結（permalink of Discussion Tools 擴展的永久連結）的 anchor。
 	 * 
 	 * @param {String}anchor
 	 *            anchor

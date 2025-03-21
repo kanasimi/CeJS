@@ -1299,5 +1299,6 @@
 	"work-title-work-id": "作品標題或 id",
 	"work-list-file": "作品列表檔案",
 	"options": "選項：",
-	"panel_label__summary": "提要"
+	"panel_label__summary": "提要",
+	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "已完成頁面數量 %1 未小於總量 %2！"
 }

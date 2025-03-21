@@ -1288,6 +1288,7 @@
 	"\u4f5c\u54c1\u6a19\u984c\u6216 id": "work title / work id",
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "work list file",
 	"Options:": "Options:",
-	"summary": "summary"
+	"summary": "summary",
+	"\u5df2\u5b8c\u6210\u9801\u9762\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "The number of completed pages %1 is not less than total %2!"
 },
 "en-US");

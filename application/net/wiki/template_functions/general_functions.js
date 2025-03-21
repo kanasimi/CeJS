@@ -181,8 +181,10 @@ function module_code(library_namespace) {
 			if (typeof anchor !== 'string') {
 				// e.g., `{{Anchor|{{u|Emojibot}}}}` @ zhwiki
 
-				library_namespace.warn('expand_template_Anchor: 特殊 anchor: #'
-						+ anchor);
+				// e.g., `##{{anchorencode:中國大陸與臺灣關係和政治地位}}` @ zhwiki
+				// `#<nowiki>引入enwiki近期{{WPBS}}之改版，暨將{{Vital_article}}併入{{WPBS}}</nowiki>`
+				library_namespace.warn('expand_template_Anchor: '
+						+ '特殊 anchor，可能導致錯誤: #' + anchor);
 				// console.trace(anchor);
 
 				// old jawiki {{Anchor}}

@@ -1286,5 +1286,6 @@
 	"work-title-work-id": "work title / work id",
 	"work-list-file": "work list file",
 	"options": "Options:",
-	"panel_label__summary": "summary"
+	"panel_label__summary": "summary",
+	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "The number of completed pages %1 is not less than total %2!"
 }

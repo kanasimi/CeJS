@@ -1918,9 +1918,9 @@ function module_code(library_namespace) {
 
 				} else if (section_title_link.tokens_maybe_handlable) {
 					// exclude "=={{T}}=="
-					library_namespace
-							.warn('Title maybe handlable 請檢查是否可處理此標題: '
-									+ section_title_token.title);
+					library_namespace.warn('get_all_anchors: '
+							+ 'Title maybe handlable 請檢查是否可處理此標題: '
+							+ section_title_token.title);
 					console.log(section_title_link.tokens_maybe_handlable
 					//
 					.map(function(token) {
@@ -1941,10 +1941,9 @@ function module_code(library_namespace) {
 					}
 					imprecise_anchor_count++;
 				} else {
-					library_namespace.warn(
-					//
-					'若包含的是模板，請檢查是否可於 template_functions 添加此標題中的模板: '
-							+ section_title_token.title);
+					library_namespace.warn('get_all_anchors: '
+							+ '若包含的是模板，請檢查是否可於 template_functions 添加此標題中的模板: '
+							+ '[[#' + section_title_token.title + ']]');
 					// Also show .imprecise_tokens
 					console.trace(section_title_link);
 					imprecise_anchor_count++;

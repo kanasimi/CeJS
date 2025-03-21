@@ -3958,7 +3958,8 @@ function module_code(library_namespace) {
 							count_summary = done + '/' + pages.length + '//';
 					}
 
-					if (work_continue && work_continue < initial_target_length) {
+					if (!work_continue) {
+					} else if (work_continue < initial_target_length) {
 						count_summary += ' '
 						// 紀錄整體作業進度 overall progress。
 						+ work_continue + '/' + initial_target_length + ' ('
@@ -3972,6 +3973,12 @@ function module_code(library_namespace) {
 
 					} else {
 						count_summary += initial_target_length;
+						library_namespace.warn([ 'wiki_API.work: ', {
+							// gettext_config:{"id":"the-number-of-completed-pages-$1-is-not-less-than-total-$2"}
+							T : [ '已完成頁面數量 %1 未小於總量 %2！',
+							//
+							work_continue, initial_target_length ]
+						} ]);
 					}
 
 					count_summary = new gettext.Sentence_combination([

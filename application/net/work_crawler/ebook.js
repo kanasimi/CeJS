@@ -886,6 +886,16 @@ function module_code(library_namespace) {
 		/**
 		 * <code>
 
+		// https://69shuba.cx/txt/52895/34444656	别人练级我修仙，苟到大乘再出山-第1章 我绑定了修仙模拟器
+		<p>最⊥新⊥小⊥说⊥在⊥六⊥9⊥⊥书⊥⊥吧⊥⊥首⊥发！</p>
+
+		</code>
+		 */
+		text = text.replace(/<p>最⊥新⊥小⊥说⊥在⊥六⊥9⊥⊥书⊥⊥吧⊥⊥首⊥发！<\/p>\n?/g, '');
+
+		/**
+		 * <code>
+
 		// https://www.69shuba.com/txt/47114/31439934	苟在仙武娶妻长生 第1章 老祖又纳妾了
 		&emsp;&emsp;(本章完)
 
