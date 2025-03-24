@@ -4,6 +4,7 @@
 			"Adriendelucca",
 			"Ajeje Brazorf",
 			"Crochet.david",
+			"Escargot bleu",
 			"Gomoko",
 			"I'm mender",
 			"Kanashimi",
@@ -1306,5 +1307,6 @@
 	"work-title-work-id": "titre ou identifiant du travail",
 	"work-list-file": "fichier de liste de travaux",
 	"options": "Options :",
-	"panel_label__summary": "Résumé"
+	"panel_label__summary": "Résumé",
+	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "Le nombre de %1 {{PLURAL:%1|page complétée|pages complétées}} n'est pas inférieur au total %2 !"
 }

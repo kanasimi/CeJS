@@ -1292,5 +1292,6 @@
 	"work-title-work-id": "tìtol o identificativ dël travaj",
 	"work-list-file": "archivi ëd lista ëd travaj",
 	"options": "Opsion:",
-	"panel_label__summary": "resumé"
+	"panel_label__summary": "resumé",
+	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "Ël nùmer ëd {{PLURAL:%1|pàgina|pàgine}} %1 completà a l'é pa men dël total %2!"
 }
