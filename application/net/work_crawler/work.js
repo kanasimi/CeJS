@@ -950,6 +950,15 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			function onerror(error) {
+				var warning = 'process_work_data: ' + (work_title || work_id)
+						+ ': ' + error;
+				_this.onwarning(warning);
+				typeof callback === 'function' && callback({
+					title : work_title
+				});
+			}
+
 			try {
 				// 解析出作品資料/作品詳情。
 				work_data = _this.parse_work_data(html,
@@ -987,15 +996,24 @@ function module_code(library_namespace) {
 
 			} catch (e) {
 				// throw e;
-				var warning = 'process_work_data: ' + (work_title || work_id)
-						+ ': ' + e;
-				_this.onwarning(warning);
-				typeof callback === 'function' && callback({
-					title : work_title
-				});
+				onerror(error);
 				return;
 			}
 
+			// --------------------------------------------
+
+			if (library_namespace.is_thenable(work_data)) {
+				work_data.then(function(_work_data) {
+					work_data = _work_data;
+					// console.trace(XMLHttp, work_data);
+					after_fetch_work_data(XMLHttp, work_data);
+				}, onerror);
+			} else {
+				after_fetch_work_data(XMLHttp, work_data);
+			}
+		}
+
+		function after_fetch_work_data(XMLHttp, work_data) {
 			// work_title: search key
 			work_data.input_title = work_title;
 			add_work_aliases(work_data, original_work_title);
@@ -1149,7 +1167,7 @@ function module_code(library_namespace) {
 			work_data.data_file = work_data.directory
 					+ work_data.directory_name + '.json';
 
-			var work_page_path = get_work_page_path(work_data), html;
+			var work_page_path = get_work_page_path(work_data), html = XMLHttp.responseText;
 			if (_this.preserve_work_page) {
 				if (!_this.regenerate) {
 					// 先寫入作品資料 cache。
@@ -1391,6 +1409,7 @@ function module_code(library_namespace) {
 				// gettext_config:{"id":"create-work_data.directory-$1"}
 				T : [ 'Create work_data.directory: %1', work_data.directory ]
 			});
+			// console.trace(work_data);
 			// 預防(work_data.directory)不存在。
 			library_namespace.create_directory(work_data.directory);
 
