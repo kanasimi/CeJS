@@ -225,6 +225,7 @@ function module_code(library_namespace) {
 	function create_directory(directories, options) {
 		// var node_fs = require('fs');
 		var error = 0;
+		// console.trace(directories);
 		if (typeof directories === 'string') {
 			directories = [ directories ];
 		}
