@@ -1083,6 +1083,8 @@
 紫发	紫髮
 // 《不许没收我的人籍》	碧发紫瞳的少女， (~碧髮<ATT>n:瞳 n:碧发+a:紫+n:瞳+u:的+n:少女+wp:，) 單純 zh_conversion 轉換過程: 发紫→發紫
 碧发	碧髮
+// 《不许没收我的人籍》	靛发青年挤出人群， (~靛髮<ATT>n:青年 n:靛发+n:青年+v:挤出+n:人群+wp:，) 單純 zh_conversion 轉換過程: 发青→發青
+靛发	靛髮
 // https://www.zdic.net/hans/霜发
 // 《玩家超正义》	霜发及地的冰肌蓝眼的美人。 (~髮<SBV>v:及 n:霜+n:发+v:及+n:地+u:的+n:冰+n:肌+a:蓝+n:眼+u:的+n:美人+wp:。)
 // 《玩家超正义》	霜发灰眼的维克多， (~髮<ATT>nh:维克多 n:霜+n:发+a:灰+n:眼+u:的+nh:维克多+wp:，)
@@ -2082,6 +2084,8 @@ https://tw.hinative.com/questions/23113659
 帮你系好	幫你繫好
 // 《仙人只想躺着》	一地之国运系一人身上， (~繫<COO>v:担心 ~繫<role.type:A0>一地之国运 ~繫<role.type:A1>一人身上 m:一+n:地+u:之+n:国运+v:系+m:一+n:人+nl:身上+wp:，)
 系一人身上	繫一人身上
+// 《不许没收我的人籍》	他的生命全部的意义就系于这一剑之上。 (~繫<COO>v:惊 ~繫<role.type:A0>他的生命全部的意义 ~繫<role.type:ARGM-ADV>就 ~繫<role.type:A1>于这一剑之上 r:他+u:的+n:生命+m:全部+u:的+n:意义+d:就+v:系+p:于+r:这+m:一+n:剑+nd:之上+wp:。) 單純 zh_conversion 轉換過程: 就系→就係
+就系于	就繫於
 // 《长生从宗门杂役开始》	万古之成败，皆系一身， (~繫<COO>v:关系 ~繫<role.type:ARGM-ADV>皆 ~繫<role.type:A1>一身 ~繫<role.type:A0>太上 n:万古+u:之+n:成败+wp:，+d:皆+v:系+m:一身+wp:，)
 皆系一身	皆繫一身
 // 《我为长生仙》	取来了五色束丝绦，往腰间一系， (~繫<COO>v:取 ~繫<role.type:ARGM-DIR>往腰间 ~繫<role.type:ARGM-ADV>一 v:取+v:来+u:了+m:五+n:色+v:束+n:丝绦+wp:，+p:往+n:腰+nd:间+d:一+v:系+wp:，) 單純 zh_conversion 轉換過程: 一系→一系
@@ -3276,10 +3280,12 @@ https://tw.hinative.com/questions/23113659
 不硬、不干	不硬、不乾
 // 《回到过去变成猫》	夏天毛干得快， (~乾<COO>v:开 ~乾<role.type:ARGM-TMP>夏天 ~乾<role.type:A0>毛 ~乾<role.type:ARGM-ADV>快 nt:夏天+n:毛+v:干+u:得+a:快+wp:，)
 干得快	乾得快
-// 解析錯誤 @ 《神国之上》	这一身血衣也已干得差不多了， (~乾<role.type:A0>这一身血衣 ~乾<role.type:ARGM-DIS>也 ~乾<role.type:ARGM-ADV>已 ~乾<role.type:ARGM-EXT>差不多 r:这+m:一+q:身+n:血衣+d:也+d:已+v:干+u:得+i:差不多+u:了)
-衣也已干得	衣也已乾得
 // 解析錯誤 @ 《回到过去变成猫》	现在身上的毛都干得差不多了。 (~乾<COO>v:看 ~乾<role.type:ARGM-TMP>现在 nt:现在+nl:身上+u:的+n:毛+d:都+v:干+u:得+i:差不多+u:了+wp:。)
 毛都干得	毛都乾得
+// 解析錯誤 @ 《神国之上》	这一身血衣也已干得差不多了， (~乾<role.type:A0>这一身血衣 ~乾<role.type:ARGM-DIS>也 ~乾<role.type:ARGM-ADV>已 ~乾<role.type:ARGM-EXT>差不多 r:这+m:一+q:身+n:血衣+d:也+d:已+v:干+u:得+i:差不多+u:了)
+衣也已干得	衣也已乾得
+// 《不许没收我的人籍》	现在是十一月底的冬天，他的喉咙却干得跟在盛夏午后大闹过一场似的， (~乾<COO>v:是 ~乾<role.type:A0>紧绷的关节 nt:现在+v:是+nt:十一月+nd:底+u:的+nt:冬天+wp:，+r:他+u:的+n:喉咙+d:却+a:干+u:得+p:跟+p:在+nt:盛夏+nt:午后+d:大闹+u:过+m:一+q:场+u:似的+wp:，) 單純 zh_conversion 轉換過程: 干得→幹得
+喉咙却干得	喉嚨卻乾得
 // 解析錯誤 @ 《回到过去变成猫》	郑叹身上的毛还没干， (~乾<VOB>v:叹 ~乾<role.type:A0>身上的毛 ~乾<role.type:ARGM-ADV>还 ~乾<role.type:ARGM-ADV>没 nh:郑+v:叹+nl:身上+u:的+n:毛+d:还+d:没+v:干+wp:，)
 毛还没干	毛還沒乾
 // 《术师手册》	她眼里的泪还没干， (~乾<COO>a:快 ~乾<role.type:A0>她眼里的泪 ~乾<role.type:ARGM-ADV>还 ~乾<role.type:ARGM-ADV>没 r:她+nl:眼里+u:的+n:泪+d:还+d:没+v:干+wp:，) 單純 zh_conversion 轉換過程: 没干→沒幹
@@ -4137,6 +4143,8 @@ https://zi.tools/zi/%E8%A8%BB
 回复得还不错	回復得還不錯
 // 《请公子斩妖》	如果不是楚梁现在修为够高而且回复极快，可能一时半刻就会被耗光气海了。 (~回復<COO>a:高 c:如果+d:不+v:是+nh:楚梁+nt:现在+n:修为+d:够+a:高+c:而且+v:回复+d:极+a:快+wp:，+v:可能+nt:一时半刻+d:就+v:会+p:被+v:耗光+n:气海+u:了+wp:。)
 而且回复极快	而且回復極快
+// 《不许没收我的人籍》	哪怕西格丽德那狼人特性让她在血月城近乎拥有超回复的不死之身，也毫无问题。 (~回復<ATT>i:不死之身 c:哪怕+ns:西格丽德+r:那+n:狼人+n:特性+v:让+r:她+p:在+n:血月城+v:近乎+v:拥有+b:超+v:回复+u:的+i:不死之身+wp:，+d:也+v:毫无+n:问题+wp:。) 單純 zh_conversion 轉換過程: 回复→回覆
+超回复的	超回復的
 // 《不许没收我的人籍》	仅仅维持普通的召唤状态，法力消耗便只比自然回复快一点， (~回復<POB>p:比 d:仅仅+v:维持+a:普通+u:的+v:召唤+n:状态+wp:，+n:法力+v:消耗+d:便+d:只+p:比+a:自然+v:回复+a:快+m:一点+wp:，) 單純 zh_conversion 轉換過程: 回复→回覆
 自然回复	自然回復
 // 《大奉打更人》	元景帝一双眼睛彻底回复了灵动， (~回復<COO>v:道 ~回復<role.type:A0>小公公 ~回復<role.type:ARGM-ADV>娓娓 ~回復<role.type:A0-PSR>元景帝 ~回復<role.type:A0-PSE>一双眼睛 ~回復<role.type:ARGM-ADV>彻底 nh:元景帝+m:一+q: 双+n:眼睛+a:彻底+v:回复+u:了+a:灵动+wp:，) (~回復<role.type:A0>元景帝 ~回復<role.type:A0>一双眼睛 ~回復<role.type:ARGM-ADV>彻底 ~回復<role.type:A1>灵动 nh:元景帝+m:一+q:双+n:眼睛+a:彻底+v:回复+u:了+a:灵动+wp:，)
@@ -4145,6 +4153,8 @@ https://zi.tools/zi/%E8%A8%BB
 满血回复	滿血回復
 // 《别人练级我修仙，苟到大乘再出山》	准备等伤势回复一番后，再进行联系。 (~回復<ATT>nd:后 ~回復<role.type:A1>伤势 ~回復<role.type:ARGM-EXT>一番 v:准备+v:等+n:伤势+v:回复+m:一番+nd:后+wp:，+d:再+v:进行+v:联系+wp:。) 單純 zh_conversion 轉換過程: 回复→回覆
 伤势回复	傷勢回復
+// 《不许没收我的人籍》	西格丽德不仅生命回复可怕，本身似乎还有种短冷却的高额治愈， (~回復<role.type:A0-PSE>生命 nz:西格丽德+c:不仅+n:生命+v:回复+a:可怕+wp:，+r:本身+d:似乎+d:还有+q:种+a:短+v:冷却+u:的+b:高额+v:治愈+wp:，) 單純 zh_conversion 轉換過程: 回复→回覆
+生命回复	生命回復
 // 《道诡异仙》	所有人的体力回复得不错， (~回復<COO>v:有 b:所有+n:人+u:的+n:体力+v:回复+u:得+a:不错+wp:，)
 体力回复	體力回復
 // 《不许没收我的人籍》	而且自己的法力回复速度也没有高到能让大爱诗人一直待在外面自由生活。 (~回復<ATT>n:速度 c:而且+r:自己+u:的+n:法力+v:回复+n:速度+d:也+d:没有+a:高+v:到+v:能+v:让+n:大爱+n:诗人+d:一直+v:待+p:在+nd:外面+a:自由+v:生活+wp:。) 單純 zh_conversion 轉換過程:回复→回覆
@@ -4155,6 +4165,8 @@ https://zi.tools/zi/%E8%A8%BB
 伤损回复	傷損回復
 // 《请公子斩妖》	他的修为回复速度一贯远超常人， (~回復<ATT>n:速度 r:他+u:的+n:修为+v:回复+n:速度+d:一贯+a:远+v:超+n:常人+wp:，)
 修为回复	修為回復
+// 《不许没收我的人籍》	身为武者的他高概率还有什么强力回复手段， (~回復<ATT>n:手段 v:身+v:为+n:武者+u:的+r:他+a:高+n:概率+v:还有+r:什么+n:强力+v:回复+n:手段+wp:，) 單純 zh_conversion 轉換過程: 回复→回覆
+强力回复手段	強力回復手段
 // [general.TW.txt]	体力的回复状况并不乐观。 (~回復<ATT>n:状况 n:体力+u:的+v:回复+n:状况+d:并+d:不+a:乐观+wp:。)
 的回复状况	的回復狀況
 // 《苍青之剑》	先统一回复成出厂设置…… (~回復<role.type:ARGM-ADV>先 ~回復<role.type:ARGM-ADV>统一 ~回復<role.type:A1>出厂设置 d:先+a:统一+v:回复+v:成+v:出厂+v:设置+wp:……)
@@ -4503,10 +4515,20 @@ https://zi.tools/zi/%E8%A8%BB
 完克	完剋
 // 《我在幕后调教大佬》	这专克一切坏气运的宝物， (~剋<ATT>n:宝物 ~剋<←ATT>r:一切 r:这+d:专+v:克+r:一切+a:坏+n:气运+u:的+n:宝物)	专克自己这方的龙族助力， (d:专+v:克+r:自己)	专克仙人。 (d:专+v:克+n:仙人)
 专克	專剋
+// 《速通修仙！》	是山河社稷图这个空间至宝太克血海了， (~太剋<VOB>v:知道 v:是+n:山河+n:社稷+n:图+r:这个+n:空间+n:至宝+d:太克+n:血海+u:了+wp:，) (~太剋<ATT>n:血海 v:是+n:山河+n:社稷图+r:这个+n:空间+n:至宝+nz:太克+n:血海+u:了+wp:，) (~剋<VOB>v:是 ~剋<role.type:A1>血海 v:是+n:山河+n:社稷+n:图+r:这个+n:空间+n:至宝+d:太+v:克+n:血海+u:了+wp:，)
+太克	太剋
+// 《速通修仙！》	长生，你太克制了。 (~克制<COO>nh:长生 ~克制<role.type:A0>你 ~克制<role.type:ARGM-ADV>太 nh:长生+wp:，+r:你+d:太+v:克制+u:了+wp:。) 單純 zh_conversion 轉換過程: 太克→太剋
+// 《速通修仙！》	你们这些一代先民太克制了。 (~克制<COO>v:做 ~克制<role.type:A0>你们这些一代先民 ~克制<role.type:ARGM-ADV>太 ~克制<role.type:A0>大法师 r:你们+r:这些+m:一+q:代+n:先民+d:太+v:克制+u:了+wp:。) 單純 zh_conversion 轉換過程: 太克→太剋
+太克制了	太克制了
 // 《我在修仙界长生不死》	最克心魔臆念， (~剋<COO>v:拜谢 d:最+v:克+n:心魔+v:臆念+wp:，)
 最克	最剋
+// [general.TW.txt]	大家都气得揍他，我已经是最克制的了。 (~克制<VOB>v:是 ~克制<role.type:ARGM-ADV>最 r:大家+d:都+v:气+u:得+v:揍+r:他+wp:，+r:我+d:已经+v:是+d:最+v:克制+u:的+u:了+wp:。) 單純 zh_conversion 轉換過程: 最克→最剋
+最克制的了	最克制的了
 // 《不许没收我的人籍》	牢桑好像还真挺克血族， (~剋<COO>v:是 ~剋<role.type:ARGM-PRP>缘由 ~剋<role.type:A0>牢桑 ~剋<role.type:ARGM-ADV>好像 ~剋<role.type:ARGM-ADV>还 ~剋<role.type:ARGM-ADV>真 ~剋<role.type:ARGM-ADV>挺 ~剋<role.type:A1>血族 nh:牢桑+d:好像+d:还+d:真+d:挺+v:克+n:血族+wp:，)
 挺克	挺剋
+// 《一品修仙》	大家都挺克制的， (~克制<COO>v:有 r:大家+d:都+d:挺+v:克制+u:的+wp:，) 單純 zh_conversion 轉換過程: 挺克→挺剋
+// 《开局奖励一亿条命》	一开始她们还挺克制谨慎的， (~克制<COO>v:心想 ~克制<role.type:ARGM-ADV>一开始 ~克制<role.type:A0>她们 ~克制<role.type:ARGM-ADV>还 ~克制<role.type:ARGM-ADV>挺 d:一+v:开始+r:她们+d:还+d:挺+v:克制+a:谨慎+u:的+wp:，) 單純 zh_conversion 轉換過程: 挺克→挺剋
+挺克制	挺克制
 // 解析錯誤 @ 《最仙遊》	虽然不被金克之， (~金剋之<POB>p:被 c:虽然+d:不+p:被+nh:金克之+wp:，)
 金克之	金剋之
 // 《最仙遊》	倒不如用水克之。 (~剋<VOB>v:不如 ~剋<role.type:ARGM-MNR>用水 ~剋<role.type:A1>之 d:倒+v:不如+p:用+n:水+v:克+r:之+wp:。)
@@ -4624,6 +4646,8 @@ https://zi.tools/zi/%E8%A8%BB
 克制她的第八境	剋制她的第八境
 // 《请公子斩妖》	可面对没有办法克制她的问道境及以下， (~剋制<COO>v:没有 ~剋制<role.type:A1>她 c:可+v:面对+v:没有+n:办法+v:克制+r:她+u:的+n:问道境及+nd:以下+wp:，)
 克制她的问道境	剋制她的問道境
+// 《不许没收我的人籍》	若是不能克制这种大魔族，就会被他百分百碾压。 (~剋制<COO>v:让 ~剋制<role.type:ARGM-DIS>如果 ~剋制<role.type:A0>其他几位血族 ~剋制<role.type:A0>拉夏尔 ~剋制<role.type:ARGM-DIS>若是 ~剋制<role.type:ARGM-ADV>不 ~剋制<role.type:A1>这种大魔族 c:若是+d:不+v:能+v:克制+r:这种+a:大+n:魔族+wp:，+d:就+v:会+p:被+r:他+m:百分百+v:碾压+wp:。) 單純 zh_conversion 轉換過程: 克制→克制
+克制这种大魔族	剋制這種大魔族
 // 《剑宗旁门》	他的水行可以克制对方的火行， (~剋制<COO>v:没有 ~剋制<role.type:A0>那 ~剋制<role.type:A1>于此 ~剋制<role.type:ARGM-DIS>虽然 ~剋制<role.type:A0>他的水行 ~剋制<role.type:A1>对方的火行 r:他+u:的+n:水行+v:可以+v:克制+n:对方+u:的+n:火行+wp:，)
 克制对方	剋制對方
 // 《道诡异仙》	就在李火旺以为司天监的法子克制住对方的时候， (~剋制<VOB>v:以为 ~剋制<role.type:A0>司天监的法子 d:就+p:在+nh:李火旺+v:以为+j:司天监+u:的+n:法子+v:克制+v:住+n:对方+u:的+n:时候+wp:，) (~剋制<VOB>v:以为 ~剋制<role.type:A0>司天监的法子 ~剋制<role.type:A1>对方 d:就+p:在+nh:李火旺+v:以为+nh:司天监+u:的+n:法子+v:克制+v:住+n:对方+u:的+n:时候+wp:，)

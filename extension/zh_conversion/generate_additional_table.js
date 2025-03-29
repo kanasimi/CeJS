@@ -2,8 +2,10 @@
  * 整合繁簡轉換各家辭典: 合併新同文堂和 ConvertZZ 的辭典檔用。
  */
 
-// node generate_additional_table.js to_CN
-// node generate_additional_table.js to_TW
+/*
+node generate_additional_table.js to_CN
+node generate_additional_table.js to_TW
+*/
 
 'use strict';
 
