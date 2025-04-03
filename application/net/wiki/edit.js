@@ -1220,6 +1220,7 @@ function module_code(library_namespace) {
 			options.comment = options.summary;
 		}
 
+		// TODO: {Array}structured_data
 		var structured_data = Object.assign(Object.create(null),
 				options.structured_data);
 

@@ -1572,6 +1572,11 @@ function module_code(library_namespace) {
 
 			// ----------------------------------------------------------------
 
+			// case '#iferror':
+			// TODO
+
+			// ----------------------------------------------------------------
+
 		case '#switch':
 			var key = get_parameter_String(1, true, true), default_value = '';
 			if (library_namespace.is_thenable(key)) {
@@ -1998,6 +2003,7 @@ function module_code(library_namespace) {
 			return eval_expr(expression);
 
 			// case '#ifexpr':
+			// TODO
 
 			// ----------------------------------------------------------------
 
