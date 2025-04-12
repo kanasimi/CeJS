@@ -434,11 +434,29 @@ function module_code(library_namespace) {
 			var operated_template_count = 0, latest_OK_key, key_of_spaces, spaces, next_insert_index;
 			for ( var replace_from in parameter_name) {
 				replace_to = parameter_name[replace_from];
+				var replace_options;
+				if (replace_to !== KEY_remove_parameter
+				//
+				&& library_namespace.is_Object(replace_to)
+				// && !wiki_API.is_parsed_element(replace_to)
+				) {
+					// console.trace(replace_to);
+					replace_options = replace_to;
+					replace_to = replace_options.replace_to;
+
+					if (replace_options.move_to
+					// TODO: 插入為第 .insert_as 個參數。
+					&& !('insert_as' in replace_options)) {
+						replace_options.insert_as = replace_options.move_to;
+					}
+				}
+
 				if (typeof replace_from === 'string')
 					replace_from = replace_from.trim();
 				if (convert_replace_to(replace_from) === undefined) {
 					continue;
 				}
+
 				var index = replace_from === KEY_template_name ? 0
 						: template_token.index_of[replace_from];
 				if (!(index >= 0)) {
