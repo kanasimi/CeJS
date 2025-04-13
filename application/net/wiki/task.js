@@ -3959,7 +3959,7 @@ function module_code(library_namespace) {
 					}
 
 					if (!work_continue) {
-					} else if (work_continue < initial_target_length) {
+					} else if (work_continue <= initial_target_length) {
 						count_summary += ' '
 						// 紀錄整體作業進度 overall progress。
 						+ work_continue + '/' + initial_target_length + ' ('

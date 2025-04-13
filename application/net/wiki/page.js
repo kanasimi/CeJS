@@ -4947,6 +4947,13 @@ function module_code(library_namespace) {
 			}
 		});
 
+		if (false && callback) {
+			promise = promise.then(callback, function(error) {
+				typeof callback === 'function' && callback(undefined, error);
+				return error;
+			});
+		}
+
 		return promise;
 	}
 
