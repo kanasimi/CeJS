@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "\u897f\u73ed\u7259",
 	"Calendrier r\u00e9publicain": "\u6cd5\u56fd\u5171\u548c\u5386",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "\u6e05\u9664\u4fe1\u606f",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "\u663e\u793a/\u9690\u85cf\u65e5\u5fd7",
 	"Load failed": "\u52a0\u8f7d\u5931\u8d25",
@@ -1288,6 +1288,7 @@
 	"\u4f5c\u54c1\u6a19\u984c\u6216 id": "\u4f5c\u54c1\u6807\u9898\u6216 id",
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "\u4f5c\u54c1\u5217\u8868\u6863\u6848",
 	"Options:": "\u9009\u9879\uff1a",
-	"summary": "\u6458\u8981"
+	"summary": "\u6458\u8981",
+	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "\u5df2\u5b8c\u6210\u7684{{PLURAL:%1|\u9875|\u9875\u6570}} %1 \u672a\u5c11\u4e8e\u603b\u6570 %2\uff01"
 },
 "cmn-Hans-CN");

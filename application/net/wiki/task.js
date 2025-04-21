@@ -3975,7 +3975,7 @@ function module_code(library_namespace) {
 						count_summary += initial_target_length;
 						library_namespace.warn([ 'wiki_API.work: ', {
 							// gettext_config:{"id":"the-number-of-completed-pages-$1-is-not-less-than-total-$2"}
-							T : [ '已完成頁面數量 %1 未小於總量 %2！',
+							T : [ '已完成{{PLURAL:%1|頁面}}數量 %1 未小於總量 %2！',
 							//
 							work_continue, initial_target_length ]
 						} ]);

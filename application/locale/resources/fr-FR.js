@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "Calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "1",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -1288,6 +1288,7 @@
 	"\u4f5c\u54c1\u6a19\u984c\u6216 id": "titre ou identifiant du travail",
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "fichier de liste de travaux",
 	"Options:": "Options\u202f:",
-	"summary": "R\u00e9sum\u00e9"
+	"summary": "R\u00e9sum\u00e9",
+	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "Le nombre de %1 {{PLURAL:%1|page compl\u00e9t\u00e9e|pages compl\u00e9t\u00e9es}} n'est pas inf\u00e9rieur au total %2\u00a0!"
 },
 "fr-FR");
