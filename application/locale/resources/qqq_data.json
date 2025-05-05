@@ -8328,7 +8328,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。",
 		"parameters": "%1: topic counts",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170915.topic_list.js#L1600}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170915.topic_list.js#L1622}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-section-counters-and-article-assessment-icons": {
