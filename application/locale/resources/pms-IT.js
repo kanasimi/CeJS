@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
-	"untranslated message count": "0",
+	"untranslated message count": "2",
 	"\u6e05\u9664\u8a0a\u606f": "Polid\u00e9 l'argistr",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Smon-e / st\u00ebrm\u00e9 l'argistr",
 	"Load failed": "Cariament fal\u00ec",
@@ -960,7 +960,6 @@
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "... %1 {{PLURAL:%1|ocorensa|ocorense}} an tut.",
 	"Report generation date: %1": "Data \u00ebd generassion d\u00ebl rap\u00f2rt: %1",
 	"Cleanup report for interlanguage link templates": "Rap\u00f2rt \u00ebd poliss\u00eca p\u00ebr j\u00eb stamp \u00ebl liure ant\u00ebrlenghe",
-	"Convert %1 to wikilink": "Convert\u00ec %1 an wikiliura",
 	"Preserve interlanguage links because of the \"preserve\" parameter is set.": "Goern\u00e9 le liure ant\u00ebrlenghe dagi\u00e0 che \u00ebl par\u00e0meter \u00abgoern\u00e9\u00bb a l'\u00e9 defin\u00ec.",
 	"The task does not process talk pages": "\u00cbl travaj a trata nen le p\u00e0gine \u00ebd ciaciarade",
 	"The local link target links back to the page itself. [[MOS:CIRCULAR]]?": "\u00cbl b\u00ebrsaj dla liura local a ponta vers l'istessa p\u00e0gina. [[MOS:CIRCULAR]]?",
@@ -1289,6 +1288,7 @@
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "archivi \u00ebd lista \u00ebd travaj",
 	"Options:": "Opsion:",
 	"summary": "resum\u00e9",
-	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "\u00cbl n\u00f9mer \u00ebd {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} %1 complet\u00e0 a l'\u00e9 pa men d\u00ebl total %2!"
+	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "\u00cbl n\u00f9mer \u00ebd {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} %1 complet\u00e0 a l'\u00e9 pa men d\u00ebl total %2!",
+	"Convert %1 to wikilink": "Convert\u00ec %1 an wikiliura"
 },
 "pms-IT");

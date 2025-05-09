@@ -7,6 +7,7 @@
 	},
 	"españa": "Spagna",
 	"french-republican-calendar": "calendari republican fransèis",
+	"untranslated-message-count": "2",
 	"clear-log": "Polidé l'argistr",
 	"show-hidden-log": "Smon-e / stërmé l'argistr",
 	"load-failed": "Cariament falì",
@@ -963,7 +964,6 @@
 	"a-total-of-$1-occurrences": "... %1 {{PLURAL:%1|ocorensa|ocorense}} an tut.",
 	"report-generation-date-$1": "Data ëd generassion dël rapòrt: %1",
 	"cleanup-report-for-interlanguage-link-templates": "Rapòrt ëd polissìa për jë stamp ël liure antërlenghe",
-	"convert-$1-to-wikilink": "Convertì %1 an wikiliura",
 	"preserve-interlanguage-links-because-of-the-preserve-parameter-is-set": "Goerné le liure antërlenghe dagià che ël paràmeter «goerné» a l'é definì.",
 	"the-task-does-not-process-talk-pages": "Ël travaj a trata nen le pàgine ëd ciaciarade",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "Ël bërsaj dla liura local a ponta vers l'istessa pàgina. [[MOS:CIRCULAR]]?",
@@ -1292,5 +1292,6 @@
 	"work-list-file": "archivi ëd lista ëd travaj",
 	"options": "Opsion:",
 	"panel_label__summary": "resumé",
-	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "Ël nùmer ëd {{PLURAL:%1|pàgina|pàgine}} %1 completà a l'é pa men dël total %2!"
+	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "Ël nùmer ëd {{PLURAL:%1|pàgina|pàgine}} %1 completà a l'é pa men dël total %2!",
+	"convert-$1-to-wikilink": "Convertì %1 an wikiliura"
 }

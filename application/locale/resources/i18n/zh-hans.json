@@ -21,6 +21,7 @@
 	},
 	"españa": "西班牙",
 	"french-republican-calendar": "法国共和历",
+	"untranslated-message-count": "2",
 	"clear-log": "清除信息",
 	"show-hidden-log": "显示/隐藏日志",
 	"load-failed": "加载失败",
@@ -977,7 +978,6 @@
 	"a-total-of-$1-occurrences": "...总共%1{{PLURAL:%1|发生}}次数。",
 	"report-generation-date-$1": "报告生成日期：%1",
 	"cleanup-report-for-interlanguage-link-templates": "跨语言链接清理报告",
-	"convert-$1-to-wikilink": "清理跨语言链接%1为内部链接：编辑摘要的红链乃正常现象，经繁简转换后存在，非bot错误编辑",
 	"preserve-interlanguage-links-because-of-the-preserve-parameter-is-set": "由于设置了“preserve”参数，因此保留跨语言链接。",
 	"the-task-does-not-process-talk-pages": "该任务不处理讨论页面",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "本地链接目标链接回页面本身。[[MOS:CIRCULAR]]?",
@@ -1306,5 +1306,6 @@
 	"work-list-file": "作品列表档案",
 	"options": "选项：",
 	"panel_label__summary": "摘要",
-	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "已完成的{{PLURAL:%1|页|页数}} %1 未少于总数 %2！"
+	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "已完成的{{PLURAL:%1|页|页数}} %1 未少于总数 %2！",
+	"convert-$1-to-wikilink": "清理跨语言链接%1为内部链接：编辑摘要的红链乃正常现象，经繁简转换后存在，非bot错误编辑"
 }

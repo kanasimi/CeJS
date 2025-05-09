@@ -15,6 +15,7 @@
 	},
 	"españa": "スペイン",
 	"french-republican-calendar": "フランス革命暦",
+	"untranslated-message-count": "600+",
 	"clear-log": "記録を消去する",
 	"show-hidden-log": "ログ表示・非表示",
 	"load-failed": "読み込みに失敗しました",
@@ -528,12 +529,12 @@
 	"will-not-automatically-notify-the-task-finished": "タスク終了の自動通知はしません！",
 	"problematic-articles": "問題のある記事",
 	"archiving-operation": "記録保存",
+	"convert-interlanguage-link-templates-to-wikilinks": "解消済み仮リンクをリンクに置き換える",
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": "このリストは手動で修正する必要のある記事群です。リストはボットによって自動更新されます。",
 	"edit-mark": "編",
 	"a-total-of-$1-occurrences": "合計%1回発生しました",
 	"report-generation-date-$1": "レポート作成日：%1",
 	"cleanup-report-for-interlanguage-link-templates": "解消済み仮リンクを内部リンクに置き換える作業の報告",
-	"convert-$1-to-wikilink": "解消済み仮リンク%1を内部リンクに置き換えます",
 	"preserve-interlanguage-links-because-of-the-preserve-parameter-is-set": "強制表示引数(preserve)を指定するなので、修正の必要がありません。",
 	"the-task-does-not-process-talk-pages": "ノートページを処理しない",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "[[WP:SELF|自己言及]]リンク。",
@@ -654,5 +655,6 @@
 	"work-title-work-id": "題名 / 作品ID",
 	"work-list-file": "作品一覧",
 	"options": "オプション:",
-	"panel_label__summary": "要約"
+	"panel_label__summary": "要約",
+	"convert-$1-to-wikilink": "解消済み仮リンク%1を内部リンクに置き換えます"
 }

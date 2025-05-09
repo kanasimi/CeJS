@@ -953,12 +953,12 @@
 	"minimum-number-of-templates-to-report-$1": "Minimum number of templates to report: %1",
 	"archiving-operation": "Archiving operation",
 	"archive-$1-chars": "Archive %1 {{PLURAL:%1|char|chars}}.",
+	"convert-interlanguage-link-templates-to-wikilinks": "Convert interlanguage link templates to wikilinks",
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": "Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.",
 	"edit-mark": "E",
 	"a-total-of-$1-occurrences": "... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.",
 	"report-generation-date-$1": "Report generation date: %1",
 	"cleanup-report-for-interlanguage-link-templates": "Cleanup report for interlanguage link templates",
-	"convert-$1-to-wikilink": "Convert %1 to wikilink",
 	"preserve-interlanguage-links-because-of-the-preserve-parameter-is-set": "Preserve interlanguage links because of the \"preserve\" parameter is set.",
 	"the-task-does-not-process-talk-pages": "The task does not process talk pages",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "The local link target links back to the page itself. [[MOS:CIRCULAR]]?",
@@ -1287,5 +1287,7 @@
 	"work-list-file": "work list file",
 	"options": "Options:",
 	"panel_label__summary": "summary",
-	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "The number of completed {{PLURAL:%1|page|pages}} %1 is not less than total %2!"
+	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "The number of completed {{PLURAL:%1|page|pages}} %1 is not less than total %2!",
+	"convert-$1-to-wikilink": "Convert %1 to wikilink",
+	"also-fix-bad-language-codes-$1": "Also fix bad language codes: %1"
 }

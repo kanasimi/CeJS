@@ -11,6 +11,7 @@
 	},
 	"españa": "Espanha",
 	"french-republican-calendar": "Calendário Francês Republicano",
+	"untranslated-message-count": "10+",
 	"clear-log": "Limpar registro",
 	"show-hidden-log": "Mostar / Esconder registro",
 	"load-failed": "Erro ao carregar",
@@ -967,7 +968,6 @@
 	"a-total-of-$1-occurrences": "... Um total de %1 {{PLURAL:%1|ocorrência|ocorrências}}.",
 	"report-generation-date-$1": "Data de geração do relatório: %1",
 	"cleanup-report-for-interlanguage-link-templates": "Relatório de limpeza para modelos de links interlínguas",
-	"convert-$1-to-wikilink": "Converter %1 em wikilink",
 	"preserve-interlanguage-links-because-of-the-preserve-parameter-is-set": "Preserva os links interlínguas porque o parâmetro \"preserve\" está definido.",
 	"the-task-does-not-process-talk-pages": "A tarefa não processa páginas de discussão",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "O link local de destino é vinculado à própria página. [[MOS:CIRCULAR]]?",
@@ -1286,5 +1286,6 @@
 	"usage": "Uso:",
 	"work-title-work-id": "título da obra / id da obra",
 	"work-list-file": "arquivo de lista de trabalho",
-	"options": "Opções:"
+	"options": "Opções:",
+	"convert-$1-to-wikilink": "Converter %1 em wikilink"
 }

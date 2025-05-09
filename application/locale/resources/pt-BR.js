@@ -960,7 +960,6 @@
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "... Um total de %1 {{PLURAL:%1|ocorr\u00eancia|ocorr\u00eancias}}.",
 	"Report generation date: %1": "Data de gera\u00e7\u00e3o do relat\u00f3rio: %1",
 	"Cleanup report for interlanguage link templates": "Relat\u00f3rio de limpeza para modelos de links interl\u00ednguas",
-	"Convert %1 to wikilink": "Converter %1 em wikilink",
 	"Preserve interlanguage links because of the \"preserve\" parameter is set.": "Preserva os links interl\u00ednguas porque o par\u00e2metro \"preserve\" est\u00e1 definido.",
 	"The task does not process talk pages": "A tarefa n\u00e3o processa p\u00e1ginas de discuss\u00e3o",
 	"The local link target links back to the page itself. [[MOS:CIRCULAR]]?": "O link local de destino \u00e9 vinculado \u00e0 pr\u00f3pria p\u00e1gina. [[MOS:CIRCULAR]]?",
@@ -1279,6 +1278,7 @@
 	"Usage:": "Uso:",
 	"\u4f5c\u54c1\u6a19\u984c\u6216 id": "t\u00edtulo da obra / id da obra",
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "arquivo de lista de trabalho",
-	"Options:": "Op\u00e7\u00f5es:"
+	"Options:": "Op\u00e7\u00f5es:",
+	"Convert %1 to wikilink": "Converter %1 em wikilink"
 },
 "pt-BR");

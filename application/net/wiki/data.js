@@ -76,12 +76,14 @@ function module_code(library_namespace) {
 	// wikidata_site_alias[site code] = Wikidata site code
 	// @see https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 	// for sites
+	// @see CeL.wiki.language_code_to_site_alias
 	var wikidata_site_alias = {
 		// 為粵文維基百科特別處理。
 		yuewiki : 'zh_yuewiki',
 
-		// 為日文特別修正: 'jp' is wrong!
-		jpwiki : 'jawiki'
+		// 為日文特別修正: 'jp' is wrong! 'jp' 不是標準的ISO編碼。
+		jpwiki : 'jawiki',
+		krwiki : 'kowiki'
 	};
 
 	function get_data_API_URL(options, default_API_URL) {

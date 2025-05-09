@@ -955,12 +955,12 @@
 	"Minimum number of templates to report: %1": "Minimum number of templates to report: %1",
 	"Archiving operation": "Archiving operation",
 	"Archive %1 {{PLURAL:%1|char|chars}}.": "Archive %1 {{PLURAL:%1|char|chars}}.",
+	"Convert interlanguage link templates to wikilinks": "Convert interlanguage link templates to wikilinks",
 	"Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.": "Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.",
 	"edit-mark": "E",
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.",
 	"Report generation date: %1": "Report generation date: %1",
 	"Cleanup report for interlanguage link templates": "Cleanup report for interlanguage link templates",
-	"Convert %1 to wikilink": "Convert %1 to wikilink",
 	"Preserve interlanguage links because of the \"preserve\" parameter is set.": "Preserve interlanguage links because of the \"preserve\" parameter is set.",
 	"The task does not process talk pages": "The task does not process talk pages",
 	"The local link target links back to the page itself. [[MOS:CIRCULAR]]?": "The local link target links back to the page itself. [[MOS:CIRCULAR]]?",
@@ -1289,6 +1289,8 @@
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "work list file",
 	"Options:": "Options:",
 	"summary": "summary",
-	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "The number of completed {{PLURAL:%1|page|pages}} %1 is not less than total %2!"
+	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "The number of completed {{PLURAL:%1|page|pages}} %1 is not less than total %2!",
+	"Convert %1 to wikilink": "Convert %1 to wikilink",
+	"Also fix bad language codes: %1": "Also fix bad language codes: %1"
 },
 "en-US");

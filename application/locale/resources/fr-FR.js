@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "Calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "0",
+	"untranslated message count": "2",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -960,7 +960,6 @@
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "... %1 occurence{{PLURAL:%1||s}} en tout.",
 	"Report generation date: %1": "Date de g\u00e9n\u00e9ration du rapport\u202f: %1",
 	"Cleanup report for interlanguage link templates": "Rapport de nettoyage pour les mod\u00e8les de liens interlangues.",
-	"Convert %1 to wikilink": "Convertir %1 en wikilien",
 	"Preserve interlanguage links because of the \"preserve\" parameter is set.": "Pr\u00e9serve les liens interlangue puisque le param\u00e8tre \u00ab\u202fpreserve\u202f\u00bb est positionn\u00e9.",
 	"The task does not process talk pages": "La t\u00e2che ne traite pas les pages de discussion",
 	"The local link target links back to the page itself. [[MOS:CIRCULAR]]?": "La cible du lien local pointe vers la page elle-m\u00eame. [[MOS:CIRCULAR|Lien circulaire]]\u202f?",
@@ -1289,6 +1288,7 @@
 	"\u4f5c\u54c1\u5217\u8868\u6a94\u6848": "fichier de liste de travaux",
 	"Options:": "Options\u202f:",
 	"summary": "R\u00e9sum\u00e9",
-	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "Le nombre de %1 {{PLURAL:%1|page compl\u00e9t\u00e9e|pages compl\u00e9t\u00e9es}} n'est pas inf\u00e9rieur au total %2\u00a0!"
+	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "Le nombre de %1 {{PLURAL:%1|page compl\u00e9t\u00e9e|pages compl\u00e9t\u00e9es}} n'est pas inf\u00e9rieur au total %2\u00a0!",
+	"Convert %1 to wikilink": "Convertir %1 en wikilien"
 },
 "fr-FR");

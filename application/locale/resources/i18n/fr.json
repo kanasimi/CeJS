@@ -22,6 +22,7 @@
 	},
 	"españa": "Espagne",
 	"french-republican-calendar": "Calendrier républicain français",
+	"untranslated-message-count": "2",
 	"clear-log": "Effacer le journal",
 	"show-hidden-log": "Afficher / masquer le journal",
 	"load-failed": "Échec du chargement",
@@ -978,7 +979,6 @@
 	"a-total-of-$1-occurrences": "... %1 occurence{{PLURAL:%1||s}} en tout.",
 	"report-generation-date-$1": "Date de génération du rapport : %1",
 	"cleanup-report-for-interlanguage-link-templates": "Rapport de nettoyage pour les modèles de liens interlangues.",
-	"convert-$1-to-wikilink": "Convertir %1 en wikilien",
 	"preserve-interlanguage-links-because-of-the-preserve-parameter-is-set": "Préserve les liens interlangue puisque le paramètre « preserve » est positionné.",
 	"the-task-does-not-process-talk-pages": "La tâche ne traite pas les pages de discussion",
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": "La cible du lien local pointe vers la page elle-même. [[MOS:CIRCULAR|Lien circulaire]] ?",
@@ -1307,5 +1307,6 @@
 	"work-list-file": "fichier de liste de travaux",
 	"options": "Options :",
 	"panel_label__summary": "Résumé",
-	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "Le nombre de %1 {{PLURAL:%1|page complétée|pages complétées}} n'est pas inférieur au total %2 !"
+	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "Le nombre de %1 {{PLURAL:%1|page complétée|pages complétées}} n'est pas inférieur au total %2 !",
+	"convert-$1-to-wikilink": "Convertir %1 en wikilien"
 }

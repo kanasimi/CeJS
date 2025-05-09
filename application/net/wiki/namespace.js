@@ -3289,6 +3289,7 @@ function module_code(library_namespace) {
 	// language_code_to_site_alias[language code] = project code
 	// @see function language_to_site_name(language, project)
 	// @see [[en:Wikimedia_project#Project_codes]]
+	// @see wikidata_site_alias @ CeL.application.net.wiki.data
 	var language_code_to_site_alias = {
 		// als : 'sq',
 		'be-x-old' : 'be-tarask',
@@ -3309,8 +3310,9 @@ function module_code(library_namespace) {
 		yue : 'zh-yue',
 		bih : 'bh',
 
-		// 為日文特別修正: 'jp' is wrong!
-		jp : 'ja'
+		// 為日文特別修正: 'jp' is wrong! 'jp' 不是標準的ISO編碼。
+		jp : 'ja',
+		kr : 'ko'
 	},
 	// @see function set_default_language(language)
 	valid_language = 'nds-nl|map-bms'.split('|').to_hash();
