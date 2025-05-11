@@ -76,15 +76,10 @@ function module_code(library_namespace) {
 	// wikidata_site_alias[site code] = Wikidata site code
 	// @see https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 	// for sites
-	// @see CeL.wiki.language_code_to_site_alias
-	var wikidata_site_alias = {
-		// 為粵文維基百科特別處理。
-		yuewiki : 'zh_yuewiki',
-
-		// 為日文特別修正: 'jp' is wrong! 'jp' 不是標準的ISO編碼。
-		jpwiki : 'jawiki',
-		krwiki : 'kowiki'
-	};
+	var wikidata_site_alias = Object.fromEntries(Object.entries(
+			wiki_API.language_code_to_site_alias).map(function(pair) {
+		return [ pair[0] + 'wiki', pair[1].replace(/-/g, '_') + 'wiki' ];
+	}));
 
 	function get_data_API_URL(options, default_API_URL) {
 		// library_namespace.debug('options:', 0, 'get_data_API_URL');
@@ -6532,11 +6527,24 @@ function module_code(library_namespace) {
 		});
 	}
 
+	/** {String}API host of Wikidata Query Service (SPARQL). */
+	var wikidata_SPARQL_host = 'https://query.wikidata.org',
+	/**
+	 * {String}API host of Wikidata Query Service (SPARQL) for academic article
+	 * (instance of (P31):scholarly article (Q13442814)).
+	 * 
+	 * @see https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service/WDQS_graph_split
+	 */
+	wikidata_SPARQL_scholarly_host = 'https://query-scholarly.wikidata.org',
 	/** {String}API URL of Wikidata Query Service (SPARQL). */
-	var wikidata_SPARQL_API_URL = 'https://query.wikidata.org/bigdata/namespace/wdq/sparql';
+	wikidata_SPARQL_API_URL_postfix = '/bigdata/namespace/wdq/sparql';
 	// https://query.wikidata.org/sparql
 	// https://commons-query.wikimedia.org/sparql
 	// https://www.dictionnairedesfrancophones.org/sparql
+
+	function is_scholarly_query(query) {
+		return /(?:P13046|Q13442814)\D/.test(query);
+	}
 
 	/**
 	 * 查詢 Wikidata Query Service (SPARQL)。
@@ -6558,14 +6566,32 @@ function module_code(library_namespace) {
 	 *      https://www.wikidata.org/wiki/Wikidata:Data_access#SPARQL_endpoints
 	 */
 	function wikidata_SPARQL(query, callback, options) {
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+		options = library_namespace.new_options(options);
 		// options.API_URL: custom SPARQL endpoint
-		var action = options && options.API_URL;
+		var action = options.API_URL;
+		var session = wiki_API.session_of_options(options);
 		if (!action) {
-			var session = wiki_API.session_of_options(options);
 			action = session && session.SPARQL_API_URL;
 		}
 		// console.trace(action);
-		action = [ action || wikidata_SPARQL_API_URL, '?query=',
+
+		var use_scholarly_SPARQL
+		//
+		= 'use_scholarly_SPARQL' in options ? options.use_scholarly_SPARQL
+		//
+		: session
+		//
+		&& 'use_scholarly_SPARQL' in session ? session.use_scholarly_SPARQL
+		// publication type of scholarly work (P13046)
+		// instance of (P31):scholarly article (Q13442814)
+		: is_scholarly_query(query) || wiki_API.use_scholarly_SPARQL;
+
+		action = [ action
+		//
+		|| (use_scholarly_SPARQL ? wikidata_SPARQL_scholarly_host
+		//
+		: wikidata_SPARQL_host) + wikidata_SPARQL_API_URL_postfix, '?query=',
 				encodeURIComponent(query), '&format=json' ];
 
 		get_URL(action.join(''), function(data, error) {

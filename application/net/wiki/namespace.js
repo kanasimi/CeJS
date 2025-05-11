@@ -731,17 +731,18 @@ function module_code(library_namespace) {
 
 	// @inner
 	function get_first_domain_name_of_session(session) {
-		var first_damain_name;
-		if (session) {
-			first_damain_name =
-			// e.g., 'simple'
-			session.first_damain_name
-			// assert: typeof session.API_URL === 'string'
-			// 注意:在取得 page 後，中途更改過 API_URL 的話，session.language 會取得錯誤的資訊！
-			|| session.language
-			// 應該採用來自宿主 host session 的 language. @see setup_data_session()
-			|| get_first_domain_name_of_session(session[KEY_HOST_SESSION]);
-		}
+		if (!session)
+			return;
+
+		var first_damain_name
+		// e.g., 'simple'
+		= session.first_damain_name
+		// assert: typeof session.API_URL === 'string'
+		// 注意:在取得 page 後，中途更改過 API_URL 的話，session.language 會取得錯誤的資訊！
+		|| session.language
+		// 應該採用來自宿主 host session 的 language. @see setup_data_session()
+		|| get_first_domain_name_of_session(session[KEY_HOST_SESSION]);
+
 		return first_damain_name;
 	}
 
@@ -3284,6 +3285,7 @@ function module_code(library_namespace) {
 	// ========================================================================
 
 	// Wikimedia project code alias
+	// assert: 不存在以 key 為名的 wiki。
 	// https://doc.wikimedia.org/mediawiki-core/master/php/LanguageCode_8php_source.html
 	// https://github.com/wikimedia/mediawiki/blob/master/languages/LanguageCode.php
 	// language_code_to_site_alias[language code] = project code
@@ -3312,7 +3314,10 @@ function module_code(library_namespace) {
 
 		// 為日文特別修正: 'jp' is wrong! 'jp' 不是標準的ISO編碼。
 		jp : 'ja',
-		kr : 'ko'
+		kr : 'ko',
+		// 「gr」並非希臘語的ISO代碼（ISO代碼為「el」）。
+		gr : 'el',
+		gre : 'el'
 	},
 	// @see function set_default_language(language)
 	valid_language = 'nds-nl|map-bms'.split('|').to_hash();
