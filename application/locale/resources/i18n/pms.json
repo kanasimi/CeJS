@@ -7,7 +7,6 @@
 	},
 	"españa": "Spagna",
 	"french-republican-calendar": "calendari republican fransèis",
-	"untranslated-message-count": "2",
 	"clear-log": "Polidé l'argistr",
 	"show-hidden-log": "Smon-e / stërmé l'argistr",
 	"load-failed": "Cariament falì",
@@ -959,6 +958,7 @@
 	"minimum-number-of-templates-to-report-$1": "Nùmer mìnim dë stamp da signalé: %1",
 	"archiving-operation": "Archiviassion ëd l'operassion",
 	"archive-$1-chars": "Archivié %1 {{PLURAL:%1|caràter}}.",
+	"convert-interlanguage-link-templates-to-wikilinks": "Convertì jë stamp ëd liura antërlenga an wikiliure",
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": "Costa-sì a l'é na lista ëd liure antërlenghe ch'a devo esse coregiùe a man. Costa lista a sarà agiornà an automàtich dal robò.",
 	"edit-mark": "M",
 	"a-total-of-$1-occurrences": "... %1 {{PLURAL:%1|ocorensa|ocorense}} an tut.",
@@ -1293,5 +1293,6 @@
 	"options": "Opsion:",
 	"panel_label__summary": "resumé",
 	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "Ël nùmer ëd {{PLURAL:%1|pàgina|pàgine}} %1 completà a l'é pa men dël total %2!",
-	"convert-$1-to-wikilink": "Convertì %1 an wikiliura"
+	"convert-$1-to-wikilink": "Convertì %1 an wikiliura",
+	"also-fix-bad-language-codes-$1": "Rangé ëdcò ij còdes ëd lenga lòfi: %1"
 }
