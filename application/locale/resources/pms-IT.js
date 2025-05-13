@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
-	"untranslated message count": "2",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Polid\u00e9 l'argistr",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Smon-e / st\u00ebrm\u00e9 l'argistr",
 	"Load failed": "Cariament fal\u00ec",
@@ -955,6 +955,7 @@
 	"Minimum number of templates to report: %1": "N\u00f9mer m\u00ecnim d\u00eb stamp da signal\u00e9: %1",
 	"Archiving operation": "Archiviassion \u00ebd l'operassion",
 	"Archive %1 {{PLURAL:%1|char|chars}}.": "Archivi\u00e9 %1 {{PLURAL:%1|car\u00e0ter}}.",
+	"Convert interlanguage link templates to wikilinks": "Convert\u00ec j\u00eb stamp \u00ebd liura ant\u00ebrlenga an wikiliure",
 	"Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.": "Costa-s\u00ec a l'\u00e9 na lista \u00ebd liure ant\u00ebrlenghe ch'a devo esse coregi\u00f9e a man. Costa lista a sar\u00e0 agiorn\u00e0 an autom\u00e0tich dal rob\u00f2.",
 	"edit-mark": "M",
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "... %1 {{PLURAL:%1|ocorensa|ocorense}} an tut.",
@@ -1289,6 +1290,7 @@
 	"Options:": "Opsion:",
 	"summary": "resum\u00e9",
 	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "\u00cbl n\u00f9mer \u00ebd {{PLURAL:%1|p\u00e0gina|p\u00e0gine}} %1 complet\u00e0 a l'\u00e9 pa men d\u00ebl total %2!",
-	"Convert %1 to wikilink": "Convert\u00ec %1 an wikiliura"
+	"Convert %1 to wikilink": "Convert\u00ec %1 an wikiliura",
+	"Also fix bad language codes: %1": "Rang\u00e9 \u00ebdc\u00f2 ij c\u00f2des \u00ebd lenga l\u00f2fi: %1"
 },
 "pms-IT");
