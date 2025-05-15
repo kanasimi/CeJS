@@ -393,9 +393,20 @@ function module_code(library_namespace) {
 			// 2023/12 將作業從 Grid Engine 遷移到 Kubernetes
 			// https://github.com/kanasimi/wikibot/issues/50
 			&& library_namespace.env.KUBERNETES_PORT
-			//
-			// https://wikitech.wikimedia.org/wiki/Help:Toolforge/FAQ#How_can_I_detect_if_I.27m_running_in_Cloud_VPS.3F_And_which_project_.28tools_or_toolsbeta.29.3F
-			|| require('fs').existsSync('/etc/wmflabs-project')
+			/**
+			 * <code>
+
+			https://wikitech.wikimedia.org/wiki/Help:Toolforge/FAQ#How_can_I_detect_if_I.27m_running_in_Cloud_VPS.3F_And_which_project_.28tools_or_toolsbeta.29.3F
+			2025/3/29至2025/4/5間，'/etc/wmflabs-project' 失效。
+
+			Is there a way to know if I am running in Toolforge when I run a bot?
+
+			[下午8:48:39] <wm-bb> <lucaswerkmeister> depends a bit on the environment (e.g. on the bastion and in a non-buildservice web service, `/etc/wmcs-project` contains “tools”, but that’s probably not the case in a build service tool)
+			[下午8:48:54] <wm-bb> <lucaswerkmeister> https://wikitech.wikimedia.org/wiki/Help:Toolforge/Envvars is probably the best solution, just define an environment variable THIS_IS_TOOLFORGE=y or whatever ^^
+
+			</code>
+			 */
+			|| require('fs').existsSync('/etc/wmcs-project')
 			// e.g., 'tools-bastion-05'.
 			// if use `process.env.INSTANCEPROJECT`,
 			// you may get 'tools' or 'tools-login'.
