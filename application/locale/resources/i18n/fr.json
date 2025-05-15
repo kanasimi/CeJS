@@ -22,7 +22,6 @@
 	},
 	"españa": "Espagne",
 	"french-republican-calendar": "Calendrier républicain français",
-	"untranslated-message-count": "2",
 	"clear-log": "Effacer le journal",
 	"show-hidden-log": "Afficher / masquer le journal",
 	"load-failed": "Échec du chargement",
@@ -974,6 +973,7 @@
 	"minimum-number-of-templates-to-report-$1": "Nombre minimum de modèles à signaler : %1",
 	"archiving-operation": "Archivage de l‘opération",
 	"archive-$1-chars": "Archiver %1 caractère{{PLURAL:%1||s}}.",
+	"convert-interlanguage-link-templates-to-wikilinks": "Convertir les modèles de lien interlingue en wikiliens",
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": "Voici une liste de liens interlangues qui doivent être corrigés manuellement. Cette liste sera mise à jour automatiquement par le robot.",
 	"edit-mark": "M",
 	"a-total-of-$1-occurrences": "... %1 occurence{{PLURAL:%1||s}} en tout.",
@@ -1308,5 +1308,6 @@
 	"options": "Options :",
 	"panel_label__summary": "Résumé",
 	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "Le nombre de %1 {{PLURAL:%1|page complétée|pages complétées}} n'est pas inférieur au total %2 !",
-	"convert-$1-to-wikilink": "Convertir %1 en wikilien"
+	"convert-$1-to-wikilink": "Convertir %1 en wikilien",
+	"also-fix-bad-language-codes-$1": "Corriger aussi les mauvais codes de langue : %1"
 }
