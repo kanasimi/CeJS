@@ -413,7 +413,19 @@ function module_code(library_namespace) {
 			&& (library_namespace.env.INSTANCENAME
 			// 以 /usr/bin/jsub 執行時可得。
 			// e.g., 'tools-exec-1210.eqiad.wmflabs'
-			|| library_namespace.env.HOSTNAME || true);
+			|| library_namespace.env.HOSTNAME || true)
+			/**
+			 * <code>
+
+			So the official detection method is to test `/etc/wmcs-project`?
+			[下午9:21:56] <dcaro> nope, test for the envvar `TOOL_TOOLFORGE_API_URL`, the `/etc/wmcs-project` might not exist for some jobs
+
+			https://wikitech.wikimedia.org/wiki/Help:Toolforge/Envvars#How_to_know_if_my_code_is_running_inside_toolforge?
+			https://wikitech.wikimedia.org/wiki/Help:Toolforge/Envvars#Globally_set_environment_variables
+
+			</code>
+			 */
+			|| library_namespace.env.TOOL_TOOLFORGE_API_URL;
 		}
 
 		if (wiki_API.wmflabs) {
