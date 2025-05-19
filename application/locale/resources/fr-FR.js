@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espagne",
 	"Calendrier r\u00e9publicain": "Calendrier r\u00e9publicain fran\u00e7ais",
-	"untranslated message count": "2",
+	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Effacer le journal",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Afficher\u202f/\u202fmasquer le journal",
 	"Load failed": "\u00c9chec du chargement",
@@ -955,6 +955,7 @@
 	"Minimum number of templates to report: %1": "Nombre minimum de mod\u00e8les \u00e0 signaler\u202f: %1",
 	"Archiving operation": "Archivage de l\u2018op\u00e9ration",
 	"Archive %1 {{PLURAL:%1|char|chars}}.": "Archiver %1 caract\u00e8re{{PLURAL:%1||s}}.",
+	"Convert interlanguage link templates to wikilinks": "Convertir les mod\u00e8les de lien interlingue en wikiliens",
 	"Here is a list of interlanguage links that need to be manually corrected. This list will be updated automatically by the robot.": "Voici une liste de liens interlangues qui doivent \u00eatre corrig\u00e9s manuellement. Cette liste sera mise \u00e0 jour automatiquement par le robot.",
 	"edit-mark": "M",
 	"... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.": "... %1 occurence{{PLURAL:%1||s}} en tout.",
@@ -1289,6 +1290,7 @@
 	"Options:": "Options\u202f:",
 	"summary": "R\u00e9sum\u00e9",
 	"\u5df2\u5b8c\u6210{{PLURAL:%1|\u9801\u9762}}\u6578\u91cf %1 \u672a\u5c0f\u65bc\u7e3d\u91cf %2\uff01": "Le nombre de %1 {{PLURAL:%1|page compl\u00e9t\u00e9e|pages compl\u00e9t\u00e9es}} n'est pas inf\u00e9rieur au total %2\u00a0!",
-	"Convert %1 to wikilink": "Convertir %1 en wikilien"
+	"Convert %1 to wikilink": "Convertir %1 en wikilien",
+	"Also fix bad language codes: %1": "Corriger aussi les mauvais codes de langue : %1"
 },
 "fr-FR");
