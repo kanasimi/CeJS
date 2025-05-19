@@ -1301,5 +1301,5 @@
 	"panel_label__summary": "提要",
 	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "已完成{{PLURAL:%1|頁面}}數量 %1 未小於總量 %2！",
 	"convert-$1-to-wikilink": "清理跨語言連結%1成為內部連結:編輯摘要的紅色連結經繁簡轉換後存在，非bot錯誤編輯",
-	"also-fix-bad-language-codes-$1": "同時修正錯誤的語言代碼"
+	"also-fix-bad-language-codes-$1": "同時修正錯誤語言代碼：%1"
 }
