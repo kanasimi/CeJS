@@ -878,6 +878,8 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 
+		var session = wiki_API.session_of_options(options);
+
 		var index = 0;
 		for (; index < first_section.length; index++) {
 			var token = first_section[index];
@@ -891,10 +893,11 @@ function module_code(library_namespace) {
 			}
 
 			if (token.type === 'transclusion') {
-				if (token.name === 'NoteTA') {
+				if ((session || wiki_API).is_template(
+						wiki_API.NoteTA_templates, token)) {
 					// preserve 轉換用詞
 					// TODO:
-					// 因為該頁會嵌入首頁，所以請不要使用{{noteTA}}進行繁簡轉換；請用-{zh-hans:簡體字;zh-hant:繁體字}-進行單個詞彙轉換。
+					// 因為該頁會嵌入首頁，所以請不要使用{{NoteTA}}進行繁簡轉換；請用-{zh-hans:簡體字;zh-hant:繁體字}-進行單個詞彙轉換。
 					// [[繁體字]] → [[繁體字|-{zh-hans:簡體字;zh-hant:繁體字}-]]
 					introduction_section.push(token);
 					continue;

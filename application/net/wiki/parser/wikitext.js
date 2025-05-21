@@ -1711,9 +1711,10 @@ function module_code(library_namespace) {
 				} else if (URL.length === 2) {
 					URL.push(parameters);
 				} else if (URL.length !== 3) {
-					library_namespace
-							.error('parse_external_link: Invalid external url: '
-									+ URL);
+					library_namespace.error('parse_external_link: '
+					// e.g., [http://w.w{{Dead link}}t]
+					// should → [http://w.w t]{{Dead link}}
+					+ 'Invalid external url: ' + URL);
 					return all;
 				} else if (parameters
 				// || parameters === 0
@@ -2144,15 +2145,15 @@ function module_code(library_namespace) {
 							parameters.size = option_name;
 
 						} else if (has_equal
-								// 這些選項必須有 "="。無 "=" 的話，會被當作 caption。
-								&&
-								// page: DjVuファイルの場合、 page="ページ番号"で開始ページを指定できます。
-								/^(?:link|alt|lang|page|thumbtime|start|end|class)$/
-										.test(option_name)) {
+						// 這些選項必須有 "="。無 "=" 的話，會被當作 caption。
+						&& /^(?:link|alt|lang|page|thumbtime|start|end|class)$/
+						// ↑ page: DjVuファイルの場合、 page="ページ番号"で開始ページを指定できます。
+						.test(option_name)) {
 							// 以後到的為準。
 							if (option_name === 'link'
-							// [[File:a.jpg|link=//a.b]] 會被認做URL。
-							&& !/\/\//.test(option_value)) {
+							// [[File:a.jpg|link=//a.b]]
+							// |link={{filepath:p.svg}} 會被認做URL。
+							&& !/\/\/|{{/.test(option_value)) {
 								// pass .session
 								option_value = wiki_API.normalize_title(
 										option_value, options);

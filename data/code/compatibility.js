@@ -11,6 +11,8 @@
  * 
  * More examples: see /_test suite/test.js
  * 
+ * TODO: URLPattern
+ * 
  * @since
  * @see https://www.audero.it/blog/2016/12/05/monkey-patching-javascript/
  * @see https://tc39.es/proposal-collection-methods/

@@ -446,7 +446,9 @@ function module_code(library_namespace) {
 				expand : expand_template_Lang
 			}
 		},
+		// @see wiki_API.NoteTA_templates
 		NoteTA : parse_template_NoteTA,
+		'NoteTA-lite' : parse_template_NoteTA,
 		簡繁轉換 : parse_template_簡繁轉換
 	};
 

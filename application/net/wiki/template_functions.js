@@ -456,7 +456,13 @@ function module_code(library_namespace) {
 				});
 			}
 
-			conversion_list.push(item_to_conversion(item));
+			try {
+				conversion_list.push(item_to_conversion(item));
+			} catch (e) {
+				library_namespace.error(wiki_API.title_link_of(page_data)
+						+ ' 手動字詞轉換規則錯誤？');
+				library_namespace.error(e);
+			}
 		}
 
 		parsed.each('template', for_each_template_token);

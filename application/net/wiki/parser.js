@@ -1535,6 +1535,9 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	/** 繁簡字詞轉換模板 CeL.wiki.NoteTA_templates */
+	wiki_API.NoteTA_templates = [ 'NoteTA', 'NoteTA-lite' ];
+
 	var default_layout_order = [
 	// header
 	'page_begin',
@@ -1722,7 +1725,8 @@ function module_code(library_namespace) {
 			'Category:維基百科維護模板',
 
 			// 字詞轉換模板
-			'NoteTA', '全局僻字',
+			// @see wiki_API.NoteTA_templates
+			'NoteTA', 'NoteTA-lite', '全局僻字',
 			// 導讀提示模板
 			'Category:頁面訊息模板', 'Category:时间模板',
 			// 資訊框模板

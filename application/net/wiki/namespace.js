@@ -1884,8 +1884,8 @@ function module_code(library_namespace) {
 			} else if (page_name.type === 'link') {
 				page_name = page_name[0].toString();
 			} else {
-				library_namespace.warn('Cannot treat ' + page_name
-						+ ' as page title!');
+				library_namespace.warn('normalize_page_name: '
+						+ 'Cannot treat ' + page_name + ' as page title!');
 				page_name = page_name[0].toString();
 			}
 		}

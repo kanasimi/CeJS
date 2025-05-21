@@ -3958,7 +3958,7 @@ function module_code(library_namespace) {
 							count_summary = done + '/' + pages.length + '//';
 					}
 
-					if (!work_continue) {
+					if (!work_continue || no_work_progress) {
 					} else if (work_continue <= initial_target_length) {
 						count_summary += ' '
 						// 紀錄整體作業進度 overall progress。
@@ -4221,6 +4221,8 @@ function module_code(library_namespace) {
 		var target = pages,
 		// const 可用來紀錄整體作業進度 overall progress。因為這個作業耗時較長 標註進度可讓人知道已經做了多少
 		initial_target_length = config.initial_target_length,
+		// pages.is_list_flow: @see wikiapi/Wikiapi.js
+		no_work_progress = pages.is_list_flow,
 		//
 		slice_size = max_slice_size(this, config),
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
