@@ -380,7 +380,7 @@ function module_code(library_namespace) {
 			}
 
 			// get conversion rule only
-			var rule = token.toString('rule');
+			var rule = token.toString('normalized rule');
 			if (rule) {
 				conversion_list.push(item_to_conversion({
 					type : 'item',

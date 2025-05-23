@@ -642,7 +642,7 @@ function module_code(library_namespace) {
 				var rule = parse_wikitext('-{A|'
 				// .toString('rule')
 				+ this.join(';') + '}-', {
-					normalize : true,
+					normalize : true
 				})
 				// .toString('rule')
 				.join(';');
@@ -1347,21 +1347,25 @@ function module_code(library_namespace) {
 
 			// console.log('parameters: ' + JSON.stringify(parameters));
 			parameters = parameters.split(';');
-			parameters.forEach(function(converted, index) {
-				if (normalize) {
+			if (normalize) {
+				parameters = parameters.map(function(conversion) {
 					// remove tail spaces
-					converted = converted.trim();
-				}
-				if (PATTERN_conversion_slice.test(converted)
+					return conversion.trim();
+				}).filter(function(conversion) {
+					return !!conversion;
+				}).sort().unique();
+			}
+			parameters.forEach(function(conversion, index) {
+				if (PATTERN_conversion_slice.test(conversion)
 				// e.g., "-{ a; zh-tw: tw }-" 之 " a"
 				|| conversion_list.length === 0
 				// 最後一個是空白。
-				|| !converted.trim() && index + 1 === parameters.length) {
-					conversion_list.push(converted);
+				|| !conversion.trim() && index + 1 === parameters.length) {
+					conversion_list.push(conversion);
 				} else {
 					conversion_list[conversion_list.length - 1]
 					// e.g., "-{zh-tw: tw ; tw : tw2}-"
-					+= ';' + converted;
+					+= ';' + conversion;
 				}
 			});
 			// console.log(conversion_list);

@@ -3958,7 +3958,7 @@ function module_code(library_namespace) {
 							count_summary = done + '/' + pages.length + '//';
 					}
 
-					if (!work_continue || no_work_progress) {
+					if (!work_continue) {
 					} else if (work_continue <= initial_target_length) {
 						count_summary += ' '
 						// 紀錄整體作業進度 overall progress。
@@ -3973,12 +3973,14 @@ function module_code(library_namespace) {
 
 					} else {
 						count_summary += initial_target_length;
-						library_namespace.warn([ 'wiki_API.work: ', {
-							// gettext_config:{"id":"the-number-of-completed-pages-$1-is-not-less-than-total-$2"}
-							T : [ '已完成{{PLURAL:%1|頁面}}數量 %1 未小於總量 %2！',
-							//
-							work_continue, initial_target_length ]
-						} ]);
+						if (!no_work_progress) {
+							library_namespace.warn([ 'wiki_API.work: ', {
+								// gettext_config:{"id":"the-number-of-completed-pages-$1-is-not-less-than-total-$2"}
+								T : [ '已完成{{PLURAL:%1|頁面}}數量 %1 未小於總量 %2！',
+								//
+								work_continue, initial_target_length ]
+							} ]);
+						}
 					}
 
 					count_summary = new gettext.Sentence_combination([
@@ -4354,7 +4356,10 @@ function module_code(library_namespace) {
 					done = config.summary ? [ nochange_count, 'fg=green',
 							String(config.summary), '-fg', ': ' + done ]
 							: [ nochange_count + done ];
-					library_namespace.sinfo(done);
+					// no_work_progress: 就算設定 initial_target_length 也不顯示。
+					if (!no_work_progress) {
+						library_namespace.sinfo(done);
+					}
 				}
 
 				// reset count and log.
