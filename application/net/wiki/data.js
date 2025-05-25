@@ -1952,55 +1952,48 @@ function module_code(library_namespace) {
 				&& typeof options.callback === 'function'
 				&& (!('get_type' in options) || options.get_type)) {
 			// 先取得/確認指定 property 之 datatype。
-			wikidata_datatype(
-					options.property,
-					function(datatype) {
-						var matched = datatype
-								&& datatype.match(/^wikibase-(item|property)$/);
-						var entity_id = library_namespace.is_Object(value)
-								&& value.value || value;
-						if (matched && entity_id
-								&& !PATTERN_entity_id.test(entity_id)) {
-							if (typeof value === 'object') {
-								library_namespace
-										.error('normalize_wikidata_value: '
-												+ 'Invalid object value!');
-								console.trace([ value, datatype,
-										options.property ]);
-								normalize_wikidata_value(value, datatype,
-										options, argument_to_pass);
-								return;
-							}
+			wikidata_datatype(options.property, function(datatype) {
+				var matched = datatype
+						&& datatype.match(/^wikibase-(item|property)$/);
+				var entity_id = library_namespace.is_Object(value)
+						&& value.value || value;
+				if (matched && entity_id
+				//
+				&& !PATTERN_entity_id.test(entity_id)) {
+					if (typeof value === 'object') {
+						library_namespace.error('normalize_wikidata_value: '
+								+ 'Invalid object value!');
+						console.trace([ value, datatype, options.property ]);
+						normalize_wikidata_value(value, datatype, options,
+								argument_to_pass);
+						return;
+					}
 
-							library_namespace.debug('將屬性名稱轉換成 id (' + datatype
-									+ '): ' + JSON.stringify(value), 3,
-									'normalize_wikidata_value');
-							// console.log(options);
-							wikidata_search.use_cache(value,
-									function(id, error) {
-										// console.trace(options);
-										// console.trace('' + options.callback);
-										normalize_wikidata_value(id ||
-										// 'normalize_wikidata_value: Nothing
-										// found: [' + value
-										// + ']'
-										value, datatype, options,
-												argument_to_pass);
-									}, Object.assign(Object.create(null),
-									// 因wikidata_search.use_cache.default_options包含.type設定，必須將特殊type設定放在匯入default_options後!
-									wikidata_search.use_cache.default_options,
-											{
-												type : matched[1],
-												// 警告: 若是設定
-												// must_callback=false，會造成程序不
-												// callback 而中途跳出!
-												must_callback : true
-											}, options));
-						} else {
-							normalize_wikidata_value(value, datatype
-									|| NOT_FOUND, options, argument_to_pass);
-						}
-					}, options);
+					library_namespace.debug('將屬性名稱轉換成 id (' + datatype + '): '
+							+ JSON.stringify(value), 3,
+							'normalize_wikidata_value');
+					// console.log(options);
+					wikidata_search.use_cache(value, function(id, error) {
+						// console.trace(options);
+						// console.trace('' + options.callback);
+						normalize_wikidata_value(id ||
+						// 'normalize_wikidata_value: Nothing found: [' + value
+						// + ']'
+						value, datatype, options, argument_to_pass);
+					}, Object.assign(Object.create(null),
+					// 因wikidata_search.use_cache.default_options包含.type設定，必須將特殊type設定放在匯入default_options後!
+					wikidata_search.use_cache.default_options, {
+						type : matched[1],
+						// 警告: 若是設定
+						// must_callback=false，會造成程序不
+						// callback 而中途跳出!
+						must_callback : true
+					}, options));
+				} else {
+					normalize_wikidata_value(value, datatype || NOT_FOUND,
+							options, argument_to_pass);
+				}
+			}, options);
 			return;
 		}
 
@@ -2118,11 +2111,10 @@ function module_code(library_namespace) {
 		if (typeof value === 'object' && value.snaktype && value.datatype) {
 			// 若 value 已經是完整的 wikidata object，則直接回傳之。
 			if (datatype !== value.datatype) {
-				library_namespace.error(
+				library_namespace.error('normalize_wikidata_value: '
 				// 所指定的與 value 的不同。
-				'normalize_wikidata_value: The datatype of the value ['
-						+ value.datatype + '] is different from specified: ['
-						+ datatype + ']');
+				+ 'The datatype of the value [' + value.datatype
+						+ '] is different from specified: [' + datatype + ']');
 			}
 
 			if (typeof options.callback === 'function') {
@@ -2201,7 +2193,7 @@ function module_code(library_namespace) {
 					});
 					if (date_value) {
 						if (('precision' in date_value)
-						//
+						// https://www.wikidata.org/wiki/Help:Dates#Precision
 						&& (date_value.precision in INDEX_OF_PRECISION)) {
 							precision = INDEX_OF_PRECISION[date_value.precision];
 						}
@@ -2226,17 +2218,42 @@ function module_code(library_namespace) {
 					precision = INDEX_OF_PRECISION[precision];
 				} else {
 					if (precision) {
-						library_namespace
-								.warn('normalize_wikidata_value: Invalid precision of time, using precision=day instead: '
-										+ precision);
+						library_namespace.warn('normalize_wikidata_value: '
+								+ 'Invalid precision ' + precision
+								+ ' of time [' + value
+								+ '], using precision=day instead.');
 					}
 					precision = INDEX_OF_PRECISION.day;
 				}
 			}
+			/**
+			 * @see https://www.wikidata.org/wiki/Help:Dates#Hours,_minutes_and_seconds
+			 * 
+			 * Wikidata 僅接受精度 11 的數值。
+			 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel#Dates_and_times
+			 * 
+			 * <code>
+			{"time":"+2010-03-19T06:00:00Z","timezone":0,"before":0,"after":0,"precision":13,"calendarmodel":"http://www.wikidata.org/entity/Q1985727"}
+
+			Error: [modification-failed] Malformed input: +2010-03-19T06:00:00Z [wikibase-validator-malformed-value] Malformed input: +2010-03-19T06:00:00Z ["+2010-03-19T06:00:00Z"]
+			</code>
+			 */
+			if (precision > INDEX_OF_PRECISION.day) {
+				var session = wiki_API.session_of_options(options);
+				// `wiki_API.site_name(session)` 會取得 host session 的 site_name。
+				var site_name = wiki_API.site_name(session && session.API_URL);
+				if (site_name === 'wikidatawiki') {
+					library_namespace.warn('normalize_wikidata_value: '
+							+ 'Malformed precision ' + precision + ' of time ['
+							+ value + '], using precision=day instead.');
+					precision = INDEX_OF_PRECISION.day;
+				}
+			}
+
 			if (error) {
 				value = String(value);
 			} else {
-				if (precision === INDEX_OF_PRECISION.day) {
+				if (precision <= INDEX_OF_PRECISION.day) {
 					// 當 precision=INDEX_OF_PRECISION.day 時，時分秒*必須*設置為 0!
 					value.setUTCHours(0, 0, 0, 0);
 				}
@@ -2278,8 +2295,8 @@ function module_code(library_namespace) {
 			} else {
 				// console.trace(datatype);
 				// console.trace(arguments);
-				error = 'normalize_wikidata_value: Illegal ' + datatype + ': '
-						+ JSON.stringify(value);
+				error = 'normalize_wikidata_value: ' + 'Illegal ' + datatype
+						+ ': ' + JSON.stringify(value);
 			}
 			break;
 
@@ -2305,8 +2322,8 @@ function module_code(library_namespace) {
 			break;
 
 		default:
-			error = 'normalize_wikidata_value: Unknown datatype [' + datatype
-					+ '] and value [' + JSON.stringify(value) + ']';
+			error = 'normalize_wikidata_value: ' + 'Unknown datatype ['
+					+ datatype + '] and value [' + JSON.stringify(value) + ']';
 		}
 
 		return normalized();
