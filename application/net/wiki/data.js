@@ -6588,6 +6588,59 @@ function module_code(library_namespace) {
 		// options.API_URL: custom SPARQL endpoint
 		var action = options.API_URL;
 		var session = wiki_API.session_of_options(options);
+
+		// ----------------------------------------------------------
+
+		function do_next_SPARQL() {
+			library_namespace.log_temporary(
+			//
+			'wikidata_SPARQL.do_next_SPARQL: offset '
+					+ options.offset
+					+ (options.items ? ', ' + options.items.length
+							+ ' items got.' : ''));
+			if (options.for_each_query_slice) {
+				options.for_each_query_slice();
+			}
+
+			query = options.pure_query + ' LIMIT ' + options.split_by_slice
+					+ ' OFFSET ' + options.offset;
+
+			wikidata_SPARQL(query, function(items, error) {
+				if (error || !Array.isArray(items)) {
+					callback(items, error);
+					return;
+				}
+
+				if (options.items)
+					options.items.append(items);
+				else
+					options.items = items;
+
+				if (items.length < options.split_by_slice) {
+					callback(options.items);
+					return;
+				}
+
+				options.offset += options.split_by_slice;
+				do_next_SPARQL();
+			}, options);
+		}
+
+		if (library_namespace.is_digits(options.split_by_slice)
+				&& !options.pure_query) {
+			Object.assign(options, {
+				pure_query : query,
+				// assert: options.split_by_slice > 0
+				// e.g., 5000
+				split_by_slice : +options.split_by_slice,
+				offset : options.offset | 0
+			});
+			do_next_SPARQL();
+			return;
+		}
+
+		// ----------------------------------------------------------
+
 		if (!action) {
 			action = session && session.SPARQL_API_URL;
 		}
@@ -6620,6 +6673,26 @@ function module_code(library_namespace) {
 			try {
 				data = JSON.parse(data.responseText);
 			} catch (e) {
+				if (typeof data.responseText === 'string'
+				/**
+				 * @example<code>
+
+				SPARQL-QUERY: queryStr=
+				...
+				java.util.concurrent.TimeoutException
+				at java.util.concurrent.FutureTask.get(FutureTask.java:205)
+				...
+
+				 </code>
+				 */
+				&& data.responseText.includes('SPARQL-QUERY: queryStr=')
+						&& data.responseText.includes('TimeoutException')) {
+					library_namespace.error(
+					// https://stackoverflow.com/questions/72804539/pagination-breaking-up-large-query-for-wikidata-sparql
+					'wikidata_SPARQL: 查詢超時。請縮減查詢量，例如分割查詢。');
+					library_namespace.log(data.responseText
+							.between('SPARQL-QUERY: queryStr='));
+				}
 				// e.g., java.util.concurrent.TimeoutException
 				callback(undefined, e);
 				return;
