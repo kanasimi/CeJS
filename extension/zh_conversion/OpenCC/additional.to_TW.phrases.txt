@@ -1110,6 +1110,8 @@
 只拼靈氣	只拚靈氣
 // 《如此堕怠，怎能成仙》	也是，唉，那就拼…… (~拚<COO>v:是 ~拚<role.type:ARGM-DIS>那 ~拚<role.type:ARGM-ADV>就 ~拚<role.type:ARGM-ADV>就是 ~拚<role.type:ARGM-ADV>不 d:也+v:是+wp:，+e:唉+wp:，+r:那+d:就+v:拼+wp:……)
 那就拼……	那就拚……
+// 《我的人生可以无限模拟》	那真是拿命在拼。 (~拚<VOB>v:是 ~拚<role.type:ARGM-MNR>拿命 ~拚<role.type:ARGM-ADV>在 r:那+d:真+v:是+v:拿+n:命+d:在+v:拼+wp:。)
+拿命在拼	拿命在拚
 // 《女侠且慢》	双方不过是在拼谁先坐不住。 (~拚<COO>v:不止 ~拚<role.type:ARGM-ADV>在 n:双方+d:不过+v:是+d:在+v:拼+r:谁+d:先+v:坐+d:不+v:住+wp:。)
 不過是在拼	不過是在拚
 // 《速通修仙！》	这些也都是季长生自己拼来的。 (~拚<VOB>v:是 ~拚<role.type:A0>季长生自己 r:这些+d:也+d:都+v:是+nh:季长生+r:自己+v:拼+v:来+u:的+wp:。)
