@@ -319,6 +319,10 @@ function module_code(library_namespace) {
 	 * 則應該使用 { value_only: true }，<br />
 	 * 或使用 'parameter name = value' 而非僅 'value'。
 	 * 
+	 * TODO: read
+	 * https://www.mediawiki.org/wiki/Help:TemplateData#Custom_formats
+	 * https://www.mediawiki.org/w/api.php?action=help&modules=templatedata
+	 * 
 	 * @example<code>
 
 	// remove parameter
