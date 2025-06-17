@@ -41,7 +41,9 @@ function detect_require(library_namespace) {
 	}
 
 	if (library_namespace.is_WWW()) {
-		library_namespace.debug('It looks like we are running in a web environment.', 1, 'detect_require');
+		library_namespace.debug(
+				'It looks like we are running in a web environment.', 1,
+				'detect_require');
 		return;
 	}
 	library_namespace.error('It looks like we are running in an unknown OS.');
@@ -122,6 +124,7 @@ function module_code(library_namespace) {
 		// _.current_directory()
 		_.working_directory = storage_module.working_directory;
 
+		// file system object statistics, fso_stats
 		// 警告: 此函數之API尚未規範。
 		// .file_stats()
 		// Not exist: will return false.

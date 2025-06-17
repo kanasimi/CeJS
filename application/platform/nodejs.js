@@ -84,6 +84,22 @@ function module_code(library_namespace) {
 	/** const node.js file system module */
 	var node_fs = require('fs'), child_process = require('child_process');
 
+	// --------------------------------------------
+
+	// TODO: 規範化
+	// get filesystem statistics
+	// https://nodejs.org/api/fs.html#class-fsstatfs
+	function partition_stats(directory_path) {
+		var partition_stats;
+		partition_stats = node_fs.statfsSync(directory_path);
+		// Total free space: partition_stats.bsize * partition_stats.bfree
+		// Available for user: partition_stats.bsize * partition_stats.bavail
+		return partition_stats;
+	}
+	_.partition_stats = partition_stats;
+
+	// --------------------------------------------
+
 	// TODO: 規範化
 	function fs_status(file_path, with_error) {
 		var file_status;

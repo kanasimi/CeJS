@@ -232,6 +232,7 @@ function module_code(library_namespace) {
 				// gettext_config:{"id":"$1-work_id-not-given"}
 				T : [ '%1: 沒有輸入 work_id！', this.id ]
 			});
+			callback && callback();
 			return;
 		}
 
@@ -278,7 +279,21 @@ function module_code(library_namespace) {
 				'Cannot create the base directory for downloading files: %1',
 						this.main_directory ]
 			});
+			callback && callback();
 			return;
+		}
+
+		var partition_stats = library_namespace
+				.partition_stats(this.main_directory);
+		// console.trace(partition_stats);
+		var free_space = partition_stats.bsize * partition_stats.bavail;
+		if (free_space < 4 * 1024 * 1024) {
+			library_namespace.error('start_downloading: ' + '剩餘儲存空間過小，僅剩 '
+					+ library_namespace.to_KiB(free_space) + '。');
+			if (partition_stats.bavail < 4) {
+				callback && callback();
+				return;
+			}
 		}
 
 		this.setup_value('Referer', this.base_URL);
@@ -302,7 +317,7 @@ function module_code(library_namespace) {
 
 		this.set_server_list(this.server_URL, function(error) {
 			if (error)
-				callback();
+				callback && callback();
 			else
 				_this.parse_work_id(work_id, callback);
 		}, server_file);
