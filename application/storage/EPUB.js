@@ -2614,8 +2614,9 @@ function module_code(library_namespace) {
 			}
 		}, this);
 
-		// 先刪除舊的電子書檔案以防干擾。
-		library_namespace.remove_file(target_file);
+		library_namespace.debug('先刪除舊的電子書檔案以防干擾。', 1, 'archive_to_ZIP');
+		if (library_namespace.file_exists(target_file))
+			library_namespace.remove_file(target_file);
 
 		library_namespace.debug({
 			// gettext_config:{"id":"creating-an-ebook-with-7zip-$1"}

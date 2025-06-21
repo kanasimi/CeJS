@@ -90,6 +90,10 @@ function module_code(library_namespace) {
 	// get filesystem statistics
 	// https://nodejs.org/api/fs.html#class-fsstatfs
 	function partition_stats(directory_path) {
+		// There is no node_fs.statfsSync in old node.js
+		if (!node_fs.statfsSync)
+			return;
+
 		var partition_stats;
 		partition_stats = node_fs.statfsSync(directory_path);
 		// Total free space: partition_stats.bsize * partition_stats.bfree
@@ -346,8 +350,11 @@ function module_code(library_namespace) {
 					// gettext_config:{"id":"recursively-removing-subdirectories-of-$1"}
 					T : [ 'Recursively removing subdirectories of %1', path ]
 				}, 2, 'remove_fso');
+			} else {
+				// https://github.com/nodejs/node/issues/56049
+				// https://github.com/nodejs/node/issues/58759
+				library_namespace.debug('Delete ' + path, 3, 'remove_fso');
 			}
-			// https://github.com/nodejs/node/issues/56049
 			// console.trace(path, recursive);
 			node_fs.rmSync(path, {
 				recursive : !!recursive

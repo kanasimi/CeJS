@@ -286,10 +286,12 @@ function module_code(library_namespace) {
 		var partition_stats = library_namespace
 				.partition_stats(this.main_directory);
 		// console.trace(partition_stats);
-		var free_space = partition_stats.bsize * partition_stats.bavail;
+		var free_space = partition_stats && partition_stats.bsize
+				* partition_stats.bavail;
 		if (free_space < 4 * 1024 * 1024) {
 			library_namespace.error('start_downloading: ' + '剩餘儲存空間過小，僅剩 '
 					+ library_namespace.to_KiB(free_space) + '。');
+			// 4: 最起碼會新開啟這麼多個檔案。
 			if (partition_stats.bavail < 4) {
 				callback && callback();
 				return;
