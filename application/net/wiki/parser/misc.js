@@ -1318,10 +1318,26 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------
 
-	// 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]] / 匿名IP用戶 is_anonymous_user
-	// [[m:Special:MyLanguage/Tech/News/2021/05]]
-	// 在diffs中，IPv6位址被寫成了小寫字母。這導致了死連結，因為Special:使用者貢獻只接受大寫的IP。這個問題已經被修正。
-	// https://www.mediawiki.org/wiki/Trust_and_Safety_Product/Temporary_Accounts/FAQ#What_does_a_temporary_username_look_like?
+	/**
+	 * 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]] / 匿名IP用戶 is_anonymous_user。
+	 * 
+	 * @param {String}username
+	 *            username to parse
+	 * 
+	 * @returns {Object}temporary username data
+	 * @returns {Undefined}temporary username
+	 * 
+	 * @example <code>
+
+	//is_temporary_username
+	is_anonymous_user = CeL.wiki.parse.user.parse_temporary_username(user_name) || CeL.is_IP(user_name);
+
+	</code>
+	 * 
+	 * @see https://www.mediawiki.org/wiki/Trust_and_Safety_Product/Temporary_Accounts/FAQ#What_does_a_temporary_username_look_like?
+	 * @see [[m:Special:MyLanguage/Tech/News/2021/05]]
+	 *      在diffs中，IPv6位址被寫成了小寫字母。這導致了死連結，因為Special:使用者貢獻只接受大寫的IP。這個問題已經被修正。
+	 */
 	function parse_temporary_username(username) {
 		// 從 testwiki 可發現 "~2024-2133" 也是正規臨時帳戶名稱。
 		var matched = username.trim().match(/^~(\d{4})-(\d+)/);
@@ -1330,7 +1346,7 @@ function module_code(library_namespace) {
 
 		return {
 			// 臨時編號
-			temporary_NO : +matched[1],
+			temporary_NO : +matched[2],
 			year : +matched[1]
 		};
 	}
