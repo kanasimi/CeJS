@@ -838,11 +838,11 @@ function module_code(library_namespace) {
 				return Array.isArray(_sentence);
 			})) {
 				// e.g., new CeL.gettext.Sentence_combination(
-				// [ [ 'message', p1 ], [ 'message' ] ])
+				// [ [ 'message', arg1 ], [ 'message' ] ])
 				sentence_combination.append(sentence);
 			} else {
 				// e.g., new CeL.gettext.Sentence_combination(
-				// [ 'message', p1, p2 ])
+				// [ 'message', arg1, arg2 ])
 				sentence_combination.push(sentence);
 			}
 		}
