@@ -9077,11 +9077,11 @@ _
 		}
 
 		level |= 0;
-		level = new RegExp('^(h[1-' + (level >= 1 && level <= 6 ? level : 6)
+		level = new RegExp('^(?:h[1-' + (level >= 1 && level <= 6 ? level : 6)
 				+ ']|header)$', 'i');
 
 		while (node) {
-			if ((matched = node.tagName) && matched.match(level))
+			if ((matched = node.tagName) && level.test(matched))
 				add_TOC_node(node);
 
 			// 表層遍歷。
@@ -9089,9 +9089,10 @@ _
 			node = node.nextSibling;
 		}
 
-		if (list_array.length === 0)
+		if (list_array.length === 0) {
 			// <h2> 為最常利用之中級結構。
-			for_nodes(add_TOC_node, 'h2');
+			for_nodes(add_TOC_node, 'h1,h2,h3');
+		}
 
 		if (list_array.length > 1) {
 			var TOC_list, id = set_attribute(content_node, 'id'),
