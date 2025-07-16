@@ -2811,6 +2811,7 @@ function module_code(library_namespace) {
 
 		if (!nodes) {
 			// select all nodes
+			// 遍歷。
 			nodes = document.querySelectorAll ? document.querySelectorAll('*')
 					: select_node('*');
 		} else if (typeof nodes === 'string') {
@@ -5321,7 +5322,7 @@ function module_code(library_namespace) {
 		if (!oPos && !oTxt)
 			return;
 
-		var limitW = screen.width - 50, limitH = screen.height >> 1;
+		var limitW = window.screen.width - 50, limitH = window.screen.height >> 1;
 		if (!sPopP.width)
 			sPopP.width = 250;
 		if (sPopP.width > limitW)
@@ -8996,16 +8997,130 @@ _
 	 */
 	function auto_TOC(content_node, options) {
 		options = library_namespace.setup_options(options);
+		content_node = get_element(content_node);
+		if (!content_node)
+			content_node = document.body;
+		/** options.force: {Integer}0:auto, 1:re-show, 2: force show. */
+		if (!options.force
+				&& content_node.scrollHeight < 4 * window.screen.height) {
+			return;
+		}
+
+		// ------------------------------------------------
+
+		var list_array = [], head_array = [], index, length,
+		// Chrome 22 在遇上 /p/cgi.cgi?_=_ 時，僅指定 href : #~ 會變成 /p/#~。因此需要
+		// workaround。
+		href = location.href.replace(/#.*$/, '') + '#';
+		if (is_Safari) {
+			// encodeURI(): Safari 5.1.7 needs this.
+			// But Opera will broken on this.
+			href = encodeURI(href);
+		}
+
 		/** {Integer}to <h\d>. default: 6. */
 		var level = options.level;
-		/** {Integer}0:auto, 1:re-show, 2: force show. */
-		var force = options.force;
-		if (!(content_node = get_element(content_node)))
-			content_node = document.body;
-		if (!force && content_node.scrollHeight < 4 * screen.height)
-			return;
+		// h1-3: 為最常利用之中級結構。
+		length = level >= 1 && level <= 6 ? level | 0 : 3;
+		level = [ 'header' ];
+		for (index = 0; index < length;) {
+			level.push('h' + ++index);
+		}
+		level = level.join(',');
 
-		// 設定目錄 height。
+		function add_TOC_node(node) {
+			library_namespace.debug('&lt;' + node.tagName + '&gt;\n'
+					+ node.innerHTML.slice(0, 200), 3);
+
+			head_array.push(node);
+			/** header title */
+			var title = set_text(node);
+			/** title 長度在規範內。 */
+			var not_too_long = title.length < auto_TOC.max_length;
+			/** tag name */
+			var tag_name = node.tagName
+			// CSS 分大小寫。
+			.toLowerCase();
+			if (!node.id && !node.name) {
+				node.id = encodeURIComponent(title);
+				if (false) {
+					// from wiki
+					node.id = node.id.replace(/%/g, '.').replace(/\s/g, '');
+				}
+			}
+
+			// 實際上應該用<li>，但<h\d>可能不會有 nested 層疊結構。
+			list_array.push({
+				div : {
+					a : not_too_long ? title : [
+							title.slice(0, auto_TOC.max_length), {
+								span : '..',
+								C : auto_TOC.CSS_prefix + 'more'
+							} ],
+					href : href + (node.id || node.name),
+					// subtitle
+					R : (not_too_long ? '' : title + (node.title ? '\n' : ''))
+							+ (node.title || ''),
+					target : '_self',
+					onclick : function() {
+						// 先緊縮目錄。
+						toggle_display(TOC_list, false);
+					}
+				},
+				C : auto_TOC.CSS_prefix
+						+ tag_name
+						+ (tag_name === 'header' ? '' : ' '
+								+ auto_TOC.CSS_prefix + 'header')
+			});
+		}
+
+		for_nodes(add_TOC_node, level);
+
+		if (list_array.length === 0) {
+			library_namespace.warn('auto_TOC: No ' + level + ' found.');
+			return;
+		}
+
+		// ------------------------------------------------
+
+		var TOC_list, id = set_attribute(content_node, 'id'),
+		// gettext_config:{"id":"↑back-to-toc"}
+		back_title = gettext('↑Back to TOC');
+
+		var node;
+		var title = set_attribute(content_node, 'title');
+		if (!title) {
+			node = content_node.firstChild;
+			// 當 firstChild 為 <header> 時，採用其內容為標題。
+			if (/^h[1-3]$/i.test(node.tagName))
+				title = set_text(node);
+		}
+		if (!title)
+			title = id;
+
+		id = auto_TOC.CSS_prefix + (id || Math.random());
+		TOC_list = id + '_list';
+
+		// 回來修改各 <header>
+		for (index = 0, length = head_array.length; index < length; index++) {
+			node = head_array[index];
+			set_class(node, auto_TOC.CSS_prefix + 'head');
+			new_node({
+				a : '📑',
+				href : href + id,
+				C : auto_TOC.CSS_prefix + 'back',
+				// T : '↑Back to TOC',
+				R : back_title,
+				target : '_self'
+			// TODO: element 本身可能是浮動的，因此應跳到下一個內文本文的元素，並採用
+			// .nextElementSibling.scrollIntoView()。
+			// @see function go_to_anchor(anchor) @ reviews.original.js
+			}, [ node, 1 ]);
+		}
+
+		/**
+		 * 設定目錄 height。
+		 */
 		function set_height() {
 			if (!CSS_position_sticky) {
 				return;
@@ -9022,212 +9137,93 @@ _
 			}
 		}
 
-		function add_TOC_node(node) {
-			library_namespace.debug('&lt;' + node.tagName + '&gt;\n'
-					+ node.innerHTML.slice(0, 200), 3);
-
-			head_array.push(node);
-			title = set_text(node);
-			// l: title 長度在規範內。
-			i = title.length < auto_TOC.max_length;
-			// l: tagName
-			// CSS 分大小寫。
-			l = node.tagName.toLowerCase();
-			if (!node.id && !node.name) {
-				node.id = encodeURIComponent(title);
-				if (false) {
-					// from wiki
-					node.id = node.id.replace(/%/g, '.').replace(/\s/g, '');
-				}
-			}
-
-			// 實際上應該用<li>，但<h\d>可能不會有 nested 層疊結構。
-			list_array.push({
-				div : {
-					a : i ? title : [ title.slice(0, auto_TOC.max_length), {
-						span : '..',
-						C : auto_TOC.CSS_prefix + 'more'
-					} ],
-					href : href + (node.id || node.name),
-					// subtitle
-					R : (i ? '' : title + (node.title ? '\n' : ''))
-							+ (node.title || ''),
-					target : '_self',
-					onclick : function() {
-						// 先緊縮目錄。
-						toggle_display(TOC_list, false);
-					}
-				},
-				C : auto_TOC.CSS_prefix
-						+ l
-						+ (l === 'header' ? '' : ' ' + auto_TOC.CSS_prefix
-								+ 'header')
-			});
-
-		}
-
-		var list_array = [], head_array = [], node = content_node.firstChild, matched, title, i, l,
-		// Chrome 22 在遇上 /p/cgi.cgi?_=_ 時，僅指定 href : #~ 會變成 /p/#~。因此需要
-		// workaround。
-		href = location.href.replace(/#.*$/, '') + '#';
-		if (is_Safari) {
-			// encodeURI(): Safari 5.1.7 needs this.
-			// But Opera will broken on this.
-			href = encodeURI(href);
-		}
-
-		level |= 0;
-		level = new RegExp('^(?:h[1-' + (level >= 1 && level <= 6 ? level : 6)
-				+ ']|header)$', 'i');
-
-		while (node) {
-			if ((matched = node.tagName) && level.test(matched))
-				add_TOC_node(node);
-
-			// 表層遍歷。
-			// TODO: 增加對更深層的探索。
-			node = node.nextSibling;
-		}
-
-		if (list_array.length === 0) {
-			// <h2> 為最常利用之中級結構。
-			for_nodes(add_TOC_node, 'h1,h2,h3');
-		}
-
-		if (list_array.length > 1) {
-			var TOC_list, id = set_attribute(content_node, 'id'),
-			// gettext_config:{"id":"↑back-to-toc"}
-			back_title = gettext('↑Back to TOC');
-
-			title = set_attribute(content_node, 'title');
-			if (!title) {
-				node = content_node.firstChild;
-				// 當 firstChild 為 <header> 時，採用其內容為標題。
-				if (/^h[1-3]$/i.test(node.tagName))
-					title = set_text(node);
-			}
-			if (!title)
-				title = id;
-
-			id = auto_TOC.CSS_prefix + (id || Math.random());
-			TOC_list = id + '_list';
-
-			// 回來修改各 <header>
-			for (i = 0, l = head_array.length; i < l; i++) {
-				if (false && i > 0) {
-					// Firefox/38.0 在兩個 hade 相鄰的情況，anchor 似乎無法正常作動。
-					// 只好手動助之加入 <p>
-					// ** 無用! 需於 <html> 中手動加入!
-					matched = node.nextSibling;
-					while (matched.nodeType === TEXT_NODE)
-						matched = matched.nextSibling;
-					if (matched === head_array[i])
-						new_node({
-							p : ' '
-						}, [ node, 3 ]);
-				}
-				set_class(node = head_array[i], auto_TOC.CSS_prefix + 'head');
-				new_node({
-					a : '📑',
-					href : href + id,
-					C : auto_TOC.CSS_prefix + 'back',
-					// T : '↑Back to TOC',
-					R : back_title,
-					target : '_self'
-				// TODO: element 本身可能是浮動的，因此應跳到下一個內文本文的元素，並採用
-				// .nextElementSibling.scrollIntoView()。
-				// @see function go_to_anchor(anchor) @ reviews.original.js
-				}, [ node, 1 ]);
-			}
-
-			list_array = [
-			// 設定目錄定位。
-			{
-				span : [ {
-					span : CSS_position_sticky ? auto_TOC.icon.unpin : '',
-					onclick : function() {
-						node.style.position = node.style.position
-						//
-						? '' : 'static';
-						this.innerHTML = auto_TOC.icon[
-						//
-						node.style.position ? 'pin' : 'unpin'];
-						set_height();
-					},
-					// gettext_config:{"id":"pin-unpin-the-toc"}
-					R : 'Pin/unpin the TOC'
-				}, {
-					span : auto_TOC.icon.right,
-					onclick : function() {
-						node.style.cssFloat = node.style.cssFloat
-						//
-						? '' : 'right';
-						this.innerHTML = auto_TOC.icon[
-						//
-						node.style.cssFloat ? 'left' : 'right'];
-					},
-					// gettext_config:{"id":"set-toc-to-left-or-right"}
-					R : 'Set TOC to left or right'
-				} ],
-				C : auto_TOC.CSS_prefix + 'position_control'
-			}, {
-				// U+1F4D1 BOOKMARK TABS
-				// http://www.utf8-chartable.de/unicode-utf8-table.pl?start=128000
-				// http://www.fileformat.info/info/emoji/list.htm
-				// http://codepoints.net/U+1F4D1
-				div : [ '📑', {
-					// gettext_config:{"id":"contents-of-$1"}
-					T : title ? [ 'Contents of [%1]', options.title_name
-					//
-					&& options.title_name(title) || title ]
-					// gettext_config:{"id":"contents"}
-					: 'Contents'
-				} ],
-				C : auto_TOC.CSS_prefix + 'control',
-				// gettext_config:{"id":"expand"}
-				title : gettext('expand'),
+		list_array = [
+		// 設定目錄定位。
+		{
+			span : [ {
+				span : CSS_position_sticky ? auto_TOC.icon.unpin : '',
 				onclick : function() {
-					var expand_now = toggle_display(TOC_list) !== 'none';
-					// show/hide (顯示/隱藏), 展開/收合目錄 click to expand
-					// gettext_config:{"id":"collapse"}
-					this.title = gettext(expand_now ? 'collapse'
-					// gettext_config:{"id":"expand"}
-					: 'expand');
-					if (expand_now)
-						set_height();
-				}
+					node.style.position = node.style.position
+					//
+					? '' : 'static';
+					this.innerHTML = auto_TOC.icon[
+					//
+					node.style.position ? 'pin' : 'unpin'];
+					set_height();
+				},
+				// gettext_config:{"id":"pin-unpin-the-toc"}
+				R : 'Pin/unpin the TOC'
 			}, {
-				div : list_array,
-				id : TOC_list,
-				C : auto_TOC.CSS_prefix + 'list'
-			} ];
-
-			var class_name = auto_TOC.CSS_prefix
-			// 若是不具有此屬性，則明確指定不使用此屬性；預防有瀏覽器雖然已實現此屬性，但是並沒有被本函式庫偵測出來。
-			+ (CSS_position_sticky ? 'box' : 'box_no_sticky');
-			if (node = get_element(id)) {
-				_.remove_all_child(node);
-				set_class(node, class_name);
-				new_node(list_array, node);
-			} else {
-				node = new_node({
-					div : list_array,
-					id : id,
-					C : class_name
-				}, [ content_node, 1 ]);
+				span : auto_TOC.icon.right,
+				onclick : function() {
+					node.style.cssFloat = node.style.cssFloat
+					//
+					? '' : 'right';
+					this.innerHTML = auto_TOC.icon[
+					//
+					node.style.cssFloat ? 'left' : 'right'];
+				},
+				// gettext_config:{"id":"set-toc-to-left-or-right"}
+				R : 'Set TOC to left or right'
+			} ],
+			C : auto_TOC.CSS_prefix + 'position_control'
+		}, {
+			// U+1F4D1 BOOKMARK TABS
+			// http://www.utf8-chartable.de/unicode-utf8-table.pl?start=128000
+			// http://www.fileformat.info/info/emoji/list.htm
+			// http://codepoints.net/U+1F4D1
+			div : [ '📑', {
+				// gettext_config:{"id":"contents-of-$1"}
+				T : title ? [ 'Contents of [%1]', options.title_name
+				//
+				&& options.title_name(title) || title ]
+				// gettext_config:{"id":"contents"}
+				: 'Contents'
+			} ],
+			C : auto_TOC.CSS_prefix + 'control',
+			// gettext_config:{"id":"expand"}
+			title : gettext('expand'),
+			onclick : function() {
+				var expand_now = toggle_display(TOC_list) !== 'none';
+				// show/hide (顯示/隱藏), 展開/收合目錄 click to expand
+				// gettext_config:{"id":"collapse"}
+				this.title = gettext(expand_now ? 'collapse'
+				// gettext_config:{"id":"expand"}
+				: 'expand');
+				if (expand_now)
+					set_height();
 			}
+		}, {
+			div : list_array,
+			id : TOC_list,
+			C : auto_TOC.CSS_prefix + 'list'
+		} ];
 
-			// auto_TOC.set_text(id);
+		var class_name = auto_TOC.CSS_prefix
+		// 若是不具有此屬性，則明確指定不使用此屬性；預防有瀏覽器雖然已實現此屬性，但是並沒有被本函式庫偵測出來。
+		+ (CSS_position_sticky ? 'box' : 'box_no_sticky');
+		node = get_element(id);
+		if (node) {
+			_.remove_all_child(node);
+			set_class(node, class_name);
+			new_node(list_array, node);
+		} else {
+			node = new_node({
+				div : list_array,
+				id : id,
+				C : class_name
+			}, [ content_node, 1 ]);
+		}
 
-			// 作 cache。
-			TOC_list = get_element(TOC_list);
+		// auto_TOC.set_text(id);
 
-			// 載入 CSS resource(s)。
-			// include resources of module.
-			library_namespace.run(library_namespace.get_module_path(
-					module_name, 'auto_TOC.css'));
-		} else
-			library_namespace.warn('auto_TOC: No ' + level + ' found.');
+		// 作 cache。
+		TOC_list = get_element(TOC_list);
+
+		// 載入 CSS resource(s)。
+		// include resources of module.
+		library_namespace.run(library_namespace.get_module_path(module_name,
+				'auto_TOC.css'));
 
 		// Release memory. 釋放被占用的記憶體.
 		head_array = list_array = null;
