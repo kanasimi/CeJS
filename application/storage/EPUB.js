@@ -1229,6 +1229,21 @@ function module_code(library_namespace) {
 				&& item1.href === item2.href;
 	}
 
+	/**
+	 * Escape ampersand '&' in text.
+	 * 
+	 * @param {String}text
+	 *            text to escape.
+	 * @return {String}escaped text
+	 * @example <code>
+
+	escape_ampersand('&amp;') === '&amp;'
+	escape_ampersand('a & b') === 'a &amp; b'
+	escape_ampersand('a &amp; b') === 'a &amp; b'
+	escape_ampersand('a &amp; b &amp; c') === 'a &amp; b &amp; c'
+
+	</code>
+	 */
 	function escape_ampersand(text) {
 		// https://stackoverflow.com/questions/12566098/what-are-the-longest-and-shortest-html-character-entity-names
 		return text.replace(/&([^&;]{0,50})([^&]?)/g, function(entity, postfix,
@@ -1296,7 +1311,7 @@ function module_code(library_namespace) {
 		})
 
 		// 去掉單純的空連結 <a ...></a>。
-		.replace(/<a(?:\s[^<>]*)*><\/a(?:\s[^<>]*)?>/ig, '')
+		.replace(/<a(?:\s[^<>]*)?><\/a(?:\s[^<>]*)?>/ig, '')
 
 		// 2017/2/2 15:1:26
 		// 標準可以沒 <rb>。若有<rb>，反而無法通過 EpubCheck 檢測。
@@ -1305,6 +1320,21 @@ function module_code(library_namespace) {
 
 		// e.g., id="text" → id="text"
 		// .replace(/ ([a-z]+)=([a-z]+)/g, ' $1="$2"')
+
+		/**
+		 * 去掉無用的空 tags。
+		 * 
+		 * @example <code>
+
+		// https://www.quanben5.com/n/sutongxiuxian_/1.html 速通修仙！ 第一章 内门考核
+		'<span id="ad"></span>' → ''
+
+		'<span id="ad" class="ad"></span>' → ''
+		'<span id="ad"><span id="ad"></span></span>' → ''
+
+		</code>
+		 */
+		.replace_till_stable(/<(span|a|b)(?:\s[^<>]*)?><\/\1>/ig, '')
 
 		// [[non-breaking space]]
 		// EpubCheck 不認識 HTML character entity，
