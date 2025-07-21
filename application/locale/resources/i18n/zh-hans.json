@@ -972,6 +972,7 @@
 	"minimum-number-of-templates-to-report-$1": "要报告的最小模板数量：%1",
 	"archiving-operation": "存档操作",
 	"archive-$1-chars": "存档%1个{{PLURAL:%1|字符}}。",
+	"convert-interlanguage-link-templates-to-wikilinks": "将跨语言链接模板转换为wiki链接",
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": "以下是需要手动更正的跨语言链接列表。此列表将由机器人自动更新。",
 	"edit-mark": "编",
 	"a-total-of-$1-occurrences": "...总共%1{{PLURAL:%1|发生}}次数。",
@@ -1306,5 +1307,6 @@
 	"options": "选项：",
 	"panel_label__summary": "摘要",
 	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": "已完成的{{PLURAL:%1|页|页数}} %1 未少于总数 %2！",
-	"convert-$1-to-wikilink": "清理跨语言链接%1为内部链接：编辑摘要的红链乃正常现象，经繁简转换后存在，非bot错误编辑"
+	"convert-$1-to-wikilink": "清理跨语言链接%1为内部链接：编辑摘要的红链乃正常现象，经繁简转换后存在，非bot错误编辑",
+	"also-fix-bad-language-codes-$1": "同时修正错误语言代码：%1"
 }
