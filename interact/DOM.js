@@ -2564,8 +2564,15 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('Get [' + selector + ']', 2, 'select_node');
 		if (library_namespace.is_Object(base_space)) {
+			if (!options) {
+				options = base_space;
+			}
 			base_space = base_space.base;
+		} else if (!options) {
+			options = library_namespace.setup_options(options);
 		}
+		if (!base_space)
+			base_space = options.base;
 
 		try {
 			if (typeof base_space === 'string' && base_space) {
@@ -2584,7 +2591,7 @@ function module_code(library_namespace) {
 
 			// http://inspire.twgg.org/programming/javascript/item/383-more-efficient-than-the-native-jquery-dom-selector-queryselector-and-queryselectorall.html
 			var result;
-			if (base_space.querySelectorAll)
+			if (base_space.querySelectorAll) {
 				try {
 					library_namespace.debug(
 							'using native .querySelectorAll() to select ['
@@ -2594,8 +2601,9 @@ function module_code(library_namespace) {
 					result = base_space.querySelectorAll(
 					// 處理本函數特有之**非標準**功能。尚有問題！
 					selector.replace(/\$([_a-z][_a-z\d]*)/gi, '[name="$1"]'));
-					if (result.length > 0)
+					if (result.length > 0) {
 						return result.length > 1 ? result : result[0];
+					}
 					library_namespace.debug('Nothing got. 嘗試本 library 傳統方法。',
 							2, 'select_node');
 				} catch (e) {
@@ -2603,6 +2611,7 @@ function module_code(library_namespace) {
 							'可能有不支援的 selector。改回本 library 傳統方法。', 2,
 							'select_node');
 				}
+			}
 
 			result = base_space;
 			var tmp_node, tag_name, identifier, part,
@@ -2816,7 +2825,7 @@ function module_code(library_namespace) {
 					: select_node('*');
 		} else if (typeof nodes === 'string') {
 			// selector || id
-			nodes = select_node(nodes) || get_element(nodes);
+			nodes = select_node(nodes, options) || get_element(nodes);
 		}
 
 		if (_.is_ELEMENT_NODE(nodes) || _.is_DOCUMENT_NODE(nodes)) {
@@ -9020,8 +9029,8 @@ _
 
 		/** {Integer}to <h\d>. default: 6. */
 		var level = options.level;
-		// h1-3: 為最常利用之中級結構。
-		length = level >= 1 && level <= 6 ? level | 0 : 3;
+		// <h1>-<h6>. or till <h3>: 為最常利用之中級結構。
+		length = level >= 1 && level <= 6 ? level | 0 : 6;
 		level = [ 'header' ];
 		for (index = 0; index < length;) {
 			level.push('h' + ++index);
@@ -9074,7 +9083,9 @@ _
 			});
 		}
 
-		for_nodes(add_TOC_node, level);
+		for_nodes(add_TOC_node, level, {
+			base : content_node
+		});
 
 		if (list_array.length === 0) {
 			library_namespace.warn('auto_TOC: No ' + level + ' found.');
