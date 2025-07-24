@@ -1150,19 +1150,20 @@ function module_code(library_namespace) {
 	 */
 	function get_entity_link(entity, language) {
 		var sitelinks = entity && entity.sitelinks;
-		if (sitelinks) {
-			var link = sitelinks[wiki_API.site_name(language)];
-			if (link) {
-				return link.title;
-			}
-			if (!language) {
-				link = [];
-				for (language in sitelinks) {
-					link.push(sitelinks[language].title);
-				}
-				return link;
-			}
+		if (!sitelinks) {
+			return;
 		}
+
+		if (language) {
+			var link = sitelinks[wiki_API.site_name(language)];
+			return link && link.title;
+		}
+
+		var links = [];
+		for (language in sitelinks) {
+			links.push(sitelinks[language].title);
+		}
+		return links;
 	}
 
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities

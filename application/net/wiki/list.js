@@ -2322,6 +2322,20 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/Manual:Langlinks_table
 	 */
 	wiki_API.langlinks = function(title, callback, to_lang, options) {
+		if (!options && library_namespace.is_Object(to_lang)) {
+			// shift
+			options = to_lang;
+			to_lang = null;
+		}
+		// 前置處理。
+		options = library_namespace.new_options(options);
+
+		var session = wiki_API.session_of_options(options);
+		if (session && !to_lang) {
+			// e.g., simplewiki
+			to_lang = session.first_damain_name || session.language;
+		}
+
 		var from_lang;
 		if (is_api_and_title(title, 'language', Object.assign({
 			ignore_API_test : true
