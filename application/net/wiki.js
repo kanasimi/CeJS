@@ -365,6 +365,8 @@ function module_code(library_namespace) {
 		is_wiki_API : is_wiki_API
 	});
 
+	// MediaWiki Frontend API
+	// https://doc.wikimedia.org/mediawiki-core/master/js/
 	if (library_namespace.is_WWW(true) && typeof mw === 'object' && mw
 			&& typeof mw.config === 'object'
 			&& typeof mw.config.get === 'function'
