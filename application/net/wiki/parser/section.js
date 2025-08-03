@@ -1769,10 +1769,30 @@ function module_code(library_namespace) {
 		var anchor_list = CeL.wiki.parse.anchor(wikitext);
 	}
 
+	var wikitext_had_expanded = typeof Symbol === 'function' ? Symbol('wikitext had expanded')
+			: '\0wikitext had expanded';
+
 	// CeL.wiki.parse.anchor()
 	function get_all_anchors(wikitext, options) {
 		if (!wikitext) {
 			return [];
+		}
+
+		options = library_namespace.setup_options(options);
+		if (options.try_to_expand_templates
+				&& (!options[wikitext_had_expanded] || options[wikitext_had_expanded] !== wikitext)) {
+			// wikitext = String(wikitext);
+			return Promise.resolve(
+			// 嵌入其他頁面時，需在 parsed.each_section() 分段前就先解開所嵌入的內容。
+			wiki_API.expand_transclusion(wikitext, options))
+			//
+			.then(function(wikitext) {
+				var _options = Object.assign(Object.create(null), options);
+				// Do not need expand templates any more.
+				delete _options.try_to_expand_templates;
+				_options[wikitext_had_expanded] = wikitext;
+				return get_all_anchors(wikitext, _options);
+			});
 		}
 
 		// const
@@ -1827,7 +1847,6 @@ function module_code(library_namespace) {
 		// var latest_action_count = session.actions && session.actions.length;
 
 		parsed.each_section();
-		options = library_namespace.setup_options(options);
 		var promise
 		//
 		= parsed.each('section_title', function(section_title_token) {

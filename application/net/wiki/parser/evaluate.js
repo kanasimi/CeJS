@@ -447,7 +447,7 @@ function module_code(library_namespace) {
 		return token;
 	}
 
-	// 類似 wiki_API_expandtemplates()
+	// 類似 wiki_API_expandtemplates() try_to_expand_templates
 	// ** 僅能提供簡單的演算功能，但提供 cache，不必每次從伺服器重新取得嵌入的頁面。
 	// [[Special:ExpandTemplates]]
 	// 使用上注意: 應設定 options[KEY_on_page_title_option]
@@ -505,6 +505,11 @@ function module_code(library_namespace) {
 		var promise = for_each_subelement.call(parsed, 'transclusion',
 		//
 		function(token) {
+			if (options.expand_transclusion_filter
+					&& !options.expand_transclusion_filter(token)) {
+				return;
+			}
+
 			// Error.stackTraceLimit = Infinity;
 			// console.trace(token);
 			token = repeatedly_expand_template_token(token, options);
@@ -525,7 +530,10 @@ function module_code(library_namespace) {
 		function expand_template_name(token) {
 			// console.trace(token[0]);
 			var template_name = token[0].toString();
-			var promise = expand_transclusion(token[0], options, level);
+			var promise = expand_transclusion(typeof token[0] === 'string'
+			// for "/header", token.page_title !== token[0].toString()
+			&& token.name.startsWith('/') ? token.page_title : token[0],
+					options, level);
 			if (!library_namespace.is_thenable(promise)) {
 				if (false) {
 					Error.stackTraceLimit = Infinity;
@@ -608,12 +616,17 @@ function module_code(library_namespace) {
 				}, options);
 
 				if (!session) {
-					page_title = wiki_API.to_namespace(page_title, 'Template');
+					if (wiki_API.is_namespace(page_title, 'main')) {
+						page_title = wiki_API.to_namespace(page_title,
+								'Template');
+					}
 					wiki_API.page(page_title, evaluate, page_options);
 					return;
 				}
 
-				page_title = session.to_namespace(page_title, 'Template');
+				if (session.is_namespace(page_title, 'main')) {
+					page_title = session.to_namespace(page_title, 'Template');
+				}
 				// console.trace(page_title);
 
 				// 盡量避免網路操作。

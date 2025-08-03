@@ -135,6 +135,14 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function expand_template_Bookmark(options) {
+		var parameters = this.parameters;
+		return (parameters[1] ? '<span id="' + parameters[1] + '"></span>' : '')
+				+ (parameters[2] || parameters[1]);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// [[w:zh:Template:Al]]
 	function expand_template_Al(options) {
 		var token = this;
@@ -157,6 +165,15 @@ function module_code(library_namespace) {
 			expand : expand_template_Al
 		});
 		return page_title_list;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	function parse_template_Bookmark(options) {
+		var token = this;
+		return token.page_title_list.map(function(title) {
+			return wiki_API.title_link_of(title);
+		}).join('、');
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -434,6 +451,11 @@ function module_code(library_namespace) {
 			}
 		},
 		Al : parse_template_Al,
+		Bookmark : {
+			properties : {
+				expand : expand_template_Bookmark
+			}
+		},
 
 		// {{Do not archive}}
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived

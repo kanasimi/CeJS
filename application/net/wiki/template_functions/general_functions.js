@@ -138,6 +138,18 @@ function module_code(library_namespace) {
 	expand_template_Colored_link.incomplete = 'Only for get_all_anchors() @ zh.moegirl [[ARGONAVIS from BanG Dream! 翻唱曲列表]]';
 
 	// --------------------------------------------------------------------------------------------
+	// 可能被用來配合網頁錨點 anchors 使用的模板。
+
+	function expand_template_Fake_heading(options) {
+		var parameters = this.parameters;
+		return '<div class="fake-heading ' + 'h'
+		// #default = h2
+		+ (parameters.level || parameters.sub || 2) + '">'
+				+ (parameters[1] || parameters.Section || parameters.分段)
+				+ '</div>';
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// 一些會產生網頁錨點 anchors 的模板或模組。
 	// Templates or modules that generate web anchors
 
@@ -605,6 +617,12 @@ function module_code(library_namespace) {
 			}
 		},
 
+		// 可能被用來配合網頁錨點 anchors 使用的模板。
+		'Fake heading' : {
+			properties : {
+				expand : expand_template_Fake_heading
+			}
+		},
 		// 一些會產生網頁錨點 anchors 的模板或模組。
 		// Templates or modules that generate web anchors
 		Anchor : {

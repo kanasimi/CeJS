@@ -2975,19 +2975,23 @@ function module_code(library_namespace) {
 					// wiki_API.namespace.hash using lower case
 					if (namespace === wiki_API.namespace.hash.template) {
 						// e.g., {{Template:name|...}}
+						// assert: parameters.name.startsWith('/') === false
 						parameters.page_title = parameters.name;
 						parameters.name = wiki_API.remove_namespace(
 								parameters.name, options);
+
+					} else if (parameters.name.startsWith('/')
+							&& (options.on_page_title || options.target_array
+									&& options.target_array.page
+									&& options.target_array.page.title)) {
+						// e.g., "{{/header}}" @ [[w:zh:Wikipedia:新条目推荐/候选]]
+						// "{{/header}}" → "Wikipedia:新条目推荐/候选/header"
+						// "{{/topic list}}" → "base page title/topic list"
+						parameters.page_title = (options.on_page_title || options.target_array.page.title)
+								+ parameters.name;
+
 					} else if (namespace === wiki_API.namespace.hash.main) {
-						if (parameters.name.startsWith('/')
-								&& options.target_array
-								&& options.target_array.page
-								&& options.target_array.page.title) {
-							// e.g., "{{/topic list}}"
-							// → "base page title/topic list"
-							parameters.page_title = options.target_array.page.title
-									+ parameters.name;
-						} else if (/^[\s_]*:/.test(parameters[0])) {
+						if (/^[\s_]*:/.test(parameters[0])) {
 							parameters.page_title = parameters.name;
 						} else {
 							parameters.page_title
@@ -2996,6 +3000,7 @@ function module_code(library_namespace) {
 							= wiki_API.to_namespace(parameters.name,
 									'Template', options);
 						}
+
 					} else {
 						// {{Wikipedia:T}}嵌入[[Wikipedia:T]]
 						parameters.page_title = parameters.name;
