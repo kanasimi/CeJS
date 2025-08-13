@@ -1782,14 +1782,20 @@ function module_code(library_namespace) {
 		if (options.try_to_expand_templates
 				&& (!options[wikitext_had_expanded] || options[wikitext_had_expanded] !== wikitext)) {
 			// wikitext = String(wikitext);
+
+			// TODO: 先嘗試展開所有模板，確定有些無法 expand 再 return Promise。
+
 			return Promise.resolve(
 			// 嵌入其他頁面時，需在 parsed.each_section() 分段前就先解開所嵌入的內容。
 			wiki_API.expand_transclusion(wikitext, options))
 			//
 			.then(function(wikitext) {
 				var _options = Object.assign(Object.create(null), options);
+
+				// ↓ 不可這麼做：會造成章節標題不被展開。
 				// Do not need expand templates any more.
-				delete _options.try_to_expand_templates;
+				// NG: delete _options.try_to_expand_templates;
+
 				_options[wikitext_had_expanded] = wikitext;
 				return get_all_anchors(wikitext, _options);
 			});

@@ -5745,8 +5745,9 @@ function test_wiki() {
 				//console.trace(anchors);
 				assert(anchors.includes('ABC（ノート / 履歴 / ログ / リンク元）'), 'CeL.wiki.parse.anchor(): {{Particle}} first');
 			}).then(function () {
-				return CeL.wiki.parse.anchor('=== {{Particle|DEF}} ===\n', options);
-			}).then(function (anchors) {
+				var _options = Object.assign({}, options);
+				delete _options.try_to_expand_templates;
+				var anchors = CeL.wiki.parse.anchor('=== {{Particle|DEF}} ===\n', options);
 				//console.trace(anchors);
 				assert(anchors.includes('DEF（ノート / 履歴 / ログ / リンク元）'), 'CeL.wiki.parse.anchor(): {{Particle}} cached');
 			});
