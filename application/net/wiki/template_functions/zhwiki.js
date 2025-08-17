@@ -8,6 +8,8 @@
  * 
  * TODO:<code>
 
+[[Template:疑問]], [[Template:Block]]
+
 </code>
  * 
  * @since 2021/1/24 16:6:50
@@ -263,24 +265,26 @@ function module_code(library_namespace) {
 	var expand_interlanguage_link_template_set = {
 		Translink : function() {
 			// @see link_body @ [[w:zh:Module:Ilh]]
+			// TODO: check if page exists
 			var page_exists = false;
 			var __display_text;
 			if (typeof Intl === 'object') {
-				var displayNames = new Intl.DisplayNames([ CeL.wiki.language ],
-				//
-				{
+				var displayNames = new Intl.DisplayNames([
+				// TODO: use session
+				CeL.wiki.language ], {
 					type : 'language'
 				});
 				__display_text = displayNames.of(this.foreign_language_code);
 				if (__display_text) {
-					// 英语、英文→英語
+					// 英语, 英文 → 英語
+					// @see [[w:zh:Module:Ilh/data]]
 					__display_text = __display_text.replace(/[语文]$/, '語');
 				}
 			}
 			__display_text = page_exists ? ''
 			//
 			: '|' + (this.display_text || this.local_page_title) + '（'
-			// @see [[w:zh:Module:Ilh/data]]
+			//
 			+ (__display_text || this.foreign_language_code) + '：-{'
 					+ this.foreign_page_title + '}-）';
 			return '[[' + this.local_page_title + __display_text + ']]';
@@ -312,11 +316,11 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// {{Lang|ja|參數值}} → -{參數值}-
 	function expand_template_Lang(options) {
 		var parameters = this.parameters;
-		return /^(?:zh|gan)/.test(parameters[1]) ? parameters[2] : '-{'
-				+ parameters[2] + '}-';
+		return /^(?:zh|gan)/.test(parameters[1]) ? parameters[2]
+		// {{Lang|語言標籤|內文}} → -{內文}-
+		: '-{' + parameters[2] + '}-';
 	}
 
 	// --------------------------------------------------------------------------------------------

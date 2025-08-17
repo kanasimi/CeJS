@@ -275,10 +275,9 @@ function module_code(library_namespace) {
 			return token;
 		}
 
-		// 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
-		// 其他常用 template 可加在 wiki.template_functions[site_name] 中。
+		// 這邊僅處理無法以 CeL.application.net.wiki.template_functions 處理之常用模板。
+		// 需要先保證這些模板存在，並且具有預期的功能。
 		//
-		// 模板這個部分除了解析模板之外沒有好的方法。
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
@@ -290,26 +289,6 @@ function module_code(library_namespace) {
 				token.shift();
 				return token;
 			}
-
-			if ((token.name in {
-				// {{lang|語言標籤|內文}}
-				Lang : true
-			}) && token.parameters[2]) {
-				return preprocess_section_link_token(token.parameters[2],
-						options);
-			}
-
-			// moved to CeL.application.net.wiki.template_functions.zhmoegirl
-			if (false
-					&& token.name === 'Lj'
-					&& wiki_API.site_name(wiki_API.session_of_options(options)) === 'zhmoegirl') {
-				return preprocess_section_link_token(wiki_API.parse('-{'
-						+ token.parameters[1] + '}-'), options);
-			}
-
-			// TODO: [[Template:User link]], [[Template:U]]
-
-			// TODO: [[Template:疑問]], [[Template:Block]]
 
 			// console.trace(token);
 
