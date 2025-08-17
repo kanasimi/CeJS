@@ -234,12 +234,13 @@ function module_code(library_namespace) {
 	};
 
 	function setup_interlanguage_link_template_parameters(template_pattern) {
-		var parsed_token = wiki_API.parse(template_pattern);
+		var template_token = wiki_API.parse(template_pattern);
 		var attribute_index = Object.create(null);
 		var configuration = {
+			template_name : template_token.name,
 			attribute_index : attribute_index
 		};
-		var parameters = parsed_token.parameters;
+		var parameters = template_token.parameters;
 
 		for ( var parameter in parameters) {
 			var attribute_name = parameters[parameter];
@@ -248,16 +249,43 @@ function module_code(library_namespace) {
 		}
 
 		var functions_of_site = wiki_API.template_functions.functions_of_site[module_site_name];
-		if (functions_of_site[parsed_token.name]) {
+		if (functions_of_site[template_token.name]) {
 			library_namespace
 					.error('setup_interlanguage_link_template_parameters: '
-							+ '已設定' + parsed_token.name
+							+ '已設定' + template_token.name
 							+ '之模板特設功能，無法設定跨語言模板功能。');
 			return;
 		}
-		functions_of_site[parsed_token.name] = parse_interlanguage_link_template
+		functions_of_site[template_token.name] = parse_interlanguage_link_template
 				.bind(configuration);
 	}
+
+	var expand_interlanguage_link_template_set = {
+		Translink : function() {
+			// @see link_body @ [[w:zh:Module:Ilh]]
+			var page_exists = false;
+			var __display_text;
+			if (typeof Intl === 'object') {
+				var displayNames = new Intl.DisplayNames([ CeL.wiki.language ],
+				//
+				{
+					type : 'language'
+				});
+				__display_text = displayNames.of(this.foreign_language_code);
+				if (__display_text) {
+					// 英语、英文→英語
+					__display_text = __display_text.replace(/[语文]$/, '語');
+				}
+			}
+			__display_text = page_exists ? ''
+			//
+			: '|' + (this.display_text || this.local_page_title) + '（'
+			// @see [[w:zh:Module:Ilh/data]]
+			+ (__display_text || this.foreign_language_code) + '：-{'
+					+ this.foreign_page_title + '}-）';
+			return '[[' + this.local_page_title + __display_text + ']]';
+		}
+	};
 
 	function parse_interlanguage_link_template(token, index, parent, options) {
 		var configuration = this;
@@ -269,11 +297,18 @@ function module_code(library_namespace) {
 				token[attribute_name] = token.parameters[attribute_index[attribute_name]];
 		}
 
-		if ('foreign_language_code' in token)
-			foreign_page_mapper[token.foreign_language_code] = token.foreign_page_title;
-
 		token.attribute_index = attribute_index;
+
+		if ('foreign_language_code' in token) {
+			foreign_page_mapper[token.foreign_language_code] = token.foreign_page_title;
+		}
+
 		token.foreign_page_mapper = foreign_page_mapper;
+
+		if (!token.expand
+				&& expand_interlanguage_link_template_set[configuration.template_name]) {
+			token.expand = expand_interlanguage_link_template_set[configuration.template_name];
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -474,7 +509,9 @@ function module_code(library_namespace) {
 		簡繁轉換 : parse_template_簡繁轉換
 	};
 
-	[ '{{Interlanguage link multi|local_page_title|foreign_language_code|foreign_page_title|lt=display_text|WD=wikidata_entity_id}}' ]
+	[
+			'{{Interlanguage link multi|local_page_title|foreign_language_code|foreign_page_title|lt=display_text|WD=wikidata_entity_id}}',
+			'{{Translink|foreign_language_code|foreign_page_title|local_page_title|display_text}}' ]
 			.forEach(setup_interlanguage_link_template_parameters);
 
 	// --------------------------------------------------------------------------------------------

@@ -1471,7 +1471,7 @@ function module_code(library_namespace) {
 	 * @returns {String} 主要使用之別名。
 	 * @returns {Object} { 正規名稱 : 別名 }
 	 */
-	gettext.get_alias = function(language) {
+	gettext.get_alias = function(language,/* TODO */in_language) {
 		return arguments.length > 0 ? gettext_main_alias[language in gettext_main_alias ? language
 				: gettext.to_standard(language)]
 				: gettext_main_alias;
