@@ -3486,7 +3486,6 @@ function test_wiki() {
 	all_error_count += CeL.test('wiki: CeL.wiki.parser()', function (assert) {
 		var wikitext, parsed;
 
-		assert(['深圳', CeL.wiki.wikitext_to_plain_text('深{{lang|zh|圳}}')], 'wikitext_to_plain_text() #1');
 		assert(['森鷗外', CeL.wiki.wikitext_to_plain_text('森&#40407;外')], 'wikitext_to_plain_text() #2');
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span lang="zh">深圳</span>')], 'wikitext_to_plain_text() #3');
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span xml:lang="zh">深圳</span>')], 'wikitext_to_plain_text() #4');
@@ -5585,6 +5584,7 @@ function test_wiki() {
 
 		//console.trace('Setup wiki tests...');
 		var enwiki = new CeL.wiki(null, null, 'en');
+
 		enwiki.run(function () {
 			var test_name = 'wiki: namespace';
 			_setup_test(test_name);
@@ -5683,6 +5683,7 @@ function test_wiki() {
 			});
 		});
 
+
 		enwiki.setup_layout_element_to_insert('{{WPBS}}', function test_insert_layout_element() {
 			var test_name = 'enwiki: insert_layout_element';
 			_setup_test(test_name);
@@ -5692,7 +5693,7 @@ function test_wiki() {
 			var parsed = CeL.wiki.parser(wikitext, enwiki).parse();
 			var WPBS_template_name = 'WPBS';
 			assert(['Template:WikiProject banner shell', enwiki.redirect_target_of(WPBS_template_name, { namespace: 'Template' })], 'enwiki.redirect_target_of() #1');
-			var WPBS_template_wikitext = CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name/*, {}*/);
+			var WPBS_template_wikitext = CeL.wiki.parse.template_object_to_wikitext(WPBS_template_name, {} && undefined);
 			assert(['talk_page_lead', CeL.wiki.get_location_of_template_element(WPBS_template_wikitext, enwiki)], 'CeL.wiki.get_location_of_template_element() #1');
 
 			assert([true, parsed.insert_layout_element(CeL.wiki.parse(WPBS_template_wikitext), CeL.wiki.add_session_to_options(enwiki))], 'enwiki: parsed.insert_layout_element() #1-1');
@@ -5704,7 +5705,6 @@ function test_wiki() {
 
 			_finish_test(test_name);
 		});
-
 
 
 		var jawiki = new CeL.wiki(null, null, 'ja');
@@ -5746,8 +5746,9 @@ function test_wiki() {
 				assert(anchors.includes('ABC（ノート / 履歴 / ログ / リンク元）'), 'CeL.wiki.parse.anchor(): {{Particle}} first');
 			}).then(function () {
 				var _options = Object.assign({}, options);
+				delete _options.allow_promise;
 				delete _options.try_to_expand_templates;
-				var anchors = CeL.wiki.parse.anchor('=== {{Particle|DEF}} ===\n', options);
+				var anchors = CeL.wiki.parse.anchor('=== {{Particle|DEF}} ===\n', _options);
 				//console.trace(anchors);
 				assert(anchors.includes('DEF（ノート / 履歴 / ログ / リンク元）'), 'CeL.wiki.parse.anchor(): {{Particle}} cached');
 			});
@@ -5756,7 +5757,6 @@ function test_wiki() {
 				_finish_test(test_name);
 			});
 		});
-
 
 
 		var zhwiki = new CeL.wiki(null, null, 'zh');
@@ -5804,6 +5804,7 @@ function test_wiki() {
 		zhwiki.run(function test_template_functions() {
 			var test_name = 'wiki: template_functions';
 			_setup_test(test_name);
+			//CeL.run('application.net.wiki.template_functions.zhwiki');
 
 			assert(["Template:Tl", zhwiki.normalize_title('t:tl')], 'zhwiki.normalize_title() #1-1');
 			assert(["Wikipedia:小作品", zhwiki.normalize_title('WP:小作品')], 'zhwiki.normalize_title() #1-2');
@@ -5823,6 +5824,8 @@ function test_wiki() {
 			// 下面這個測試只能在含入 CeL.application.net.wiki.template_functions.zhwiki 後才能使用。
 			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, CeL.wiki.add_session_to_options(zhwiki)).toString()], 'wiki.section_link + template_functions #1-1');
 			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link + template_functions #1-2');
+
+			assert(['深圳', CeL.wiki.wikitext_to_plain_text('深{{lang|zh|圳}}', { site_name: 'zhwiki' })], 'wikitext_to_plain_text() #1: need use session');
 
 			_finish_test(test_name);
 		});
