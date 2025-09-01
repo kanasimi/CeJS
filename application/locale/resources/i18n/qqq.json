@@ -6,6 +6,7 @@
 			"Amire80",
 			"Ice bulldog",
 			"Kanashimi",
+			"McDutchie",
 			"Robby",
 			"Verdy p"
 		]
@@ -190,7 +191,7 @@
 	"holocene-calendar": "Label for calendar option.\n; Demo: [https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]\n; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5273}}\n; Scope: data.date.era: 可選用的文字式年曆欄位: 分類",
 	"gregorian-reform": "Label for calendar option.\n; Demo: [https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]\n; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5303}}\n; Scope: data.date.era: 可選用的文字式年曆欄位: 分類",
 	"famous-places": "Option label to caculate date-time.\n; Demo: [https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]\n; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5384}}\n; Scope: data.date.era: 設定/地理座標",
-	"loading-$1$": "Loading message. e.g., Loading 20%...\n; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L997}}\n; Scope: system",
+	"loading-$1$": "Loading progress message with percentage completed, e.g., Loading 20%...\n; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L997}}\n; Scope: system",
 	"the-bot-operation-is-completed-$1$-in-total": "Overall progress. 整體作業進度。用在編輯摘要時通常放在最後面，預防擠掉更重要的內容。; Repositories: {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}\n; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1060}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3972}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L702}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1080}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L216}}",
 	"finished": "Used as log message.\n; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1075}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3522}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3534}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1443}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L1445}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L490}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/code/thread.js#L513}}\n; Scope: application.net.wiki.task",
 	"no-changes": "Used as log message at report.\n; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}\n; References: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1148}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1159}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4030}}\n; Scope: application.net.wiki.task",
