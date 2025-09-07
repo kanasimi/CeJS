@@ -170,7 +170,7 @@
 	"Holocene calendar": "Holoceen kalender",
 	"Gregorian reform": "Invoering van de Gregoriaanse kalender",
 	"\u8457\u540d\u5730\u9ede\uff1a": "Bekende plaatsen: ",
-	"Loading %1%...": "Bezig met het laden van %1%...",
+	"Loading %1%...": "%1% geladen\u2026",
 	"finished": "voltooid",
 	"No changes.": "Geen wijzigingen.",
 	"No page modified": "Geen pagina aangepast",
