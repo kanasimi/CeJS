@@ -265,7 +265,7 @@
 	"\u4f7f\u7528\u81ea\u5b9a\u7fa9 agent\u3002": "Utilisation d\u2019un agent personnalis\u00e9.",
 	"\u81ea\u5b9a\u7fa9 agent \u8207 URL \u4e4b\u5354\u5b9a\u4e0d\u540c\uff0c\u5c07\u5617\u8a66\u63a1\u7528\u7b26\u5408\u7684\u5354\u5b9a\uff1a%1": "L\u2019agent personnalis\u00e9 est diff\u00e9rent de l\u2019URL et tentera d\u2019adopter l\u2019agr\u00e9ement conforme\u202f: %1",
 	"\u63a1\u7528\u6cdb\u7528\u7684 agent\u3002": "Utilisation d\u2019un agent g\u00e9n\u00e9rique.",
-	"\u91cd\u65b0\u8a2d\u5b9a cookie \u6210\uff1a%1": "R\u00e9initialiser le cookie \u00e0\u202f: %1",
+	"\u91cd\u65b0\u8a2d\u5b9a cookie \u6210\uff1a%1": "R\u00e9initialiser le t\u00e9moin (''cookie'') \u00e0\u202f: %1",
 	"Retry %1/%2: %3": "Nouvel essai %1 sur %2\u202f: %3",
 	"URL not found: [%1]": "URL introuvable\u202f: [%1]",
 	"Node.js v12 and later versions disable TLS v1.0 and v1.1 by default.": "Node.js en version 12 ou ult\u00e9rieure d\u00e9sactive par d\u00e9faut les versions 1.0 et 1.1 de TLS.",
