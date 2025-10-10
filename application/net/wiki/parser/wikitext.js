@@ -2650,6 +2650,7 @@ function module_code(library_namespace) {
 							+ token + ']');
 						}
 					} else {
+						// e.g., {{#invoke:module name|function name}}
 						if (typeof value === 'string')
 							value = value.trim();
 						// 位移2個。
@@ -2658,11 +2659,14 @@ function module_code(library_namespace) {
 						if (invoke_properties && _index === 1) {
 							invoke_properties.module_name
 							// token[1]: module name 模組名稱
-							= wiki_element_to_key(value, options);
+							= wiki_API.normalize_title(wiki_element_to_key(
+									value, options).trim());
 						} else if (invoke_properties && _index === 2) {
 							invoke_properties.function_name
 							// token[2]: lua function name 函式名稱
-							= wiki_element_to_key(value, options);
+							= wiki_element_to_key(value, options).trim()
+							// || 'main'
+							;
 						} else {
 							// 警告: 不該尋找下一個可用的 parameter serial。
 							// 無名parameters有自己一套計數，不因具名parameters而跳過。
