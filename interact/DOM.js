@@ -5312,6 +5312,28 @@ function module_code(library_namespace) {
 		safari : 5
 	});
 
+	function pre_text_to_HTML(pre_text) {
+		return pre_text.replace(/<[\/\w][^<>]*>|[ \n]/g, function(
+				text_to_escape) {
+			if (text_to_escape.startsWith('<')) {
+				if (!/<(?:a)/.test(text_to_escape)
+				//
+				&& !/\starget=/.test(text_to_escape)) {
+					text_to_escape = text_to_escape
+					//
+					.replace(/>$/, ' target="_blank">');
+				}
+				return text_to_escape;
+			}
+
+			// 以不換行(pre)的方式顯示.patch
+			return {
+				' ' : '&nbsp;',
+				'\n' : '<br />'
+			}[text_to_escape];
+		});
+	}
+
 	// TODO: 點選文字後在下方出現全橫幅的layer以展示訊息，再點選可隱藏。
 	// e.g.,
 	// https://www.twreporter.org/a/bookreview-i-generation-discrimination-micro-aggression
@@ -5630,30 +5652,11 @@ function module_code(library_namespace) {
 			//
 			? '<div id="s" style="color:#488;background-color:#FF8;">\n'
 			//
-			+ oPos.innerHTML.replace(/\n/g, '<br />')
-			//
-			.replace(/ /g, '&nbsp;') + '\n<\/div><hr />' : '')
+			+ pre_text_to_HTML(oPos.innerHTML) + '\n<\/div><hr />' : '')
 
 			+ '<div id="c" style="color:#404;background-color:#8FF;">\n'
 
-			+ oTxt.replace(/<[\/\w][^<>]*>|[ \n]/g, function(text_to_escape) {
-				if (text_to_escape.startsWith('<')) {
-					if (!/<\//.test(text_to_escape)
-					//
-					&& !/\starget=/.test(text_to_escape)) {
-						text_to_escape = text_to_escape
-						//
-						.replace(/>$/, ' target="_blank">');
-					}
-					return text_to_escape;
-				}
-
-				// 以不換行(pre)的方式顯示.patch
-				return {
-					' ' : '&nbsp;',
-					'\n' : '<br />'
-				}[text_to_escape];
-			})
+			+ pre_text_to_HTML(oTxt)
 
 			+ '\n<\/div><hr />'
 
@@ -5663,6 +5666,7 @@ function module_code(library_namespace) {
 			//
 			+ sPopP.close_message + '<\/b> ]'
 			// + '</body></html>'
+			;
 
 			w.document.open();
 			w.document.write(t);
@@ -5678,6 +5682,9 @@ function module_code(library_namespace) {
 		// 回傳決定的type
 		return popup_window_type;
 	}
+
+	// 警告: 這是個暫時性的 hook，用在 review html files。可能改為 CeL.set_up_popup() 之類。
+	_.sPop = sPop;
 
 	/**
 	 * <code>	開啟連結於 target
