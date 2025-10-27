@@ -3419,6 +3419,7 @@ function module_code(library_namespace) {
 			// console.trace(each[1]);
 			Object.assign(config.no_edit ? config : options, each[1]);
 		}
+		// 要約欄
 		callback = config.summary;
 		// 採用 {{tlx|template_name}} 時，[[Special:RecentChanges]]頁面無法自動解析成 link。
 		options.summary = callback
@@ -4030,6 +4031,7 @@ function module_code(library_namespace) {
 						messages.add(gettext('No changes.'));
 					}
 					if (log_item.title && config.summary) {
+						// 要約欄: <code><nowiki>config.summary</nowiki></code>
 						messages.unshift(summary_to_wikitext(config.summary),
 								'');
 					}
@@ -4094,7 +4096,7 @@ function module_code(library_namespace) {
 
 				if (config.no_message) {
 					;
-				} else if (log_to && messages.join('\n')
+				} else if (log_to && messages.join('')
 				//
 				&& (done !== nochange_count
 				// 若全無變更，則預設僅從 console 提示，不寫入 log 頁面。因此無變更者將不顯示。
