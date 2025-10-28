@@ -967,8 +967,17 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// 可算 function preprocess_section_link_token(token, options) 的簡化版。
-	// 可能保留 "\n"、不可見字符 必須自己 .trim()。
+	/**
+	 * 將 wiki element 轉成 key。
+	 * 
+	 * 可算 function preprocess_section_link_token(token, options) 的簡化版。
+	 * 
+	 * 可能保留 "\n"、不可見字符 必須自己 .trim()。
+	 * 
+	 * @param {Array|String}token
+	 *            wiki element token
+	 * @returns {String|Array} key
+	 */
 	function wiki_element_to_key(token) {
 		if (!Array.isArray(token))
 			return token;
@@ -994,6 +1003,7 @@ function module_code(library_namespace) {
 		// console.trace([ has_no_string, _token ]);
 		if (token.type === 'plain' && !has_no_string)
 			return _token.join('');
+		// 注意: 這時 不會回傳 {String}!
 		return set_wiki_type(_token, token.type);
 	}
 
@@ -2660,11 +2670,11 @@ function module_code(library_namespace) {
 							invoke_properties.module_name
 							// token[1]: module name 模組名稱
 							= wiki_API.normalize_title(wiki_element_to_key(
-									value, options).trim());
+									value, options).toString().trim());
 						} else if (invoke_properties && _index === 2) {
 							invoke_properties.function_name
 							// token[2]: lua function name 函式名稱
-							= wiki_element_to_key(value, options).trim()
+							= wiki_element_to_key(value, options)
 							// || 'main'
 							;
 						} else {
