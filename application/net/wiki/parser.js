@@ -1506,7 +1506,10 @@ function module_code(library_namespace) {
 	// 取得定位各布局項目所需元素。
 	// TODO: Not yet tested
 	function setup_layout_elements(callback, options) {
-		var session = wiki_API.session_of_options(options);
+		throw new Error('NYI');
+		options = library_namespace.setup_options(options);
+
+		var session = /* wiki_API.session_of_options(options) || */this;
 		if (!session.configuration)
 			session.configuration = Object.create(null);
 		var layout_index = session.configuration.layout_index;
@@ -2234,7 +2237,7 @@ function module_code(library_namespace) {
 			}
 
 			template_name_list = template_order_of_layout[location]
-			//
+			// normalize template names
 			= template_name_list.filter(function(page_name) {
 				page_name = page_name.trim();
 				if (!page_name)

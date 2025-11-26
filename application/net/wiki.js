@@ -176,7 +176,7 @@ function module_code(library_namespace) {
 			this.running = true;
 		}
 
-		// 權杖
+		// 權杖 TODO: use .tokens
 		this.token = {
 			// lgusername
 			lgname : user_name,
