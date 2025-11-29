@@ -762,7 +762,7 @@ function module_code(library_namespace) {
 				if (false && promise) {
 					console.trace([ index + '/' + length, depth, promise,
 							modify_by_return ]);
-					promise.then(function(r) {
+					promise = promise.then(function(r) {
 						console
 								.trace([ r, index + '/' + length, depth,
 										promise ]);
@@ -895,6 +895,7 @@ function module_code(library_namespace) {
 				: [ 'for_each_subelement.skip_inner: skip children' ],
 		// CeL.wiki.parser.parser_prototype.each.remove_token
 		// for_each_subelement.remove_token: remove current children token
+		// c.f. CeL.wiki.parse.replace_parameter.KEY_remove_parameter
 		remove_token : typeof Symbol === 'function' ? Symbol('REMOVE_TOKEN')
 				: [ 'for_each_subelement.skip_inner: remove current token' ],
 		ref_name_templates : [ 'R' ]

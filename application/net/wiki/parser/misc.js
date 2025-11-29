@@ -76,6 +76,8 @@ function module_code(library_namespace) {
 	/**
 	 * 將 parameters 形式的 object 轉成 wikitext。
 	 * 
+	 * 警告: 不保證 template_object 的順序！
+	 * 
 	 * @example<code>
 
 	CeL.wiki.parse.template_object_to_wikitext('t', {
@@ -397,6 +399,7 @@ function module_code(library_namespace) {
 	 </code>
 	 * 
 	 * @see 20190912.fix_Infobox_company.js, 20190913.move_link.js
+	 * @see CeL.wiki.parse.template_object_to_wikitext()
 	 * 
 	 * @param {Array}template_token
 	 *            由 wiki_API.parse === parse_wikitext() 獲得之 template_token
@@ -464,9 +467,10 @@ function module_code(library_namespace) {
 				var index = replace_from === KEY_template_name ? 0
 						: template_token.index_of[replace_from];
 				if (!(index >= 0)) {
-					// 不存在此 parameter name 可 replace。
+					// 不存在此 parameter name 可 replace。新 parameter。
 					if (replace_to !== KEY_remove_parameter
-							&& options.value_only && options.force_add) {
+							&& replace_to !== undefined && options.value_only
+							&& options.force_add) {
 						// options.preserve_spacing
 						if (!options.no_value_space
 						//
