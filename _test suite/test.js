@@ -3984,9 +3984,12 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #40');
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #40-1');
 		assert(['Template:Text', parsed.page_title], 'wiki.parse.transclusion #40-2');
-		wikitext = '{{Template:}}'; parsed = CeL.wiki.parse(wikitext);
+		wikitext = '{{Template:A|條目}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41');
-		assert([wikitext, parsed], 'wiki.parse.transclusion #41-1');
+		assert([wikitext, parsed.page_title], 'wiki.parse.transclusion #41-1');
+		wikitext = '{{Template:}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41-2');
+		assert([wikitext, parsed], 'wiki.parse.transclusion #41-3');
 
 		wikitext = '{{text| {{ {{<s> }} }} </s> }}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #42');
@@ -5221,7 +5224,7 @@ function test_wiki() {
 		assert(['{{t|b=2|1}}', CeL.wiki.parse.replace_parameter(token, 'a', KEY_remove_parameter) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #3');
 		assert(['{{t|1}}', CeL.wiki.parse.replace_parameter(token, { b: KEY_remove_parameter }, { parameter_name_only: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
 		token = CeL.wiki.parse('{{WPBS|1=\n{{TT}}\n}}');
-		assert(['{{WPBS|class=A|vital=yes|1=\n{{TT}}\n}}', CeL.wiki.parse.replace_parameter(token, { 'class': 'A', vital: 'yes' }, { value_only: true, force_add: true, before_parameter: 1, no_value_space: true }) === 2 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
+		assert(['{{WPBS|class=A|vital=yes|1=\n{{TT}}\n}}', CeL.wiki.parse.replace_parameter(token, { 'class': 'A', vital: 'yes', nothing_to_set: undefined }, { value_only: true, force_add: true, before_parameter: 1, no_value_space: true }) === 2 && token.toString()], 'wiki.parse.replace_parameter remove parameter: #4');
 		wikitext = '{{  t | a= 1|v =  3 }}';
 		token = CeL.wiki.parse(wikitext);
 		assert(['{{q| a= 1|v =  3 }}', CeL.wiki.parse.replace_parameter(token, CeL.wiki.parse.replace_parameter.KEY_template_name, 'q') === 1 && token.toString()], 'wiki.parse.replace_parameter: #18-1 Only change template name');

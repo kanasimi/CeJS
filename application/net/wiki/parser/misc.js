@@ -460,6 +460,7 @@ function module_code(library_namespace) {
 
 				if (typeof replace_from === 'string')
 					replace_from = replace_from.trim();
+				// 不新增原先沒有並且未設定值的 parameter。
 				if (convert_replace_to(replace_from) === undefined) {
 					continue;
 				}
@@ -469,8 +470,7 @@ function module_code(library_namespace) {
 				if (!(index >= 0)) {
 					// 不存在此 parameter name 可 replace。新 parameter。
 					if (replace_to !== KEY_remove_parameter
-							&& replace_to !== undefined && options.value_only
-							&& options.force_add) {
+							&& options.value_only && options.force_add) {
 						// options.preserve_spacing
 						if (!options.no_value_space
 						//

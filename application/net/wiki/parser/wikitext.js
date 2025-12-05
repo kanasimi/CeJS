@@ -1027,7 +1027,7 @@ function module_code(library_namespace) {
 	 * @param {Array}token
 	 *            root token
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項
+	 *            附加參數/設定選擇性/特殊功能與選項。
 	 * @returns
 	 */
 	function flat_plain_element(token, options) {
@@ -1130,7 +1130,7 @@ function module_code(library_namespace) {
 	 * @param {String}wikitext
 	 *            wikitext to parse
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項
+	 *            附加參數/設定選擇性/特殊功能與選項。
 	 * @param {Array}[queue]
 	 *            temporary queue. 基本上僅供內部使用。
 	 * 
@@ -2248,6 +2248,7 @@ function module_code(library_namespace) {
 
 					// 需再進一步處理 {{}}, -{}- 之類。
 					// [[w:en:Wikipedia:Categorization#Sort keys]]
+					// 多個同名的 category 會以最後一個的 sort key 為主。
 					parameters[category_matched ? 'sort_key'
 					// [[w:en:Wikipedia:Piped link]] the displayed text
 					: 'display_text'] = parsed_display_text
