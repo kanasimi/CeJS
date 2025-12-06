@@ -2296,6 +2296,9 @@ function module_code(library_namespace) {
 	// insert_navigate_template
 	// TODO: resort token
 	function insert_layout_element(token, options) {
+		if (!token)
+			return;
+
 		/**
 		 * {String}layout_type. e.g., 'hatnote', 'maintenance tag', 'navigation
 		 * template'
@@ -2315,10 +2318,18 @@ function module_code(library_namespace) {
 		if (session)
 			wiki_API.add_session_to_options(session, options);
 
+		if (typeof token === 'string') {
+			token = wiki_API.parse(token, options);
+		}
+		if (token.type === 'plain') {
+			token.forEach(function(subtoken) {
+				insert_layout_element.call(parsed, subtoken, options);
+			});
+			return;
+		}
+
 		// Guess location
 		if (!location) {
-			if (typeof token === 'string')
-				token = wiki_API.parse(token, options);
 			location = get_location_of_template_element(token, options);
 			// console.trace(token, location);
 			if (location) {
