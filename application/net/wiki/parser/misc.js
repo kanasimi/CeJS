@@ -274,10 +274,29 @@ function module_code(library_namespace) {
 		return parameter.trim().replace(/^([^={}]+)\s+=\s+/, '$1=');
 	}
 
+	// @inner
+	function may_omit_numbered_parameter_name(template_token, parameter_name,
+			next_insert_index) {
+		if (!library_namespace.is_digits(parameter_name))
+			return false;
+
+		next_insert_index = +next_insert_index || template_token.length;
+		for (var index = next_insert_index; index > 1;) {
+			var piece = template_token[--index];
+			var latest_parameter_name = String(piece[0]);
+			if (library_namespace.is_digits(latest_parameter_name)) {
+				return +latest_parameter_name === parameter_name - 1;
+			}
+		}
+
+		return +parameter_name === 1;
+	}
+
 	// 可以省略數字參數名 numbered parameter / numeric parameter name。
 	// TODO: template 本身假如會產出 "a=b" 這樣的字串，恐怕會造成問題。
 	// https://www.mediawiki.org/wiki/Help:Templates#Numbered_parameters
-	function may_omit_numbered_parameter(parameter_value, options) {
+	// @inner
+	function may_omit_numbered_parameter_value(parameter_value, options) {
 		if (!Array.isArray(parameter_value)) {
 			if (typeof parameter_value !== 'string')
 				return true;
@@ -488,17 +507,24 @@ function module_code(library_namespace) {
 						}
 						// console.trace([ replace_from, replace_to ]);
 						if (spaces && spaces[1]) {
+							// 警告: 此操作會丟失 replace_to 物件原有屬性！
 							replace_to = spaces[0] + replace_from + spaces[1]
 									+ replace_to + spaces[2];
-						} else if (library_namespace.is_digits(replace_from)
-								&& may_omit_numbered_parameter(replace_to,
-										options)) {
+						} else if (may_omit_numbered_parameter_name(
+								template_token, replace_from, next_insert_index)
+								&& may_omit_numbered_parameter_value(
+										replace_to, options)) {
 							library_namespace.debug(
 									'Auto remove numbered parameter: '
 											+ replace_from, 1,
 									'replace_parameter');
 						} else {
+							// 警告: 此操作會丟失 replace_to 物件原有屬性！
 							replace_to = replace_from + '=' + replace_to;
+						}
+						if (typeof replace_to === 'string') {
+							replace_to = wiki_API.parse(replace_to, Object
+									.clone(options));
 						}
 						if (options.before_parameter
 								&& template_token.index_of[options.before_parameter]) {
@@ -573,7 +599,7 @@ function module_code(library_namespace) {
 					// name.
 					// e.g., "| key<!---->=1 |" → "| key<!---->=2 |"
 					// NOT: "| key<!---->=1 |" → "| key=2 |"
-					if (parameters && parameters[replace_from]) {
+					if (parameters && parameters[replace_from] !== undefined) {
 						this_parameter[2] = this_parameter[2].toString()
 						// 留下註解之類。
 						.replace(parameters[replace_from], function(all) {
@@ -597,7 +623,7 @@ function module_code(library_namespace) {
 						skip_replacement = 1;
 					}
 
-					if (!may_omit_numbered_parameter(replace_to, options)
+					if (!may_omit_numbered_parameter_value(replace_to, options)
 							&& !this_parameter[1]) {
 						this_parameter[0] = replace_from;
 						this_parameter[1] = '=';
@@ -675,7 +701,8 @@ function module_code(library_namespace) {
 			} else {
 				// remove the parameter
 				template_token.splice(index, 1);
-				replace_to = wiki_API.parse(template_token.toString());
+				replace_to = wiki_API.parse(template_token.toString(), Object
+						.clone(options));
 				if (!replace_to || replace_to.type !== 'transclusion') {
 					throw new Error('replace_parameter: Parse error for '
 							+ template_token);
@@ -701,14 +728,17 @@ function module_code(library_namespace) {
 				var value = replace_to[key];
 				if (!key) {
 					library_namespace.warn('Including empty key: '
-					// TODO: allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
+					// TODO: allow {{|=...}}, e.g.,
+					// [[w:zh:Template:Policy]]
 					+ JSON.stringify(replace_to));
 					key = parameter_name;
 				}
 				// TODO: using is_valid_parameters_value(value)
-				return spaces[1] ? spaces[0] + key + spaces[1] + value
+				return wiki_API.parse(spaces[1]
 				//
-				+ spaces[2] : key + '=' + value;
+				? spaces[0] + key + spaces[1] + value + spaces[2]
+				//
+				: key + '=' + value, Object.clone(options));
 			});
 		}
 		if (Array.isArray(replace_to) && !replace_to.type) {
@@ -725,7 +755,7 @@ function module_code(library_namespace) {
 		if (!spaces[1] && library_namespace.is_digits(parameter_name)) {
 			var matched = replace_to.match(/^\s*(\d+)\s*=\s*([\s\S]*)$/);
 			if (matched && matched[1] == parameter_name
-					&& may_omit_numbered_parameter(matched[2], options)) {
+					&& may_omit_numbered_parameter_value(matched[2], options)) {
 				// e.g., replace [2] to non-named 'value' in {{t|1|2}}
 				library_namespace.debug('Auto remove numbered parameter: '
 						+ parameter_name, 1, 'replace_parameter');
@@ -793,6 +823,7 @@ function module_code(library_namespace) {
 
 		library_namespace.debug(parameter_name + ': "' + template_token[index]
 				+ '"→"' + replace_to + '"', 2, 'replace_parameter');
+		replace_to = wiki_API.parse(replace_to, Object.clone(options));
 		template_token[index] = replace_to;
 
 		return 1;

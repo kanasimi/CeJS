@@ -1094,6 +1094,13 @@ function module_code(library_namespace) {
 		return pattern;
 	}
 
+	// is_meaningful_element
+	function is_meaningful_token(token) {
+		return typeof token === 'string' ? /\S/.test(token)
+		// `token &&`: incase token === undefined
+		: token === 0 || token && token.type !== 'comment';
+	}
+
 	var KEY_apostrophe_element_start_quote = 0, KEY_apostrophe_element_content = 1, KEY_apostrophe_element_end_quote = 2,
 	//
 	default_include_mark = '\x00', default_end_mark = '\x01',
@@ -2248,7 +2255,7 @@ function module_code(library_namespace) {
 
 					// 需再進一步處理 {{}}, -{}- 之類。
 					// [[w:en:Wikipedia:Categorization#Sort keys]]
-					// 多個同名的 category 會以最後一個的 sort key 為主。
+					// @see function get_categories(options)
 					parameters[category_matched ? 'sort_key'
 					// [[w:en:Wikipedia:Piped link]] the displayed text
 					: 'display_text'] = parsed_display_text
@@ -2289,6 +2296,15 @@ function module_code(library_namespace) {
 				_set_wiki_type(parameters, 'plain');
 
 			} else {
+				parameters.page_title = wiki_API.normalize_title(
+				// parameters[0]
+				page_name.toString(), Object.assign({
+					// preserve_head_colon : true,
+					no_convert_interface_message : true
+				}, options));
+				parameters.page_title = decode_title(parameters.page_title)
+						|| parameters.page_title;
+
 				if (file_matched || category_matched) {
 					// shown by link, is a linking to a file
 					// e.g., token[0][0].trim() === "File"; token[0]: namespace
@@ -2305,17 +2321,9 @@ function module_code(library_namespace) {
 								.normalize_title(category_matched[1], options);
 					}
 				} else {
-					parameters.is_link = true;
+					parameters.is_link = !interwiki_pattern
+							|| !interwiki_pattern.test(parameters.page_title);
 				}
-
-				parameters.page_title = wiki_API.normalize_title(
-				// parameters[0]
-				page_name.toString(), Object.assign({
-					// preserve_head_colon : true,
-					no_convert_interface_message : true
-				}, options));
-				parameters.page_title = decode_title(parameters.page_title)
-						|| parameters.page_title;
 
 				if (false) {
 					// NG: Array.isArray(pipe_separator) for file
@@ -2446,6 +2454,10 @@ function module_code(library_namespace) {
 		} else {
 			PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
 		}
+
+		var interwiki_pattern = session
+		// session === wiki_API?
+		&& session.configurations && session.configurations.interwiki_pattern;
 
 		// or use ((PATTERN_transclusion))
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
@@ -2621,7 +2633,8 @@ function module_code(library_namespace) {
 				token.some(function(t, index) {
 					if (typeof t !== 'string') {
 						return;
-						// return t && t.type !== 'comment';
+						// assert: is_parsed_element(tail)
+						// return is_meaningful_token(t);
 					}
 					// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 					if (t.includes('=')) {
@@ -4283,11 +4296,6 @@ function module_code(library_namespace) {
 
 		function parse_section_title(all, previous, section_level, parameters,
 				postfix) {
-			function not_only_comments(token) {
-				return typeof token === 'string' ? !/^[ \t]+$/.test(token)
-				// assert: is_parsed_element(tail)
-				: token.type !== 'comment';
-			}
 			if (postfix && postfix.includes(include_mark)) {
 				if (false) {
 					console.assert(postfix.includes(include_mark)
@@ -4298,7 +4306,7 @@ function module_code(library_namespace) {
 				// console.log(tail);
 				if (is_parsed_element(tail) && (tail.type === 'plain'
 				//
-				? tail.some(not_only_comments) : not_only_comments(tail))) {
+				? tail.some(is_meaningful_token) : is_meaningful_token(tail))) {
 					// console.log(all);
 					return all;
 				}
@@ -4420,7 +4428,7 @@ function module_code(library_namespace) {
 			&& !has_invalid_token(line, function(token, previous_text) {
 				if (previous_text.trim())
 					return true;
-				// token maybe undefined
+				// @see is_meaningful_token(token)
 				return token && token.type !== 'comment';
 			})) {
 				list_now.at(-1).at(-1).push(
@@ -4598,11 +4606,7 @@ function module_code(library_namespace) {
 			//
 			&& !(line.type === 'plain' ? line : [ line ])
 			//
-			.some(function(sub_token) {
-				return typeof sub_token === 'string' ? sub_token.trim()
-				//
-				: sub_token.type !== 'comment';
-			})) {
+			.some(is_meaningful_token)) {
 				if (line.type === 'plain')
 					line.unshift(' ');
 				else
@@ -5299,6 +5303,7 @@ function module_code(library_namespace) {
 		HTML_to_wikitext : HTML_to_wikitext,
 		// wikitext_to_plain_text : wikitext_to_plain_text,
 		is_parsed_element : is_parsed_element,
+		is_meaningful_token : is_meaningful_token,
 
 		inplace_reparse_element : inplace_reparse_element,
 		parse : parse_wikitext

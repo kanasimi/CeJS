@@ -3984,12 +3984,16 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #40');
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #40-1');
 		assert(['Template:Text', parsed.page_title], 'wiki.parse.transclusion #40-2');
-		wikitext = '{{Template:A|條目}}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41');
-		assert([wikitext, parsed.page_title], 'wiki.parse.transclusion #41-1');
 		wikitext = '{{Template:}}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41-2');
-		assert([wikitext, parsed], 'wiki.parse.transclusion #41-3');
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41-1');
+
+		assert([wikitext, parsed], 'wiki.parse.transclusion #41-2');
+		wikitext = '{{a|條目}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41-3');
+		assert(['Template:A', parsed.page_title], 'wiki.parse.transclusion #41-4');
+		wikitext = '{{template:a|條目}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41-5');
+		assert(['Template:A', parsed.page_title], 'wiki.parse.transclusion #41-6');
 
 		wikitext = '{{text| {{ {{<s> }} }} </s> }}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #42');
@@ -5251,6 +5255,9 @@ function test_wiki() {
 		// https://github.com/5j9/wikitextparser/blob/master/tests/test_template.py
 		wikitext = '{{t\n  | p1   = v1\n  | p22  = v2\n}}'; token = CeL.wiki.parse(wikitext);
 		assert(['{{t\n  | p1   = v1\n  | p22  = v2\n| z  = z\n}}', CeL.wiki.parse.replace_parameter(token, { z: 'z' }, { value_only: true, force_add: true }) === 1 && token.toString()], 'wiki.parse.replace_parameter: #22-1');
+		wikitext = '{{t}}'; token = CeL.wiki.parse(wikitext);
+		assert([1, CeL.wiki.parse.replace_parameter(token, { '3': 2 }, { value_only: true, force_add: true, append_key_value: true })], 'wiki.parse.replace_parameter: #23-1');
+		assert(['{{t|3=2}}', token.toString()], 'wiki.parse.replace_parameter: #23-2');
 
 		wikitext = '{{t1|p1=1|p2=2|p4=}}'; parsed = CeL.wiki.parse(wikitext);
 		var parsed_2 = CeL.wiki.parse('{{ T1|p3=3|p4=4}}');
@@ -5815,8 +5822,12 @@ function test_wiki() {
 			assert(["Talk:1,1':2',1'':3'',1'''-四联苯", zhwiki.to_talk_page("Talk:1,1':2',1'':3'',1'''-四联苯")], 'zhwiki.to_talk_page #1');
 			assert(["Talk:ß", zhwiki.to_talk_page("Talk:ß")], 'zhwiki.to_talk_page #2');
 
-			var wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
-			var parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
+			var wikitext = '[[ja:東京]]';
+			var parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([false, parsed.is_link], 'zhwiki: .is_link() #1-1');
+
+			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
+			parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
 			parsed.each('tempLate:NoteTA', function (token) {
 				// console.log(token.conversion_list);
 				assert(["-{A|zh-cn:巴颜喀拉山脉;zh-hk:巴顏喀拉山脈;zh-tw:巴顏喀喇山}-", token.conversion_list.toString()], 'template_functions: remove spaces');

@@ -322,6 +322,7 @@ function module_code(library_namespace) {
 		// assert: list_token.type === 'list'
 		if (parent_token.type === 'list_item' && list_token
 		// remove all empty / blank list_item
+		// @see is_meaningful_token(token)
 		&& parent_token.every(function(token) {
 			// token maybe undefined
 			if (!token)
@@ -707,6 +708,9 @@ function module_code(library_namespace) {
 						token = '';
 					}
 
+				} else if (result === for_each_subelement.skip_inner) {
+					// Do next.
+
 				} else if (modify_by_return) {
 					// console.trace([ index, result, parent_token ]);
 
@@ -890,6 +894,7 @@ function module_code(library_namespace) {
 		? Symbol('EXIT_for_each_subelement')
 				: [ 'for_each_subelement.exit: abort the operation' ],
 		// CeL.wiki.parser.parser_prototype.each.skip_inner
+		// .skip_children
 		// for_each_subelement.skip_inner: Skip inner tokens, skip children.
 		skip_inner : typeof Symbol === 'function' ? Symbol('SKIP_CHILDREN')
 				: [ 'for_each_subelement.skip_inner: skip children' ],
@@ -1009,6 +1014,7 @@ function module_code(library_namespace) {
 			if (!this_element)
 				continue;
 
+			// @see is_meaningful_token(token)
 			if (typeof this_element === 'string') {
 				if (this_element.trim()) {
 					return options.get_index ? start_index : this_element;
@@ -1163,35 +1169,51 @@ function module_code(library_namespace) {
 			this.get_categories(options);
 		}
 
-		if (!this.category_Map.has(category_name)) {
+		// const
+		var old_category_token = this.category_Map.get(category_name);
+		// console.trace(old_category_token);
+
+		if (!old_category_token) {
 			this.category_Map.set(category_name, category_token);
-			if (!options.is_existed)
+			if (!options.category_is_existed) {
+				// 直接添加本 category。
 				do_append_category.call(this, category_token);
+			}
 			return;
 		}
 
 		// console.trace(category_token);
 
-		if (!category_token.sort_key) {
-			// 保留 old_category_token，跳過沒有新資訊的。
+		if (old_category_token.sort_key === category_token.sort_key) {
+			// 已存在相同的 category。
 			return;
 		}
 
-		// const
-		var old_category_token = this.category_Map.get(category_name);
-		// console.trace(old_category_token);
-		if (old_category_token.sort_key) {
+		if (old_category_token.sort_key && category_token.sort_key) {
+			if (old_category_token.sort_key.toString().trim() === category_token.sort_key
+					.toString().trim()) {
+				// 已存在相同的 category。
+				// e.g., [[Category:category_name|{{PAGENAME}}]]
+				return;
+			}
+
+			// TODO: 移除重複的/同時存在繁體簡體的 category_token。
+
 			library_namespace.warn('register_and_append_category: '
 					+ library_namespace.wiki.title_link_of(this.page)
 					+ ': Multiple sort key: ' + old_category_token + ', '
 					+ category_token);
 			if (options.do_not_overwrite_sort_key) {
-				if (!options.is_existed) {
-					// Will overwrite the sort key
+				// 不動到 old_category_token。
+				if (!options.category_is_existed) {
+					// 依 MediaWiki 實作，重複的 category 預設只會取得最後出現的。
+					// 因此當添加 category_token 在最後，實際將以 category_token 為主。
+					this.category_Map.set(category_name, category_token);
 					do_append_category.call(this, category_token);
 				}
 				return;
 			}
+
 			// default: Will overwrite the sort key.
 		}
 
@@ -1200,35 +1222,37 @@ function module_code(library_namespace) {
 		}
 		// reuse old category_token
 		old_category_token.set_sort_key(category_token.sort_key);
-		if (options.is_existed) {
-			// 移除重複的/同時存在繁體簡體的 category_token。
+		if (options.category_is_existed) {
 			return this.each.remove_token;
 		}
 	}
 
 	// parsed.get_categories()
 	function get_categories(options) {
-		if (!this.category_Map) {
-			this.category_Map = new Map;
+		options = library_namespace.new_options(options);
+		var parsed = this;
 
-			options = library_namespace.new_options(options);
-			options.is_existed = true;
+		if (!parsed.category_Map || options.reget_categories) {
+			parsed.category_Map = new Map;
+
 			delete options.category_name;
-			var parsed = this;
+			// 這邊呼叫 parsed.append_category() 時都是已確認存在 parsed 中的 category。
+			options.category_is_existed = true;
 
 			// 先從頭登記一次現有的 Category。
-			this.each('Category', function(category_token, index, parent) {
-				// for remove
+			parsed.each('Category', function(category_token, index, parent) {
 				// category_token.index = index;
 				// category_token.parent = parent;
+
+				// 此操作將登記 .category_Map，並移除重複的類別。
 				return parsed.append_category(category_token, options);
 			}, {
 				modify : options.remove_existed_duplicated
 			});
 		}
 
-		// 警告: 重複的 category 只會取得首個出現的。
-		return Array.from(this.category_Map.values());
+		// 依 MediaWiki 實作，重複的 category 預設只會取得最後出現的。
+		return Array.from(parsed.category_Map.values());
 	}
 
 	// ------------------------------------------------------------------------
