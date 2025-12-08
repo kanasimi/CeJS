@@ -801,7 +801,7 @@ function module_code(library_namespace) {
 			// console.trace(tail);
 			if (XML_stack.length !== 1)
 				throw new Error('There are ' + (XML_stack.length - 1)
-						+ 'elements left!');
+						+ ' element(s) left!');
 			if (tail)
 				XML_stack[0].push(tail);
 		}
