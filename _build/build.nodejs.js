@@ -1533,6 +1533,8 @@ function write_qqq_data(resources_path) {
 	return message_id_order;
 }
 
+/** untranslated message count was deprecated */
+let no_untranslated_message_count = true;
 
 function write_i18n_files(resources_path, message_id_order) {
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
@@ -1543,10 +1545,12 @@ function write_i18n_files(resources_path, message_id_order) {
 			const untranslated_ratio = untranslated_message_count / qqq_data_Map.size;
 			const number_digits = Math.floor(Math.log10(untranslated_message_count));
 			const number_base = 10 ** number_digits;
-			// deprecated
-			if (false) {
-				// gettext_config:{"id":"untranslated-message-count"}
-				locale_data[en_message_to_message_id('untranslated message count')] =
+			// gettext_config:{"id":"untranslated-message-count"}
+			const untranslated_message_count_id = en_message_to_message_id('untranslated message count');
+			if (no_untranslated_message_count) {
+				delete locale_data[untranslated_message_count_id];
+			} else {
+				locale_data[untranslated_message_count_id] =
 					// String(): FuzzyBot 必須為 {String}?
 					number_digits < 1 ? String(untranslated_message_count)
 						// 減少變更次數: 以數字位數為單位變更。
