@@ -179,10 +179,10 @@ bits: <input id="bits" value="8" type="number" style="width:3em;" />
 |
 <div onclick="CeL.toggle_display('Hamming_panel');" class="test_toggle">Hamming code</div>
 <div id="Hamming_panel" class="test_panel">
-data(/^[01]{,20}$/): <input id="h_data" value="1101" type="number" pattern="[01]{0,20}" />
+data(/^[01]{0,20}$/): <input id="h_data" value="1101" type="number" pattern="[01]{0,20}" />
 <a href="#" onclick="return Hamming.dec();" title="decode">←</a>
 <a href="#" onclick="return Hamming.enc();" title="encode">→</a>
-code(/^[01]{,20}$/): <input id="h_code" type="number" pattern="[01]{0,20}" />
+code(/^[01]{0,20}$/): <input id="h_code" type="number" pattern="[01]{0,20}" />
 <label for="h_reverse"><input type="checkbox" id="h_reverse" />reverse</label>
 |
 show
