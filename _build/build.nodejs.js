@@ -1534,7 +1534,7 @@ function write_qqq_data(resources_path) {
 }
 
 /** untranslated message count was deprecated */
-let no_untranslated_message_count = true;
+let no_i18n_data_untranslated_message_count = false;
 
 function write_i18n_files(resources_path, message_id_order) {
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
@@ -1547,15 +1547,11 @@ function write_i18n_files(resources_path, message_id_order) {
 			const number_base = 10 ** number_digits;
 			// gettext_config:{"id":"untranslated-message-count"}
 			const untranslated_message_count_id = en_message_to_message_id('untranslated message count');
-			if (no_untranslated_message_count) {
-				delete locale_data[untranslated_message_count_id];
-			} else {
-				locale_data[untranslated_message_count_id] =
-					// String(): FuzzyBot 必須為 {String}?
-					number_digits < 1 ? String(untranslated_message_count)
-						// 減少變更次數: 以數字位數為單位變更。
-						: Math.floor(untranslated_message_count / number_base) + '0'.repeat(number_digits) + '+';
-			}
+			locale_data[untranslated_message_count_id] =
+				// String(): FuzzyBot 必須為 {String}?
+				number_digits < 1 ? String(untranslated_message_count)
+					// 減少變更次數: 以數字位數為單位變更。
+					: Math.floor(untranslated_message_count / number_base) + '0'.repeat(number_digits) + '+';
 			if (untranslated_message_count < 500 || untranslated_ratio < .3) {
 				const comments = untranslated_message_count === 0 ? '已翻譯完畢的語言'
 					: untranslated_message_count < 20 && untranslated_ratio < .01 ? '幾近翻譯完畢的語言'
@@ -1566,6 +1562,10 @@ function write_i18n_files(resources_path, message_id_order) {
 
 			// qqq was saved to `qqq_data_file_name` @ write_qqq_data()
 			write_message_script_file({ resources_path, language_code, locale_data, message_id_order });
+
+			if (no_i18n_data_untranslated_message_count) {
+				delete locale_data[untranslated_message_count_id];
+			}
 		}
 
 		write_i18n_data_file({ language_code, locale_data, message_id_order });
