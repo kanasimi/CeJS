@@ -318,6 +318,10 @@ function module_code(library_namespace) {
 		// free
 		// next_index = undefined;
 
+		if (parent_token.length === 0) {
+			// TODO: <includeonly>[[Category:cat]]</includeonly> 去掉中間的元素時，整個消掉。
+		}
+
 		var list_token = parent_token.parent;
 		// assert: list_token.type === 'list'
 		if (parent_token.type === 'list_item' && list_token
@@ -1228,6 +1232,7 @@ function module_code(library_namespace) {
 	}
 
 	// parsed.get_categories()
+	// TODO: 處理繁簡轉換
 	function get_categories(options) {
 		options = library_namespace.new_options(options);
 		var parsed = this;

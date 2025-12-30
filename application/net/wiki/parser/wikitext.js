@@ -2321,8 +2321,13 @@ function module_code(library_namespace) {
 								.normalize_title(category_matched[1], options);
 					}
 				} else {
-					parameters.is_link = !interwiki_pattern
-							|| !interwiki_pattern.test(parameters.page_title);
+					parameters.is_link = !PATTERN_language_startup
+					// || /^\s*:/.test(page_name.toString())
+					|| !PATTERN_language_startup.test(page_name.toString());
+
+					// https://www.mediawiki.org/wiki/Manual:Interwiki#Interwiki_links_to_other_languages
+					// https://www.mediawiki.org/wiki/Manual:$wgExtraInterlanguageLinkPrefixes
+					// parameters.is_interlanguage_link = !parameters.is_link;
 				}
 
 				if (false) {
@@ -2455,9 +2460,10 @@ function module_code(library_namespace) {
 			PATTERN_category_prefix = wiki_API.PATTERN_category_prefix;
 		}
 
-		var interwiki_pattern = session
+		var PATTERN_language_startup = session
 		// session === wiki_API?
-		&& session.configurations && session.configurations.interwiki_pattern;
+		&& session.configurations
+				&& session.configurations.PATTERN_language_startup;
 
 		// or use ((PATTERN_transclusion))
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]

@@ -5824,7 +5824,36 @@ function test_wiki() {
 
 			var wikitext = '[[ja:東京]]';
 			var parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			assert([false, parsed.is_link], 'zhwiki: .is_link() #1-1');
+			assert([false, parsed.is_link], 'zhwiki: .is_link #1-1');
+
+			wikitext = '[[:ja:東京]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, parsed.is_link], 'zhwiki: .is_link #2-1');
+
+			wikitext = '[[commons:東京]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, parsed.is_link], 'zhwiki: .is_link #3-1');
+
+			wikitext = '[[Wikipedia:嵌入包含]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, parsed.is_link], 'zhwiki: .is_link #4-1');
+
+			wikitext = '[[file:a.jpg]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([false, parsed.is_link], 'zhwiki: .is_link #5-1');
+
+			wikitext = '[[:file:a.jpg]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, parsed.is_link], 'zhwiki: .is_link #6-1');
+
+			wikitext = '[[category:東京]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([false, parsed.is_link], 'zhwiki: .is_link #7-1');
+
+			wikitext = '[[:category:東京]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, parsed.is_link], 'zhwiki: .is_link #8-1');
+
 
 			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();

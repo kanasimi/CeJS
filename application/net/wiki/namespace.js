@@ -2949,11 +2949,20 @@ function module_code(library_namespace) {
 		configurations.interwikimap;
 		if (interwikimap) {
 			// prefix_pattern
-			site_configurations.interwiki_pattern = new RegExp('^('
+			site_configurations.interwiki_pattern = new RegExp('^\\s*('
 					+ interwikimap.map(function(interwiki) {
 						return interwiki.prefix;
 					}).join('|') + ')(?::(.*))?$', 'i');
 			// 不可刪除 configurations.interwikimap: 還會用到。
+		}
+
+		var language_codes = configurations.languages;
+		if (Array.isArray(language_codes)) {
+			language_codes = language_codes.map(function(language) {
+				return language.code;
+			});
+		} else {
+			language_codes = [];
 		}
 
 		var languagevariants = configurations.languagevariants;
@@ -2970,6 +2979,9 @@ function module_code(library_namespace) {
 			// Release memory. 釋放被占用的記憶體。
 			// delete configurations.languagevariants;
 		}
+
+		site_configurations.PATTERN_language_startup = new RegExp('^\\s*('
+				+ language_codes.join('|') + ')(?::(.*))?$', 'i');
 
 		// --------------------------------------------------------------------
 
