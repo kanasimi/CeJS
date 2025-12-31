@@ -1500,10 +1500,11 @@ function module_code(library_namespace) {
 				if (false) {
 					parsed.each_section();
 					// scan / traversal section templates:
-					parsed.each.call(parsed.sections[section_index],
-							'template', function(token) {
+					wiki_API.parser.parser_prototype.each.call(
+							parsed.sections[section_index], 'template',
+							function(token) {
 								;
-							});
+							}, options);
 				}
 
 				if (false) {

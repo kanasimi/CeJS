@@ -1645,9 +1645,8 @@ function module_code(library_namespace) {
 					if (property_name in this.claims) {
 						value = this.claims[property_name];
 						library_namespace.log('wikidata_entity_value: 自多個 "'
-								+ property + '" 同名屬性中 ('
-								+ property_list.join(', ') + ')，選擇第一個有屬性值的 '
-								+ property_name + '。');
+								+ property + '" (' + property_list.join(', ')
+								+ ') 同名屬性中，選擇第一個有屬性值的 ' + property_name + '。');
 						break;
 					}
 				}

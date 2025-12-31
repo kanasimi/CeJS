@@ -150,7 +150,7 @@ function module_code(library_namespace) {
 	/** {Object}prototype of {wiki page parser} */
 	page_parser.parser_prototype = {
 		// traversal_tokens(), parsed.each()
-		// CeL.wiki.parser.parser_prototype.each.call(token_list,'Template:',(token,index,parent)=>{});
+		// CeL.wiki.parser.parser_prototype.each.call(token_list,'Template:',(token,index,parent)=>{},wiki.append_session_to_options());
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_subelement,
 		parse : parse_page,
@@ -496,6 +496,12 @@ function module_code(library_namespace) {
 					token_name = wiki_API.normalize_title(token_name[2]);
 				}
 				type = 'transclusion';
+				if (!session && !options.no_session_warning) {
+					library_namespace.warn('for_each_subelement: '
+					// 請採用 `wiki.append_session_to_options()`。
+					+ '未設定 session 卻篩選模板:' + token_name + '，會漏掉採用別名的模板！');
+					console.trace(type);
+				}
 			}
 
 			// normalize type
@@ -824,7 +830,7 @@ function module_code(library_namespace) {
 							3, 'for_each_subelement');
 					return for_each_subelement.remove_token;
 				}
-			});
+			}, wiki_API.add_session_to_options(session, options));
 			check_if_result_is_thenable(result);
 
 			result = for_each_subelement.call(this, 'transclusion',
@@ -843,7 +849,7 @@ function module_code(library_namespace) {
 						return for_each_subelement.remove_token;
 					}
 				}
-			});
+			}, wiki_API.add_session_to_options(session, options));
 			check_if_result_is_thenable(result);
 		}
 
@@ -1251,9 +1257,9 @@ function module_code(library_namespace) {
 
 				// 此操作將登記 .category_Map，並移除重複的類別。
 				return parsed.append_category(category_token, options);
-			}, {
+			}, Object.assign({
 				modify : options.remove_existed_duplicated
-			});
+			}, options));
 		}
 
 		// 依 MediaWiki 實作，重複的 category 預設只會取得最後出現的。
@@ -1311,7 +1317,10 @@ function module_code(library_namespace) {
 				reference_list.push(token);
 			}
 
-		}, false, Infinity);
+		}, Object.assign({
+			modify : false,
+			max_depth : Infinity
+		}, options));
 
 		this.reference_list = reference_list;
 		return reference_list;
@@ -2344,8 +2353,11 @@ function module_code(library_namespace) {
 
 		var parsed = this;
 		var session = wiki_API.session_of_options(parsed || options);
-		if (session)
+		if (session) {
 			wiki_API.add_session_to_options(session, options);
+		} else {
+			options.no_session_warning = true;
+		}
 
 		if (typeof token === 'string') {
 			token = wiki_API.parse(token, options);
@@ -2526,7 +2538,7 @@ function module_code(library_namespace) {
 			parsed.each(token.page_title, function(template_token) {
 				// TODO: merge parameters
 				layout_element_list.push(template_token);
-			});
+			}, options);
 			if (false) {
 				console.trace(session);
 				console.trace(token, layout_element_list.length,
@@ -2578,7 +2590,7 @@ function module_code(library_namespace) {
 							token_changed = true;
 							return parsed.each.remove_token;
 						}
-					});
+					}, options);
 
 					if (options.main_template_processor) {
 						options.main_template_processor(main_token);
@@ -2636,7 +2648,7 @@ function module_code(library_namespace) {
 					layout_element_list.push(category_token);
 				}
 				return parsed.each.exit;
-			});
+			}, options);
 			// console.trace(token, layout_element_list);
 			if (layout_element_list.changed)
 				return true;
@@ -2932,7 +2944,9 @@ function module_code(library_namespace) {
 			if (tag_token.tag === 'noinclude') {
 				return '';
 			}
-		}, true);
+		}, Object.assign({
+			modify : true
+		}, options));
 
 		function render_parameter(parameter_token) {
 			var name = parameter_token[0].toString().trim();
@@ -2951,7 +2965,10 @@ function module_code(library_namespace) {
 		function render_all_parameters(token) {
 			if (Array.isArray(token))
 				for_each_subelement.call(token, 'parameter', render_parameter,
-						true);
+				//
+				wiki_API.add_session_to_options(session, Object.assign({
+					modify : true
+				}, options)));
 		}
 		function render_result_of_parameter(name) {
 			name = function_token[function_token.index_of[name]];
@@ -2994,7 +3011,9 @@ function module_code(library_namespace) {
 				return wiki_API.upper_case_initial(function_token[1] || '');
 
 			}
-		}, true);
+		}, Object.assign({
+			modify : true
+		}, options));
 
 		// 解碼剩下的 parameters。
 		render_all_parameters(parsed);
