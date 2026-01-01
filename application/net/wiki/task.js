@@ -3916,6 +3916,15 @@ function module_code(library_namespace) {
 					// Do not set `error_to_return` here: `error` maybe 'skip'.
 					// console.trace([ error_to_return, error ]);
 
+					if (config.on_edit_error && error
+							&& !(error === 'nochange' || error === 'skip')) {
+						try {
+							config.on_edit_error.apply(session, arguments);
+						} catch (e) {
+							// TODO: handle exception
+						}
+					}
+
 					// console.trace(arguments);
 					// nomally call do_batch_work_summary()
 					callback.apply(session, arguments);
