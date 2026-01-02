@@ -415,7 +415,7 @@ function module_code(library_namespace) {
 	 * TODO: 可中途跳出。
 	 * 
 	 * @param {String}[type]
-	 *            欲搜尋之類型。 e.g., 'template'. see
+	 *            filter 或欲搜尋之類型。 e.g., 'template'. see
 	 *            ((wiki_API.parse.wiki_element_toString)).<br />
 	 *            未指定: 處理所有節點。
 	 * @param {Function}processor
@@ -479,6 +479,27 @@ function module_code(library_namespace) {
 		}
 
 		var token_name;
+		function filter_token(token) {
+			if (type && type !== (Array.isArray(token) ? token.type
+			// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行指定作業。
+			: 'plain')) {
+				return false;
+			}
+
+			if (!token_name)
+				return true;
+
+			switch (token.type) {
+			case 'transclusion':
+				return session ? session.is_template(token_name, token)
+						: token.name === token_name;
+
+			case 'tag_single':
+			case 'tag':
+				return token.tag === token_name;
+			}
+		}
+
 		if (type || type === '') {
 			if (typeof type !== 'string') {
 				library_namespace.warn('for_each_subelement: Invalid type ['
@@ -486,7 +507,10 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			token_name = type.match(/^(Template):(.+)$/i);
+			type = type.trim();
+			// 配合 function filter_token(token)
+			token_name = type.match(/^(Template):([^{}|:]+)$/i)
+					|| type.match(/^({{)([^{}|:]+)}}$/i);
 			if (token_name) {
 				if (session) {
 					token_name = session.redirect_target_of(type);
@@ -501,6 +525,21 @@ function module_code(library_namespace) {
 					// 請採用 `wiki.append_session_to_options()`。
 					+ '未設定 session 卻篩選模板:' + token_name + '，會漏掉採用別名的模板！');
 					console.trace(type);
+				}
+
+			} else if (token_name = type.match(/^<(\w+)[^<>]*>/i)) {
+				token_name[2] = wiki_API.parse(type, options, []);
+				if (!(token_name[2] && (token_name[2].type === 'tag' || token_name[2].type === 'tag_single'))) {
+					// e.g., .each('<p>', ...)
+					token_name[2] = wiki_API.parse(type + '</' + token_name[1]
+							+ '>', options, []);
+				}
+				if (token_name[2]
+						&& (token_name[2].type === 'tag' || token_name[2].type === 'tag_single')) {
+					type = token_name[2].type;
+					token_name = token_name[2].tag;
+				} else {
+					token_name = null;
 				}
 			}
 
@@ -592,12 +631,7 @@ function module_code(library_namespace) {
 					console.trace([ type, token ]);
 				}
 
-				if ((!type
-				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
-				|| type === (Array.isArray(token) ? token.type : 'plain'))
-						&& (!token_name || (session ? token.type === 'transclusion'
-								&& session.is_template(token_name, token)
-								: token.name === token_name))) {
+				if (filter_token(token)) {
 					// options.set_index
 					if (options.add_index && token && typeof token === 'object') {
 						// 假如需要自動設定 .parent, .index 則必須特別指定。

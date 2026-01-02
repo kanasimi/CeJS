@@ -1219,6 +1219,7 @@ function module_code(library_namespace) {
 				replace_by : replace_section_by,
 				toString : _this.toString
 			});
+			wiki_API.add_session_to_options(options[KEY_SESSION], section);
 			section[wiki_API.KEY_page_data] = _this.page;
 			all_root_section_list.push(section);
 		}

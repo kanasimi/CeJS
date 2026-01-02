@@ -5491,7 +5491,18 @@ function test_wiki() {
 
 		wikitext = '\n{{to del}} [[L]]'; parsed = CeL.wiki.parser(wikitext).parse(); 0;
 		parsed.each('template', function (token) { if (CeL.wiki.is_template('To del', token)) { return parsed.each.remove_token; } });
-		assert([parsed.toString(), '[[L]]'], 'parsed.each.remove_token #3');
+		assert([parsed.toString(), '[[L]]'], 'parsed.each.remove_token #4');
+
+
+		wikitext = '\n{{tT}} [[L]]_<p>f</p> {{tt|1}}<p class="s">s</p>a{{TT|2}}'; parsed = CeL.wiki.parser(wikitext).parse(); 0;
+		parsed.list = [];
+		parsed.each('template:tT', function (token) { parsed.list.push(token); }, { no_session_warning: true });
+		assert([parsed.list.join(''), '{{tT}}{{TT|2}}'], 'parsed.each(template) #1');
+
+		parsed = CeL.wiki.parser(wikitext).parse(); 0;
+		parsed.list = [];
+		parsed.each('<p>', function (token) { parsed.list.push(token); });
+		assert([parsed.list.join(''), '<p>f</p><p class="s">s</p>'], 'parsed.each(tag) #1');
 
 
 		CeL.wiki.set_language('en');
