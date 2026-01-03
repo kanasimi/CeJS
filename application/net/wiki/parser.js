@@ -527,12 +527,12 @@ function module_code(library_namespace) {
 					console.trace(type);
 				}
 
-			} else if (token_name = type.match(/^<(\w+)[^<>]*>/i)) {
-				token_name[2] = wiki_API.parse(type, options, []);
+			} else if (token_name = type.match(/^<(\w+)[^<>]*>/)) {
+				token_name[2] = wiki_API.parse(type, Object.clone(options));
 				if (!(token_name[2] && (token_name[2].type === 'tag' || token_name[2].type === 'tag_single'))) {
 					// e.g., .each('<p>', ...)
 					token_name[2] = wiki_API.parse(type + '</' + token_name[1]
-							+ '>', options, []);
+							+ '>', Object.clone(options));
 				}
 				if (token_name[2]
 						&& (token_name[2].type === 'tag' || token_name[2].type === 'tag_single')) {
