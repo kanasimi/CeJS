@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2025.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2026.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spuenien",
 	"untranslated message count": "1000+",
@@ -243,6 +243,7 @@
 	"\u932f\u8aa4\u539f\u56e0": "Grond vum Feeler",
 	"\u53d6\u6d88\u641c\u5c0b": "Sich ofbriechen",
 	"\u53d6\u6d88": "Ofbriechen",
+	"\u53d6\u6d88\u4e0b\u8f09": "Download ofbriechen",
 	"Options:": "Optiounen:"
 },
 "lb-LU");

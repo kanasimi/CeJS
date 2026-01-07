@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2025.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2026.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
@@ -901,6 +901,7 @@
 	"\u672a\u8a2d\u5b9a\u6587\u5b57\uff1a%1": "Gnun test defin\u00ec: %1",
 	"\u9019\u689d\u898f\u5247\u4f3c\u4e4e\u6c92\u6709\u5fc5\u8981": "Costa r\u00e9gola a smija pa necessaria",
 	"Cannot move to %1": "Imposs\u00ecbil tramud\u00e9 a %1",
+	"Very Sorry. Undo the robot's wrong edits. (%1)": "An d\u00ebspias motobin. Le mod\u00ecfiche l\u00f2fie f\u00e0ite dal rob\u00f2 a devo esse tir\u00e0 andar\u00e9. (%1)",
 	"Close %1 {{PLURAL:%1|request|requests}}: %2": "Sar\u00e9 %1 {{PLURAL:%1|arcesta|arceste}}: %2",
 	"Treat %1 as language: %2.": "Trat\u00e9 %1 coma la lenga: %2.",
 	"Cannot detect language of %1!": "Imposs\u00ecbil arcon\u00f2sse la lenga \u00ebd %1!",
@@ -1050,7 +1051,6 @@
 	"Adding sitelinks when synchronizing common pages: %1 \u2192 %2": "Gionta dle liure d\u00ebl sit durant la sincronisassion \u00ebd le p\u00e0gine comun-e: %1 \u2192 %2",
 	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u7ae0\u7bc0\uff1a%1": "La liura a manda a la session: %1",
 	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u672a\u5d4c\u5165\u8a72\u6a21\u677f\u7684\u9801\u9762\uff1a%1": "La liura a manda a na p\u00e0gina ch'a l'\u00e9 nen ant\u00ebgr\u00e0 an cost \u00ebstamp: %1",
-	"Very Sorry. Undo the robot's wrong edits. (%1)": "An d\u00ebspias motobin. Le mod\u00ecfiche l\u00f2fie f\u00e0ite dal rob\u00f2 a devo esse tir\u00e0 andar\u00e9. (%1)",
 	"debug level": "livel \u00ebd disanfestassion",
 	"%2: The target directory [%1] does not exist?": "%2: \u00cbl dossi\u00e9 b\u00ebrsaj [%1] a esist nen?",
 	"%3: %1: %2 {{PLURAL:%2|file|files}} / {{PLURAL:%2|directory|directories}} to check.": "%3: %1: %2 {{PLURAL:%2|archivi}} o {{PLURAL:%2|dossi\u00e9}} da control\u00e9.",

@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2025.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2026.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "\u30b9\u30da\u30a4\u30f3",
 	"Calendrier r\u00e9publicain": "\u30d5\u30e9\u30f3\u30b9\u9769\u547d\u66a6",
@@ -506,6 +506,7 @@
 	"Unknown style: [%1].": "\u4e0d\u660e\u306a\u30b9\u30bf\u30a4\u30eb: [%1]\u3002",
 	"Illegal %1: [%2]": "\u4e0d\u6b63\u306a%1\uff1a[%2]",
 	"%1\u8f49\u63db\u5c0d\uff1a": "%1\u306e\u5909\u63db\u30da\u30a2:",
+	"Very Sorry. Undo the robot's wrong edits. (%1)": "\u5927\u5909\u7533\u3057\u8a33\u3054\u3056\u3044\u307e\u305b\u3093\u3002\u30ed\u30dc\u30c3\u30c8\u306e\u9593\u9055\u3063\u305f\u7de8\u96c6\u3092\u5143\u306b\u623b\u3059\u3002\uff08%1\uff09",
 	"revision id": "\u7248\u306e\u8b58\u5225\u5b50",
 	"The requested robot task begins.": "Bot\u4f9d\u983c\u306e\u4f5c\u696d\u3092\u59cb\u3081\u307e\u3059\u3002",
 	"\u672c\u7ae0\u7bc0\u672a\u8a2d\u5b9a\u4efb\u52d9\u5167\u5bb9: %1": "\u30bb\u30af\u30b7\u30e7\u30f3 \"%1\" \u306b\u30bf\u30b9\u30af\u306f\u8a2d\u5b9a\u3055\u308c\u3066\u3044\u307e\u305b\u3093\u3002",
@@ -560,7 +561,6 @@
 	"\u689d\u76ee\u4e00\u89bd": "\u8a18\u4e8b\u4e00\u89a7",
 	"See also": "\u95a2\u9023\u9805\u76ee",
 	"\u7121\u6a19\u7c64": "\u30e9\u30d9\u30eb\u6b20\u5982",
-	"Very Sorry. Undo the robot's wrong edits. (%1)": "\u5927\u5909\u7533\u3057\u8a33\u3054\u3056\u3044\u307e\u305b\u3093\u3002\u30ed\u30dc\u30c3\u30c8\u306e\u9593\u9055\u3063\u305f\u7de8\u96c6\u3092\u5143\u306b\u623b\u3059\u3002\uff08%1\uff09",
 	"debug level": "\u30c7\u30d0\u30c3\u30b0\u30ec\u30d9\u30eb",
 	"Move %1:": "\u79fb\u52d5 %1:",
 	"Compress %1:": "\u5727\u7e2e %1:",

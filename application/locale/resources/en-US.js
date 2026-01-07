@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2025.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2026.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espa\u00f1a",
 	"Calendrier r\u00e9publicain": "French Republican Calendar",
@@ -901,6 +901,7 @@
 	"\u672a\u8a2d\u5b9a\u6587\u5b57\uff1a%1": "No text set: %1",
 	"\u9019\u689d\u898f\u5247\u4f3c\u4e4e\u6c92\u6709\u5fc5\u8981": "This rule seems unnecessary",
 	"Cannot move to %1": "Cannot move to %1",
+	"Very Sorry. Undo the robot's wrong edits. (%1)": "Very Sorry. Undo the robot's wrong edits. (%1)",
 	"Close %1 {{PLURAL:%1|request|requests}}: %2": "Close %1 {{PLURAL:%1|request|requests}}: %2",
 	"Treat %1 as language: %2.": "Treat %1 as language: %2.",
 	"Cannot detect language of %1!": "Cannot detect language of %1!",
@@ -1050,7 +1051,6 @@
 	"Adding sitelinks when synchronizing common pages: %1 \u2192 %2": "Adding sitelinks when synchronizing common pages: %1 \u2192 %2",
 	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u7ae0\u7bc0\uff1a%1": "The link redirects to section: %1",
 	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u672a\u5d4c\u5165\u8a72\u6a21\u677f\u7684\u9801\u9762\uff1a%1": "The link redirects to a page that is not embedded in this template: %1",
-	"Very Sorry. Undo the robot's wrong edits. (%1)": "Very Sorry. Undo the robot's wrong edits. (%1)",
 	"debug level": "debug level",
 	"%2: The target directory [%1] does not exist?": "%2: The target directory [%1] does not exist?",
 	"%3: %1: %2 {{PLURAL:%2|file|files}} / {{PLURAL:%2|directory|directories}} to check.": "%3: %1: %2 {{PLURAL:%2|file|files}} / {{PLURAL:%2|directory|directories}} to check.",

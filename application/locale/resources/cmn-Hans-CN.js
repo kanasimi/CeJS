@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2025.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2026.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "\u897f\u73ed\u7259",
 	"Calendrier r\u00e9publicain": "\u6cd5\u56fd\u5171\u548c\u5386",
@@ -901,6 +901,7 @@
 	"\u672a\u8a2d\u5b9a\u6587\u5b57\uff1a%1": "\u672a\u8bbe\u7f6e\u6587\u672c\uff1a%1",
 	"\u9019\u689d\u898f\u5247\u4f3c\u4e4e\u6c92\u6709\u5fc5\u8981": "\u8fd9\u6761\u89c4\u5219\u4f3c\u4e4e\u6ca1\u6709\u5fc5\u8981",
 	"Cannot move to %1": "\u65e0\u6cd5\u79fb\u81f3%1",
+	"Very Sorry. Undo the robot's wrong edits. (%1)": "\u975e\u5e38\u62b1\u6b49\u3002\u64a4\u9500\u673a\u5668\u4eba\u7684\u9519\u8bef\u7f16\u8f91\u3002(%1)",
 	"Close %1 {{PLURAL:%1|request|requests}}: %2": "\u5173\u95ed%1\u4e2a{{PLURAL:%1|\u8bf7\u6c42}}\uff1a%2",
 	"Treat %1 as language: %2.": "\u5c06%1\u89c6\u4f5c\u8be5\u8bed\u8a00\uff1a%2",
 	"Cannot detect language of %1!": "\u65e0\u6cd5\u68c0\u6d4b\u5230%1\u7684\u8bed\u8a00\uff01",
@@ -1050,7 +1051,6 @@
 	"Adding sitelinks when synchronizing common pages: %1 \u2192 %2": "\u540c\u6b65\u5e38\u7528\u9875\u9762\u65f6\u6dfb\u52a0\u7ad9\u70b9\u94fe\u63a5\uff1a%1 \u2192 %2",
 	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u7ae0\u7bc0\uff1a%1": "\u94fe\u63a5\u91cd\u5b9a\u5411\u81f3\u90e8\u5206\uff1a%1",
 	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u672a\u5d4c\u5165\u8a72\u6a21\u677f\u7684\u9801\u9762\uff1a%1": "\u8be5\u94fe\u63a5\u91cd\u5b9a\u5411\u81f3\u672a\u5d4c\u5165\u6b64\u6a21\u677f\u7684\u9875\u9762\uff1a%1",
-	"Very Sorry. Undo the robot's wrong edits. (%1)": "\u975e\u5e38\u62b1\u6b49\u3002\u64a4\u9500\u673a\u5668\u4eba\u7684\u9519\u8bef\u7f16\u8f91\u3002(%1)",
 	"debug level": "\u8c03\u8bd5\u7ea7\u522b",
 	"%2: The target directory [%1] does not exist?": "%2\uff1a\u4e0d\u5b58\u5728\u6807\u7684\u76ee\u5f55 [%1]\uff1f",
 	"%3: %1: %2 {{PLURAL:%2|file|files}} / {{PLURAL:%2|directory|directories}} to check.": "%3\uff1a%1\uff1a\u5c06\u68c0\u67e5 %2 \u4e2a{{PLURAL:%2|\u6587\u4ef6}}\u6216{{PLURAL:%2|\u76ee\u5f55}}\u3002",

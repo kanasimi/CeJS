@@ -1,5 +1,5 @@
 /*	Localized messages of CeL.
-	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2025.
+	This file is auto created by auto-generate tool: build.nodejs(.js) @ 2026.
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Espanha",
 	"Calendrier r\u00e9publicain": "Calend\u00e1rio Franc\u00eas Republicano",
@@ -901,6 +901,7 @@
 	"\u672a\u8a2d\u5b9a\u6587\u5b57\uff1a%1": "Nenhum texto definido: %1",
 	"\u9019\u689d\u898f\u5247\u4f3c\u4e4e\u6c92\u6709\u5fc5\u8981": "Essa regra parece desnecess\u00e1ria",
 	"Cannot move to %1": "N\u00e3o \u00e9 poss\u00edvel mover para %1",
+	"Very Sorry. Undo the robot's wrong edits. (%1)": "Muito arrependido. Desfa\u00e7a as edi\u00e7\u00f5es erradas do rob\u00f4. (%1)",
 	"Close %1 {{PLURAL:%1|request|requests}}: %2": "Fechar %1 {{PLURAL:%1|solicita\u00e7\u00e3o|solicita\u00e7\u00f5es}}: %2",
 	"Treat %1 as language: %2.": "Tratar %1 como idioma: %2.",
 	"Cannot detect language of %1!": "N\u00e3o \u00e9 poss\u00edvel detectar o idioma de %1!",
@@ -1042,7 +1043,6 @@
 	"Adding sitelinks when synchronizing common pages: %1 \u2192 %2": "Adi\u00e7\u00e3o de sitelinks ao sincronizar p\u00e1ginas comuns: %1 \u2192 %2",
 	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u7ae0\u7bc0\uff1a%1": "O link redireciona para a se\u00e7\u00e3o: %1",
 	"\u9023\u7d50\u91cd\u5b9a\u5411\u5230\u672a\u5d4c\u5165\u8a72\u6a21\u677f\u7684\u9801\u9762\uff1a%1": "O link redireciona para uma p\u00e1gina que n\u00e3o est\u00e1 incorporada neste modelo: %1",
-	"Very Sorry. Undo the robot's wrong edits. (%1)": "Muito arrependido. Desfa\u00e7a as edi\u00e7\u00f5es erradas do rob\u00f4. (%1)",
 	"debug level": "n\u00edvel de depura\u00e7\u00e3o",
 	"%2: The target directory [%1] does not exist?": "%2: O diret\u00f3rio de destino [%1] n\u00e3o existe?",
 	"%3: %1: %2 {{PLURAL:%2|file|files}} / {{PLURAL:%2|directory|directories}} to check.": "%3: %1: %2 {{PLURAL:%2|arquivo|arquivos}} / {{PLURAL:%2|diret\u00f3rio|diret\u00f3rios}} para verificar.",
