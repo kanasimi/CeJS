@@ -3603,11 +3603,17 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #14');
 		assert(['external_link', parsed.parameters[1].type], 'wiki.parse: external link #14');
 		assert(['url', parsed.parameters[1][0].type], 'wiki.parse: external link #14');
-		wikitext = "[http://windows.microsoft.com/-{zh-hans:zh-cn;zh-hk:zh-hk;zh-tw:zh-tw;}-/ t]"; parsed = CeL.wiki.parse(wikitext);
+		wikitext = '[http://windows.microsoft.com/-{zh-hans:zh-cn;zh-hk:zh-hk;zh-tw:zh-tw;}-/ t]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #15 錯誤的用法');
-		assert(['url', parsed[0].type], 'wiki.parse: external link #15 錯誤的用法');
-		assert(['http://windows.microsoft.com/-{zh-hans:zh-cn;zh-hk:zh-hk;zh-tw:zh-tw;}-/', parsed[0].toString()], 'wiki.parse: external link #15 錯誤的用法');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #15-1 錯誤的用法');
+		assert(['http://windows.microsoft.com/-{zh-hans:zh-cn;zh-hk:zh-hk;zh-tw:zh-tw;}-/', parsed[0].toString()], 'wiki.parse: external link #15-2 錯誤的用法');
 		//assert(['http://windows.microsoft.com/zh-tw/', CeL.wiki.wikitext_to_plain_text(parsed[0].toString())], 'wiki.parse: nowiki #15 錯誤的用法');
+		wikitext = '[https://tools.wmflabs.org/guc/index.php?uselang={{uselang}}&user={{urlencode:{{{1|{{PAGENAME}}}}}}}  全域貢獻]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #16');
+		assert(['url', parsed[0][0].type], 'wiki.parse: external link #16-1');
+		assert(['https://tools.wmflabs.org/guc/index.php?uselang={{uselang}}&user={{urlencode:{{{1|{{PAGENAME}}}}}}}', parsed[0].toString()], 'wiki.parse: external link #16-2');
+		assert(['  ', parsed[1]], 'wiki.parse: external link #16-3');
+		assert(['全域貢獻', parsed[2]], 'wiki.parse: external link #16-4');
 
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);

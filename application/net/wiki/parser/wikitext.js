@@ -1683,13 +1683,75 @@ function module_code(library_namespace) {
 			if (URL.type === 'url') {
 				URL = [ URL ];
 			} else if (URL.type === 'plain' && URL[0].type === 'url') {
-				// including "'''". e.g., [http://a.b/''disply text'']
-				if (delimiter) {
-					parameters = delimiter + (parameters || '');
+				/**
+				 * <code>
+				including template / parameter.
+				e.g.,
+				[http://example.com/foo<!---->bar{{text|}} t]
+				[https://tools.wmflabs.org/guc/index.php?uselang={{uselang}}&user={{urlencode:{{{1|{{PAGENAME}}}}}}} 全域貢獻]
+				</code>
+				 */
+
+				if (URL.some(function(token, index) {
+					if (index === 0) {
+						return false;
+					}
+					if (typeof token === 'string') {
+						// assert: /\s/.test(token) === false
+						return false;
+					}
+
+					switch (token.type) {
+					case 'comment':
+						return false;
+
+					case 'parameter':
+						return false;
+
+					case 'magic_word_function':
+						if (token.name in {
+							URLENCODE : true,
+							PAGENAME : true
+						}) {
+							return false;
+						}
+						break;
+
+					case 'transclusion':
+						// e.g., [http://example.com/foo{{text|}} t]
+						if (token.name in {
+							Uselang : true
+						}) {
+							return false;
+						}
+						break;
+					}
+
+					// URL 從 URL[index] 開始可能包含空白字元。
+					URL.index = index;
+					return true;
+				})) {
+					if (delimiter) {
+						parameters = delimiter + (parameters || '');
+					}
+
 					delimiter = '';
+					parameters = URL.splice(URL.index, URL.length).join('')
+							+ parameters;
+					// assert: /^\s/.test(parameters) === false
+					delete URL.index;
+
+					if (URL.length > 1) {
+						// URL = [ URL, /* delimiter */'' ];
+						URL = [ URL ];
+					} else {
+						// URL[1] = /* delimiter */'';
+					}
+
+				} else {
+					URL = [ URL, delimiter ];
 				}
-				// 確保 [1] 是 delimiter
-				URL.splice(1, 0, '');
+
 			} else {
 				library_namespace.error('parse_external_link: Invalid url: '
 						+ URL);
@@ -1737,6 +1799,7 @@ function module_code(library_namespace) {
 					// should → [http://w.w t]{{Dead link}}
 					+ 'Invalid external url: ' + URL);
 					return all;
+
 				} else if (parameters
 				// || parameters === 0
 				) {
@@ -4742,11 +4805,19 @@ function module_code(library_namespace) {
 			// external link
 			// [http://... ...]
 
-			// TODO:
-			// [{{URL template}} ...]
-			// [<!-- --><!-- -->ht<!-- -->tp://... ...]
-			// @see
-			// https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+			/**
+			 * <code>
+			TODO:
+			@[[Template:User toolbox]]
+			[{{fullurl:Special:Log|user={{urlencode:{{{1|{{PAGENAME}}}}}}}}} 日志]
+
+			[{{URL template}} ...]
+
+			[<!-- --><!-- -->ht<!-- -->tp://... ...]
+			</code>
+			 * 
+			 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+			 */
 
 			// 不可跨行。
 			wikitext = wikitext.replace_till_stable(
