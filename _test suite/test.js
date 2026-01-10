@@ -3614,6 +3614,15 @@ function test_wiki() {
 		assert(['https://tools.wmflabs.org/guc/index.php?uselang={{uselang}}&user={{urlencode:{{{1|{{PAGENAME}}}}}}}', parsed[0].toString()], 'wiki.parse: external link #16-2');
 		assert(['  ', parsed[1]], 'wiki.parse: external link #16-3');
 		assert(['全域貢獻', parsed[2]], 'wiki.parse: external link #16-4');
+		wikitext = '[<!-- --><!-- -->ht<!-- -->tp:/<!-- -->/github.com github]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #17');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #17-1');
+		assert(['<!-- --><!-- -->ht<!-- -->tp:/<!-- -->/github.com', parsed[0].toString()], 'wiki.parse: external link #17-2');
+		// @[[Template:User toolbox]]
+		wikitext = '[{{fullurl:Special:Log|user={{urlencode:{{{1|{{PAGENAME}}}}}}}}} 日志]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #17');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #17-1');
+		assert(['{{fullurl:Special:Log|user={{urlencode:{{{1|{{PAGENAME}}}}}}}}}', parsed[0].toString()], 'wiki.parse: external link #17-2');
 
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);

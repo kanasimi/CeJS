@@ -385,7 +385,7 @@ function module_code(library_namespace) {
 			PATTERN_URL_WITH_PROTOCOL_GLOBAL.source
 			// 允許 [//example.com/]
 			.replace('):)', '):|\\/\\/)').replace(/^\([^()]+\)/, /\[/.source)
-					+ /(?:([^\S\r\n]+)([^\]]*))?\]/.source, 'ig'),
+					+ /(?:([^\S\n]+)([^\]]*))?\]/.source, 'ig'),
 
 	// 若包含 br|hr| 會導致 "aa<br>\nbb</br>\ncc" 解析錯誤！
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
@@ -841,9 +841,9 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/Help:Magic_words
 	// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=functionhooks&utf8&format=json
 	('DISPLAYTITLE|DEFAULTSORT|DEFAULTSORTKEY|DEFAULTCATEGORYSORT|デフォルトソート'
-			+ '|ns|nse|lc|lcfirst|uc|ucfirst' + '|padleft|padright|bidi'
-			+ '|formatnum' + '|urlencode|anchorencode'
-			+ '|localurl|fullurl|filepath'
+			+ '|NOEXTERNALLANGLINKS' + '|ns|nse|lc|lcfirst|uc|ucfirst'
+			+ '|padleft|padright|bidi' + '|formatnum'
+			+ '|urlencode|anchorencode' + '|localurl|fullurl|filepath'
 
 			// https://www.mediawiki.org/wiki/Help:Magic_words#Transclusion_modifiers
 			// https://en.wikipedia.org/wiki/Help:Transclusion#Transclusion_modifiers
@@ -876,7 +876,7 @@ function module_code(library_namespace) {
 
 	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
 	var PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
-	PATTERN_BEHAVIOR_SWITCH = /__(NOTOC|FORCETOC|TOC|NOEDITSECTION|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|NOCONTENTCONVERT|NOCC|NOTITLECONVERT|NOTC|INDEX|NOINDEX|STATICREDIRECT|NOGLOBAL)__/g;
+	PATTERN_BEHAVIOR_SWITCH = /__(NOTOC|FORCETOC|TOC|ARCHIVEDTALK|NOTALK|NOEDITSECTION|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|EXPECTUNUSEDCATEGORY|EXPECTUNUSEDTEMPLATE|NOCONTENTCONVERT|NOCC|NOTITLECONVERT|NOTC|INDEX|NOINDEX|STATICREDIRECT|DISAMBIG|EXPECTED_UNCONNECTED_PAGE|NOGLOBAL)__/g;
 
 	// [[w:en:Wikipedia:Extended image syntax]]
 	// [[mw:Help:Images]]
@@ -1821,6 +1821,93 @@ function module_code(library_namespace) {
 					}
 				}
 			}
+
+			_set_wiki_type(URL, 'external_link');
+			queue.push(URL);
+			return include_mark + (queue.length - 1) + end_mark;
+		}
+
+		function parse_odd_external_link(all, URL, delimiter, parameters) {
+			URL = parse_wikitext(URL, options, queue);
+
+			if (!Array.isArray(URL)) {
+				// 一般正規的外部連結應該在上一個 parse_external_link 已處理過。
+				return all;
+			}
+
+			if (URL.type !== 'plain') {
+				URL = [ URL ];
+			}
+
+			var prefix_to_detect = [];
+			var index = 0;
+			for (; index < URL.length; index++) {
+				var token = URL[index];
+				if (typeof token === 'string') {
+					prefix_to_detect.push(token);
+					continue;
+				}
+
+				if (token.type === 'comment') {
+					continue;
+				}
+
+				if (prefix_to_detect.length === 0) {
+					if (token.type === 'magic_word_function'
+					//
+					&& (token.name in {
+						// [{{fullurl:Special:...|...}} ...]
+						FULLURL : true,
+						CANONICALURL : true,
+						FILEPATH : true
+					})) {
+						break;
+					}
+
+					if (false && token.type === 'transclusion'
+					// [{{Bare URL template}} ...]
+					&& (token.name in {
+						// [[w:en:Template:NRWbahnarchivURL]]
+						NRWbahnarchivURL : true
+					})) {
+						break;
+					}
+
+					return all;
+				}
+
+				break;
+			}
+
+			if (prefix_to_detect.length > 0) {
+				prefix_to_detect = '[' + prefix_to_detect.join('')
+						+ URL.slice(index).join('') + (delimiter || '')
+						+ (parameters || '') + ']';
+				// console.trace(prefix_to_detect);
+				prefix_to_detect = parse_wikitext(prefix_to_detect, Object
+						.assign(Object.clone(options), {
+							no_odd_external_link : true
+						}), queue);
+				if (prefix_to_detect.type !== 'external_link')
+					return all;
+			} else {
+				prefix_to_detect = null;
+			}
+
+			if (!Array.isArray(URL) || URL.length > 1 || URL.type
+					&& URL.type !== 'plain') {
+				URL = [ URL ];
+			}
+			if (delimiter || parameters) {
+				URL.push(delimiter || '');
+				if (parameters) {
+					parameters = parse_wikitext(parameters, options, queue);
+					URL.push(parameters);
+				}
+			}
+
+			if (prefix_to_detect)
+				URL.url = prefix_to_detect[0];
 
 			_set_wiki_type(URL, 'external_link');
 			queue.push(URL);
@@ -4805,23 +4892,20 @@ function module_code(library_namespace) {
 			// external link
 			// [http://... ...]
 
-			/**
-			 * <code>
-			TODO:
-			@[[Template:User toolbox]]
-			[{{fullurl:Special:Log|user={{urlencode:{{{1|{{PAGENAME}}}}}}}}} 日志]
-
-			[{{URL template}} ...]
-
-			[<!-- --><!-- -->ht<!-- -->tp://... ...]
-			</code>
-			 * 
-			 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
-			 */
-
 			// 不可跨行。
 			wikitext = wikitext.replace_till_stable(
 					PATTERN_external_link_global, parse_external_link);
+
+			/**
+			 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+			 * @see [[Category:External link templates]]
+			 */
+
+			if (!options.no_odd_external_link) {
+				wikitext = wikitext.replace_till_stable(
+						/\[([^\[\]\s\n]+)(?:([^\S\n]+)([^\]]*?))?\]/gi,
+						parse_odd_external_link);
+			}
 
 			// ----------------------------------------------------
 			// plain url
