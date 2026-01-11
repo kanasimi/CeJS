@@ -2073,6 +2073,10 @@ function module_code(library_namespace) {
 				if (normalize) {
 					page_name = page_name.trim();
 				}
+				// [[::zh:title]] would be rendered as plaintext
+				if (/^\s*:\s*:/.test(page_name)) {
+					return previous + all_link;
+				}
 				// test [[file:name|...|...]]
 				file_matched = page_name.match(PATTERN_file_prefix);
 				if (!file_matched) {
@@ -2080,10 +2084,6 @@ function module_code(library_namespace) {
 					// test [[Category:name|order]]
 					.match(PATTERN_category_prefix);
 					// console.log([ page_name, category_matched ]);
-				}
-				// [[::zh:title]] would be rendered as plaintext
-				if (/^\s*:\s*:/.test(page_name)) {
-					return previous + all_link;
 				}
 				if (page_name.includes(include_mark)) {
 					// e.g., [[{{T}}]]

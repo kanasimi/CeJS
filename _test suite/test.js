@@ -4019,8 +4019,8 @@ function test_wiki() {
 		assert(['<s> }} }} </s>', matched && matched.toString()], 'wiki.parse.transclusion #42-3');
 
 		// TODO:
-		// "{{text| {{ {{<s title="{{s}}"> }} }} </s> }}"
 		// "{{text| {{ {{<s>}} </s> }}"
+		// "{{text| {{ {{<s title="{{s}}"> }} }} </s> }}"
 		wikitext = '{{text| {{ {{<s>}} }}</s> }}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #43');
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #43-1');
@@ -4921,8 +4921,10 @@ function test_wiki() {
 		assert(['25 December 2009', CeL.wiki.expand_transclusion('{{#formatdate:dec 25,2009|dmy}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #2');
 		assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25|mdy}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #3');
 		assert(['2009-12-25', CeL.wiki.expand_transclusion('{{#formatdate:2009 dec 25|ISO 8601}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #4');
+		// TODO
 		//assert(['December 25', CeL.wiki.expand_transclusion('{{#dateformat:25 decEmber|mdy}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #5');
 		assert(['2009-12-25', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #6');
+		// TODO
 		// assert(['25 December 2009', CeL.wiki.expand_transclusion('{{#dateformat:25 dec 2009}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #7');
 		// assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#formatdate:dec 25,2009}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #8');
 		// assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #9');
@@ -4959,6 +4961,7 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:3|03|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #2');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:0.00003456|3.456E-05|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #3');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:1e23|.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #4');
+		// TODO
 		//assert(['0', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456789|9034567890123456788|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #5');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456700.0|9034567890123456800|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #6');
 
@@ -4981,6 +4984,7 @@ function test_wiki() {
 		assert(['are', CeL.wiki.expand_transclusion('{{PLURAL:2|is|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #2');
 		assert(['1', CeL.wiki.expand_transclusion('{{PLURAL:{{#expr:1+1-1}}|{{#expr:2+2-3}}|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #3');
 
+		// TODO
 		// https://meta.wikimedia.org/wiki/Help:Calculation#Comparisons
 		//assert(['0', CeL.wiki.expand_transclusion('{{#ifexpr:1e23=.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifexpr:}} #1');
 
@@ -4993,6 +4997,7 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr: -1 or 0 }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #6');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr: 0 or 0 }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #7');
 		assert(['', CeL.wiki.expand_transclusion('{{#expr:  }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #8');
+		// TODO
 		//assert(['Expression error: Missing operand for +.', CeL.wiki.expand_transclusion('{{#expr: 1+ }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #9');
 		//assert(['Expression error: Missing operand for =.', CeL.wiki.expand_transclusion('{{#expr: 1 = }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #10');
 		//assert(['Expression error: Unrecognized word "foo".', CeL.wiki.expand_transclusion('{{#expr: 1 foo 2 }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #11');
@@ -5020,6 +5025,7 @@ function test_wiki() {
 		assert(['2000000000000000000', CeL.wiki.expand_transclusion('{{#expr:(trunc2)e(trunc18)}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #26');
 		assert(['60', CeL.wiki.expand_transclusion('{{#expr:6e(5-2)e-2}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #27');
 		assert(are_very_close(3.1622776601684, CeL.wiki.expand_transclusion('{{#expr:1e.5}}')), 'wiki.expand_transclusion: {{#expr:}} #28');
+		// TODO
 		//assert(['Expression error: Unexpected number.', CeL.wiki.expand_transclusion('{{#expr:e4}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #29');
 		assert(are_very_close(4.7278394682293E+18, CeL.wiki.expand_transclusion('{{#expr:exp43}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #30');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:exp trunc0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #31');
@@ -5029,9 +5035,9 @@ function test_wiki() {
 		assert(are_very_close(4727839468229346304, CeL.wiki.expand_transclusion('{{#expr:trunc exp43}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #35');
 		assert(are_very_close(0.69314718055995, CeL.wiki.expand_transclusion('{{#expr:ln2}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #36');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:ln trunc1}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #37');
-		//assert(['709.07967482591', CeL.wiki.expand_transclusion('{{#expr:ln8.9e307}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #38');
+		assert(are_very_close(709.07967482591, CeL.wiki.expand_transclusion('{{#expr:ln8.9e307}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #38');
 		assert(are_very_close(71.263604066559, CeL.wiki.expand_transclusion('{{#expr:ln8.9e30}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #38');
-		//assert(['-744.44007192138', CeL.wiki.expand_transclusion('{{#expr:ln.5e-323}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #39');
+		assert(are_very_close(-744.44007192138, CeL.wiki.expand_transclusion('{{#expr:ln.5e-323}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #39');
 		assert(are_very_close(-74.375870156369, CeL.wiki.expand_transclusion('{{#expr:ln.5e-32}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #39');
 		assert(are_very_close(0.30102999566398, CeL.wiki.expand_transclusion('{{#expr:ln2/ln10}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #40');
 		assert(['0.002', CeL.wiki.expand_transclusion('{{#expr:20 e - 4}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #41');
@@ -5041,6 +5047,7 @@ function test_wiki() {
 		assert(['2', CeL.wiki.expand_transclusion('{{#expr:sqrt 4}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #45');
 		assert(are_very_close(1.4142135623731, CeL.wiki.expand_transclusion('{{#expr:sqrt 2}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #46');
 		assert(are_very_close(3162277660.1684, CeL.wiki.expand_transclusion('{{#expr:sqrt 1e19}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #47');
+		// TODO
 		//assert(['In sqrt: Result is not a number.', CeL.wiki.expand_transclusion('{{#expr:sqrt-1}}	').toString()], 'wiki.expand_transclusion: {{#expr:}} #48');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:trunc1.2}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #49');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:trunc1.8}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #50');
@@ -5096,6 +5103,7 @@ function test_wiki() {
 		assert(['2', CeL.wiki.expand_transclusion('{{#expr:30mod-7}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #100');
 		assert(['-2', CeL.wiki.expand_transclusion('{{#expr:-30mod-7}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #101');
 		assert(['2', CeL.wiki.expand_transclusion('{{#expr:30.5mod7.9}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #102');
+		// TODO
 		//assert(['Expression error: Division by zero', CeL.wiki.expand_transclusion('{{#expr:123mod2^64}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #103');
 		assert(['0.5', CeL.wiki.expand_transclusion('{{#expr:5.7fmod1.3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #104');
 		assert(['39.9', CeL.wiki.expand_transclusion('{{#expr:99.9fmod60}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #105');
@@ -5124,6 +5132,7 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:1e16=trunc(1e16)}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #128');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:1e16=trunc(1e16)+trunc1}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #129');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:trunc(1e10)=trunc(1e10)+trunc1}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #130');
+		// TODO
 		//assert(['Expression error: Unrecognized word "a".', CeL.wiki.expand_transclusion('{{#expr:a=a}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #131');
 		assert(['1.01', CeL.wiki.expand_transclusion('{{#expr:1.005round2}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #131');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:3<>3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #132');
@@ -5136,6 +5145,7 @@ function test_wiki() {
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:3.0<3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #139');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:2.9<trunc3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #140');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:3.0<trunc3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #141');
+		// TODO
 		//assert(['Expression error: Unrecognized word "a".', CeL.wiki.expand_transclusion('{{#expr:a<b}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #142');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:4>3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #143');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:3>3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #144');
@@ -5166,8 +5176,8 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:1.23=1.234round2}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #169');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:1 and 2=1}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #170');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:1 or 1 and 0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #171');
-		// TODO
-		//assert([CeL.wiki.expand_transclusion('{{#if:{{{a|}}}{{{b|}}}|1|0}}}}').toString(), CeL.wiki.expand_transclusion('{{#expr: {{#if:{{{a|}}}|1|0}} or {{#if:{{{b|}}}|1|0}} }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #172');
+		assert(['0', CeL.wiki.expand_transclusion('{{#if:{{{a|}}}{{{b|}}}|1|0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #172');
+		assert(['0', CeL.wiki.expand_transclusion('{{#expr: {{#if:{{{a|}}}|1|0}} or {{#if:{{{b|}}}|1|0}} }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #172-1');
 		assert(['18', CeL.wiki.expand_transclusion('{{#expr:12/2*3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #173');
 		assert(['19683', CeL.wiki.expand_transclusion('{{#expr:3^3^3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #174');
 		assert(['20', CeL.wiki.expand_transclusion('{{#expr:(2+3)*4}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #175');
@@ -5175,14 +5185,17 @@ function test_wiki() {
 		assert(['8', CeL.wiki.expand_transclusion('{{#expr:7.5round0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #177');
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:0and1}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #178');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:0or not0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #179');
+		// TODO
 		//assert(['Expression error: Unrecognized word "ornot".', CeL.wiki.expand_transclusion('{{#expr:0ornot0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #180');
 		//assert(['Expression error: Unexpected number.', CeL.wiki.expand_transclusion('{{#expr:123 456}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #181');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:not not3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #182');
+		// TODO
 		//assert(['Expression error: Unrecognized word "notnot".', CeL.wiki.expand_transclusion('{{#expr:notnot3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #183');
 		assert(['-2', CeL.wiki.expand_transclusion('{{#expr:---2}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #184');
 		assert(['2', CeL.wiki.expand_transclusion('{{#expr:-+-2}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #185');
 		assert(['-6', CeL.wiki.expand_transclusion('{{#expr:2*-3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #186');
 		assert(['-1', CeL.wiki.expand_transclusion('{{#expr:-not-not-not0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #187');
+		// TODO
 		//assert(['Expression error: Unexpected / operator.', CeL.wiki.expand_transclusion('{{#expr:2*/3}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #188');
 		//assert(['Expression error: Unrecognized word "sinln".', CeL.wiki.expand_transclusion('{{#expr:sinln1.1}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #189');
 		assert(are_very_close(0.095165945236752, CeL.wiki.expand_transclusion('{{#expr:sin ln1.1}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #190');

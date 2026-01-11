@@ -155,6 +155,8 @@ function module_code(library_namespace) {
 		// console.trace([ parsed.toString(), parsed ]);
 		// Error.stackTraceLimit = 10;
 		parsed = set_shell(parsed);
+		parsed = convert_parameter(parsed, options.template_token_called
+				&& options.template_token_called.parameters, options);
 
 		var promise = for_each_subelement.call(parsed, 'magic_word_function',
 		//
