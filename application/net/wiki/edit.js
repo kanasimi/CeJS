@@ -580,13 +580,25 @@ function module_code(library_namespace) {
 
 		var post_data = wiki_API.extract_parameters(options, action);
 
-		wiki_API.query(action, function(data, error) {
+		function handle_result(data, error) {
 			// console.log(data);
 			if (error) {
 			} else if (data.error) {
 				// 檢查 MediaWiki 伺服器是否回應錯誤資訊。
 				error = data.error;
+
+				if (/^abusefilter-warning/.test(error.code)
+						&& options.ignore_abusefilter_warnings
+						// 已忽略過防濫用過濾器警告。
+						&& !action.had_ignored_abusefilter_warnings) {
+					action.had_ignored_abusefilter_warnings = true;
+					// 重新執行一次就能跳過防濫用過濾器警告。
+					wiki_API.query(action, handle_result, post_data, options);
+					return;
+				}
+
 				error.toString = wiki_API.query.error_toString;
+
 			} else if (data.edit && data.edit.result !== 'Success') {
 				error = {
 					code : data.edit.result,
@@ -703,7 +715,9 @@ function module_code(library_namespace) {
 				callback(title, error, data);
 				// console.trace(title);
 			}
-		}, post_data, options);
+		}
+
+		wiki_API.query(action, handle_result, post_data, options);
 	}
 
 	/**
