@@ -1720,6 +1720,7 @@ function module_code(library_namespace) {
 					case 'transclusion':
 						// e.g., [http://example.com/foo{{text|}} t]
 						if (token.name in {
+							// 這些模板絕對不會包含空白字元，且常被用於URL的一部分。
 							Uselang : true
 						}) {
 							return false;
@@ -1733,6 +1734,8 @@ function module_code(library_namespace) {
 				})) {
 					if (delimiter) {
 						parameters = delimiter + (parameters || '');
+					} else {
+						parameters = '';
 					}
 
 					delimiter = '';
