@@ -257,7 +257,8 @@ function module_code(library_namespace) {
 				// remove local function Item(o, r)
 				object = object.replace(
 						/(?:\w* )*function Item\s*\([\s\S]+?[\n ]end *\n/, '')
-						.replace(/local\s+Item\s*=[^\n;]+/, '');
+				// `local Item = require('Module:CGroup/core').Item;`
+				.replace(/local\s+Item\s*=[^\n;]+/, '');
 
 				/**
 				 * e.g., [[w:zh:Module:CGroup/NBA]] <code>
