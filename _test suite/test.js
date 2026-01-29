@@ -5289,6 +5289,12 @@ function test_wiki() {
 		wikitext = '{{t}}'; token = CeL.wiki.parse(wikitext);
 		assert([1, CeL.wiki.parse.replace_parameter(token, { '3': 2 }, { value_only: true, force_add: true, append_key_value: true })], 'wiki.parse.replace_parameter: #23-1');
 		assert(['{{t|3=2}}', token.toString()], 'wiki.parse.replace_parameter: #23-2');
+		wikitext = '{{t|a=bad one}}'; token = CeL.wiki.parse(wikitext);
+		assert([1, CeL.wiki.parse.replace_parameter(token, { 'a': { value_only: true, filter: /bad/, replace_to: 'good' } })], 'wiki.parse.replace_parameter: #24-1');
+		assert(['{{t|a=good}}', token.toString()], 'wiki.parse.replace_parameter: #24-2');
+		wikitext = '{{t|a=one}}'; token = CeL.wiki.parse(wikitext);
+		assert([0, CeL.wiki.parse.replace_parameter(token, { 'a': { value_only: true, filter: /bad/, replace_to: 'good' } })], 'wiki.parse.replace_parameter: #25-1');
+		assert([wikitext, token.toString()], 'wiki.parse.replace_parameter: #25-2');
 
 		wikitext = '{{t1|p1=1|p2=2|p4=}}'; parsed = CeL.wiki.parse(wikitext);
 		var parsed_2 = CeL.wiki.parse('{{ T1|p3=3|p4=4}}');

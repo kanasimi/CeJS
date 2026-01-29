@@ -180,12 +180,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function parse_template_不存檔(token, index, parent, options) {
-		token.message_expire_date = Infinity;
-	}
-
-	// --------------------------------------------------------------------------------------------
-
 	function expand_template_楷體(options) {
 		var parameters = this.parameters;
 		return '<span class="template-kai">' + (parameters[1] || '楷体')
@@ -498,7 +492,7 @@ function module_code(library_namespace) {
 
 		// {{Do not archive}}
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
-		不存檔 : parse_template_不存檔,
+		不存檔 : wiki_API.template_functions.functions_of_all_sites['Pin message'],
 
 		// [[Template:Interlanguage link]] 跨語言模板 多語言模板。
 
@@ -507,11 +501,15 @@ function module_code(library_namespace) {
 				expand : expand_template_Lang
 			}
 		},
-		// @see wiki_API.NoteTA_templates
-		NoteTA : parse_template_NoteTA,
-		'NoteTA-lite' : parse_template_NoteTA,
 		簡繁轉換 : parse_template_簡繁轉換
 	};
+
+	// wiki_API.NoteTA_templates @ CeL.application.net.wiki.parser
+	wiki_API.NoteTA_templates.forEach(function(template_name) {
+		wiki_API.template_functions.functions_of_site[module_site_name]
+		// template_name: e.g., 'NoteTA-lite'
+		[template_name] = parse_template_NoteTA;
+	});
 
 	[
 			'{{Interlanguage link multi|local_page_title|foreign_language_code|foreign_page_title|lt=display_text|WD=wikidata_entity_id}}',

@@ -24,6 +24,8 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.wiki.parser.misc',
 
 	require : 'application.net.wiki.parser.wikitext.'
+	// CeL.data.fit_filter()
+	+ '|data.'
 	// to_JS_value()
 	+ '|data.code.',
 
@@ -467,13 +469,25 @@ function module_code(library_namespace) {
 				// && !wiki_API.is_parsed_element(replace_to)
 				) {
 					// console.trace(replace_to);
-					replace_options = replace_to;
+					replace_options = Object.assign(Object.clone(replace_to),
+							options);
 					replace_to = replace_options.replace_to;
+					if (!('value_only' in replace_options)) {
+						replace_options.value_only = true;
+					}
 
 					if (replace_options.move_to
 					// TODO: 插入為第 .insert_as 個參數。
 					&& !('insert_as' in replace_options)) {
 						replace_options.insert_as = replace_options.move_to;
+					}
+
+					if (!library_namespace.data.fit_filter(
+							replace_options.filter,
+							template_token.parameters[replace_from])) {
+						library_namespace.debug('Skip replace parameter ['
+								+ replace_from + ']', 1, 'replace_parameter');
+						continue;
 					}
 				}
 
@@ -489,7 +503,8 @@ function module_code(library_namespace) {
 				if (!(index >= 0)) {
 					// 不存在此 parameter name 可 replace。新 parameter。
 					if (replace_to !== KEY_remove_parameter
-							&& options.value_only && options.force_add) {
+							&& (replace_options || options).value_only
+							&& options.force_add) {
 						// options.preserve_spacing
 						if (!options.no_value_space
 						//
@@ -563,7 +578,7 @@ function module_code(library_namespace) {
 				}
 
 				var skip_replacement = undefined;
-				if (options.value_only
+				if ((replace_options || options).value_only
 						// 預防有 KEY_remove_parameter 之類。
 						&& (typeof replace_to === 'string'
 								|| typeof replace_to === 'number'

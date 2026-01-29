@@ -453,12 +453,14 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function parse_template_Pin_message(template_token, index, parent, options) {
-		var parameters = template_token.parameters, message_expire_date;
-		if (parameters[1]) {
+		var parameters = template_token.parameters, message_expire_date = parameters[1]
+				// [[w:zh:Template:不存檔]]
+				|| parameters.until;
+		if (message_expire_date) {
 			options = library_namespace.new_options(options);
 			options.get_timevalue = true;
-			message_expire_date = wiki_API.parse.date(parameters[1], {
-				get_timevalue : true,
+			message_expire_date = wiki_API.parse.date(message_expire_date, {
+				get_timevalue : true
 			});
 		}
 		// console.trace([ message_expire_date, parameters ]);
