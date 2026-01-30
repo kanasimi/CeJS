@@ -5248,7 +5248,7 @@ function test_wiki() {
 		assert(['{{t| 12|5}}', CeL.wiki.parse.replace_parameter(token, 2, ' 2 = 5') && token.toString()], 'wiki.parse.replace_parameter: #14');
 		assert([0, CeL.wiki.parse.replace_parameter(token, 2, 5) && token.toString()], 'wiki.parse.replace_parameter: #15');
 		token = CeL.wiki.parse('{{t| a= 1| v=4|b=5}}');
-		assert([2, CeL.wiki.parse.replace_parameter(token, { a: 'k =1', b: 'r = 1' })], 'wiki.parse.replace_parameter: #16-1');
+		assert([2, CeL.wiki.parse.replace_parameter(token, { a: 'k =1', b: 'r = 1' }, { value_only: false })], 'wiki.parse.replace_parameter: #16-1');
 		assert(['{{t|k =1| v=4|r = 1}}', token.toString()], 'wiki.parse.replace_parameter: #16-2');
 		token = CeL.wiki.parse('{{t|p<!-- = -->=v}}');
 		assert(['{{t|p<!-- = -->=V}}', CeL.wiki.parse.replace_parameter(token, { p: 'V' }, 'value_only') && token.toString()], 'wiki.parse.replace_parameter: #17');

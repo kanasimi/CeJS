@@ -217,7 +217,17 @@ function module_code(library_namespace) {
 		wiki_API.parse.set_wiki_type(parameter_token, 'plain');
 	}
 
-	// @inner
+	/**
+	 * 參照上下文，判斷更改參數時前後應該加的空白字元。
+	 * 
+	 * @param {Array}template_token
+	 *            由 parse_wikitext() 解析出的模板元素。
+	 * @param {Integer|String}index
+	 *            判斷 template_token[index] 的空白字元。
+	 * @returns {Array}[ leading spaces, middle spaces with "=", tailing spaces ]
+	 * 
+	 * @inner
+	 */
 	function mode_space_of_parameters(template_token, index) {
 		if (false) {
 			template_token.forEach(function(parameter, index) {
@@ -356,7 +366,7 @@ function module_code(library_namespace) {
 	changed_count = CeL.wiki.parse.replace_parameter(token, {
 		parameter_name : 'replace to value',
 		parameter_name_2 : 'replace to value_2',
-	}, 'value_only');
+	}, { value_only : true });
 	token.toString();
 
 	// replace value and parameter name
@@ -448,47 +458,47 @@ function module_code(library_namespace) {
 			return replace_to;
 		}
 
+		/**
+		 * {Array|Undefined}參照上下文，更改參數時前後應該加的空白字元。
+		 * 
+		 * {Array}[ leading spaces, middle spaces with "=", tailing spaces ]
+		 */
+		var spaces = undefined;
+
 		if (library_namespace.is_Object(parameter_name)) {
 			if (options) {
 				library_namespace.error('replace_parameter: Invalid usage!');
 			}
 			// treat `replace_to` as options
 			options = library_namespace.setup_options(replace_to);
+			// replace_to = null;
+
 			// Replace parameter name only, preserve value.
 			if (options.parameter_name_only) {
 				parameter_name = to_parameter_name_only(parameter_name);
 			}
 
-			var operated_template_count = 0, latest_OK_key, key_of_spaces, spaces, next_insert_index;
+			var operated_template_count = 0, latest_OK_key, key_of_spaces, next_insert_index;
 			for ( var replace_from in parameter_name) {
+				var this_replace_options = Object.clone(options);
 				replace_to = parameter_name[replace_from];
-				var replace_options;
 				if (replace_to !== KEY_remove_parameter
 				//
 				&& library_namespace.is_Object(replace_to)
 				// && !wiki_API.is_parsed_element(replace_to)
 				) {
 					// console.trace(replace_to);
-					replace_options = Object.assign(Object.clone(replace_to),
-							options);
-					replace_to = replace_options.replace_to;
-					if (!('value_only' in replace_options)) {
-						replace_options.value_only = true;
-					}
+					Object.assign(this_replace_options, replace_to);
+					replace_to = this_replace_options.replace_to;
+				}
 
-					if (replace_options.move_to
-					// TODO: 插入為第 .insert_as 個參數。
-					&& !('insert_as' in replace_options)) {
-						replace_options.insert_as = replace_options.move_to;
-					}
-
-					if (!library_namespace.data.fit_filter(
-							replace_options.filter,
-							template_token.parameters[replace_from])) {
-						library_namespace.debug('Skip replace parameter ['
-								+ replace_from + ']', 1, 'replace_parameter');
-						continue;
-					}
+				if (this_replace_options.filter
+						&& !library_namespace.data.fit_filter(
+								this_replace_options.filter,
+								template_token.parameters[replace_from])) {
+					library_namespace.debug('Skip replace parameter ['
+							+ replace_from + ']', 3, 'replace_parameter');
+					continue;
 				}
 
 				if (typeof replace_from === 'string')
@@ -498,15 +508,25 @@ function module_code(library_namespace) {
 					continue;
 				}
 
+				if (!('value_only' in this_replace_options)) {
+					this_replace_options.value_only = replace_to !== KEY_remove_parameter;
+				}
+
+				if (this_replace_options.move_to
+				// TODO: 插入為第 .insert_as 個參數。
+				&& !('insert_as' in this_replace_options)) {
+					this_replace_options.insert_as = this_replace_options.move_to;
+				}
+
 				var index = replace_from === KEY_template_name ? 0
 						: template_token.index_of[replace_from];
 				if (!(index >= 0)) {
 					// 不存在此 parameter name 可 replace。新 parameter。
 					if (replace_to !== KEY_remove_parameter
-							&& (replace_options || options).value_only
-							&& options.force_add) {
-						// options.preserve_spacing
-						if (!options.no_value_space
+							&& this_replace_options.value_only
+							&& this_replace_options.force_add) {
+						// this_replace_options.preserve_spacing
+						if (!this_replace_options.no_value_space
 						//
 						&& (!key_of_spaces || key_of_spaces !== latest_OK_key)
 						//
@@ -528,7 +548,7 @@ function module_code(library_namespace) {
 						} else if (may_omit_numbered_parameter_name(
 								template_token, replace_from, next_insert_index)
 								&& may_omit_numbered_parameter_value(
-										replace_to, options)) {
+										replace_to, this_replace_options)) {
 							library_namespace.debug(
 									'Auto remove numbered parameter: '
 											+ replace_from, 1,
@@ -539,12 +559,12 @@ function module_code(library_namespace) {
 						}
 						if (typeof replace_to === 'string') {
 							replace_to = wiki_API.parse(replace_to, Object
-									.clone(options));
+									.clone(this_replace_options));
 						}
-						if (options.before_parameter
-								&& template_token.index_of[options.before_parameter]) {
+						if (this_replace_options.before_parameter
+								&& template_token.index_of[this_replace_options.before_parameter]) {
 							// insert before parameter
-							next_insert_index = template_token.index_of[options.before_parameter];
+							next_insert_index = template_token.index_of[this_replace_options.before_parameter];
 							set_original_parameter_index(template_token,
 									next_insert_index);
 							// assert:
@@ -552,7 +572,7 @@ function module_code(library_namespace) {
 							// 'plain'
 							template_token[next_insert_index][0].push(
 									replace_to, '|');
-						} else if (options.append_key_value
+						} else if (this_replace_options.append_key_value
 								&& next_insert_index >= 1) {
 							// 警告: 這會使 template_token[next_insert_index]
 							// 不合正規格式！但能插入在最接近前一個插入點之後，
@@ -578,7 +598,7 @@ function module_code(library_namespace) {
 				}
 
 				var skip_replacement = undefined;
-				if ((replace_options || options).value_only
+				if (this_replace_options.value_only
 						// 預防有 KEY_remove_parameter 之類。
 						&& (typeof replace_to === 'string'
 								|| typeof replace_to === 'number'
@@ -587,7 +607,7 @@ function module_code(library_namespace) {
 					var this_parameter = template_token[index];
 					if (index === 0) {
 						// console.trace([ this_parameter, replace_to ]);
-						if (options.override_same_value ? this_parameter
+						if (this_replace_options.override_same_value ? this_parameter
 								.toString() !== replace_to.toString()
 								: this_parameter.toString().trim() !== replace_to
 										.toString().trim()) {
@@ -618,7 +638,7 @@ function module_code(library_namespace) {
 						this_parameter[2] = this_parameter[2].toString()
 						// 留下註解之類。
 						.replace(parameters[replace_from], function(all) {
-							if (options.override_same_value
+							if (this_replace_options.override_same_value
 							//
 							? all !== replace_to.toString()
 							//
@@ -638,7 +658,8 @@ function module_code(library_namespace) {
 						skip_replacement = 1;
 					}
 
-					if (!may_omit_numbered_parameter_value(replace_to, options)
+					if (!may_omit_numbered_parameter_value(replace_to,
+							this_replace_options)
 							&& !this_parameter[1]) {
 						this_parameter[0] = replace_from;
 						this_parameter[1] = '=';
@@ -649,7 +670,8 @@ function module_code(library_namespace) {
 						parameters[replace_from] = replace_to;
 					}
 
-					if (skip_replacement > 0 && options.no_value_space) {
+					if (skip_replacement > 0
+							&& this_replace_options.no_value_space) {
 						if (this_parameter[3]) {
 							this_parameter[3] = this_parameter[3].toString()
 									.trimStart();
@@ -685,7 +707,7 @@ function module_code(library_namespace) {
 					continue;
 				}
 				operated_template_count += replace_parameter(template_token,
-						replace_from, replace_to);
+						replace_from, replace_to, this_replace_options);
 			}
 			return operated_template_count;
 		}
@@ -693,6 +715,14 @@ function module_code(library_namespace) {
 		// --------------------------------------
 
 		options = library_namespace.setup_options(options);
+
+		if (options.filter
+				&& !library_namespace.data.fit_filter(options.filter,
+						template_token.parameters[replace_from])) {
+			library_namespace.debug('Skip replace parameter [' + replace_from
+					+ ']', 3, 'replace_parameter');
+			return 0;
+		}
 
 		var index = parameter_name === KEY_template_name ? 0
 				: template_token.index_of[parameter_name];
@@ -730,7 +760,7 @@ function module_code(library_namespace) {
 		// --------------------------------------
 		// 判斷上下文使用的 spaces。
 
-		var spaces = mode_space_of_parameters(template_token, index);
+		spaces = mode_space_of_parameters(template_token, index);
 		// console.trace(spaces);
 		// console.trace(replace_to);
 
