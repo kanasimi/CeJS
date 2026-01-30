@@ -745,6 +745,7 @@ function module_code(library_namespace) {
 		function to_Number(number) {
 			if (number === '.')
 				return 0;
+
 			number = number.toLowerCase();
 			if (number === 'pi')
 				return Math.PI;
@@ -752,9 +753,20 @@ function module_code(library_namespace) {
 				return Math.E;
 			if (number === 'nan')
 				return 'NAN';
+
 			// '123.456.789e33' → '123.456e33'
-			number = number.replace(/^([^.]*\.[^.]*)\.[\d.]*/, '$1');
-			return +number;
+			var _number = number.replace(/^([^.]*\.[^.]*)\.[\d.]*/, '$1');
+
+			_number = +_number;
+
+			// TODO:
+			// https://www.mediawiki.org/wiki/Manual:Expr_parser_function_syntax#Operators,_numbers,_and_constants
+			if (false && isNaN(_number)) {
+				return new wiki_error(library_namespace.gettext(
+						'Expression error: Unrecognized word "%1".', number));
+			}
+
+			return _number;
 		}
 
 		function _handle_binary_operations(all, _1, op, _2) {
@@ -770,6 +782,7 @@ function module_code(library_namespace) {
 					return _1 * Math.pow(10, number[1]) + number[2];
 				return _1 * Math.pow(10, _2);
 			}
+
 			_1 = to_Number(_1);
 			_2 = to_Number(_2);
 			// console.trace([ _1, op, _2 ]);
@@ -858,6 +871,10 @@ function module_code(library_namespace) {
 			case 'abs':
 				return Math.abs(number);
 			case 'sqrt':
+				if (false && !(number >= 0)) {
+					return new wiki_error(library_namespace
+							.gettext('In sqrt: Result is not a number.'));
+				}
 				return Math.sqrt(number);
 			case 'trunc':
 				return Math.trunc(number);
@@ -1494,9 +1511,11 @@ function module_code(library_namespace) {
 			// ----------------------------------------------------------------
 
 		case '#if':
-			// console.trace([ '#if%', token, get_parameter_String(1)
-			// ]);
+			if (false) {
+				console.trace([ '#if%', token, get_parameter_String(1) ]);
+			}
 			token = token.parameters[get_parameter_String(1) ? 2 : 3] || '';
+			token = wiki_API.trim_token(token);
 			// console.trace(token);
 			break;
 
@@ -1505,6 +1524,7 @@ function module_code(library_namespace) {
 					|| +get_parameter_String(1) === +get_parameter_String(2) ? 3
 					: 4]
 					|| '';
+			token = wiki_API.trim_token(token);
 			// console.trace(token);
 			break;
 
@@ -1589,10 +1609,40 @@ function module_code(library_namespace) {
 
 			// ----------------------------------------------------------------
 
-			// case '#iferror':
-			// TODO
+		case '#iferror':
+			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
+			var message = get_parameter_String(1), has_error;
+			message = eval_expr(message);
+			message = wiki_API.parse(message, options);
+			// `<strong class="error">message</strong>`
+			for_each_subelement.call([ message ], 'tag', function(tag_token) {
+				if (has_error || !tag_token.attributes || !(tag_token.tag in {
+					p : true,
+					span : true,
+					div : true,
+					strong : true
 
-			// ----------------------------------------------------------------
+				// 以下無效:
+				// <b class="error">message</b>
+				// <i>, <s>, <del>, <li>, ...
+				})) {
+					return;
+				}
+
+				var _class = tag_token.attributes['class'];
+				if (/^\s*error(?:$|\s)/.test(_class)
+						|| /^[\s\S]+?\serror(?:$|\s)/.test(_class)) {
+					has_error = true;
+					return;
+				}
+			});
+			token = has_error ? token.parameters[2] || '' : token.parameters[3]
+					|| message || '';
+			token = wiki_API.trim_token(token);
+			// console.trace(token);
+			break;
+
+		// ----------------------------------------------------------------
 
 		case '#switch':
 			var key = get_parameter_String(1, true, true), default_value = '';

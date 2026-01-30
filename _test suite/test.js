@@ -4968,6 +4968,8 @@ function test_wiki() {
 		//assert(['0', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456789|9034567890123456788|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #5');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456700.0|9034567890123456800|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #6');
 
+		assert(['error', CeL.wiki.expand_transclusion('{{#iferror: <strong class="error">a</strong> | error | correct }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #1');
+
 		if (typeof Intl !== 'object' || !Intl.DisplayNames) {
 			CeL.warn('No valid Intl. Skip tests of wiki.expand_transclusion: {{#language:}}');
 		} else {

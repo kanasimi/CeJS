@@ -1101,6 +1101,36 @@ function module_code(library_namespace) {
 		: token === 0 || token && token.type !== 'comment';
 	}
 
+	function trim_token(token) {
+		if (!token)
+			return token;
+
+		if (typeof token === 'string')
+			return token.trim();
+
+		if (Array.isArray(token)) {
+			var _token = token;
+			while (Array.isArray(_token[0])) {
+				// assert: Array.isArray(_token)
+				_token = _token[0];
+			}
+			if (typeof _token[0] === 'string')
+				_token[0] = _token[0].trimStart();
+
+			_token = token;
+			while (Array.isArray(_token.at(-1))) {
+				// assert: Array.isArray(_token)
+				_token = _token.at(-1);
+			}
+			if (typeof _token.at(-1) === 'string')
+				_token[_token.length - 1] = _token.at(-1).trimEnd();
+
+			return token;
+		}
+
+		return token;
+	}
+
 	var KEY_apostrophe_element_start_quote = 0, KEY_apostrophe_element_content = 1, KEY_apostrophe_element_end_quote = 2,
 	//
 	default_include_mark = '\x00', default_end_mark = '\x01',
@@ -5468,6 +5498,7 @@ function module_code(library_namespace) {
 		// wikitext_to_plain_text : wikitext_to_plain_text,
 		is_parsed_element : is_parsed_element,
 		is_meaningful_token : is_meaningful_token,
+		trim_token : trim_token,
 
 		inplace_reparse_element : inplace_reparse_element,
 		parse : parse_wikitext
