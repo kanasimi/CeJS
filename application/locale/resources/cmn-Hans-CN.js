@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "\u897f\u73ed\u7259",
 	"Calendrier r\u00e9publicain": "\u6cd5\u56fd\u5171\u548c\u5386",
-	"untranslated message count": "0",
+	"untranslated message count": "2",
 	"\u6e05\u9664\u8a0a\u606f": "\u6e05\u9664\u4fe1\u606f",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "\u663e\u793a/\u9690\u85cf\u65e5\u5fd7",
 	"Load failed": "\u52a0\u8f7d\u5931\u8d25",

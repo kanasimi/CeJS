@@ -358,11 +358,53 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	/**
+	 * @see https://javascript.info/custom-errors
+	 * @see https://stackoverflow.com/questions/1382107/whats-a-good-way-to-extend-error-in-javascript
+	 */
+	function wiki_error(message, options) {
+		// Error.call(this, message);
+
+		// this.name = 'wiki_error';
+		this.message = Array.isArray(message) ? library_namespace.gettext
+				.apply(null, message)
+		// assert: typeof message === 'string'
+		: library_namespace.gettext(message);
+
+		if (false) {
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/Error
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
+			if (options && options.cause)
+				this.cause = options.cause;
+
+			// https://groups.google.com/g/mozilla.dev.tech.js-engine/c/rxlcWq-_yzI
+			this.stack = (new Error).stack.split("\n").slice(1);
+		}
+	}
+
+	// 繼承 Error 物件
+	// @see https://pjchender.blogspot.com/2017/12/js-error-handling.html
+	wiki_error.prototype = Object.assign(
+	// new Error()
+	Object.create(Error.prototype), {
+		name : 'wiki_error',
+		// is_wiki_error : true,
+		constructor : wiki_error,
+		// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
+		toString : function wiki_error_toString() {
+			return '<strong class="error">' + this.message + '</strong>';
+		}
+	});
+
+	// ------------------------------------------------------------------------
+
 	// export 導出.
 
 	// @static
 	Object.assign(wiki_API, {
-		is_wiki_API : is_wiki_API
+		is_wiki_API : is_wiki_API,
+
+		wiki_error : wiki_error
 	});
 
 	// MediaWiki Frontend API

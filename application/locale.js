@@ -2470,7 +2470,10 @@ function module_code(library_namespace) {
 		'lb-LU' : 'Lëtzebuergesch|lb-LU|Luxembourgish|盧森堡語',
 
 		// Piedmontese language
-		'pms-IT' : 'Piemontèis|pms-IT|Piedmontese|皮埃蒙特語'
+		'pms-IT' : 'Piemontèis|pms-IT|Piedmontese|皮埃蒙特語',
+
+		// vi-Latn-VN
+		'vi-VN' : 'Tiếng Việt|vi-VN|Vietnamese language|越南語'
 	};
 	gettext.set_alias(gettext.default_domain);
 

@@ -4968,7 +4968,17 @@ function test_wiki() {
 		//assert(['0', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456789|9034567890123456788|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #5');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456700.0|9034567890123456800|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #6');
 
+		// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
 		assert(['error', CeL.wiki.expand_transclusion('{{#iferror: <strong class="error">a</strong> | error | correct }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #1');
+		assert(['correct', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: 1 + 2 }} | error | correct }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #2');
+		assert(['error', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: 1 + X }} | error | correct }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #3');
+		assert(['3', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: 1 + 2 }} | error }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #4');
+		assert(['error', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: 1 + X }} | error }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #5');
+		assert(['3', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: 1 + 2 }} }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #6');
+		assert(['', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: 1 + X }} }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #7');
+		assert(['correct', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: . }} | error | correct }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #8');
+
+		assert(['no', CeL.wiki.expand_transclusion('{{#ifexpr: | yes | no}}').toString()], 'wiki.expand_transclusion: {{#ifexpr:}} #1');
 
 		if (typeof Intl !== 'object' || !Intl.DisplayNames) {
 			CeL.warn('No valid Intl. Skip tests of wiki.expand_transclusion: {{#language:}}');

@@ -761,9 +761,11 @@ function module_code(library_namespace) {
 
 			// TODO:
 			// https://www.mediawiki.org/wiki/Manual:Expr_parser_function_syntax#Operators,_numbers,_and_constants
-			if (false && isNaN(_number)) {
-				return new wiki_error(library_namespace.gettext(
-						'Expression error: Unrecognized word "%1".', number));
+			if (isNaN(_number)) {
+				// https://translatewiki.net/wiki/MediaWiki:Pfunc_expr_unrecognised_word/en
+				return new wiki_API.wiki_error([
+				// gettext_config:{"id":"expression-error-unrecognized-word-$1"}
+				'Expression error: Unrecognized word "%1".', number ]);
 			}
 
 			return _number;
@@ -871,9 +873,10 @@ function module_code(library_namespace) {
 			case 'abs':
 				return Math.abs(number);
 			case 'sqrt':
-				if (false && !(number >= 0)) {
-					return new wiki_error(library_namespace
-							.gettext('In sqrt: Result is not a number.'));
+				if (!(number >= 0)) {
+					return new wiki_API.wiki_error(
+					// gettext_config:{"id":"in-$1-result-is-not-a-number"}
+					[ 'In %1: Result is not a number.', op ]);
 				}
 				return Math.sqrt(number);
 			case 'trunc':
@@ -952,7 +955,9 @@ function module_code(library_namespace) {
 
 		// e.g., for {{#expr:pi}}
 		var number = to_Number(expression);
-		return isNaN(number) ? expression : String(number);
+		return number instanceof wiki_API.wiki_error ? number
+		// : isNaN(number) ? expression
+		: String(number);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -983,7 +988,7 @@ function module_code(library_namespace) {
 		if (/\w/.test(format.replace(/%\w/g, ''))) {
 			// 警告不能完全模擬的功能。
 			// console.trace([ format, format.replace(/[-\s]/g, '') ]);
-			return new wiki_error('NYI');
+			return new wiki_API.wiki_error('NYI');
 		}
 
 		options = Object.assign(Object.clone(options), {
@@ -1029,22 +1034,6 @@ function module_code(library_namespace) {
 	// others: TODO
 	}, wiki_date_to_String.default_locale, {
 		no_gettext : true
-	});
-
-	// --------------------------------------------------------------------------------------------
-
-	// https://stackoverflow.com/questions/1382107/whats-a-good-way-to-extend-error-in-javascript
-	function wiki_error(message) {
-		// Error.call(this, message);
-		this.message = message;
-		// https://groups.google.com/g/mozilla.dev.tech.js-engine/c/rxlcWq-_yzI
-		this.stack = (new Error).stack;
-	}
-
-	wiki_error.prototype = Object.assign(Object.create(Error.prototype), {
-		name : 'wiki_error',
-		// is_wiki_error : true,
-		constructor : wiki_error
 	});
 
 	// --------------------------------------------------------------------------------------------
@@ -1498,13 +1487,13 @@ function module_code(library_namespace) {
 			} else {
 				date = new Date(argument_2 + ' UTC');
 				if (!date) {
-					return new wiki_error('Error: Invalid time.');
+					return new wiki_API.wiki_error('Error: Invalid time.');
 				}
 				date = new Date(date);
 			}
 			// console.trace([ argument_2, new Date(date) ]);
 			date = wiki_date_to_String(date, get_parameter_String(1), options);
-			if (date instanceof wiki_error)
+			if (date instanceof wiki_API.wiki_error)
 				return NYI();
 			return date;
 
@@ -1607,37 +1596,54 @@ function module_code(library_namespace) {
 
 			return check_page_existence_via_net(page_title);
 
-			// ----------------------------------------------------------------
+		case '#ifexpr':
+			var expression = get_parameter_String(1, true);
+			if (library_namespace.is_thenable(expression)) {
+				return NYI();
+			}
+			expression = eval_expr(expression);
+			if (expression instanceof wiki_API.wiki_error)
+				return expression;
+			token = token.parameters[expression ? 2 : 3] || '';
+			token = wiki_API.trim_token(token);
+			// console.trace(token);
+			break;
 
 		case '#iferror':
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
-			var message = get_parameter_String(1), has_error;
+			var message = get_parameter_String(1);
 			message = eval_expr(message);
-			message = wiki_API.parse(message, options);
-			// `<strong class="error">message</strong>`
-			for_each_subelement.call([ message ], 'tag', function(tag_token) {
-				if (has_error || !tag_token.attributes || !(tag_token.tag in {
-					p : true,
-					span : true,
-					div : true,
-					strong : true
+			var has_error = message instanceof wiki_API.wiki_error;
+			if (!has_error) {
+				message = wiki_API.parse(message, options);
+				// `<strong class="error">message</strong>`
+				for_each_subelement.call([ message ], 'tag',
+				//
+				function(tag_token) {
+					if (has_error || !tag_token.attributes
+							|| !(tag_token.tag in {
+								p : true,
+								span : true,
+								div : true,
+								strong : true
 
-				// 以下無效:
-				// <b class="error">message</b>
-				// <i>, <s>, <del>, <li>, ...
-				})) {
-					return;
-				}
+							// 以下無效:
+							// <b class="error">message</b>
+							// <i>, <s>, <del>, <li>, ...
+							})) {
+						return;
+					}
 
-				var _class = tag_token.attributes['class'];
-				if (/^\s*error(?:$|\s)/.test(_class)
-						|| /^[\s\S]+?\serror(?:$|\s)/.test(_class)) {
-					has_error = true;
-					return;
-				}
-			});
+					var _class = tag_token.attributes['class'];
+					if (/^\s*error(?:$|\s)/.test(_class)
+							|| /^[\s\S]+?\serror(?:$|\s)/.test(_class)) {
+						has_error = true;
+						return;
+					}
+				});
+			}
 			token = has_error ? token.parameters[2] || '' : token.parameters[3]
-					|| message || '';
+					|| message.toString() || '';
 			token = wiki_API.trim_token(token);
 			// console.trace(token);
 			break;
@@ -2068,9 +2074,6 @@ function module_code(library_namespace) {
 				return expression.then(eval_expr);
 			}
 			return eval_expr(expression);
-
-			// case '#ifexpr':
-			// TODO
 
 			// ----------------------------------------------------------------
 
