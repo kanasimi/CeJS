@@ -344,6 +344,8 @@
 	"wikitext parser checking: %1": "wikitext parser checking: %1",
 	"There are more than one %1 in %2": "There are more than one %1 in %2",
 	"Expression error: Unrecognized word \"%1\".": "Expression error: Unrecognized word \"%1\".",
+	"Expression error: Unrecognized punctuation character \"%1\".": "Expression error: Unrecognized punctuation character \"%1\".",
+	"Division by zero.": "Division by zero.",
 	"In %1: Result is not a number.": "In %1: Result is not a number.",
 	"\u4f3c\u4e4e\u4e1f\u5931\u4e86\u4ee4\u724c\u3002": "It seems that the token is lost.",
 	"Too many badtoken errors! Please re-execute the program!": "Too many badtoken errors! Please re-execute the program!",

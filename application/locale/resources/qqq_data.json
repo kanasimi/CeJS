@@ -2637,13 +2637,13 @@
 	"load-the-main-functions-and-necessary-dependencies-to-operate-mediawiki": {
 		"message": "Load the main functions and necessary dependencies to operate MediaWiki.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L486}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L520}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"all-wiki-submodules-are-loaded": {
 		"message": "All wiki submodules are loaded.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L519}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L553}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-the-$1-for-$2-and-do-not-set-them-because-the-values-already-exist-and-$3-is-not-set": {
@@ -2939,15 +2939,29 @@
 	"expression-error-unrecognized-word-$1": {
 		"message": "Expression error: Unrecognized word \"%1\".",
 		"original_message_language_code": "en-US",
-		"notes": "The English version is synchronized with [[MediaWiki:Pfunc expr unrecognised word/en]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L768}}",
+		"notes": "English version is synchronized with [[MediaWiki:Pfunc expr unrecognised word/en]].",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L731}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"expression-error-unrecognized-punctuation-character-$1": {
+		"message": "Expression error: Unrecognized punctuation character \"%1\".",
+		"original_message_language_code": "en-US",
+		"notes": "English version is synchronized with [[MediaWiki:MediaWiki:Pfunc expr unrecognised punctuation/en]].",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L736}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"division-by-zero": {
+		"message": "Division by zero.",
+		"original_message_language_code": "en-US",
+		"notes": "English version is synchronized with [[MediaWiki:Pfunc expr division by zero/en]].",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L783}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"in-$1-result-is-not-a-number": {
 		"message": "In %1: Result is not a number.",
 		"original_message_language_code": "en-US",
 		"notes": "English version is synchronized with [[MediaWiki:Pfunc expr not a number/en]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L879}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L872}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {

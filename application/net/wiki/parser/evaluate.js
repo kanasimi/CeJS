@@ -703,243 +703,283 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	var PATTERN_expr_number = /([+\-]?(?:[\d.]+)(?:e[+\-]\d+)?|\.|(?:pi|e|NAN)(?!\s*[+\-\d\w]|$))/i;
-	function generate_PATTERN_expr_operations(operations, operand_count) {
-		return new RegExp((operand_count === 1 ? /(operations)\s*number/
-		// assert: operand_count === 2
-		: /number\s*(operations)\s*number/).source.replace('operations',
-				operations).replace(/number/g, PATTERN_expr_number.source),
-				'ig');
-	}
+	// @inner of eval_expr()
+	function to_Number(number) {
+		if (number === '.')
+			return 0;
 
-	var PATTERN_expr_e_notation = generate_PATTERN_expr_operations('[eE]', 2);
-	var PATTERN_expr_floor = generate_PATTERN_expr_operations('floor', 1);
-	var PATTERN_expr_power = generate_PATTERN_expr_operations(/\^/.source, 2);
-	// 乘 除 模除/餘數
-	var PATTERN_expr_乘除 = generate_PATTERN_expr_operations('[*/]|div|mod|fmod',
-			2);
-	var PATTERN_expr_加減 = generate_PATTERN_expr_operations('[+\-]', 2);
-	var PATTERN_expr_round = generate_PATTERN_expr_operations('round', 2);
+		number = number.toLowerCase();
+		switch (number) {
+		case 'pi':
+			return Math.PI;
+		case 'e':
+			return Math.E;
+		case 'nan':
+			return 'NAN';
+		}
 
-	var
-	// 其他的一元運算
-	PATTERN_expr_unary_operations = generate_PATTERN_expr_operations(
-	// [+\-]+|exp|ln|abs|sqrt|trunc|floor|ceil|sin|cos|tan|asin|acos|atan|not
-	/[+\-]+|exp|ln|abs|sqrt|trunc|ceil|sin|cos|tan|asin|acos|atan|not/.source,
-			1),
-	// 其他的二元運算
-	PATTERN_expr_binary_operations = generate_PATTERN_expr_operations(
-	// [+\-*/^<>=eE]|[<>!]=|<>|and|or|div|mod|fmod|round
-	/[<>=]|[<>!]=|<>/.source, 2),
-	// 用括號框起來起來的數字。
-	PATTERN_expr_bracketed_number = new RegExp(/\(\s*number\s*\)/.source
-			.replace(/number/g, PATTERN_expr_number.source), 'g');
+		// '123.456.789e33' → '123.456e33'
+		var _number = number.replace(/^([^.]*\.[^.]*)\.[\d.]*/, '$1');
 
-	var PATTERN_expr_and = generate_PATTERN_expr_operations('and', 2);
-	var PATTERN_expr_or = generate_PATTERN_expr_operations('or', 2);
-
-	// [[mw:Help:Extension:ParserFunctions##expr]], [[mw:Help:Help:Calculation]]
-	function eval_expr(expression) {
-		// console.trace(expression);
-		var TRUE = 1, FALSE = 0;
-		function to_Number(number) {
-			if (number === '.')
-				return 0;
-
-			number = number.toLowerCase();
-			if (number === 'pi')
-				return Math.PI;
-			if (number === 'e')
-				return Math.E;
-			if (number === 'nan')
-				return 'NAN';
-
-			// '123.456.789e33' → '123.456e33'
-			var _number = number.replace(/^([^.]*\.[^.]*)\.[\d.]*/, '$1');
-
-			_number = +_number;
-
-			// TODO:
-			// https://www.mediawiki.org/wiki/Manual:Expr_parser_function_syntax#Operators,_numbers,_and_constants
-			if (isNaN(_number)) {
+		// TODO:
+		// https://www.mediawiki.org/wiki/Manual:Expr_parser_function_syntax#Operators,_numbers,_and_constants
+		if (isNaN(_number)) {
+			if (/^\w+$/.test(_number)) {
 				// https://translatewiki.net/wiki/MediaWiki:Pfunc_expr_unrecognised_word/en
 				return new wiki_API.wiki_error([
 				// gettext_config:{"id":"expression-error-unrecognized-word-$1"}
 				'Expression error: Unrecognized word "%1".', number ]);
 			}
 
-			return _number;
+			return new wiki_API.wiki_error([
+			// gettext_config:{"id":"expression-error-unrecognized-punctuation-character-$1"}
+			'Expression error: Unrecognized punctuation character "%1".',
+					number ]);
 		}
 
-		function _handle_binary_operations(all, _1, op, _2) {
-			op = op.toLowerCase();
-			if (op === 'e') {
-				var number = +all;
-				// console.trace([ all, number, _1, op, _2 ]);
-				if (!isNaN(number))
-					return number;
-				// e.g., '{{#expr:6e(5-2)e-2}}'
-				number = _2.match(/^([\d+\-.]+)(e[\d+\-]+)$/);
-				if (number)
-					return _1 * Math.pow(10, number[1]) + number[2];
-				return _1 * Math.pow(10, _2);
-			}
+		_number = +_number;
 
-			_1 = to_Number(_1);
-			_2 = to_Number(_2);
-			// console.trace([ _1, op, _2 ]);
-			switch (op) {
-			case '+':
-				return _1 + _2;
-			case '-':
-				return _1 - _2;
-			case '*':
-				return _1 * _2;
-			case '/':
-			case 'div':
-				return _1 / _2;
-			case 'mod':
-				// 將兩數截斷為整數後的除法餘數。
-				return Math.floor(_1) % Math.floor(_2);
-			case 'fmod':
-				return (_1 % _2).to_fixed();
-			case '^':
-				var power = Math.pow(_1, _2);
-				return isNaN(power) ? 'NAN' : power;
+		return _number;
+	}
 
-			case 'round':
-				var power = Math.pow(10, Math.trunc(_2));
-				var is_negative = _1 < 0;
-				if (is_negative)
-					_1 = -_1;
-				// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Math/round
-				// giving a different result in the case of negative numbers
-				// with a fractional part of exactly 0.5.
-				_1 = Math.round((_1 * power).to_fixed()) / power;
-				if (is_negative)
-					_1 = -_1;
-				return _1;
+	// @inner of eval_expr()
+	var Pfunc_TRUE = 1, Pfunc_FALSE = 0;
 
-			case '>':
-				return _1 > _2 ? TRUE : FALSE;
-			case '<':
-				return _1 < _2 ? TRUE : FALSE;
-			case '>=':
-				return _1 >= _2 ? TRUE : FALSE;
-			case '<=':
-				return _1 <= _2 ? TRUE : FALSE;
-			case '=':
-				return _1 === _2 ? TRUE : FALSE;
-			case '<>':
-			case '!=':
-				return _1 !== _2 ? TRUE : FALSE;
-			case 'and':
-				return _1 && _2 ? TRUE : FALSE;
-			case 'or':
-				return _1 || _2 ? TRUE : FALSE;
-			}
-
-			throw new Error('二元運算符未定義，這不該發生，請聯絡函式庫作者: '
-					+ [ all, _1, op, _2, expression ]);
+	// @inner of eval_expr()
+	function _handle_binary_operations(all, _1, op, _2) {
+		op = op.toLowerCase();
+		if (op === 'e') {
+			var number = +all;
+			// console.trace([ all, number, _1, op, _2 ]);
+			if (!isNaN(number))
+				return number;
+			// e.g., '{{#expr:6e(5-2)e-2}}'
+			number = _2.match(/^([\d+\-.]+)(e[\d+\-]+)$/);
+			if (number)
+				return _1 * Math.pow(10, number[1]) + number[2];
+			return _1 * Math.pow(10, _2);
 		}
 
-		function handle_binary_operations(all, _1, op, _2) {
-			var result = _handle_binary_operations(all, _1, op, _2);
+		_1 = to_Number(_1);
+		if (_1 instanceof wiki_API.wiki_error)
+			return _1;
+		_2 = to_Number(_2);
+		if (_2 instanceof wiki_API.wiki_error)
+			return _2;
+
+		// console.trace([ _1, op, _2 ]);
+		switch (op) {
+		case '+':
+			return _1 + _2;
+		case '-':
+			return _1 - _2;
+		case '*':
+			return _1 * _2;
+		case '/':
+		case 'div':
+			if (_2 === 0) {
+				return new wiki_API.wiki_error([
+				// gettext_config:{"id":"division-by-zero"}
+				'Division by zero.' ]);
+			}
+			return _1 / _2;
+		case 'mod':
+			// 將兩數截斷為整數後的除法餘數。
+			return Math.floor(_1) % Math.floor(_2);
+		case 'fmod':
+			return (_1 % _2).to_fixed();
+		case '^':
+			var power = Math.pow(_1, _2);
+			return isNaN(power) ? 'NAN' : power;
+
+		case 'round':
+			var power = Math.pow(10, Math.trunc(_2));
+			var is_negative = _1 < 0;
+			if (is_negative)
+				_1 = -_1;
+			// https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+			// giving a different result in the case of negative numbers
+			// with a fractional part of exactly 0.5.
+			_1 = Math.round((_1 * power).to_fixed()) / power;
+			if (is_negative)
+				_1 = -_1;
+			return _1;
+
+		case '>':
+			return _1 > _2 ? Pfunc_TRUE : Pfunc_FALSE;
+		case '<':
+			return _1 < _2 ? Pfunc_TRUE : Pfunc_FALSE;
+		case '>=':
+			return _1 >= _2 ? Pfunc_TRUE : Pfunc_FALSE;
+		case '<=':
+			return _1 <= _2 ? Pfunc_TRUE : Pfunc_FALSE;
+		case '=':
+			return _1 === _2 ? Pfunc_TRUE : Pfunc_FALSE;
+		case '<>':
+		case '!=':
+			return _1 !== _2 ? Pfunc_TRUE : Pfunc_FALSE;
+		case 'and':
+			return _1 && _2 ? Pfunc_TRUE : Pfunc_FALSE;
+		case 'or':
+			return _1 || _2 ? Pfunc_TRUE : Pfunc_FALSE;
+		}
+
+		throw new Error('二元運算符未定義，這不該發生，請聯絡函式庫作者: '
+				+ [ all, _1, op, _2, expression ]);
+	}
+
+	// @inner of eval_expr()
+	function handle_binary_operations(all, _1, op, _2) {
+		var result = _handle_binary_operations(all, _1, op, _2);
+		if (result instanceof wiki_API.wiki_error)
+			return result;
+
+		// preserve plus sign
+		// e.g., '{{#expr:2+3*4}}'
+		return /^\s*\+/.test(_1)
+				&& (typeof result === 'number' ? result >= 0 : !/^\s*\+/
+						.test(result)) ? '+' + result : result;
+	}
+
+	// @inner of eval_expr()
+	function handle_unary_operations(all, op, number) {
+		op = op.toLowerCase();
+		number = to_Number(number);
+		if (number instanceof wiki_API.wiki_error)
+			return number;
+
+		// console.trace([ op, number ]);
+		if (/^[+\-]+$/.test(op)) {
+			return (op.length - op.replace(/-/g, '').length) % 2 === 0
 			// preserve plus sign
-			// e.g., '{{#expr:2+3*4}}'
-			return /^\s*\+/.test(_1)
-					&& (typeof result === 'number' ? result >= 0 : !/^\s*\+/
-							.test(result)) ? '+' + result : result;
+			// e.g., '{{#expr:(abs-2)+3}}'
+			? '+' + number
+			// e.g., "{{#expr:+-+-++-5}}"
+			: -number;
 		}
 
-		function handle_unary_operations(all, op, number) {
-			op = op.toLowerCase();
-			number = to_Number(number);
-			// console.trace([ op, number ]);
-			if (/^[+\-]+$/.test(op)) {
-				return (op.length - op.replace(/-/g, '').length) % 2 === 0
-				// preserve plus sign
-				// e.g., '{{#expr:(abs-2)+3}}'
-				? '+' + number
-				// e.g., "{{#expr:+-+-++-5}}"
-				: -number;
+		switch (op) {
+		case 'exp':
+			return Math.exp(number);
+		case 'ln':
+			return Math.log(number);
+		case 'abs':
+			return Math.abs(number);
+		case 'sqrt':
+			if (!(number >= 0)) {
+				return new wiki_API.wiki_error(
+				// gettext_config:{"id":"in-$1-result-is-not-a-number"}
+				[ 'In %1: Result is not a number.', op ]);
 			}
-
-			switch (op) {
-			case 'exp':
-				return Math.exp(number);
-			case 'ln':
-				return Math.log(number);
-			case 'abs':
-				return Math.abs(number);
-			case 'sqrt':
-				if (!(number >= 0)) {
-					return new wiki_API.wiki_error(
-					// gettext_config:{"id":"in-$1-result-is-not-a-number"}
-					[ 'In %1: Result is not a number.', op ]);
-				}
-				return Math.sqrt(number);
-			case 'trunc':
-				return Math.trunc(number);
-			case 'floor':
-				return Math.floor(number);
-			case 'ceil':
-				return Math.ceil(number);
-			case 'sin':
-				return Math.sin(number);
-			case 'cos':
-				return Math.cos(number);
-			case 'tan':
-				return Math.tan(number);
-			case 'asin':
-				return Math.asin(number);
-			case 'acos':
-				return Math.acos(number);
-			case 'atan':
-				return Math.atan(number);
-			case 'not':
-				return number ? FALSE : TRUE;
-			}
-
-			throw new Error('一元運算符未定義，這不該發生，請聯絡函式庫作者: '
-					+ [ all, op, number, expression ]);
+			return Math.sqrt(number);
+		case 'trunc':
+			return Math.trunc(number);
+		case 'floor':
+			return Math.floor(number);
+		case 'ceil':
+			return Math.ceil(number);
+		case 'sin':
+			return Math.sin(number);
+		case 'cos':
+			return Math.cos(number);
+		case 'tan':
+			return Math.tan(number);
+		case 'asin':
+			return Math.asin(number);
+		case 'acos':
+			return Math.acos(number);
+		case 'atan':
+			return Math.atan(number);
+		case 'not':
+			return number ? Pfunc_FALSE : Pfunc_TRUE;
 		}
 
+		throw new Error('一元運算符未定義，這不該發生，請聯絡函式庫作者: '
+				+ [ all, op, number, expression ]);
+	}
+
+	// @inner of eval_expr()
+	// @see https://en.wikipedia.org/wiki/Order_of_operations
+	var Pfunc_operations_queue = (function() {
+		function generate_PATTERN_expr_operations(operations, operand_count) {
+			return new RegExp((operand_count === 1 ? /(operations)\s*number/
+			// assert: operand_count === 2
+			: /number\s*(operations)\s*number/).source.replace('operations',
+					operations).replace(/number/g, PATTERN_expr_number.source),
+					'ig');
+		}
+
+		var PATTERN_expr_number = /([+\-]?(?:[\d.]+)(?:e[+\-]\d+)?|\.|(?:pi|e|NAN)(?!\s*[+\-\d\w]|$))/i;
+
+		var PATTERN_expr_e_notation = generate_PATTERN_expr_operations('[eE]',
+				2);
+		var PATTERN_expr_floor = generate_PATTERN_expr_operations('floor', 1);
+		var PATTERN_expr_power = generate_PATTERN_expr_operations(/\^/.source,
+				2);
+		// 乘 除 模除/餘數 multiplication and division
+		var PATTERN_expr_multiply_divide = generate_PATTERN_expr_operations(
+				'[*/]|div|mod|fmod', 2);
+		// 加減
+		var PATTERN_expr_plus_minus = generate_PATTERN_expr_operations('[+\-]',
+				2);
+		var PATTERN_expr_round = generate_PATTERN_expr_operations('round', 2);
+
+		var
+		// 其他的一元運算
+		PATTERN_expr_unary_operations = generate_PATTERN_expr_operations(
+				// [+\-]+|exp|ln|abs|sqrt|trunc|floor|ceil|sin|cos|tan|asin|acos|atan|not
+				/[+\-]+|exp|ln|abs|sqrt|trunc|ceil|sin|cos|tan|asin|acos|atan|not/.source,
+				1),
+		// 其他的二元運算
+		PATTERN_expr_binary_operations = generate_PATTERN_expr_operations(
+		// [+\-*/^<>=eE]|[<>!]=|<>|and|or|div|mod|fmod|round
+		/[<>=]|[<>!]=|<>/.source, 2),
+		// 用括號框起來起來的數字。
+		PATTERN_expr_bracketed_number = new RegExp(/\(\s*number\s*\)/.source
+				.replace(/number/g, PATTERN_expr_number.source), 'g');
+
+		var PATTERN_expr_and = generate_PATTERN_expr_operations('and', 2);
+		var PATTERN_expr_or = generate_PATTERN_expr_operations('or', 2);
+
+		return [
+		// 四則運算的優先權: 先算括號
+		[ PATTERN_expr_bracketed_number, '$1' ],
+				[ PATTERN_expr_e_notation, handle_binary_operations ],
+				[ PATTERN_expr_floor, handle_unary_operations ],
+				[ PATTERN_expr_power, handle_binary_operations ],
+				// 先乘除後加減
+				[ PATTERN_expr_multiply_divide, handle_binary_operations ],
+				[ PATTERN_expr_plus_minus, handle_binary_operations ],
+				[ PATTERN_expr_round, handle_binary_operations ],
+				[ PATTERN_expr_binary_operations, handle_binary_operations ],
+				[ PATTERN_expr_and, handle_binary_operations ],
+				[ PATTERN_expr_or, handle_binary_operations ],
+				[ PATTERN_expr_unary_operations, handle_unary_operations ] ];
+	})();
+
+	// @see
+	// [[mw:Help:Extension:ParserFunctions##expr]], [[mw:Help:Help:Calculation]]
+	// https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/ParserFunctions/+/refs/heads/master/includes/ExprParser.php
+	function eval_expr(expression) {
+		// console.trace(expression);
+		var error_occurred;
 		while (true) {
 			var new_expression = expression;
-			new_expression = new_expression.replace(
-					PATTERN_expr_bracketed_number, '$1');
 
-			new_expression = new_expression.replace(PATTERN_expr_e_notation,
-					handle_binary_operations);
-
-			new_expression = new_expression.replace(PATTERN_expr_floor,
-					handle_unary_operations);
-
-			// @see https://en.wikipedia.org/wiki/Order_of_operations
-			new_expression = new_expression.replace(PATTERN_expr_power,
-					handle_binary_operations);
-
-			new_expression = new_expression.replace(PATTERN_expr_乘除,
-					handle_binary_operations);
-
-			new_expression = new_expression.replace(PATTERN_expr_加減,
-					handle_binary_operations);
-
-			new_expression = new_expression.replace(PATTERN_expr_round,
-					handle_binary_operations);
-
-			new_expression = new_expression.replace(
-					PATTERN_expr_binary_operations, handle_binary_operations);
-
-			new_expression = new_expression.replace(PATTERN_expr_and,
-					handle_binary_operations);
-
-			new_expression = new_expression.replace(PATTERN_expr_or,
-					handle_binary_operations);
-
-			new_expression = new_expression.replace(
-					PATTERN_expr_unary_operations, handle_unary_operations);
+			for (var index = 0; index < Pfunc_operations_queue.length; index++) {
+				// operation_config: [ pattern, handler / operation ]
+				var operation_config = Pfunc_operations_queue[index], handler = operation_config[1];
+				new_expression = new_expression.replace(operation_config[0],
+				//
+				typeof handler === 'function' ? function() {
+					var result = handler.apply(null, arguments);
+					if (result instanceof wiki_API.wiki_error)
+						error_occurred = result;
+					return result;
+				} : handler);
+				if (error_occurred)
+					return error_occurred;
+			}
 
 			if (new_expression === expression)
 				break;
@@ -1596,6 +1636,16 @@ function module_code(library_namespace) {
 
 			return check_page_existence_via_net(page_title);
 
+			// ----------------------------------------------------------------
+
+		case '#expr':
+			var expression = get_parameter_String(1, true);
+			if (library_namespace.is_thenable(expression)) {
+				return NYI();
+				return expression.then(eval_expr);
+			}
+			return eval_expr(expression);
+
 		case '#ifexpr':
 			var expression = get_parameter_String(1, true);
 			if (library_namespace.is_thenable(expression)) {
@@ -1603,7 +1653,7 @@ function module_code(library_namespace) {
 			}
 			expression = eval_expr(expression);
 			if (expression instanceof wiki_API.wiki_error)
-				return expression;
+				return expression.toString();
 			token = token.parameters[expression ? 2 : 3] || '';
 			token = wiki_API.trim_token(token);
 			// console.trace(token);
@@ -1613,37 +1663,9 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
 			var message = get_parameter_String(1);
 			message = eval_expr(message);
-			var has_error = message instanceof wiki_API.wiki_error;
-			if (!has_error) {
-				message = wiki_API.parse(message, options);
-				// `<strong class="error">message</strong>`
-				for_each_subelement.call([ message ], 'tag',
-				//
-				function(tag_token) {
-					if (has_error || !tag_token.attributes
-							|| !(tag_token.tag in {
-								p : true,
-								span : true,
-								div : true,
-								strong : true
-
-							// 以下無效:
-							// <b class="error">message</b>
-							// <i>, <s>, <del>, <li>, ...
-							})) {
-						return;
-					}
-
-					var _class = tag_token.attributes['class'];
-					if (/^\s*error(?:$|\s)/.test(_class)
-							|| /^[\s\S]+?\serror(?:$|\s)/.test(_class)) {
-						has_error = true;
-						return;
-					}
-				});
-			}
-			token = has_error ? token.parameters[2] || '' : token.parameters[3]
-					|| message.toString() || '';
+			token = wiki_API.wiki_error.is_wiki_error(message, options) ? token.parameters[2]
+					|| ''
+					: token.parameters[3] || message.toString() || '';
 			token = wiki_API.trim_token(token);
 			// console.trace(token);
 			break;
@@ -2064,16 +2086,6 @@ function module_code(library_namespace) {
 			}
 			return wiki_API.parse('<' + attributes.join(' ') + '>' + innerHTML
 					+ '</' + tag_name + '>', options);
-
-			// ----------------------------------------------------------------
-
-		case '#expr':
-			var expression = get_parameter_String(1, true);
-			if (library_namespace.is_thenable(expression)) {
-				return NYI();
-				return expression.then(eval_expr);
-			}
-			return eval_expr(expression);
 
 			// ----------------------------------------------------------------
 

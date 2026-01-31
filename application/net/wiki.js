@@ -396,6 +396,40 @@ function module_code(library_namespace) {
 		}
 	});
 
+	function is_wiki_error(object, options) {
+		if (object instanceof wiki_error)
+			return object;
+
+		object = wiki_API.parse(object, options);
+		var has_error;
+		wiki_API.parser.parser_prototype.each.call([ object ], 'tag', function(
+				tag_token) {
+			// `<strong class="error">message</strong>`
+			if (has_error || !tag_token.attributes || !(tag_token.tag in {
+				p : true,
+				span : true,
+				div : true,
+				strong : true
+
+			// 以下無效:
+			// <b class="error">message</b>
+			// <i>, <s>, <del>, <li>, ...
+			})) {
+				return;
+			}
+
+			var _class = tag_token.attributes['class'];
+			if (/^\s*error(?:$|\s)/.test(_class)
+					|| /^[\s\S]+?\serror(?:$|\s)/.test(_class)) {
+				has_error = true;
+				return wiki_API.parser.parser_prototype.each.exit;
+			}
+		});
+		return has_error;
+	}
+
+	wiki_error.is_wiki_error = is_wiki_error;
+
 	// ------------------------------------------------------------------------
 
 	// export 導出.
