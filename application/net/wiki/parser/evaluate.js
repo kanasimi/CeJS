@@ -1470,12 +1470,22 @@ function module_code(library_namespace) {
 		case 'CURRENTDOW':
 			return (new Date).getUTCDay();
 
+		case 'CURRENTDAYNAME':
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString
+			return (new Date).toLocaleDateString(undefined, {
+				// timeZone : 'UTC',
+				weekday : 'long'
+			});
+
 		case 'CURRENTHOUR':
 			return (new Date).getUTCHours().toString().padStart(2, 0);
 
 		case 'CURRENTTIME':
 			return (new Date).getUTCHours().toString().padStart(2, 0) + ':'
 					+ (new Date).getUTCMinutes().toString().padStart(2, 0);
+
+		case 'CURRENTWEEK':
+			return new Date().format('%W');
 
 		case 'CURRENTTIMESTAMP':
 			return (new Date).toISOString().replace(/[\-:TZ]/g, '').replace(
@@ -1663,7 +1673,7 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
 			var message = get_parameter_String(1);
 			message = eval_expr(message);
-			token = wiki_API.wiki_error.is_wiki_error(message, options) ? token.parameters[2]
+			token = wiki_API.wiki_error.has_error(message, options) ? token.parameters[2]
 					|| ''
 					: token.parameters[3] || message.toString() || '';
 			token = wiki_API.trim_token(token);

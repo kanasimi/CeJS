@@ -1828,12 +1828,26 @@ function module_code(library_namespace) {
 	}
 	_.ordinal_date = ordinal_date;
 
-	// week date, 週日期, 表示年內的星期數天數，再加上星期內第幾天。
-	// https://en.wikipedia.org/wiki/ISO_week_date
-	// return [ year, week (1-52 or 53), weekday (1-7) ]
-	// var w = week_date(new Date);
-	// w[0].pad(4) + '-W' + w[1].pad(2) + '-' + w[2]
-	function week_date(date, to_ISO) {
+	/**
+	 * week date, 週日期, 表示年內第幾周的星期數，再加上星期內第幾天。
+	 * 
+	 * @param date
+	 *            日期
+	 * @param {Object}options
+	 *            選擇性功能。
+	 * @returns [ year, week (1-52 or 53), weekday (1-7) ]
+	 * 
+	 * @example<code>
+
+	var w = week_date(new Date);
+	w[0].pad(4) + '-W' + w[1].pad(2) + '-' + w[2]
+
+	</code>
+	 * 
+	 * @see https://en.wikipedia.org/wiki/ISO_week_date#Algorithms
+	 * @see https://stackoverflow.com/questions/6117814/get-week-of-year-in-javascript-like-in-php
+	 */
+	function week_date(date, options) {
 		var year = date.getFullYear() | 0, weekday = date.getDay() | 0, days = ordinal_date(date) | 0, week;
 		if (weekday === 0) {
 			weekday = 7;
@@ -1851,21 +1865,24 @@ function module_code(library_namespace) {
 			year++;
 		}
 
-		if (to_ISO) {
-			// TODO: 在IS0 8601中星期以星期一開始
-			// 一年的首星期必須包含1月4日, 包含一年的首個星期四
-			year = year.pad(4);
-			week = 'W' + week.pad(2);
-		}
 		days = [ year, week, weekday ];
-		if (to_ISO === 1) {
-			days = days.join('');
-		} else if (to_ISO !== 2) {
+		if (options) {
+			options = library_namespace.setup_options(options);
+			if (options.ISO) {
+				// 轉成ISO格式。
+				// TODO: 在IS0 8601中星期以星期一開始
+				// 一年的首星期必須包含1月4日, 包含一年的首個星期四
+				days = [ year.pad(4), 'W' + week.pad(2), weekday ];
+			}
+		}
+
+		if (!options || !options.get_data) {
 			days = days.join('-');
 		}
 
 		return days;
 	}
+
 	_.week_date = week_date;
 
 	// <a href="http://www.cppreference.com/wiki/cn/chrono/c/strftime"
@@ -1994,7 +2011,9 @@ function module_code(library_namespace) {
 		},
 		// 週數 以十進制數寫年的第幾個星期（星期一是星期的首日）（範圍[00,53]）。
 		W : function(date_value, options) {
-			return week_date(date_value)[1];
+			return week_date(date_value, {
+				get_data : true
+			})[1];
 		},
 
 		// 有相同開頭的時候，長的要放前面！

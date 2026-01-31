@@ -396,7 +396,7 @@ function module_code(library_namespace) {
 		}
 	});
 
-	function is_wiki_error(object, options) {
+	function has_error(object, options) {
 		if (object instanceof wiki_error)
 			return object;
 
@@ -428,7 +428,7 @@ function module_code(library_namespace) {
 		return has_error;
 	}
 
-	wiki_error.is_wiki_error = is_wiki_error;
+	wiki_error.has_error = has_error;
 
 	// ------------------------------------------------------------------------
 
