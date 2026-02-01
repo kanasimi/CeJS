@@ -2964,6 +2964,13 @@
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L872}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
+	"error-invalid-depth-in-path-$1-(tried-to-access-a-node-above-the-root-node)": {
+		"message": "Error: Invalid depth in path: \"%1\" (tried to access a node above the root node).",
+		"original_message_language_code": "en-US",
+		"notes": "English version is synchronized with [[MediaWiki:Pfunc rel2abs invalid depth/en]].",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1833}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
 	"it-seems-that-the-token-is-lost": {
 		"message": "似乎丟失了令牌。",
 		"original_message_language_code": "cmn-Hant-TW",

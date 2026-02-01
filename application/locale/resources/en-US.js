@@ -347,6 +347,7 @@
 	"Expression error: Unrecognized punctuation character \"%1\".": "Expression error: Unrecognized punctuation character \"%1\".",
 	"Division by zero.": "Division by zero.",
 	"In %1: Result is not a number.": "In %1: Result is not a number.",
+	"Error: Invalid depth in path: \"%1\" (tried to access a node above the root node).": "Error: Invalid depth in path: \"%1\" (tried to access a node above the root node).",
 	"\u4f3c\u4e4e\u4e1f\u5931\u4e86\u4ee4\u724c\u3002": "It seems that the token is lost.",
 	"Too many badtoken errors! Please re-execute the program!": "Too many badtoken errors! Please re-execute the program!",
 	"Not using node.js!": "Not using node.js!",

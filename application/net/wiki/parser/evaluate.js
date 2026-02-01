@@ -959,6 +959,7 @@ function module_code(library_namespace) {
 
 	// @see
 	// [[mw:Help:Extension:ParserFunctions##expr]], [[mw:Help:Help:Calculation]]
+	// https://github.com/wikimedia/mediawiki-extensions-ParserFunctions/blob/master/includes/ExprParser.php
 	// https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/ParserFunctions/+/refs/heads/master/includes/ExprParser.php
 	function eval_expr(expression) {
 		// console.trace(expression);
@@ -1717,8 +1718,10 @@ function module_code(library_namespace) {
 					}
 				}
 			}
-			return typeof default_value === 'number' ? get_parameter_String(
-					default_value, true) : default_value;
+
+			return wiki_API.trim_token(typeof default_value === 'number'
+			//
+			? get_parameter_String(default_value, true) : default_value);
 
 			// ----------------------------------------------------------------
 
@@ -1824,9 +1827,11 @@ function module_code(library_namespace) {
 			base_path += '/' + path;
 			path = library_namespace.simplify_path(base_path);
 			if (/^[.\/]/.test(path)) {
-				return new Error('Error: Invalid depth in path: '
-						+ JSON.stringify(base_path)
-						+ ' (tried to access a node above the root node).');
+				return new wiki_API.wiki_error(
+						[
+								// gettext_config:{"id":"error-invalid-depth-in-path-$1-(tried-to-access-a-node-above-the-root-node)"}
+								'Error: Invalid depth in path: "%1" (tried to access a node above the root node).',
+								JSON.stringify(base_path) ]);
 			}
 			return path.replace(/\/$/, '');
 
