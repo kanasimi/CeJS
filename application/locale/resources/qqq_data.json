@@ -2968,7 +2968,7 @@
 		"message": "Error: Invalid depth in path: \"%1\" (tried to access a node above the root node).",
 		"original_message_language_code": "en-US",
 		"notes": "English version is synchronized with [[MediaWiki:Pfunc rel2abs invalid depth/en]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1833}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1846}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {
@@ -3178,7 +3178,7 @@
 		"message": "Cannot convert Lua pattern to RegExp pattern: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Lua pattern",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L534}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L535}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-detect-work-id-from-url-$1": {
@@ -4911,7 +4911,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: stop_task()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1072}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1074}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"prepare-to-pause-the-download.-it-will-take-effect-after-downloading-this-chapter": {
@@ -4919,7 +4919,7 @@
 		"notes": "",
 		"scope": "work_crawler.js: stop_task()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1074}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1076}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-downloading-«$1»": {
@@ -4928,7 +4928,7 @@
 		"scope": "work_crawler.js: continue_task()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: work title / id",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1140}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1142}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"estimated-$1-to-download": {
@@ -4937,7 +4937,7 @@
 		"scope": "work_crawler.js: estimated_message()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: estimated time of accomplishment",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1166}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/task.js#L1168}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"work_data.author": {

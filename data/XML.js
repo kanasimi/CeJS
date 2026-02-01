@@ -597,10 +597,12 @@ function module_code(library_namespace) {
 	 * @returns {String}XML
 	 */
 	function to_XML(nodes, options) {
+		var separator = options && options.separator;
+		separator = separator || separator === 0 ? String(separator) : '';
 		if (Array.isArray(nodes)) {
 			return nodes.map(function(node) {
 				return to_XML(node, options);
-			}).join(options && options.separator || '');
+			}).join(separator);
 		}
 
 		if (typeof nodes === 'object') {
@@ -621,7 +623,7 @@ function module_code(library_namespace) {
 			node.push(name || name === '' ? '>' + name + '</' + tag + '>'
 			// e.g., name = null, undefined
 			: ' />');
-			return node.join(options && options.separator || '');
+			return node.join(separator);
 		}
 
 		return name || name === 0 ? String(nodes) : nodes;
@@ -643,9 +645,10 @@ function module_code(library_namespace) {
 		var XML = to_XML(nodes, options);
 
 		if (options && (options === true || options.declaration)) {
+			var separator = options.separator;
+			separator = separator || separator === 0 ? String(separator) : '';
 			// 加上起首之 declaration。
-			XML = XML_declaration("UTF-8")
-					+ (options && options.separator || '') + XML;
+			XML = XML_declaration("UTF-8") + separator + XML;
 		}
 
 		return XML;

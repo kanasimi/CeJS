@@ -247,6 +247,7 @@ function module_code(library_namespace) {
 	function expand_template_Rfc(options) {
 		var parameters = this.parameters;
 		var wikitext = '<span id="rfctag"></span>';
+		// assert: {String|Undefined}.rfcid, .rfcid !== 0
 		var rfcid = parameters.rfcid || '';
 		if (rfcid) {
 			rfcid = 'rfc_' + rfcid;

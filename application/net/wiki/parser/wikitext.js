@@ -599,6 +599,7 @@ function module_code(library_namespace) {
 		// [[Help:Table]]
 		table : function() {
 			// this: [ table style, row, row, ... ]
+			// assert: {String|Undefined}this.indentation, this.indentation!==0
 			return (this.indentation || '') + '{|' + this.join('')
 					+ ('ending' in this ? this.ending : '\n|}');
 		},
@@ -609,10 +610,12 @@ function module_code(library_namespace) {
 		// table caption
 		caption : function() {
 			// this: [ main caption, invalid caption, ... ]
+			// assert: {String|Undefined}this.delimiter, this.delimiter !== 0
 			return (this.delimiter || '') + this.join('');
 		},
 		table_row : function() {
 			// this: [ row style, cell, cell, ... ]
+			// assert: {String|Undefined}this.delimiter, this.delimiter !== 0
 			return (this.delimiter || '') + this.join('');
 		},
 		table_cell : function() {
@@ -824,6 +827,7 @@ function module_code(library_namespace) {
 			return this[0];
 		},
 		paragraph : function() {
+			// assert: {String|Undefined}this.separator, this.separator !== 0
 			return this.join('\n') + (this.separator || '');
 		},
 		// plain text 或尚未 parse 的 wikitext.

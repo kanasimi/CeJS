@@ -1013,6 +1013,8 @@ function module_code(library_namespace) {
 					reports.push('<tr><td>'
 							+ (index + 1)
 							+ '</td><td>'
+							// assert: {String|Undefined}work_status.id,
+							// work_status.id !== 0
 							+ (work_status.id || '')
 							+ '</td><td>'
 							+ (work_status.url ? '<a href="' + work_status.url

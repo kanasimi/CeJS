@@ -961,6 +961,7 @@ function module_code(library_namespace) {
 	// [[mw:Help:Extension:ParserFunctions##expr]], [[mw:Help:Help:Calculation]]
 	// https://github.com/wikimedia/mediawiki-extensions-ParserFunctions/blob/master/includes/ExprParser.php
 	// https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/ParserFunctions/+/refs/heads/master/includes/ExprParser.php
+	// @see convert_MathML @ CeL.application.math
 	function eval_expr(expression) {
 		// console.trace(expression);
 		var error_occurred;
@@ -1177,19 +1178,30 @@ function module_code(library_namespace) {
 		function value_to_String(value, allow_thenable, as_key) {
 			function return_parameter(value) {
 				if (Array.isArray(value)) {
-					for_each_subelement.call(value, 'comment', function() {
-						return for_each_subelement.remove_token;
-					});
+					for_each_subelement.call(value, function(token) {
+						if (token.type === 'comment')
+							return for_each_subelement.remove_token;
+
+						if (token.type === 'magic_word_function') {
+							// console.trace(token);
+							token = evaluate_parser_function_token.call(token,
+									options);
+							if (wiki_API.wiki_error.has_error(token)) {
+								return token.toString();
+							}
+							return token;
+						}
+					}, true);
+
 					if (as_key) {
 						var extensiontag_hash = session
 								&& session.configurations.extensiontag_hash
 								|| wiki_API.wiki_extensiontags;
 						for_each_subelement.call(value, function(token) {
-							if ((token.type === 'tag'
-							//
-							|| token.type === 'tag_single')
-							//
-							&& (token.tag.toLowerCase() in extensiontag_hash)) {
+							if (token.type in {
+								tag : true,
+								tag_single : true
+							} && token.tag.toLowerCase() in extensiontag_hash) {
 								value.has_extensiontag = true;
 								return for_each_subelement.exit;
 							}
@@ -1198,7 +1210,8 @@ function module_code(library_namespace) {
 							return value;
 					}
 				}
-				value = String(value || '');
+
+				value = String(value || value === 0 ? value : '');
 				// console.trace([ '' + token, token ]);
 				// var is_parser_function = token.name.startsWith('#');
 				// if (!is_parser_function)

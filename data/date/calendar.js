@@ -3975,6 +3975,7 @@ function Date_to_Thai(date, month, year, options) {
 		date = [
 				(weekday = Date_to_Thai.weekday_name[weekday]) ? 'วัน'
 						+ weekday : '', date || '',
+				// TODO: check year === 0
 				Date_to_Thai.month_name[month] || '', year || '' ];
 
 		if (date[0] && (date[1] || date[2] || date[3])) {

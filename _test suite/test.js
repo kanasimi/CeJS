@@ -4958,7 +4958,13 @@ function test_wiki() {
 		assert(['[[a]]', CeL.wiki.expand_transclusion('{{#switch:1<!-- -->23|12<!-- -->3=[[a]]}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #21');
 		assert(['t', CeL.wiki.expand_transclusion('{{#switch:|#de<!-- -->fault = t}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #22');
 		assert(['c', CeL.wiki.expand_transclusion('{{#switch:<b>B</b>|B=a|<b>B</b>=c}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #23');
-		//assert(['1', CeL.wiki.expand_transclusion('{{#switch: {{#expr:x}} | {{#expr: x }} = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #24');
+		assert(['1', CeL.wiki.expand_transclusion('{{#switch: [[t]] | [[t]] = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #24');
+		assert(['1', CeL.wiki.expand_transclusion('{{#switch: <b>t</b> | <b>t</b> = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #25');
+		//assert(['1', CeL.wiki.expand_transclusion('{{#switch: {{t}} | {{t}} = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #26');
+		CeL.gettext.use_domain('en', true);
+		assert(['1', CeL.wiki.expand_transclusion('{{#switch: {{#expr:x}} | {{#expr: x }} = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #27');
+		assert(['1', CeL.wiki.expand_transclusion('{{#switch: <strong class="error">Expression error: Unrecognized word "x".</strong> | {{#expr:  x }} = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #28');
+		assert(['1', CeL.wiki.expand_transclusion('{{#switch: {{#expr: x  }} | <strong class{{=}}"error">Expression error: Unrecognized word "x".</strong> = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #29');
 
 		// https://meta.wikimedia.org/wiki/Help:Calculation#Comparisons
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:3|3.0|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #1');
