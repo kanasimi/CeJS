@@ -6,7 +6,6 @@
 		]
 	},
 	"españa": "Spuenien",
-	"untranslated-message-count": "1000+",
 	"load-failed": "Lueden huet net funktionéiert",
 	"coordinates": "Koordinaten:&#32;",
 	"latitude": "Breedegrad:&#32;",
@@ -110,6 +109,7 @@
 	"unknown-api-response-$1": "Onbekannt API Äntwert: %1",
 	"does-not-exist": "Gëtt et net",
 	"configuration-page-$1": "Konfiguratiounssäit: %1",
+	"division-by-zero": "Divisioun duerch Null.",
 	"no-page-redirects-to-this-page": "Keng Säit leed virun op dës Säit",
 	"no-change": "keng Ännerung",
 	"edit-$1": "%1 änneren",
