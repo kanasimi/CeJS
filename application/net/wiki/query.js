@@ -839,6 +839,12 @@ function module_code(library_namespace) {
 	// jawiki : 10000
 	};
 
+	/** {Object}可忽略的警告訊息。 */
+	wiki_API_query.ignorable_warning_messages = {
+		// https://github.com/wikimedia/mediawiki-extensions-Wikibase/blob/master/repo/includes/EditEntity/MediaWikiEditEntity.php#L377
+		'wikibase-conflict-patched' : true
+	};
+
 	/**
 	 * 對於可以不用 XMLHttp 的，直接採 JSONP callback 法。
 	 * 
@@ -1059,12 +1065,17 @@ function module_code(library_namespace) {
 
 		if (data.warnings) {
 			for ( var action in data.warnings) {
-				if (data.warnings[action]['*']) {
-					library_namespace.warn('handle_error: '
-							+ data.warnings[action]['*']);
+				var warning = data.warnings[action];
+				var messages = warning['*'];
+				if (messages) {
+					if (!(messages.code in wiki_API_query.ignorable_warning_messages)) {
+						library_namespace.warn('handle_error: ' + messages);
+					}
 
-				} else if (Array.isArray(data.warnings[action].messages)) {
-					library_namespace.warn('handle_error: '
+				} else if (Array.isArray(warning.messages)
+				//
+				&& (messages = warning.messages.filter(function(line) {
+					return !(line.name
 					/**
 					 * <code>
 
@@ -1073,7 +1084,11 @@ function module_code(library_namespace) {
 
 					</code>
 					 */
-					+ data.warnings[action].messages.map(function(line) {
+					in wiki_API_query.ignorable_warning_messages);
+				})).length > 0) {
+					library_namespace.warn('handle_error: '
+					//
+					+ messages.map(function(line) {
 						var message = '[' + line.name + ']';
 						var text = line.html && line.html['*'];
 						if (text)
@@ -1081,9 +1096,11 @@ function module_code(library_namespace) {
 						return message;
 					}).join('\n'));
 				}
-
 			}
-			console.trace(JSON.stringify(data.warnings));
+
+			if (library_namespace.is_debug()) {
+				console.trace(JSON.stringify(data.warnings));
+			}
 		}
 
 		// 檢查 MediaWiki 伺服器是否回應錯誤資訊。

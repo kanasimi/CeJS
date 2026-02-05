@@ -106,6 +106,7 @@
 	"Unknown API response: %1": "Onbekannt API \u00c4ntwert: %1",
 	"Does not exist": "G\u00ebtt et net",
 	"Configuration page: %1": "Konfiguratiounss\u00e4it: %1",
+	"Division by zero.": "Divisioun duerch Null.",
 	"\u7121\u9801\u9762\u91cd\u5b9a\u5411\u81f3\u672c\u9801": "Keng S\u00e4it leed virun op d\u00ebs S\u00e4it",
 	"no change": "keng \u00c4nnerung",
 	"Edit %1": "%1 \u00e4nneren",

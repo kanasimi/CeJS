@@ -6584,7 +6584,13 @@ function module_code(library_namespace) {
 	 */
 	function wikidata_SPARQL(query, callback, options) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
-		options = library_namespace.new_options(options);
+		if (typeof options === 'function')
+			options = {
+				filter : options
+			};
+		else {
+			options = library_namespace.new_options(options);
+		}
 		// options.API_URL: custom SPARQL endpoint
 		var action = options.API_URL;
 		var session = wiki_API.session_of_options(options);
@@ -6705,6 +6711,9 @@ function module_code(library_namespace) {
 				callback(data);
 				return;
 			}
+
+			if (options.filter)
+				items = items.filter(options.filter);
 
 			// 正常情況
 			items.for_id = for_erach_SPARQL_item_process_id;
