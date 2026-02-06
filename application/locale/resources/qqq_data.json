@@ -2946,7 +2946,7 @@
 	"expression-error-unrecognized-punctuation-character-$1": {
 		"message": "Expression error: Unrecognized punctuation character \"%1\".",
 		"original_message_language_code": "en-US",
-		"notes": "English version is synchronized with [[MediaWiki:MediaWiki:Pfunc expr unrecognised punctuation/en]].",
+		"notes": "English version is synchronized with [[MediaWiki:Pfunc expr unrecognised punctuation/en]].",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L736}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
