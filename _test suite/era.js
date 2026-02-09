@@ -4929,7 +4929,7 @@ function affairs() {
 			a : {
 				T : '月禽'
 			},
-			R : '中曆曆注。二十八宿年禽。見演禽訣。',
+			R : '中曆曆注。二十八宿月禽。見演禽訣。',
 			href : 'http://blog.sina.com.cn/s/blog_4aacc33b0100b8eh.html'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.二十八宿(date, '月');
@@ -5413,8 +5413,7 @@ function affairs() {
 			// 河內市
 			'Hà Nội' : '21°01′42.5″N 105°51′15.0″E'
 		},
-		others : {
-		}
+		others : {}
 	};
 	for ( var country in place_list) {
 		var country_places = place_list[country];
