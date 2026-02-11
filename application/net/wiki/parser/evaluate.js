@@ -1789,6 +1789,50 @@ function module_code(library_namespace) {
 			// case 'CANONICALURL':
 			// case 'FILEPATH':
 
+		case '#isbn':
+			var key = get_parameter_String(1, true, true);
+			if (library_namespace.is_thenable(key)) {
+				return NYI();
+			}
+			key = key.toString().replace(/-/g, '');
+			// https://www.mediawiki.org/wiki/Help:Magic_words#isbn
+			var parsed = wiki_API.parse('[[Special:BookSources/' + key + ']]',
+					options);
+			return parsed;
+
+		case '#speciale':
+		case '#special':
+			// TODO: 尚未完善。
+			var page_title = get_parameter_String(1, true);
+			if (library_namespace.is_thenable(key)) {
+				return NYI();
+			}
+			var specialpagealiases = session
+					&& session.latest_site_configurations
+					&& session.latest_site_configurations.specialpagealiases;
+			if (Array.isArray(specialpagealiases)) {
+				specialpagealiases.some(function(data) {
+					var _page_title = page_title.toLowerCase();
+					if (data.realname.toLowerCase() === _page_title
+					//
+					|| data.aliases.some(function(title) {
+						return title.toLowerCase() === _page_title;
+					})) {
+						// page_title = data.realname;
+						page_title = data.aliases[0];
+						return true;
+					}
+				});
+			}
+			if (token.name === '#speciale')
+				page_title = PAGENAMEE_encoding(page_title);
+			var parsed = wiki_API.parse('Special:' + page_title, options);
+			return parsed;
+
+			// TODO:
+			// case '#interwikilink':
+			// case '#interlanguagelink':
+
 			// ----------------------------------------------------------------
 
 		case 'FULLPAGENAME':
@@ -1993,8 +2037,12 @@ function module_code(library_namespace) {
 			}
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
 			var parsed = wiki_API.parse(wikitext, options);
+			// TODO: SAFESUBST:在模板包含對其他模板或解析器函數的呼叫時，允許遞歸替換。
 			// expand template
 			return expand_transclusion(parsed, options);
+
+			// TODO:
+			// case 'MSGNW':
 
 			// ----------------------------------------------------------------
 

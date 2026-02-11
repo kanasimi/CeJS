@@ -4995,6 +4995,8 @@ function test_wiki() {
 			assert(['中文', CeL.wiki.expand_transclusion('{{#language:zh|zh}}').toString()], 'wiki.expand_transclusion: {{#language:}} #3');
 		}
 
+		assert(['[[Special:BookSources/9781538163214]]', CeL.wiki.expand_transclusion('{{#isbn:978-1538163214}}').toString()], 'wiki.expand_transclusion: {{#isbn:}} #1');
+
 		assert(['<testtag/>', CeL.wiki.expand_transclusion('{{#tag:testtag}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #1');
 		assert(['<testtag></testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag|}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #2');
 		assert(['<testtag>inner HTML</testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag|inner HTML}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #3');
@@ -5696,6 +5698,12 @@ function test_wiki() {
 			assert(['[[:File:File name|caption]]', CeL.wiki.title_link_of(link)], 'CeL.wiki.title_link_of(file link) #1');
 			assert(['[[:File:File name|ALT]]', CeL.wiki.title_link_of(link, 'ALT')], 'CeL.wiki.title_link_of(file link) #2');
 			assert(['[[w:en:File:File name|ALT]]', CeL.wiki.title_link_of(link, 'ALT', enwiki)], 'CeL.wiki.title_link_of(file link) #3');
+
+			assert(['Special:UserLogin', CeL.wiki.expand_transclusion('{{#special:userlogin}}', CeL.wiki.add_session_to_options(enwiki)).toString()], 'wiki.expand_transclusion: {{#special:}} #1');
+			assert(['Special:UserLogin', CeL.wiki.expand_transclusion('{{#special:loGin}}', CeL.wiki.add_session_to_options(enwiki)).toString()], 'wiki.expand_transclusion: {{#special:}} #2');
+
+			assert(['Special:UserLogin', CeL.wiki.expand_transclusion('{{#speciale:userlogin}}', CeL.wiki.add_session_to_options(enwiki)).toString()], 'wiki.expand_transclusion: {{#speciale:}} #1');
+			assert(['Special:UserLogin', CeL.wiki.expand_transclusion('{{#speciale:loGin}}', CeL.wiki.add_session_to_options(enwiki)).toString()], 'wiki.expand_transclusion: {{#speciale:}} #2');
 
 			//console.trace(test_name);
 			_finish_test(test_name);
