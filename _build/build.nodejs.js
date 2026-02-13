@@ -31,6 +31,9 @@ let library_main_script = 'ce.js';
 const structure_directory = '_structure/';
 const main_structure_file = structure_directory + 'structure.js';
 
+/** Discard untranslated message counts in i18n/(language code).js 捨棄 i18n/(語言代碼).js 中的未翻譯訊息計數。 */
+let no_i18n_data_untranslated_message_count = true;
+
 /** {RegExp} 跳過這些檔案不處理。跳過本地化語系檔本身。 */
 const default_PATTERN_ignore_file_path = /\/(?:resources)\//;
 
@@ -232,6 +235,11 @@ async function get_gettext_plural_rules(resources_path) {
 }
 
 
+/**
+ *  將英文訊息轉換為訊息 ID。
+ * @param {String} en_message  英文訊息。
+ * @returns  {String} 訊息 ID。
+ */
 function en_message_to_message_id(en_message) {
 	let message_id = en_message.trim();
 	if (/\{\{PLURAL:/.test(message_id)) {
@@ -1533,9 +1541,6 @@ function write_qqq_data(resources_path) {
 	return message_id_order;
 }
 
-/** untranslated message count was deprecated */
-let no_i18n_data_untranslated_message_count = false;
-
 function write_i18n_files(resources_path, message_id_order) {
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
 		if (language_code !== 'qqq') {
@@ -1602,8 +1607,9 @@ function write_message_script_file({ resources_path, language_code, locale_data,
 		return escape_non_latin_chars(JSON.stringify(normalize_plain_header_tail(message)));
 	}
 	for (const [message_id, locale_message] of Object.entries(sort_Object_by_order(locale_data, message_id_order))) {
-		if (message_id === '@metadata')
+		if (message_id === '@metadata') {
 			continue;
+		}
 		const qqq_data = qqq_data_Map.get(message_id);
 		if (!qqq_data) {
 			CeL.error(`${write_message_script_file.name}: No qqq_data of ${JSON.stringify(message_id)} found!`);
