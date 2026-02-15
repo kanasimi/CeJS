@@ -31,9 +31,6 @@ let library_main_script = 'ce.js';
 const structure_directory = '_structure/';
 const main_structure_file = structure_directory + 'structure.js';
 
-/** Discard untranslated message counts in i18n/(language code).js 捨棄 i18n/(語言代碼).js 中的未翻譯訊息計數。 */
-let no_i18n_data_untranslated_message_count = true;
-
 /** {RegExp} 跳過這些檔案不處理。跳過本地化語系檔本身。 */
 const default_PATTERN_ignore_file_path = /\/(?:resources)\//;
 
@@ -1542,6 +1539,22 @@ function write_qqq_data(resources_path) {
 }
 
 function write_i18n_files(resources_path, message_id_order) {
+	/**
+	 * 未翻譯訊息計數的 message id。
+	 * @type {String}
+	 */
+	const untranslated_message_count_id
+		// gettext_config:{"id":"untranslated-message-count"}
+		= en_message_to_message_id('untranslated message count');
+	/**
+	 *  Discard untranslated message counts in `i18n/(language code).js`, depend on {{ignored}} @ qqq.json<br />
+	 *  捨棄 `i18n/(語言代碼).js` 中的未翻譯訊息計數。
+	 * @type {Boolean}
+	 */
+	const no_i18n_data_untranslated_message_count = i18n_message_id_to_message['qqq']
+		// 依 qqq 中的 {{ignored}} 來決定是否要列入 i18n/(語言代碼).js 中。
+		&& /{{\s*ignored[^{}]*}}/.test(i18n_message_id_to_message['qqq'][untranslated_message_count_id]);
+
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
 		if (language_code !== 'qqq') {
 			adapt_message_id_changed_to_Object(locale_data);
@@ -1550,8 +1563,6 @@ function write_i18n_files(resources_path, message_id_order) {
 			const untranslated_ratio = untranslated_message_count / qqq_data_Map.size;
 			const number_digits = Math.floor(Math.log10(untranslated_message_count));
 			const number_base = 10 ** number_digits;
-			// gettext_config:{"id":"untranslated-message-count"}
-			const untranslated_message_count_id = en_message_to_message_id('untranslated message count');
 			locale_data[untranslated_message_count_id] =
 				// String(): FuzzyBot 必須為 {String}?
 				number_digits < 1 ? String(untranslated_message_count)
