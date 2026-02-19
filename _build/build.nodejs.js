@@ -1547,13 +1547,16 @@ function write_i18n_files(resources_path, message_id_order) {
 		// gettext_config:{"id":"untranslated-message-count"}
 		= en_message_to_message_id('untranslated message count');
 	/**
-	 *  Discard untranslated message counts in `i18n/(language code).js`, depend on {{ignored}} @ qqq.json<br />
-	 *  捨棄 `i18n/(語言代碼).js` 中的未翻譯訊息計數。
-	 * @type {Boolean}
+	 *  Discard messages in `i18n/(language code).js`, depend on {{ignored}} @ qqq.json<br />
+	 *  捨棄 `i18n/(語言代碼).js` 中訊息。
+	 * @type {Set|Undefined}
 	 */
-	const no_i18n_data_untranslated_message_count = i18n_message_id_to_message['qqq']
-		// 依 qqq 中的 {{ignored}} 來決定是否要列入 i18n/(語言代碼).js 中。
-		&& /{{\s*ignored[^{}]*}}/.test(i18n_message_id_to_message['qqq'][untranslated_message_count_id]);
+	const all_ignored_message_id_Set = i18n_message_id_to_message['qqq'] && new Set(
+		Object.entries(i18n_message_id_to_message['qqq'])
+			// 依 qqq 中的 {{ignored}} 來決定是否要列入 i18n/(語言代碼).json 中。
+			.filter(([message_id, qqq_message]) => /{{\s*[Ii]gnored[^{}]*}}/.test(qqq_message))
+			.map(([message_id]) => message_id)
+	);
 
 	for (const [language_code, locale_data] of Object.entries(i18n_message_id_to_message)) {
 		if (language_code !== 'qqq') {
@@ -1578,10 +1581,12 @@ function write_i18n_files(resources_path, message_id_order) {
 
 			// qqq was saved to `qqq_data_file_name` @ write_qqq_data()
 			write_message_script_file({ resources_path, language_code, locale_data, message_id_order });
+		}
 
-			if (no_i18n_data_untranslated_message_count) {
-				delete locale_data[untranslated_message_count_id];
-			}
+		// 不忽略的好處是 FuzzyBot 會更新 translatewiki 上的訊息。但這樣每次 FuzzyBot commit 至 github 都會更新 i18n/(語言代碼).json 中的訊息。
+		if (false) {
+			// 依 qqq 中的 {{ignored}} 來決定是否要列入 i18n/(語言代碼).json 中。
+			all_ignored_message_id_Set?.forEach(message_id => delete locale_data[message_id]);
 		}
 
 		write_i18n_data_file({ language_code, locale_data, message_id_order });

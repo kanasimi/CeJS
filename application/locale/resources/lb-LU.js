@@ -244,7 +244,7 @@
 	"\u932f\u8aa4\u539f\u56e0": "Grond vum Feeler",
 	"\u53d6\u6d88\u641c\u5c0b": "Sich ofbriechen",
 	"\u53d6\u6d88": "Ofbriechen",
-	"\u53d6\u6d88\u4e0b\u8f09": "Download ofbriechen",
+	"\u53d6\u6d88\u4e0b\u8f09": "Eroflueden ofbriechen",
 	"Options:": "Optiounen:"
 },
 "lb-LU");
