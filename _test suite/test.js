@@ -4920,6 +4920,7 @@ function test_wiki() {
 		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:987,654,321.654321|R}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #2');
 		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:{{formatnum:987654321.654321}}|R}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #3');
 		assert(['987654321.654321', CeL.wiki.expand_transclusion('{{formatnum:987654321.654321 |NOSEP}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #4');
+		assert(['10000000000000001', CeL.wiki.expand_transclusion('{{formatnum:10000000000000001|LOSSLESS}}').toString()], 'wiki.expand_transclusion: {{formatnum:}} #5');
 		assert(['2009 December 25', CeL.wiki.expand_transclusion('{{#dateformat:25 dec 2009|ymd}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #1');
 		assert(['25 December 2009', CeL.wiki.expand_transclusion('{{#formatdate:dec 25,2009|dmy}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #2');
 		assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25|mdy}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #3');

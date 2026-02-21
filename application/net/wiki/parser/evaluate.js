@@ -1427,7 +1427,12 @@ function module_code(library_namespace) {
 			var number = get_parameter_String(1);
 			var type = get_parameter_String(2);
 
-			var matched = number.match(/^([\s\S]+?)\.(.+)?$/);
+			if (type === 'LOSSLESS') {
+				return number;
+			}
+
+			var matched = number.match(/^([\s\S]+?)\.(.+)?$/)
+					|| number.match(/^([\d,]+?)(?:\.(\d*))?$/);
 			if (!matched) {
 				// e.g.,
 				// '{{formatnum:abs({{#invoke:String|str_find|source=Wikipedia:互助客栈/其他|:}})-1}}'
@@ -1435,8 +1440,9 @@ function module_code(library_namespace) {
 			}
 
 			// TODO: 此為有缺陷的極精簡版。
-			if (type === 'R' || type === 'NOSEP')
+			if (type === 'R' || type === 'NOSEP') {
 				return number.replace(/,/g, '');
+			}
 
 			var thousands_separator = THOUSANDS_SEPARATOR[wiki_API.language]
 					|| THOUSANDS_SEPARATOR.ISO;
