@@ -492,19 +492,22 @@ function module_code(library_namespace) {
 					replace_to = this_replace_options.replace_to;
 				}
 
-				if (this_replace_options.filter
-						&& !library_namespace.data.fit_filter(
-								this_replace_options.filter,
-								template_token.parameters[replace_from])) {
-					library_namespace.debug('Skip replace parameter ['
-							+ replace_from + ']', 3, 'replace_parameter');
-					continue;
-				}
-
 				if (typeof replace_from === 'string')
 					replace_from = replace_from.trim();
 				// 不新增原先沒有並且未設定值的 parameter。
 				if (convert_replace_to(replace_from) === undefined) {
+					continue;
+				}
+
+				if (this_replace_options.filter
+				//
+				&& !library_namespace.data.fit_filter(
+				// 使用 filter 可篩選特定值。
+				this_replace_options.filter,
+				//
+				template_token.parameters[replace_from])) {
+					library_namespace.debug('Skip replace parameter ['
+							+ replace_from + ']', 3, 'replace_parameter');
 					continue;
 				}
 
@@ -717,9 +720,11 @@ function module_code(library_namespace) {
 		options = library_namespace.setup_options(options);
 
 		if (options.filter
-				&& !library_namespace.data.fit_filter(options.filter,
-						template_token.parameters[replace_from])) {
-			library_namespace.debug('Skip replace parameter [' + replace_from
+		// 使用 filter 可篩選特定值。
+		&& !library_namespace.data.fit_filter(options.filter,
+		//
+		template_token.parameters[parameter_name])) {
+			library_namespace.debug('Skip replace parameter [' + parameter_name
 					+ ']', 3, 'replace_parameter');
 			return 0;
 		}

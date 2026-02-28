@@ -3284,11 +3284,25 @@ function module_code(library_namespace) {
 		// 請改用 <pages from="" to="" section=1> or <pages section=1>。
 
 		// [ all attributes, name, value, unquoted value, text without "=" ]
-		var PATTERN_tag_attribute = /\s*(\w+)(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})("[^"]*"|'[^']*'|([^\s"'{}\|]*))|\s*([^\s"'{}\|]*)/g;
+		var PATTERN_tag_attribute = /\s*(\w+)(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})("[^"]*"?|'[^']*'?|([^\s"'{}\|]*))|\s*([^\s"'{}\|]*)/g;
 
+		/**
+		 * 解析 HTML 標籤的屬性。
+		 * 
+		 * @param {String}attributes
+		 *            HTML 標籤的屬性字串。 e.g., `style="color:red"`, `style=color:red`
+		 * 
+		 * @returns {Object} 解析後的屬性物件。 e.g., { style : 'style=color:red' }
+		 *          Warning: `{| id="h style=color:red\n|T\n|}` will get<br />
+		 *          id:"h style=color:red", NOT id==="h"!
+		 */
 		function extract_tag_attributes(attributes) {
 			// assert: typeof attributes === 'string'
 			var attribute_hash = Object.create(null);
+
+			// 去掉註解 comments 與不起作用的元素。
+			attributes = attributes.replace(/<\!--[\s\S]*?-->/g, '').replace(
+					/<\/?nowiki(?:\s[^<>]*)?>/g, '');
 
 			/**
 			 * TODO: parse for templates <code>
@@ -3328,6 +3342,8 @@ function module_code(library_namespace) {
 			}) : options;
 
 			var attributes_list = [], matched;
+			// reset PATTERN index
+			PATTERN_tag_attribute.lastIndex = 0;
 			while ((matched = PATTERN_tag_attribute.exec(attributes))
 					&& matched[0]) {
 				// console.trace(matched);
@@ -3348,7 +3364,9 @@ function module_code(library_namespace) {
 				// name = parse_wikitext(name, _options, queue);
 				var value = matched[3]
 				// 去掉 "", ''
-				|| matched[2].slice(1, -1);
+				|| matched[2].slice(1,
+				// e.g., '<b style="color:red; id=i>T</b>'
+				matched[2].charAt(0) === matched[2].at(-1) ? -1 : undefined);
 				if (wiki_API.HTML_to_wikitext)
 					value = wiki_API.HTML_to_wikitext(value);
 				value = parse_wikitext(value, _options, queue);
@@ -3358,8 +3376,6 @@ function module_code(library_namespace) {
 				console
 						.assert(PATTERN_tag_attribute.lastIndex === attributes.length);
 			}
-			// reset PATTERN index
-			PATTERN_tag_attribute.lastIndex = 0;
 
 			return attribute_hash;
 		}

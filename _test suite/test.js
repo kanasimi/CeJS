@@ -321,6 +321,9 @@ function test_compatibility() {
 	]);
 
 	all_error_count += CeL.test('compatibility', [
+		// for extract_tag_attributes() @ CeL.application.net.wiki.parser.wikitext
+		[["ABC".slice(1, undefined), "ABC".slice(1)], 'String.slice(,undefined) === String.slice()'],
+
 		[[NaN, NaN], 'Object.is(NaN,NaN)'],
 
 		[[/./ig.flags, 'gi'], '/./ig.flags'],
@@ -5473,6 +5476,12 @@ function test_wiki() {
 		wikitext = "#l\n##''a''{{tl|t}}\n##c\n <!--\n--> <!--\n--> \n  <!--\n--> <!--\n--> \n##d\n"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: list #20');
 		assert(['\n##c\n <!--\n--> <!--\n--> \n  <!--\n--> <!--\n--> ', parsed[0][1][0][1].toString()], 'wiki.parse: list #21 list with comments in new line');
+		wikitext = '<b style="color:<nowiki>#</nowiki>f<!-- -->00">T</b>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #22');
+		assert(['color:#f00', parsed.attributes.style], 'wiki.parse: list #23: <nowiki> inside tag attributes');
+		wikitext = '<b style="color:red; id=i>T</b>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: list #24');
+		assert(['color:red; id=i', parsed.attributes.style], 'wiki.parse: list #25: bad tag attributes');
 
 		wikitext = 'a\n p\n  2\n {{t}}\n  [[a]]\nb'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: pre #1');
