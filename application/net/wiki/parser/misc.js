@@ -24,8 +24,6 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.wiki.parser.misc',
 
 	require : 'application.net.wiki.parser.wikitext.'
-	// wiki_API.remove_non_functional_wikitext()
-	+ '|application.net.wiki.parser.wikitext.'
 	// CeL.data.fit_filter()
 	+ '|data.'
 	// to_JS_value()
@@ -1852,7 +1850,7 @@ function module_code(library_namespace) {
 			// TODO: <syntaxhighlight lang="JavaScript" line start="55">
 			// https://www.mediawiki.org/wiki/Extension:SyntaxHighlight
 			// <source lang="cpp">
-			.replace(/<\/?(?:code|syntaxhighlight)>/g, '')
+			.replace(/<\/?(?:nowiki|code|syntaxhighlight)>/g, '')
 			// wikilink → page title
 			.replace(/^\[\[ *:?([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]$/,
 					'$1');

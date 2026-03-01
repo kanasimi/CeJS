@@ -108,10 +108,13 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// set_shell(token[1])
 			token = [ token[1] ];
 			convert_parameter(token, parameters, options);
 			return token[0];
-		}, true);
+		}, {
+			modify : true
+		});
 
 		// console.trace([ has_complex_parameter_name, parsed.toString() ]);
 		if (has_complex_parameter_name) {
@@ -163,7 +166,9 @@ function module_code(library_namespace) {
 		function(token) {
 			// console.trace(token);
 			return evaluate_parser_function_token.call(token, options);
-		}, true);
+		}, {
+			modify : true
+		});
 
 		// Error.stackTraceLimit = Infinity;
 		// console.trace([ parsed.toString(), parsed, promise ]);
@@ -197,13 +202,17 @@ function module_code(library_namespace) {
 				// Allow `<noinclude />`
 				return '';
 			}
-		}, true);
+		}, {
+			modify : true
+		});
 		parsed.each('tag', function(token) {
 			if (token.tag === 'noinclude')
 				return '';
 			if (token.tag === 'includeonly')
 				return token.join('');
-		}, true);
+		}, {
+			modify : true
+		});
 		wikitext = parsed.toString();
 		// console.trace(wikitext);
 
@@ -223,6 +232,15 @@ function module_code(library_namespace) {
 	}
 
 	/**
+	 * 模板嵌套模板的最大遞歸深度。
+	 * 
+	 * @type Number
+	 * 
+	 * @see https://www.mediawiki.org/wiki/Manual:$wgMaxTemplateDepth
+	 */
+	var DEFAULT_MAX_TEMPLATE_DEPTH = 4;
+
+	/**
 	 * 演算/簡化要 transclusion 的模板 wikitext。
 	 * 
 	 * @param {String}wikitext
@@ -231,15 +249,18 @@ function module_code(library_namespace) {
 	 *            正呼叫此模板的 template token。 The template token being called.
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項。
-	 * @param {Number}[level]
-	 *            迭代呼叫層數。
+	 * @param {Number}[template_depth]
+	 *            Highest expansion depth. 迭代呼叫層數。
 	 * 
 	 * @returns {Promise|Array} 簡化過且解析過的 wiki syntax。
 	 */
 	function simplify_transclusion(wikitext, template_token_called, options,
-			level) {
+			template_depth) {
+		options = library_namespace.setup_options(options);
+
 		// console.trace(template_token_called);
-		// console.trace(template_token_called[0].toString(), level);
+		// console.trace(template_token_called[0].toString(),
+		// options.template_depth);
 		var parameters = template_token_called.parameters;
 		var page_data, transclusion_config;
 		if (wiki_API.is_page_data(wikitext)) {
@@ -300,10 +321,8 @@ function module_code(library_namespace) {
 		wikitext = parsed.toString();
 		// console.trace([ wikitext, page_data ]);
 
-		if (!level)
-			level = 1;
-		else
-			level++;
+		if (!template_depth)
+			template_depth = 0;
 
 		// 避免不解析模板。
 		// e.g., "=={{USA}} USA=="
@@ -312,7 +331,7 @@ function module_code(library_namespace) {
 		parsed = wiki_API.parser(wikitext, options).parse();
 		if (parsed.length === 1 && typeof parsed[0] === 'string'
 				&& parsed[0].includes('{{')) {
-			library_namespace.warn('simplify_transclusion: Cannot parse '
+			library_namespace.warn('simplify_transclusion: ' + 'Cannot parse '
 					+ JSON.stringify(wikitext));
 			// console.trace(wikitext);
 			// console.trace(options);
@@ -351,16 +370,21 @@ function module_code(library_namespace) {
 			// token = evaluate_parsed(token, options);
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
 			var parsed = wiki_API.parse(wikitext, options);
-			if (level > 3 || !parsed || parsed.type !== 'transclusion') {
+			if (template_depth >= (options.max_template_depth
+			//
+			|| DEFAULT_MAX_TEMPLATE_DEPTH) || !parsed
+					|| parsed.type !== 'transclusion') {
 				// `page_data ?`: 為了維持cache與第一次執行的輸出相同。
 				// 例如在 `await CeL.wiki.expand_transclusion(
 				// '{{Namespace detect|main=Article text}}')`
 				return page_data ? token : parsed;
 			}
 			// expand template
-			parsed = expand_transclusion(parsed, options, level);
+			parsed = expand_transclusion(parsed, options, template_depth + 1);
 			return parsed;
-		}, true);
+		}, {
+			modify : true
+		});
 
 		function resolve_magic_word_function() {
 			var wikitext = parsed.toString();
@@ -371,7 +395,11 @@ function module_code(library_namespace) {
 			}
 			var promise = evaluate_parsed(parsed, options);
 			// console.trace([ promise ]);
-			return promise || parsed;
+			if (!promise)
+				promise = parsed;
+			if (Array.isArray(promise))
+				promise.template_depth_now = template_depth;
+			return promise;
 		}
 
 		if (promise)
@@ -382,7 +410,18 @@ function module_code(library_namespace) {
 
 	// 循環展開模板節點。
 	// 可考慮是否採用 CeL.wiki.wikitext_to_plain_text()
-	function repeatedly_expand_template_token(token, options) {
+	function repeatedly_expand_template_token(token, options, template_depth) {
+		options = library_namespace.setup_options(options);
+
+		if (!template_depth)
+			template_depth = 0;
+
+		if (template_depth >= (options.max_template_depth
+		//
+		|| DEFAULT_MAX_TEMPLATE_DEPTH)) {
+			return token;
+		}
+
 		while (token && token.type === 'transclusion') {
 			if (typeof token.expand !== 'function') {
 				if (wiki_API.template_functions) {
@@ -406,15 +445,20 @@ function module_code(library_namespace) {
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
 			var promise = token.expand(options);
+			template_depth++;
 			if (library_namespace.is_thenable(promise)) {
 				// e.g., general_expand_template()
 				if (options && options.allow_promise) {
 					return promise.then(function(token) {
 						// console.log([ token, options ]);
 						// console.trace(token.toString());
-						return repeatedly_expand_template_token(
-						//
-						token, options);
+						token = repeatedly_expand_template_token(token,
+								options, template_depth);
+						if (false) {
+							template_depth = token.template_depth_now
+									|| template_depth;
+						}
+						return token;
 					});
 				}
 				library_namespace
@@ -446,6 +490,8 @@ function module_code(library_namespace) {
 			token = wiki_API.parse(promise.toString(), options);
 		}
 
+		if (Array.isArray(token))
+			token.template_depth_now = template_depth;
 		return token;
 	}
 
@@ -454,13 +500,13 @@ function module_code(library_namespace) {
 	// [[Special:ExpandTemplates]]
 	// 使用上注意: 應設定 options[KEY_on_page_title_option]
 	// 可考慮是否採用 CeL.wiki.wikitext_to_plain_text()
-	function expand_transclusion(wikitext, options, level) {
+	function expand_transclusion(wikitext, options, template_depth) {
 		if (!wikitext)
 			return wikitext;
 
 		if (library_namespace.is_thenable(wikitext)) {
 			return wikitext.then(function(wikitext) {
-				return expand_transclusion(wikitext, options, level);
+				return expand_transclusion(wikitext, options, template_depth);
 			});
 		}
 
@@ -499,6 +545,9 @@ function module_code(library_namespace) {
 					options.template_token_called.parameters, options);
 		}
 
+		if (!template_depth)
+			template_depth = 0;
+
 		var session = wiki_API.session_of_options(options);
 		// console.trace(parsed);
 		// Error.stackTraceLimit = Infinity;
@@ -514,7 +563,8 @@ function module_code(library_namespace) {
 
 			// Error.stackTraceLimit = Infinity;
 			// console.trace(token);
-			token = repeatedly_expand_template_token(token, options);
+			token = repeatedly_expand_template_token(token, options,
+					template_depth + 1);
 			// console.trace(token);
 			// Error.stackTraceLimit = 10;
 			if (!token || token.type !== 'transclusion')
@@ -527,7 +577,9 @@ function module_code(library_namespace) {
 
 			// console.trace(token);
 			return fetch_and_resolve_template(token);
-		}, true);
+		}, {
+			modify : true
+		});
 
 		function expand_template_name(token) {
 			// console.trace(token[0]);
@@ -535,7 +587,7 @@ function module_code(library_namespace) {
 			var promise = expand_transclusion(typeof token[0] === 'string'
 			// for "/header", token.page_title !== token[0].toString()
 			&& token.name.startsWith('/') ? token.page_title : token[0],
-					options, level);
+					options, template_depth + 1);
 			if (!library_namespace.is_thenable(promise)) {
 				if (false) {
 					Error.stackTraceLimit = Infinity;
@@ -547,7 +599,8 @@ function module_code(library_namespace) {
 					token[0] = promise;
 					// console.trace('re-parse ' + token[0]);
 					token = wiki_API.parse(token.toString(), options);
-					token = repeatedly_expand_template_token(token, options);
+					token = repeatedly_expand_template_token(token, options,
+							template_depth + 1);
 					if (token.type === 'plain' && token.length === 1)
 						token = token[0];
 					// console.trace(token);
@@ -588,7 +641,11 @@ function module_code(library_namespace) {
 			}
 			var page_title = token.page_title.toString();
 			// @see PATTERN_page_name @ CeL.application.net.wiki.namespace
-			if (is_invalid_page_title(page_title)) {
+			if (is_invalid_page_title(page_title)
+			//
+			|| template_depth >= (options.max_template_depth
+			//
+			|| DEFAULT_MAX_TEMPLATE_DEPTH)) {
 				library_namespace.warn('expand_transclusion: Cannot expand '
 						+ token);
 				// Error.stackTraceLimit = Infinity;
@@ -608,9 +665,27 @@ function module_code(library_namespace) {
 						resolve();
 						return;
 					}
-					resolve(simplify_transclusion(page_data, token, options,
-							level));
+
+					page_data = simplify_transclusion(page_data, token,
+							options, template_depth + 1);
+					if (page_data.template_depth_now
+					//
+					>= (options.max_template_depth
+					//
+					|| DEFAULT_MAX_TEMPLATE_DEPTH)) {
+						page_data.skip_inner_traversal = true;
+					}
+					resolve(page_data);
 				}
+
+				/**
+				 * 單單只要 expand template 的話，可以不必取得頁面內容，而是採用
+				 * action=expandtemplates 或 action=compare 。
+				 * 
+				 * action=compare 可參考 function subst_template() @ wikibot/replace/replace_tool.js
+				 * 
+				 * @see https://www.mediawiki.org/wiki/API:Expandtemplates
+				 */
 
 				// var session = wiki_API.session_of_options(options);
 				var page_options = Object.assign({
@@ -687,6 +762,8 @@ function module_code(library_namespace) {
 			if (parsed.has_shell)
 				parsed = parsed[0];
 			parsed = evaluate_parsed(parsed, options);
+			if (Array.isArray(parsed))
+				parsed.template_depth_now = template_depth;
 			// console.trace(parsed.toString());
 			return parsed;
 		}
@@ -1191,7 +1268,9 @@ function module_code(library_namespace) {
 							}
 							return token;
 						}
-					}, true);
+					}, {
+						modify : true
+					});
 
 					if (as_key) {
 						var extensiontag_hash = session

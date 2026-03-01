@@ -29,9 +29,7 @@ typeof CeL === 'function' && CeL.run({
 	// for BLANK_TOKEN
 	+ '|application.net.wiki.task.'
 	//
-	+ '|application.net.wiki.page.'
-	// wiki_API.remove_non_functional_wikitext()
-	+ '|application.net.wiki.parser.wikitext.',
+	+ '|application.net.wiki.page.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',

@@ -37,8 +37,6 @@ typeof CeL === 'function' && CeL.run({
 	// for wiki_API.estimated_message()
 	// + '|application.net.wiki.task.'
 
-	// wiki_API.remove_non_functional_wikitext()
-	+ '|application.net.wiki.parser.wikitext.'
 	//
 	+ '|application.net.wiki.query.|application.net.wiki.Flow.',
 
@@ -352,11 +350,12 @@ function module_code(library_namespace) {
 					callback(page_data);
 				}
 
-			}, {
+			}, wiki_API.add_session_to_options(wiki_API
+					.session_of_options(options), {
 				rvdir : 'newer',
 				rvprop : 'timestamp',
 				rvlimit : 1
-			});
+			}));
 			return;
 		}
 

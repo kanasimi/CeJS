@@ -790,20 +790,22 @@ function module_code(library_namespace) {
 			function traversal_children(token, result) {
 				// assert: !promise || (promise is resolved)
 
-				// depth-first search (DFS) 向下層巡覽，再進一步處理。
-				// 這樣最符合token在文本中的出現順序。
-				// Skip inner tokens, skip children.
 				if (result !== for_each_subelement.skip_inner
 				// is_atom: 不包含可 parse 之要素，不包含 text。
 				&& Array.isArray(token) && !token.is_atom
+				// Skip inner tokens, skip children.
+				&& !token.skip_inner_traversal
 				// 最起碼必須執行一次 `traversal_next_sibling()`。
 				&& token.length > 0 && !exit
 				// comment 可以放在任何地方，因此能滲透至任一層。
 				// 但這可能性已經在 wiki_API.parse() 中偵測並去除。
 				// && type !== 'comment'
 				&& (!max_depth || depth + 1 < max_depth)) {
+					// depth-first search (DFS) 向下層巡覽，再進一步處理。
+					// 這樣最符合token在文本中的出現順序。
 					traversal_tokens(token, depth + 1, _traversal_next_sibling);
 				} else if (promise) {
+					// Skip inner tokens, skip children.
 					_traversal_next_sibling();
 				}
 
@@ -1040,6 +1042,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// @seealso is_meaningful_token(), remove_non_functional_wikitext()
 	function next_meaningful_element(parent_element, start_index, options) {
 		var options;
 		if (library_namespace.is_Object(start_index)) {

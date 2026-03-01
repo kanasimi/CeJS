@@ -33,9 +33,7 @@ typeof CeL === 'function' && CeL.run({
 	// CeL.DOM.HTML_to_Unicode(), CeL.DOM.Unicode_to_HTML()
 	+ '|interact.DOM.'
 	// setup module namespace
-	+ '|application.net.wiki.'
-	// wiki_API.remove_non_functional_wikitext()
-	+ '|application.net.wiki.parser.wikitext.',
+	+ '|application.net.wiki.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -1714,6 +1712,29 @@ function module_code(library_namespace) {
 	}
 
 	// ------------------------------------------------------------------------
+
+	/**
+	 * 去除註解、<nowiki>等不起作用的元素。 Remove comments, <nowiki>, and other
+	 * non-functional elements.
+	 * 
+	 * TODO: 將本函數放在 CeL.application.net.wiki.parser.wikitext，會造成
+	 * wikitext_parser.html 無法載入所有函式庫的 bug。
+	 * 
+	 * @param {String}wikitext
+	 *            wikitext to remove non-functional elements from
+	 * 
+	 * @returns {String} wikitext with non-functional elements removed
+	 * 
+	 * @seealso is_meaningful_token()
+	 */
+	function remove_non_functional_wikitext(wikitext) {
+		return wikitext
+		// 去除註解。 Remove comments. "<!-- comment -->"
+		.replace(/<\!--[\s\S]*?-->/g, '')
+		// 去掉不起作用的元素。
+		// .replace(/<nowiki\s*>[\s\S]*<\/nowiki>/g, '')
+		.replace(/<\/?nowiki(?:\s[^<>]*)?>/g, '');
+	}
 
 	// wikitext to plain text
 	// CeL.wiki.plain_text(wikitext)
@@ -4335,6 +4356,7 @@ function module_code(library_namespace) {
 		: generate_page_pattern_of_namespace,
 		file_pattern : file_pattern,
 
+		remove_non_functional_wikitext : remove_non_functional_wikitext,
 		// Please use CeL.wiki.wikitext_to_plain_text() instead!
 		plain_text : simple_wikitext_to_plain_text,
 

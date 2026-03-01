@@ -34,8 +34,6 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.net.wiki.namespace.'
 	// for to_exit
 	+ '|application.net.wiki.parser.'
-	// wiki_API.remove_non_functional_wikitext()
-	+ '|application.net.wiki.parser.wikitext.'
 	//
 	+ '|application.net.wiki.page.|application.net.wiki.list.',
 
