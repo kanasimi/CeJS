@@ -1303,7 +1303,7 @@ if (typeof CeL === 'function') {
 						var matched = config
 								.match(/^[\s\n]*<\!--(.+?)-->[\s\n]*$/);
 						config = matched ? matched[1]
-						//
+						// 去除註解。 Remove comments. "<!-- comment -->"
 						: config.replace(/<\!--[\s\S]*?-->/g, '');
 					}
 					if (config) {

@@ -36,6 +36,9 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.net.wiki.namespace.'
 	// for wiki_API.estimated_message()
 	// + '|application.net.wiki.task.'
+
+	// wiki_API.remove_non_functional_wikitext()
+	+ '|application.net.wiki.parser.wikitext.'
 	//
 	+ '|application.net.wiki.query.|application.net.wiki.Flow.',
 
@@ -1855,9 +1858,9 @@ function module_code(library_namespace) {
 			data = data.parse;
 			try {
 				// 罕見情況下，有可能 data === undefined
-				data = data.text['*']
+
 				// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
-				.replace(/<\!--[\s\S]*?-->/g, '')
+				data = wiki_API.remove_non_functional_wikitext(data.text['*'])
 				// 去掉前後包覆。 e.g., <p> or <pre>
 				.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
 

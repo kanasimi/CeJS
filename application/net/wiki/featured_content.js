@@ -34,6 +34,8 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.net.wiki.namespace.'
 	// for to_exit
 	+ '|application.net.wiki.parser.'
+	// wiki_API.remove_non_functional_wikitext()
+	+ '|application.net.wiki.parser.wikitext.'
 	//
 	+ '|application.net.wiki.page.|application.net.wiki.list.',
 
@@ -228,8 +230,8 @@ function module_code(library_namespace) {
 
 			if (matched[3]) {
 				// 分類/類別。
-				catalog = matched[3].replace(/<\!--[\s\S]*?-->/g, '').trim()
-						.replace(/\s*（\d+）$/, '');
+				catalog = wiki_API.remove_non_functional_wikitext(matched[3])
+						.trim().replace(/\s*（\d+）$/, '');
 				continue;
 			}
 
@@ -373,7 +375,10 @@ function module_code(library_namespace) {
 		// console.trace([ FC_configurations, type_name, list_source ]);
 		if (!list_source) {
 			// library_namespace.error('get_FC_via_category: ' + error);
-			callback && callback(null, !options.ignore_missed && new Error('Unknown type: ' + options.type));
+			if (callback) {
+				callback(null, !options.ignore_missed
+						&& new Error('Unknown type: ' + options.type));
+			}
 			return;
 		}
 

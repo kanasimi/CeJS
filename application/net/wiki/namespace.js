@@ -33,7 +33,9 @@ typeof CeL === 'function' && CeL.run({
 	// CeL.DOM.HTML_to_Unicode(), CeL.DOM.Unicode_to_HTML()
 	+ '|interact.DOM.'
 	// setup module namespace
-	+ '|application.net.wiki.',
+	+ '|application.net.wiki.'
+	// wiki_API.remove_non_functional_wikitext()
+	+ '|application.net.wiki.parser.wikitext.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -1817,8 +1819,7 @@ function module_code(library_namespace) {
 	function prefix_page_name(page_name) {
 		page_name = String(page_name);
 
-		// 去除註解。 Remove comments. "<!-- comment -->"
-		page_name = page_name.replace(/<\!--[\s\S]*?-->/g, '');
+		page_name = wiki_API.remove_non_functional_wikitext(page_name);
 
 		// [[mw:Help:Magic words#Escaped characters]]
 		page_name = page_name

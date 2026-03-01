@@ -29,7 +29,9 @@ typeof CeL === 'function' && CeL.run({
 	// for BLANK_TOKEN
 	+ '|application.net.wiki.task.'
 	//
-	+ '|application.net.wiki.page.',
+	+ '|application.net.wiki.page.'
+	// wiki_API.remove_non_functional_wikitext()
+	+ '|application.net.wiki.parser.wikitext.',
 
 	// 設定不匯出的子函式。
 	no_extend : 'this,*',
@@ -918,8 +920,7 @@ function module_code(library_namespace) {
 
 		if (typeof content === 'string') {
 			// 去掉絕對不會影響 deny code 的內容。
-			content = content.replace(/<\!--[\s\S]*?-->/g, '').replace(
-					/<nowiki\s*>[\s\S]*<\/nowiki>/g, '');
+			content = wiki_API.remove_non_functional_wikitext(content);
 		}
 		if (!content)
 			return;
@@ -1877,9 +1878,7 @@ function module_code(library_namespace) {
 		return Variable_Map__page_text_updater.bind(this);
 	}
 
-	Variable_Map.plain_text = function plain_text(wikitext) {
-		return wiki_link.replace(/<\!--[\s\S]*?-->/g, '');
-	};
+	Variable_Map.plain_text = wiki_API.remove_non_functional_wikitext;
 
 	wiki_API.Variable_Map = Variable_Map;
 

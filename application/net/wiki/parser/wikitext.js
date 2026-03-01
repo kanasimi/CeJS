@@ -1135,6 +1135,24 @@ function module_code(library_namespace) {
 		return token;
 	}
 
+	/**
+	 * 去除註解、<nowiki>等不起作用的元素。 Remove comments, <nowiki>, and other
+	 * non-functional elements.
+	 * 
+	 * @param {String}wikitext
+	 *            wikitext to remove non-functional elements from
+	 * 
+	 * @returns {String} wikitext with non-functional elements removed
+	 */
+	function remove_non_functional_wikitext(wikitext) {
+		return wikitext
+		// 去除註解。 Remove comments. "<!-- comment -->"
+		.replace(/<\!--[\s\S]*?-->/g, '')
+		// 去掉不起作用的元素。
+		// .replace(/<nowiki\s*>[\s\S]*<\/nowiki>/g, '')
+		.replace(/<\/?nowiki(?:\s[^<>]*)?>/g, '');
+	}
+
 	var KEY_apostrophe_element_start_quote = 0, KEY_apostrophe_element_content = 1, KEY_apostrophe_element_end_quote = 2,
 	//
 	default_include_mark = '\x00', default_end_mark = '\x01',
@@ -3300,9 +3318,7 @@ function module_code(library_namespace) {
 			// assert: typeof attributes === 'string'
 			var attribute_hash = Object.create(null);
 
-			// 去掉註解 comments 與不起作用的元素。
-			attributes = attributes.replace(/<\!--[\s\S]*?-->/g, '').replace(
-					/<\/?nowiki(?:\s[^<>]*)?>/g, '');
+			attributes = wiki_API.remove_non_functional_wikitext(attributes);
 
 			/**
 			 * TODO: parse for templates <code>
@@ -5519,6 +5535,7 @@ function module_code(library_namespace) {
 		is_parsed_element : is_parsed_element,
 		is_meaningful_token : is_meaningful_token,
 		trim_token : trim_token,
+		remove_non_functional_wikitext : remove_non_functional_wikitext,
 
 		inplace_reparse_element : inplace_reparse_element,
 		parse : parse_wikitext
