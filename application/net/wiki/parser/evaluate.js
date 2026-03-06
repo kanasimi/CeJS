@@ -1658,9 +1658,11 @@ function module_code(library_namespace) {
 			break;
 
 		case '#ifeq':
-			token = token.parameters[get_parameter_String(1) === get_parameter_String(2)
-					|| +get_parameter_String(1) === +get_parameter_String(2) ? 3
-					: 4]
+			var argument_1 = get_parameter_String(1);
+			var argument_2 = get_parameter_String(2);
+			token = token.parameters[argument_1 === argument_2
+					|| (!/^\d+$/.test(argument_1) || argument_1 < Number.MAX_SAFE_INTEGER)
+					&& +argument_1 === +argument_2 ? 3 : 4]
 					|| '';
 			token = wiki_API.trim_token(token);
 			// console.trace(token);
@@ -1763,7 +1765,7 @@ function module_code(library_namespace) {
 			expression = eval_expr(expression);
 			if (expression instanceof wiki_API.wiki_error)
 				return expression.toString();
-			token = token.parameters[expression ? 2 : 3] || '';
+			token = get_parameter_String(expression ? 2 : 3) || '';
 			token = wiki_API.trim_token(token);
 			// console.trace(token);
 			break;
@@ -1772,9 +1774,9 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
 			var message = get_parameter_String(1);
 			message = eval_expr(message);
-			token = wiki_API.wiki_error.has_error(message, options) ? token.parameters[2]
+			token = wiki_API.wiki_error.has_error(message, options) ? get_parameter_String(2)
 					|| ''
-					: token.parameters[3] || message.toString() || '';
+					: get_parameter_String(3) || message.toString() || '';
 			token = wiki_API.trim_token(token);
 			// console.trace(token);
 			break;

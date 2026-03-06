@@ -2121,6 +2121,13 @@ function module_code(library_namespace) {
 					category_matched = page_name
 					// test [[Category:name|order]]
 					.match(PATTERN_category_prefix);
+					if (!category_matched && page_name.endsWith(':')
+					//
+					&& (PATTERN_file_prefix.test(page_name + 'T')
+					//
+					|| PATTERN_category_prefix.test(page_name + 'T'))) {
+						return previous + all_link;
+					}
 					// console.log([ page_name, category_matched ]);
 				}
 				if (page_name.includes(include_mark)) {

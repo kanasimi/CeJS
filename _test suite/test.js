@@ -3781,13 +3781,19 @@ function test_wiki() {
 		assert(['{{c|d[[e]]f}}', parsed.toString()], 'only links of level 1');
 		assert(['file', CeL.wiki.parse('[[FiLe:a]]').type]);
 		assert(['Ab', CeL.wiki.parse('[[FiLe:ab]]').name]);
-		// TODO: 當前解析為 'link', 應為 'text'
-		// assert([ 'text', CeL.wiki.parse('[[File:]]').type ]);
+		wikitext = '[[File:]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, CeL.wiki.parse(wikitext)]);
+		wikitext = '[[檔案:]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, CeL.wiki.parse(wikitext)]);
 		assert(['link', CeL.wiki.parse('[[File]]').type]);
 		assert(['category', CeL.wiki.parse('[[Category:a]]').type]);
 		assert(['Ab', CeL.wiki.parse('[[Category:ab]]').name]);
-		// TODO: 當前解析為 'link', 應為 'text'
-		// assert([ 'text', CeL.wiki.parse('[[Category:]]').type ]);
+		wikitext = '[[Category:]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, CeL.wiki.parse(wikitext)]);
+		wikitext = '[[ category:#a]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, CeL.wiki.parse(wikitext)]);
+		wikitext = '[[分類:]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, CeL.wiki.parse(wikitext)]);
 		assert(['link', CeL.wiki.parse('[[Category]]').type]);
 		// CeL.wiki.parser('[[Category:a]]').each('category', function(token) {console.log(token);});0;
 		wikitext = '{{ {{tl|t}} | p }}'; parsed = CeL.wiki.parse(wikitext);
@@ -3798,9 +3804,6 @@ function test_wiki() {
 		assert(['transclusion', parsed.type], 'template in template name #2-1');
 		assert(['transclusion', parsed[0][1].type], 'template in template name #2-2');
 
-		wikitext = '{{#ifexpr: {{{1}}} > 0 and {{{1}}} < 1.0 or {{#ifeq:{{{decimal}}}| yes}} |is decimal |not decimal}}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()]);
-		assert(['magic_word_function', parsed.type]);
 		// [[mw:Help:Substitution]]
 		wikitext = '{{subst:msgnw:foo}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
@@ -4934,7 +4937,7 @@ function test_wiki() {
 		// TODO
 		// assert(['25 December 2009', CeL.wiki.expand_transclusion('{{#dateformat:25 dec 2009}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #7');
 		// assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#formatdate:dec 25,2009}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #8');
-		// assert(['December 25, 2009', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #9');
+		// assert(['2009-12-25', CeL.wiki.expand_transclusion('{{#dateformat:2009-12-25}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #9');
 		// assert(['2009 December 25', CeL.wiki.expand_transclusion('{{#formatdate:2009 dec 25}}').toString()], 'wiki.expand_transclusion: {{#formatdate:}} #10');
 
 		assert(['2024-06-01', CeL.wiki.expand_transclusion('{{#time:Y-m-d|2024-6-1}}').toString()], 'wiki.expand_transclusion: {{#time:}} #1');
@@ -4975,8 +4978,7 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:3|03|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #2');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:0.00003456|3.456E-05|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #3');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:1e23|.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #4');
-		// TODO
-		//assert(['0', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456789|9034567890123456788|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #5');
+		assert(['0', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456789|9034567890123456788|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #5');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456700.0|9034567890123456800|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #6');
 
 		// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
@@ -4990,6 +4992,12 @@ function test_wiki() {
 		assert(['correct', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: . }} | error | correct }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #8');
 
 		assert(['no', CeL.wiki.expand_transclusion('{{#ifexpr: | yes | no}}').toString()], 'wiki.expand_transclusion: {{#ifexpr:}} #1');
+		// https://www.mediawiki.org/wiki/Manual:Expr_parser_function_syntax#Comparisons
+		assert(['1', CeL.wiki.expand_transclusion('{{#ifexpr:1e23=.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifexpr:}} #2');
+		wikitext = '{{#ifexpr: {{{1}}} > 0 and {{{1}}} < 1.0 or {{#ifeq:{{{decimal}}}| yes}} |is decimal |not decimal}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['magic_word_function', parsed.type]);
+
 
 		if (typeof Intl !== 'object' || !Intl.DisplayNames) {
 			CeL.warn('No valid Intl. Skip tests of wiki.expand_transclusion: {{#language:}}');
@@ -5011,10 +5019,6 @@ function test_wiki() {
 		assert(['is', CeL.wiki.expand_transclusion('{{PLURAL:1|is|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #1');
 		assert(['are', CeL.wiki.expand_transclusion('{{PLURAL:2|is|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #2');
 		assert(['1', CeL.wiki.expand_transclusion('{{PLURAL:{{#expr:1+1-1}}|{{#expr:2+2-3}}|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #3');
-
-		// TODO
-		// https://meta.wikimedia.org/wiki/Help:Calculation#Comparisons
-		//assert(['0', CeL.wiki.expand_transclusion('{{#ifexpr:1e23=.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifexpr:}} #1');
 
 		// [[mw:Help:Extension:ParserFunctions##expr]], [[mw:Help:Help:Calculation]]
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr: 1 and -1 }}').toString()], 'wiki.expand_transclusion: {{#expr:}} #1');
