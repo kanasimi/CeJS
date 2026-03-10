@@ -564,7 +564,7 @@ function module_code(library_namespace) {
 						}, 2, 'String_to_RegExp');
 					}
 
-					if (replace_to) {
+					if (/* replace_to || */typeof replace_to === 'string') {
 						pattern.replace_to = replace_to;
 						if (false) {
 							pattern.replace = function replace(string) {

@@ -5080,7 +5080,7 @@ function test_wiki() {
 		assert(are_very_close(1.4142135623731, CeL.wiki.expand_transclusion('{{#expr:sqrt 2}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #46');
 		assert(are_very_close(3162277660.1684, CeL.wiki.expand_transclusion('{{#expr:sqrt 1e19}}').toString()), 'wiki.expand_transclusion: {{#expr:}} #47');
 		// TODO
-		//assert(['In sqrt: Result is not a number.', CeL.wiki.expand_transclusion('{{#expr:sqrt-1}}	').toString()], 'wiki.expand_transclusion: {{#expr:}} #48');
+		//assert(['In sqrt: Result is not a number.', CeL.wiki.expand_transclusion('{{#expr:sqrt-1}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #48');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:trunc1.2}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #49');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:trunc1.8}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #50');
 		assert(['-1', CeL.wiki.expand_transclusion('{{#expr:trunc-1.2}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #51');
