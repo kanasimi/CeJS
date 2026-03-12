@@ -227,13 +227,14 @@ function module_code(library_namespace) {
 
 	function generate_expand_template_function(transclusion_config) {
 		// 利用語境 context。
-		return function general_expand_template(options) {
+		return function general_expand_template(options, template_depth_now) {
 			// console.trace(transclusion_config);
 			transclusion_config.usage_times++;
 			var wikitext = transclusion_config.simplified_template_wikitext;
 			// console.trace(transclusion_config);
 			return transclusion_config.need_evaluate ? simplify_transclusion(
-					wikitext, this, options) : wikitext;
+			// template_depth_now + 1: 在執行本函數時，實際上已多 expand 一次。
+			wikitext, this, options, template_depth_now + 1) : wikitext;
 		};
 	}
 
@@ -266,7 +267,7 @@ function module_code(library_namespace) {
 
 		// console.trace(template_token_called);
 		// console.trace(template_token_called[0].toString(),
-		// options.template_depth);
+		// options.max_template_depth);
 		var parameters = template_token_called.parameters;
 		var page_data, transclusion_config;
 		if (wiki_API.is_page_data(wikitext)) {
@@ -378,8 +379,9 @@ function module_code(library_namespace) {
 			var _parsed = wiki_API.parse(wikitext, options);
 			if (template_depth_now >= (options.max_template_depth
 			//
-			|| DEFAULT_MAX_TEMPLATE_DEPTH) || !_parsed
-					|| _parsed.type !== 'transclusion') {
+			|| DEFAULT_MAX_TEMPLATE_DEPTH)
+			//
+			|| !_parsed || _parsed.type !== 'transclusion') {
 				// `page_data ?`: 為了維持cache與第一次執行的輸出相同。
 				// 例如在 `await CeL.wiki.expand_transclusion(
 				// '{{Namespace detect|main=Article text}}')`
@@ -424,8 +426,8 @@ function module_code(library_namespace) {
 			template_depth_now) {
 		options = library_namespace.setup_options(options);
 
-		if (!template_depth_now)
-			template_depth_now = 0;
+		template_depth_now = Math.max(template_depth_now || 0,
+				get_template_depth_now_of_token(token) || 0);
 
 		while (token && token.type === 'transclusion') {
 			if (typeof token.expand !== 'function') {
@@ -453,7 +455,7 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
-			var promise = token.expand(options);
+			var promise = token.expand(options, template_depth_now);
 			template_depth_now++;
 			if (library_namespace.is_thenable(promise)) {
 				// e.g., general_expand_template()
@@ -463,6 +465,7 @@ function module_code(library_namespace) {
 						// console.trace(token.toString());
 						token = repeatedly_expand_template_token(token,
 								options, template_depth_now);
+						// 不必再設定 template_depth_now，因為 template_depth_now 已不再使用。
 						if (false) {
 							template_depth_now = token.template_depth_now
 									|| template_depth_now;
@@ -502,6 +505,16 @@ function module_code(library_namespace) {
 		if (Array.isArray(token))
 			token.template_depth_now = template_depth_now;
 		return token;
+	}
+
+	// @inner
+	function get_template_depth_now_of_token(token) {
+		while (token) {
+			var template_depth_now = token.template_depth_now;
+			if (template_depth_now >= 0)
+				return template_depth_now;
+			token = token.parent;
+		}
 	}
 
 	// 類似 wiki_API_expandtemplates() try_to_expand_templates
@@ -588,6 +601,7 @@ function module_code(library_namespace) {
 			// console.trace(token);
 			return fetch_and_resolve_template(token);
 		}, {
+			add_index : true,
 			modify : true
 		});
 
@@ -660,11 +674,12 @@ function module_code(library_namespace) {
 				return token;
 			}
 
-			if (template_depth_now >= (options.max_template_depth || DEFAULT_MAX_TEMPLATE_DEPTH)) {
-				library_namespace
-						.warn('expand_transclusion: 已達最大層數 '
-								+ (options.max_template_depth || DEFAULT_MAX_TEMPLATE_DEPTH)
-								+ '，不再展開: ' + token);
+			var max_template_depth = options.max_template_depth
+					|| DEFAULT_MAX_TEMPLATE_DEPTH;
+			if (template_depth_now >= max_template_depth
+					|| get_template_depth_now_of_token(token) >= max_template_depth) {
+				library_namespace.debug('已達最大層數 ' + max_template_depth
+						+ '，不再展開: ' + token, 2, 'expand_transclusion');
 				return token;
 			}
 
@@ -779,6 +794,7 @@ function module_code(library_namespace) {
 				parsed = parsed[0];
 			parsed = evaluate_parsed(parsed, options, template_depth_now);
 			if (Array.isArray(parsed)) {
+				// 已在 evaluate_parsed() 中設定好 .template_depth_now 。
 				// parsed.template_depth_now = template_depth_now;
 			}
 			// console.trace(parsed.toString());
@@ -1804,14 +1820,17 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------------------
 
 		case '#switch':
-			var key = get_parameter_String(1, true, true), default_value = '';
+			// https://en.wikipedia.org/wiki/Help:Switch_parser_function
+			var key = get_parameter_String(1, true, true);
 			if (library_namespace.is_thenable(key)) {
 				return NYI();
 			}
+			var default_value = '', default_value_candidate;
 			for (var index = 2, found; index < token.length; index++) {
 				// var parameter = get_parameter_String(index);
 				var parameter = token[index];
 				if ('value' in parameter) {
+					default_value_candidate = null;
 					// assert: 'key=value'
 					if (typeof parameter.key !== 'number') {
 						parameter.key = value_to_String(parameter.key, true,
@@ -1828,7 +1847,7 @@ function module_code(library_namespace) {
 						default_value = parameter.value;
 				} else {
 					// assert: 'value'
-					default_value = index;
+					default_value_candidate = index;
 					parameter = get_parameter_String(index, true);
 					if (library_namespace.is_thenable(parameter)) {
 						return NYI();
@@ -1839,9 +1858,12 @@ function module_code(library_namespace) {
 				}
 			}
 
-			return wiki_API.trim_token(typeof default_value === 'number'
+			return wiki_API.trim_token(
 			//
-			? get_parameter_String(default_value, true) : default_value);
+			typeof default_value_candidate === 'number'
+			//
+			? get_parameter_String(default_value_candidate, true)
+					: default_value);
 
 			// ----------------------------------------------------------------
 
@@ -2142,6 +2164,7 @@ function module_code(library_namespace) {
 			if (!session) {
 				return NYI();
 			}
+			// @see expand_transclusion()
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
 			var parsed = wiki_API.parse(wikitext, options);
 			// TODO: SAFESUBST:在模板包含對其他模板或解析器函數的呼叫時，允許遞歸替換。
@@ -2175,7 +2198,7 @@ function module_code(library_namespace) {
 
 			// console.trace(token);
 			if (typeof token.expand === 'function') {
-				var promise = token.expand(options);
+				var promise = token.expand(options, template_depth_now);
 				if (promise === undefined || promise === token) {
 					return NYI();
 				}
