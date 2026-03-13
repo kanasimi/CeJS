@@ -4972,6 +4972,8 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#switch: {{#expr:x}} | {{#expr: x }} = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #27');
 		assert(['1', CeL.wiki.expand_transclusion('{{#switch: <strong class="error">Expression error: Unrecognized word "x".</strong> | {{#expr:  x }} = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #28');
 		assert(['1', CeL.wiki.expand_transclusion('{{#switch: {{#expr: x  }} | <strong class{{=}}"error">Expression error: Unrecognized word "x".</strong> = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #29');
+		assert(['other', CeL.wiki.expand_transclusion('{{#switch: 6 |#default = other |1=one |2=two |3|4|5=range 3–5}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #30');
+		assert(['4', CeL.wiki.expand_transclusion('{{#switch: 6 |#default = other |1=one |2=two |3|4}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #31');
 
 		// https://meta.wikimedia.org/wiki/Help:Calculation#Comparisons
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:3|3.0|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #1');
@@ -5861,7 +5863,7 @@ function test_wiki() {
 		var zhwiki = new CeL.wiki(null, null, 'zh');
 
 		zhwiki.run(function () {
-			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software', 'Template:WikiProject CIS', '赵孟俯'], function test_register_redirects() {
+			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software', 'Template:WikiProject CIS', '赵孟俯', 'Template:港铁路线标志'], function test_register_redirects() {
 				var test_name = 'wiki: register_redirects';
 				_setup_test(test_name);
 
@@ -5875,7 +5877,10 @@ function test_wiki() {
 
 				assert(zhwiki.is_template('獨立國協專題', '獨聯體專題'), 'zhwiki.is_template() #4-1');
 
-				assert([zhwiki.redirect_target_of('赵体'), '趙孟頫'], 'zhwiki.redirect_target_of() #1-1');
+				assert(zhwiki.is_template('港鐵路綫標誌', '港铁路线标志'), 'zhwiki.is_template() #5-1');
+				assert(zhwiki.is_template('港鐵路線標誌', '港铁路线标志'), 'zhwiki.is_template() #5-1');
+
+				assert([zhwiki.redirect_target_of('赵体'), '趙孟頫'], 'zhwiki.redirect_target_of() #1');
 
 				_finish_test(test_name);
 			});

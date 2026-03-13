@@ -96,7 +96,7 @@ function module_code(library_namespace) {
 					for_each_subelement.call(parsed,
 					//
 					library_namespace.null_function, {
-						add_index : true
+						add_index : 'all'
 					});
 				}
 				// console.trace(parsed);
@@ -601,7 +601,7 @@ function module_code(library_namespace) {
 			// console.trace(token);
 			return fetch_and_resolve_template(token);
 		}, {
-			add_index : true,
+			add_index : 'all',
 			modify : true
 		});
 
