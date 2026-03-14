@@ -390,6 +390,7 @@ function module_code(library_namespace) {
 				console.log([ index, token, parent ]);
 			}
 		}, {
+			// for .token_is_children_of()
 			add_index : 'all'
 		});
 
@@ -397,11 +398,14 @@ function module_code(library_namespace) {
 	});
 
 	// 注意: 必須配合 `parsed.each(, {add_index : 'all'})` 使用。
-	function token_is_children_of(token, parent_filter) {
+	function token_is_children_of(token, parent_filter, from_self) {
 		var parent;
+		if (from_self && parent_filter(token))
+			return token;
+
 		while (token && (parent = token.parent)) {
 			if (parent_filter(parent))
-				return true;
+				return parent;
 			token = parent;
 		}
 	}

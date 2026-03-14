@@ -96,6 +96,7 @@ function module_code(library_namespace) {
 					for_each_subelement.call(parsed,
 					//
 					library_namespace.null_function, {
+						// for convert_parameter()
 						add_index : 'all'
 					});
 				}
@@ -509,6 +510,16 @@ function module_code(library_namespace) {
 
 	// @inner
 	function get_template_depth_now_of_token(token) {
+		if (false) {
+			// method 1
+			token = wiki_API.parse.token_is_children_of(token,
+					function(_token) {
+						return _token.template_depth_now >= 0;
+					}, true);
+			return token && token.template_depth_now;
+		}
+
+		// --------------------------------------
 		while (token) {
 			var template_depth_now = token.template_depth_now;
 			if (template_depth_now >= 0)
@@ -601,6 +612,7 @@ function module_code(library_namespace) {
 			// console.trace(token);
 			return fetch_and_resolve_template(token);
 		}, {
+			// for get_template_depth_now_of_token(token)
 			add_index : 'all',
 			modify : true
 		});
