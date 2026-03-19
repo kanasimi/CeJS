@@ -14,7 +14,7 @@ TODO:
 
 </code>
  * 
- * @see [[Special:MostTranscludedPages]], [[Template:High-use]]
+ * @see [[Special:MostTranscludedPages]], [[Wikipedia:資料庫報告/高引用量模板列表]], [[Template:High-use]]
  * 
  * @since 2021/1/24 16:6:50
  */

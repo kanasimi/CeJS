@@ -1565,6 +1565,14 @@ function module_code(library_namespace) {
 			while (matched = PATTERN_all.exec(wikitext)) {
 				// 用戶名正規化。
 				var name = wiki_API.normalize_title(matched[1]);
+				// fix for [[Special:Contributions/User:name]]
+				if (name.includes(':') && PATTERN_all !== PATTERN_user_link_all) {
+					PATTERN_user_link_all.lastIndex = 0;
+					matched = PATTERN_user_link_all.exec('[[' + name + ']]');
+					if (matched) {
+						name = wiki_API.normalize_title(matched[1]);
+					}
+				}
 				if (!user_name || user_name === name) {
 					// console.log(name);
 					if (user_list) {

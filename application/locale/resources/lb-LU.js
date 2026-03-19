@@ -162,7 +162,7 @@
 	"Bulgaria": "Bulgarien",
 	"Soviet Union": "Sowjetunioun",
 	"Serbia": "Serbien",
-	"Romania": "Rum\u00e4mnien",
+	"Romania": "Rum\u00e4nien",
 	"Greece": "Griicheland",
 	"T\u00fcrkiye": "Tierkei",
 	"%1 {{PLURAL:%1|year|years}} and %2 {{PLURAL:%2|month|months}}": "%1 {{PLURAL:%1|Joer}} an %2 {{PLURAL:%2|Mount|M\u00e9int}}",
