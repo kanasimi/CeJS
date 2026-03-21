@@ -1759,7 +1759,13 @@ function module_code(library_namespace) {
 			'Category:WikiProject banners with quality assessment',
 
 			// banners indicating a known issue with the page
-			'Image requested', 'Photo requested', 'Infobox requested',
+			// 'Image requested', 'Photo requested', 'Infobox requested',
+			'Category:Request templates', 'Category:Image request templates',
+			//
+			'Category:Pronunciation audio request templates',
+			//
+			'Category:Protected pages edit request templates',
+
 			// if applicable
 			'Connected contributor', 'Press',
 			// when used as a banner
@@ -2403,7 +2409,8 @@ function module_code(library_namespace) {
 		if (typeof token === 'string') {
 			token = wiki_API.parse(token, options);
 		}
-		if (token.type === 'plain') {
+		if (Array.isArray(token) && (!token.type || token.type === 'plain')) {
+			// 對於容器，如元素列表，一一插入其子元素。
 			token.forEach(function(subtoken) {
 				insert_layout_element.call(parsed, subtoken, options);
 			});
