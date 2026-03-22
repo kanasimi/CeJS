@@ -2431,7 +2431,8 @@ function module_code(library_namespace) {
 		}
 
 		if (wiki_API.is_page_data(page_data)) {
-			var title = page_data.title;
+			var title = options && options.original_title_first
+					&& page_data.original_title || page_data.title;
 			// 檢測一般頁面
 			if (title) {
 				// should use wiki_API.is_page_data(page_data)
