@@ -1464,16 +1464,33 @@ function module_code(library_namespace) {
 	}
 
 	function namespace_of_options(options) {
-		var namespace = Array.isArray(options) ? options
-		// 必須預防 {Object}options。
-		: !options ? 0 : typeof options === 'number' ? options
-				: typeof options === 'string' ? library_namespace
-						.is_digits(options) ? +options : options
-						: options.namespace;
-		return namespace;
+		if (library_namespace.is_Object(options))
+			options = options.namespace;
+
+		if (!options) {
+			// main
+			return 0;
+		}
+
+		if (Array.isArray(options))
+			return options;
+
+		if (typeof options === 'number')
+			return options;
+
+		if (typeof options === 'string') {
+			if (options.includes('|')) {
+				// for is_namespace(page_title, 'Wikipedia|User')
+				return options.split('|');
+			}
+
+			if (library_namespace.is_digits(options))
+				return +options;
+		}
+
+		return options;
 	}
 
-	// TODO: is_namespace(page_title, 'Wikipedia|User')
 	function page_title_is_namespace(page_title, options) {
 		var namespace = namespace_of_options(options);
 

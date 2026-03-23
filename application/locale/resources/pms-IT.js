@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spagna",
 	"Calendrier r\u00e9publicain": "calendari republican frans\u00e8is",
-	"untranslated message count": "5",
+	"untranslated message count": "3",
 	"\u6e05\u9664\u8a0a\u606f": "Polid\u00e9 l'argistr",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Smon-e / st\u00ebrm\u00e9 l'argistr",
 	"Load failed": "Cariament fal\u00ec",
@@ -343,6 +343,8 @@
 	"\u7b49\u5f85 %1 \u4ee5\u61c9\u7528\u8a2d\u5b9a\u3002": "Spet\u00e9 %1 p\u00ebr aplich\u00e9 ij par\u00e0meter.",
 	"wikitext parser checking: %1": "ver\u00ecfica \u00ebd l'analisator d\u00ebl wikitest: %1",
 	"There are more than one %1 in %2": "A-i \u00e9 pi che un %1 an %2",
+	"Expression error: Unrecognized word \"%1\".": "Eror \u00ebd l'espression: Par\u00f2la \u00ab%1\u00bb nen arconoss\u00f9a.",
+	"Expression error: Unrecognized punctuation character \"%1\".": "Eror \u00ebd l'espression: Car\u00e0ter \u00ebd pontegiadura \u00ab%1\u00bb nen arconoss\u00f9.",
 	"\u4f3c\u4e4e\u4e1f\u5931\u4e86\u4ee4\u724c\u3002": "A smija che \u00ebl geton a sia sp\u00ebrdusse.",
 	"Too many badtoken errors! Please re-execute the program!": "Tr\u00f2pi eror \u00ebd geton l\u00f2fio! P\u00ebr pias\u00ec, ch'a fasa torna parte \u00ebl programa!",
 	"Not using node.js!": "As deuvra nen node.js!",
