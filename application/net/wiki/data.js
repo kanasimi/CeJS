@@ -214,13 +214,13 @@ function module_code(library_namespace) {
 
 		// data_configuration: set Wikidata session
 		var data_login_options = {
+			// preserve_password : session.preserve_password,
 			user_name : session.token.lgname,
 			// wiki.set_data(host session, password)
 			password : password || session.token.lgpassword,
 			// API_URL: host session
 			API_URL : typeof API_URL === 'string' && wiki_API.api_URL(API_URL)
-					|| get_data_API_URL(session),
-			preserve_password : session.preserve_password
+					|| get_data_API_URL(session)
 		};
 		// console.trace([ data_login_options, session.API_URL ]);
 		if (false && data_login_options.API_URL === session.API_URL) {
@@ -234,6 +234,7 @@ function module_code(library_namespace) {
 		} else {
 			// 警告: 可能需要設定 options.is_running
 			session.data_session = new wiki_API(data_login_options);
+			session.data_session.token = session.token;
 		}
 
 		library_namespace.debug('Setup 宿主 host session.', 2,

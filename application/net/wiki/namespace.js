@@ -2907,6 +2907,8 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(response));
 			error = error || response && response.error;
 			if (error) {
+				library_namespace.error('wiki_API_siteinfo: '
+						+ JSON.stringify(error));
 				callback(response, error);
 				return;
 			}
@@ -4211,9 +4213,11 @@ function module_code(library_namespace) {
 	function add_session_to_options(session, options) {
 		// Warning: Will append to original options!!
 		// function for_each_subelement() needs assigning to original options.
-		options = library_namespace.setup_options(options);
-		if (session)
-			options[KEY_SESSION] = session;
+		if (!wiki_API.is_wiki_API(options)) {
+			options = library_namespace.setup_options(options);
+			if (session)
+				options[KEY_SESSION] = session;
+		}
 		return options;
 	}
 

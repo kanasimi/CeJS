@@ -4635,7 +4635,7 @@ function module_code(library_namespace) {
 
 		function _done(data, _error) {
 			// 注意: 在 mass edit 時會 lose token (badtoken)，需要保存 password。
-			if (!session.preserve_password) {
+			if (false && !session.preserve_password) {
 				// 捨棄 password。
 				delete session.token.lgpassword;
 			}

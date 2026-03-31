@@ -5677,8 +5677,18 @@ function test_wiki() {
 
 	CeL.test('CeL.wiki: asynchronous functions', function (assert, _setup_test, _finish_test) {
 
+		var test_configurations = CeL.read_file('_test suite/_test_configurations.json');
+		if (test_configurations) {
+			test_configurations = JSON.parse(test_configurations.toString());
+			var wiki_configurations = CeL.read_file(test_configurations["wiki configuration path"] + '/wiki configuration.js');
+			globalThis.login_options_for_project = Object.create(null);
+			globalThis.DEFAULT_PROJECT_KEY = '*';
+			eval(wiki_configurations.toString());
+		}
+
 		//console.trace('Setup wiki tests...');
-		var enwiki = new CeL.wiki(null, null, 'en');
+		//var enwiki = new CeL.wiki(null, null, 'en');
+		var enwiki = CeL.wiki.login(Object.assign({ API_URL: 'en' }, login_options_for_project['*']));
 
 		enwiki.run(function () {
 			var test_name = 'wiki: namespace';
@@ -5743,11 +5753,11 @@ function test_wiki() {
 		});
 
 		_setup_test('wiki: get_creation_Date and others');
-		enwiki.page('wikipedia:sandbox', function (page_data) {
-			assert(['Wikipedia:Sandbox', enwiki.title_of(page_data)], 'enwiki.title_of() #1');
+		enwiki.page('universe', function (page_data) {
+			assert(['Universe', enwiki.title_of(page_data)], 'enwiki.title_of() #1');
 			assert(['Abc', enwiki.title_of('abc')], 'enwiki.title_of() #2');
 			// {Date}page_data.creation_Date
-			assert(['2008-03-14T03:01:58.000Z', page_data && page_data.creation_Date.toISOString()], 'get_creation_Date: [[Wikipedia:Sandbox]]');
+			assert(["2001-10-01T19:21:41.000Z", page_data && page_data.creation_Date.toISOString()], 'get_creation_Date: [[Universe]]');
 			_finish_test('wiki: get_creation_Date and others');
 		}, {
 			get_creation_Date: true
@@ -5808,7 +5818,8 @@ function test_wiki() {
 		});
 
 
-		var jawiki = new CeL.wiki(null, null, 'ja');
+		//var jawiki = new CeL.wiki(null, null, 'ja');
+		var jawiki = CeL.wiki.login(Object.assign({ API_URL: 'ja' }, login_options_for_project['*']));
 
 		jawiki.run(function () {
 			var test_name = 'wiki: jawiki base functions';
@@ -5860,7 +5871,8 @@ function test_wiki() {
 		});
 
 
-		var zhwiki = new CeL.wiki(null, null, 'zh');
+		//var zhwiki = new CeL.wiki(null, null, 'zh');
+		var zhwiki = CeL.wiki.login(Object.assign({ API_URL: 'zh' }, login_options_for_project['*']));
 
 		zhwiki.run(function () {
 			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software', 'Template:WikiProject CIS', '赵孟俯', 'Template:港铁路线标志'], function test_register_redirects() {
@@ -6131,8 +6143,9 @@ function test_wiki() {
 			assert(['P31', id_list], 'get data id of ' + test_property_name);
 
 			// 執行剩下的程序. run rest codes.
-			var wiki = CeL.wiki.login(null, null, 'zh');
+			//var wiki = CeL.wiki.login(null, null, 'zh');
 			//var wiki = new CeL.wiki('zh');
+			var wiki = CeL.wiki.login(Object.assign({ API_URL: 'zh' }, login_options_for_project['*']));
 			//CeL.set_debug(6);
 			wiki.data(page_title, after_get_data);
 
@@ -6161,7 +6174,8 @@ function test_wiki() {
 			type: 'property'
 		});
 
-		var commonswiki = new CeL.wiki(null, null, 'commons');
+		//var commonswiki = new CeL.wiki(null, null, 'commons');
+		var commonswiki = CeL.wiki.login(Object.assign({ API_URL: 'commons' }, login_options_for_project['*']));
 		assert(['commonswiki', CeL.wiki.site_name(commonswiki)], 'CeL.wiki.site_name(commonswiki) #1');
 		//console.trace(CeL.wiki.site_name(commonswiki, { get_all_properties: true }));
 		commonswiki.run(function () {
@@ -6627,7 +6641,10 @@ var all_test_groups = {
 		'application.net.wiki',
 		'application.net.wiki.data',
 
-		'application.net.wiki.template_functions'
+		'application.net.wiki.template_functions',
+
+		// for CeL.read_file()
+		'application.storage'
 	], test_wiki]
 };
 

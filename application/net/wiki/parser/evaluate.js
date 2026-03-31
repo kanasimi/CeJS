@@ -1171,29 +1171,57 @@ function module_code(library_namespace) {
 	// https://www.php.net/manual/en/datetimeimmutable.createfromformat.php
 	strftime.set_conversion({
 		Y : function(date_value) {
-			return date_value.getUTCFullYear();
+			return date_value.getUTCFullYear().pad(4);
 		},
 		y : function(date_value) {
-			return date_value.getUTCYear();
+			return date_value.getUTCYear().pad(2);
 		},
 		L : function(date_value) {
 			var year = date_value.getUTCFullYear();
-			return library_namespace.date.is_leap_year(year);
+			return library_namespace.date.is_leap_year(year) ? 1 : 0;
 		},
+
 		n : function(date_value, options) {
 			return 1 + date_value.getUTCMonth();
 		},
 		m : function(date_value, options) {
 			return (1 + date_value.getUTCMonth()).pad(2);
 		},
+		F : function(date_value, options) {
+			var session = wiki_API.session_of_options(options);
+			var language = session && session.language;
+			if (language === 'zh' || language === 'ja') {
+				return (1 + date_value.getUTCMonth()) + '月';
+			}
+			// @see month_name() @ CeL.application.locale
+			return gettext_date.month(1 + date_value.getUTCMonth(), language
+					|| 'en');
+		},
+
 		j : function(date_value, options) {
 			return date_value.getUTCDate();
 		},
 		d : function(date_value, options) {
 			return date_value.getUTCDate().pad(2);
 		},
-		F : function(date_value, options) {
-			return gettext_date.month(1 + date_value.getUTCMonth(), 'en');
+
+		H : function(date_value, options) {
+			return date_value.getHours().pad(2);
+		},
+
+		i : function(date_value, options) {
+			return date_value.getMinutes().pad(2);
+		},
+
+		s : function(date_value, options) {
+			return date_value.getSeconds().pad(2);
+		},
+
+		c : function(date_value, options) {
+			return (new Date).toISOString() + '+00:00';
+		},
+		U : function(date_value, options) {
+			return date_value / 1000 | 0;
 		}
 	// others: TODO
 	}, wiki_date_to_String.default_locale, {
@@ -1679,7 +1707,9 @@ function module_code(library_namespace) {
 			// }}
 			var argument_2 = get_parameter_String(2);
 			var date;
-			if (!argument_2 || argument_2 === 'now') {
+			// The date/time object can be in any format accepted by PHP's
+			// strtotime() https://www.php.net/function.strtotime
+			if (!argument_2 || argument_2 === 'now' || argument_2 === 'today') {
 				date = new Date;
 			} else {
 				date = new Date(argument_2 + ' UTC');

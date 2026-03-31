@@ -123,6 +123,7 @@ function module_code(library_namespace) {
 
 			// 不應該利用 `session[wiki_API.KEY_HOST_SESSION].token.lgpassword`，
 			// 而是該設定 `session.preserve_password`。
+			// 但為了出錯時自動登入，已改為預設會保存密碼。
 			if (!session.token.lgpassword) {
 				// console.log(result);
 				// console.trace(session);
@@ -430,7 +431,7 @@ function module_code(library_namespace) {
 			// 防止未登錄編輯
 			&& session.token
 			//
-			&& (session.token.lgpassword || session.preserve_password)) {
+			&& (session.token.lgpassword/* || session.preserve_password */)) {
 				// console.log([ action, POST_data ]);
 				library_namespace.error('wiki_API_query: 未登錄編輯？');
 				throw new Error('wiki_API_query: 未登錄編輯？');
