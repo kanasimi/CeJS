@@ -5677,6 +5677,7 @@ function test_wiki() {
 
 	CeL.test('CeL.wiki: asynchronous functions', function (assert, _setup_test, _finish_test) {
 
+		var login_options;
 		var test_configurations = CeL.read_file('_test suite/_test_configurations.json');
 		if (test_configurations) {
 			test_configurations = JSON.parse(test_configurations.toString());
@@ -5684,11 +5685,13 @@ function test_wiki() {
 			globalThis.login_options_for_project = Object.create(null);
 			globalThis.DEFAULT_PROJECT_KEY = '*';
 			eval(wiki_configurations.toString());
+			login_options = login_options_for_project[globalThis.DEFAULT_PROJECT_KEY];
 		}
+
 
 		//console.trace('Setup wiki tests...');
 		//var enwiki = new CeL.wiki(null, null, 'en');
-		var enwiki = CeL.wiki.login(Object.assign({ API_URL: 'en' }, login_options_for_project['*']));
+		var enwiki = CeL.wiki.login(Object.assign({ API_URL: 'en' }, login_options));
 
 		enwiki.run(function () {
 			var test_name = 'wiki: namespace';
@@ -5819,7 +5822,7 @@ function test_wiki() {
 
 
 		//var jawiki = new CeL.wiki(null, null, 'ja');
-		var jawiki = CeL.wiki.login(Object.assign({ API_URL: 'ja' }, login_options_for_project['*']));
+		var jawiki = CeL.wiki.login(Object.assign({ API_URL: 'ja' }, login_options));
 
 		jawiki.run(function () {
 			var test_name = 'wiki: jawiki base functions';
@@ -5872,7 +5875,7 @@ function test_wiki() {
 
 
 		//var zhwiki = new CeL.wiki(null, null, 'zh');
-		var zhwiki = CeL.wiki.login(Object.assign({ API_URL: 'zh' }, login_options_for_project['*']));
+		var zhwiki = CeL.wiki.login(Object.assign({ API_URL: 'zh' }, login_options));
 
 		zhwiki.run(function () {
 			zhwiki.register_redirects(['template:Authority control', '模板:大學專題', '模板:WikiProject Software', 'Template:WikiProject CIS', '赵孟俯', 'Template:港铁路线标志'], function test_register_redirects() {
@@ -6145,7 +6148,7 @@ function test_wiki() {
 			// 執行剩下的程序. run rest codes.
 			//var wiki = CeL.wiki.login(null, null, 'zh');
 			//var wiki = new CeL.wiki('zh');
-			var wiki = CeL.wiki.login(Object.assign({ API_URL: 'zh' }, login_options_for_project['*']));
+			var wiki = CeL.wiki.login(Object.assign({ API_URL: 'zh' }, login_options));
 			//CeL.set_debug(6);
 			wiki.data(page_title, after_get_data);
 
@@ -6175,7 +6178,7 @@ function test_wiki() {
 		});
 
 		//var commonswiki = new CeL.wiki(null, null, 'commons');
-		var commonswiki = CeL.wiki.login(Object.assign({ API_URL: 'commons' }, login_options_for_project['*']));
+		var commonswiki = CeL.wiki.login(Object.assign({ API_URL: 'commons' }, login_options));
 		assert(['commonswiki', CeL.wiki.site_name(commonswiki)], 'CeL.wiki.site_name(commonswiki) #1');
 		//console.trace(CeL.wiki.site_name(commonswiki, { get_all_properties: true }));
 		commonswiki.run(function () {
