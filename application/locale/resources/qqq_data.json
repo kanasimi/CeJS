@@ -2650,14 +2650,14 @@
 		"message": "跳過 %2 之 %1 設定，因數值已存在且未設定 %3。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: claim items (qualifiers, references, rank). %2: \"property = value\". %3: property of options",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3146}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5224}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3147}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5225}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"Comma-separator": {
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <bdi><code>{{int:Comma-separator}}</code></bdi> ([[translatewiki:MediaWiki:Comma-separator]]).\nBe careful to the presence of a trailing space when appropriate for your language (if it is needed, you can input it as <code>&amp;#32;</code> to avoid its trimming when editing this message.\nSee also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3158}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5236}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1526}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L169}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1913}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L700}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L712}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3585}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3592}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3599}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L630}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L261}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3159}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5237}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1526}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L169}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1913}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L700}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L712}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3585}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3592}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3599}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L630}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L261}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"check-the-emergency-stop-page-$1": {
@@ -2793,20 +2793,20 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L353}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1569}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L420}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L425}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L429}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L878}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L949}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L988}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1059}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1066}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L353}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1569}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L420}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L425}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L429}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L878}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L950}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L989}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1059}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1066}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3251}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3253}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3299}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3301}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2814,14 +2814,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3385}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3387}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3984}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3986}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2926,7 +2926,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3991}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1043}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1105}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3022}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3063}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3075}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L476}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L689}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L882}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L941}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1031}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1196}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1776}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L422}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3991}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1043}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1105}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3028}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3069}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3081}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L476}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L689}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L882}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L941}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1031}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1196}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1776}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L422}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"there-are-more-than-one-$1-in-$2": {
@@ -2968,7 +2968,7 @@
 		"message": "Error: Invalid depth in path: \"%1\" (tried to access a node above the root node).",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc rel2abs invalid depth}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L2031}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L2061}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {
@@ -2992,26 +2992,26 @@
 	"no-password-preserved": {
 		"message": "未保存密碼！",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L132}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L133}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"did-not-set-$1": {
 		"message": "Did not set %1!",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: options to set",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L148}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L299}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L149}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L300}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"too-many-failed-login-attempts-$1": {
 		"message": "Too many failed login attempts: %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L177}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L178}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"try-to-get-the-token-again": {
 		"message": "嘗試重新取得令牌。",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L189}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L190}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"invalid-url-$1": {
@@ -3019,20 +3019,20 @@
 		"notes": "CeL.application.storage.EPUB: add_chapter()",
 		"scope": "執行時 console 訊息 work_crawler.js: full_URL_of_path()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L285}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L727}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1671}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1706}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L286}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L727}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1671}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1706}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"will-set-$1-automatically": {
 		"message": "將自動設定 %1。",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L302}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L303}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"waiting-$1": {
 		"message": "Waiting %1...",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Time to wait. 需要等待的時間。",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L377}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L508}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L378}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/work.js#L508}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-page-redirects-to-this-page": {
@@ -7808,7 +7808,7 @@
 		"message": "Duplicate task name %1! Will overwrite old task with new task: %2→%3",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: task name, %2: old task configuration, %3, new task configuration",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3414}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L909}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3420}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L909}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-task(s)-from-$2": {
@@ -8828,7 +8828,7 @@
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L709}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L760}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"directory-of-sub-catalog-$1-created-$2": {
@@ -8836,7 +8836,7 @@
 		"notes": "catalog, move_to_path",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L715}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L766}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"$2-$1-directories-to-compress": {
@@ -8844,7 +8844,7 @@
 		"notes": "process_queue.length, script_name",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L726}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L777}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"since-there-is-no-compression-(do_compress)-there-are-$1-files-or-folders-that-are-not-compressed": {
@@ -8852,7 +8852,7 @@
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L745}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L796}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"$1-$2-compressing": {
@@ -8860,7 +8860,7 @@
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L775}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L826}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"compress-$1": {
@@ -8869,7 +8869,7 @@
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: profile_name, 後接 profile.archive",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L779}}\n: {{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L791}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L830}}\n: {{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L842}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"target-exists-$1": {
@@ -8877,7 +8877,7 @@
 		"notes": "",
 		"scope": "classify_and_compress.js",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L785}}",
+		"references": "{{GitHub|kanasimi/work_crawler/blob/master/arrangement/classify_and_compress.js#L836}}",
 		"repositories": "{{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"§$1-«$2»-must-wait-until-$3-to-read.-skipping-the-remaining-chapters": {
