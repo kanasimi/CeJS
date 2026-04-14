@@ -6598,6 +6598,8 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------------
 
+		var retry_left = options.error_retry || 0;
+
 		function do_next_SPARQL() {
 			library_namespace.log_temporary(
 			//
@@ -6614,6 +6616,16 @@ function module_code(library_namespace) {
 
 			wikidata_SPARQL(query, function(items, error) {
 				if (error || !Array.isArray(items)) {
+					if (retry_left-- > 0) {
+						library_namespace
+								.warn('wikidata_SPARQL.do_next_SPARQL: '
+										+ (error || 'Failed to get items.'));
+						library_namespace.log('Retry '
+								+ (options.error_retry - retry_left) + '/'
+								+ options.error_retry + '...');
+						do_next_SPARQL();
+						return;
+					}
 					callback(items, error);
 					return;
 				}
