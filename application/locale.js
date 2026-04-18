@@ -1533,8 +1533,14 @@ function module_code(library_namespace) {
 				alias.split(/-/).forEach(function(token) {
 					if (!gettext_aliases[token])
 						gettext_aliases[token] = [];
-					if (!gettext_aliases[token].includes(norm))
+					if (!gettext_aliases[token].includes(norm)) {
 						gettext_aliases[token].push(norm);
+						gettext_aliases[token].sort(function(_1, _2) {
+							return (_1.startsWith(token) ? 0 : 1)
+							// e.g., for CeL.gettext.to_standard('yue')
+							- (_2.startsWith(token) ? 0 : 1);
+						});
+					}
 				});
 				continue;
 
@@ -2411,6 +2417,9 @@ function module_code(library_namespace) {
 		'臺灣閩南語|min-nan-Hant-TW|Taiwanese|zh-min-nan|zh-min-nan-Hant-TW|臺語|台語|臺灣話|台灣話|閩南語|河洛話|福老話',
 
 		// 粵語審音配詞字庫 http://humanum.arts.cuhk.edu.hk/Lexis/lexi-can/
+		// [[w:en:Hong Kong Cantonese]] The specific IETF code for Cantonese
+		// written with traditional Han characters as used in Hong Kong is
+		// yue-Hant-HK.
 		'yue-Hant-HK' : '香港粵語|zh-yue-Hant-HK|Hong Kong Cantonese|港式粵語|香港話|港式廣東話|港式廣州話',
 
 		// 前面的會覆蓋後來的，前面的優先度較高。

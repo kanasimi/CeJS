@@ -589,7 +589,52 @@ function module_code(library_namespace) {
 				library_namespace.debug('處理多項列表作業, using operation: '
 						+ JSON.stringify(_operation), 5, 'wiki_API_cache');
 
-				get_next_item();
+				switch (type) {
+				case 'page':
+					var session = wiki_API.session_of_options(_this);
+					var work_options = Object.assign(
+					// for redirects : 1,
+					Object.clone(operation), {
+						no_edit : true,
+						list : [],
+						each : function(data) {
+							// 警告: 這裡的執行順序不會依照 `list` 的順序!
+							_operation.operator.call(_this, data);
+							work_options.list.push(data);
+						},
+						last : function() {
+							list = work_options.list;
+							index = list.length;
+							get_next_item();
+						}
+					});
+					// 一次取得大量頁面。
+					session.work(work_options, list);
+					break;
+
+				case 'redirects_here':
+					var session = wiki_API.session_of_options(_this);
+					session.register_redirects(list, function() {
+						index = list.length;
+						get_next_item();
+					}, {
+						no_message : true,
+						for_each_page
+						//
+						: function(root_page_data, redirect_list) {
+							// console.trace(this, redirect_list, _operation);
+							library_namespace.log_temporary(++index + '/'
+									+ list.length + ' '
+									+ wiki_API.title_link_of(root_page_data));
+							_operation.operator.call(_this, redirect_list);
+						}
+					});
+					break;
+
+				default:
+					get_next_item();
+					break;
+				}
 				return;
 			}
 
@@ -695,8 +740,17 @@ function module_code(library_namespace) {
 				// 取得所有重定向到(title重定向標的)之頁面列表，(title重定向標的)將會排在[0]。
 				// 注意: 無法避免雙重重定向問題!
 				to_get_data = function(title, callback) {
+					if (false && wiki_API.is_page_data(title)
+							&& title.redirect_list) {
+						// e.g., from list above
+						callback(title.redirect_list);
+						return;
+					}
+
 					// wiki_API.redirects_here(title, callback, options)
-					wiki_API.redirects_here(title, function(root_page_data,
+					wiki_API.redirects_here(title,
+					//
+					function for_each_redirects_here_page(root_page_data,
 							redirect_list) {
 						if (!operation.keep_redirects && redirect_list
 								&& redirect_list[0]) {

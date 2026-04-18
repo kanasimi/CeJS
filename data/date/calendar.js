@@ -4734,7 +4734,7 @@ function Byzantine_Date(year, month, date) {
 	// Byzantine calendar to Julian calendar
 	year += Byzantine_epochal_year;
 
-	return Julian_day.to_Date(Julian_day.from_YMD(year, month, date));
+	return Julian_day.to_Date(Julian_day.from_YMD(year, month, date, 'CE'));
 
 	return String_to_Date.parser.Julian(
 	// slow~~
@@ -4752,7 +4752,7 @@ Byzantine_Date.month_name = function(month_serial) {
 
 
 function Date_to_Byzantine(date, options) {
-	date = Julian_day.to_YMD(Julian_day(date));
+	date = Julian_day.to_YMD(Julian_day(date), 'CE');
 	if (false)
 		// slow~~
 		date = library_namespace.Date_to_String.parser.Julian(date, '%Y/%m/%d', undefined, {
@@ -4818,7 +4818,7 @@ function Nanakshahi_Date(year, month, date) {
 	if (year < 0)
 		year++;
 
-	var JDN = Julian_day.from_YMD(year + 1468, 3, 14, true) + date - 1
+	var JDN = Julian_day.from_YMD(year + 1468, 3, 14, 'CE') + date - 1
 	// Nanakshahi 前5個月 31日。
 	+ (month > 5 ? 5 * 31 + (month - 6) * 30 : (month - 1) * 31);
 
@@ -4835,7 +4835,7 @@ function Date_to_Nanakshahi(date, options) {
 		year--;
 	var days = Julian_day(date)
 	// get the first day of this Nanakshahi year.
-	- Julian_day.from_YMD(year, 3, 14, true) | 0;
+	- Julian_day.from_YMD(year, 3, 14, 'CE') | 0;
 	// assert: 0 <= days <= 366
 
 	// Nanakshahi 前5個月 31日。

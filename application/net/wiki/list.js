@@ -921,8 +921,11 @@ function module_code(library_namespace) {
 				}
 
 				if (Array.isArray(pages)) {
-					library_namespace.debug(wiki_API.title_link_of(title)
-							+ ': ' + pages.length + ' page(s)', 2, 'get_list');
+					library_namespace.debug({
+						// gettext_config:{"id":"get-$1-pages-from-$2"}
+						T : [ 'Get %1 {{PLURAL:%1|page|pages}} from %2',
+								pages.length, wiki_API.title_link_of(title) ]
+					}, 2, 'get_list');
 				}
 
 				run_for_each();
@@ -958,8 +961,11 @@ function module_code(library_namespace) {
 				}
 
 				pages.push(page_list);
-				library_namespace.debug('[' + page.title + ']: '
-						+ page_list.length + ' page(s)', 1, 'get_list');
+				library_namespace.debug({
+					// gettext_config:{"id":"get-$1-pages-from-$2"}
+					T : [ 'Get %1 {{PLURAL:%1|page|pages}} from %2',
+							page_list.length, wiki_API.title_link_of(page) ]
+				}, 1, 'get_list');
 			}
 			// console.trace(pages);
 
@@ -2405,7 +2411,7 @@ function module_code(library_namespace) {
 					//
 					'wiki_API.langlinks: Get ' + pages.length
 					//
-					+ ' page(s)! We will pass all pages to callback!');
+					+ ' page(s)! Pass all pages to callback!');
 				}
 				// page 之 structure 按照 wiki API 本身之 return！
 				// page = {pageid,ns,title,revisions:[{langlinks,'*'}]}

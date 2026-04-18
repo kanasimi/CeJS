@@ -1034,6 +1034,8 @@ function module_code(library_namespace) {
 				redirects : 1,
 				// [KEY_SESSION]
 				session : this,
+				// 取得所有重定向到(title重定向標的)之頁面列表，(title重定向標的)將會排在[0]。
+				// 注意: 無法避免雙重重定向問題!
 				// Making .redirect_list[0] the redirect target.
 				include_root : true,
 				// converttitles: 1,
@@ -1129,6 +1131,10 @@ function module_code(library_namespace) {
 			wiki_API.redirects_here(next[1], function(root_page_data,
 					redirect_list, error) {
 				// console.trace([ root_page_data, redirect_list, error ]);
+				if (false && typeof next[3].for_each_slice === 'function') {
+					next[3].for_each_slice.apply(this, arguments);
+				}
+
 				if (error) {
 					// console.trace(error);
 					// next[2] : callback(root_page_data, error)
@@ -1234,6 +1240,9 @@ function module_code(library_namespace) {
 				}
 
 				if (redirect_list) {
+					if (typeof next[3].for_each_page === 'function') {
+						next[3].for_each_page.apply(this, arguments);
+					}
 					// e.g., wiki_API.redirects_here({String})
 					// console.trace([ next[1], root_page_data ]);
 					register_redirect_list(redirect_list,
@@ -1245,6 +1254,10 @@ function module_code(library_namespace) {
 				} else {
 					// e.g., wiki_API.redirects_here({Array})
 					root_page_data.forEach(function(page_data) {
+						if (typeof next[3].for_each_page === 'function') {
+							next[3].for_each_page.call(undefined, page_data,
+									page_data.redirect_list);
+						}
 						// console.trace(page_data.redirect_list);
 						// console.trace(page_data.original_title);
 						register_redirect_list(page_data.redirect_list
@@ -1362,6 +1375,11 @@ function module_code(library_namespace) {
 							}
 
 							var pattern = char_list.map(function(chars) {
+								if (/^[.?*()\[\]]$/.test(chars)) {
+									// e.g., [[? (电影)]]
+									return '\\' + chars;
+								}
+
 								chars = add_char_variants(chars);
 								return chars.length === 1 ? chars : '['
 										+ chars.join('') + ']';
@@ -3272,6 +3290,9 @@ function module_code(library_namespace) {
 		last : function last(error) {
 			// this: options
 		},
+		// @see page_options
+		redirects : 1,
+		converttitles : 1,
 		// 不作編輯作業。
 		no_edit : true,
 		// 設定寫入目標。一般為 debug、test 測試期間用。

@@ -343,6 +343,12 @@ function module_code(library_namespace) {
 	/**
 	 * Get (year, month, date) of JDN.
 	 * 
+	 * @example<code>
+
+	YMD = CeL.Julian_day.to_YMD(JDN, 'CE');
+
+	</code>
+	 * 
 	 * @param {Number}JDN
 	 *            Julian date number
 	 * @param {Boolean}type
@@ -351,7 +357,7 @@ function module_code(library_namespace) {
 	 * @param {Boolean}no_year_0
 	 *            no year 0
 	 * 
-	 * @returns {Array} [ year, month, date ]
+	 * @returns {Array} [ year, month from 1, date ]
 	 * 
 	 * @see https://en.wikipedia.org/wiki/Julian_day#Julian_or_Gregorian_calendar_from_Julian_day_number
 	 *      algorithm by Richards 2013
@@ -388,6 +394,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * JD to YMDHMS. Get (year, month, date, hour, minute, second) of JD.
+	 * 
+	 * @example<code>
+
+	YMDHMS = CeL.Julian_day.to_YMDHMS(JDN, 0, 'CE');
+
+	</code>
 	 * 
 	 * @param {Number}JD
 	 *            Julian date
@@ -433,7 +445,7 @@ function module_code(library_namespace) {
 	 * Get the local midnight date of JDN.<br />
 	 * 傳回 local midnight (0:0)。
 	 * 
-	 * <code>
+	 * @example<code>
 
 	date = CeL.Julian_day.to_Date(JDN);
 
@@ -453,9 +465,16 @@ function module_code(library_namespace) {
 			// epoch 為 12:0，需要將之減回來以轉成 midnight (0:0)。
 			JDN -= .5;
 		}
-		JDN = JDN * ONE_DAY_LENGTH_VALUE + Julian_day.epoch
-		//
-		+ (isNaN(offset) ? Julian_day.default_offset : offset);
+
+		if (false) {
+			JDN = Julian_day.to_YMDHMS(JDN, 0, 'CE');
+			// console.log(JDN, arguments);
+			JDN = Date.UTC(JDN[0], JDN[1] - 1, JDN[2], JDN[3], JDN[4], JDN[5]);
+		} else {
+			JDN = JDN * ONE_DAY_LENGTH_VALUE + Julian_day.epoch
+					+ (isNaN(offset) ? Julian_day.default_offset : offset);
+		}
+
 		return get_value ? JDN : new Date(JDN);
 	};
 
@@ -651,8 +670,8 @@ function module_code(library_namespace) {
 	 * options.base_date . also see indicate_date_time()
 	 * 
 	 * @example <code>
-	 * '2003/1-4 12:53:5.45PM'.to_Date('CST').format();
-	 * '12:53:5.45PM 2003/1-4'.to_Date('CST').format();
+	'2003/1-4 12:53:5.45PM'.to_Date('CST').format();
+	'12:53:5.45PM 2003/1-4'.to_Date('CST').format();
 	 * </code>
 	 * 
 	 * @param {String}date_string
@@ -1636,11 +1655,13 @@ function module_code(library_namespace) {
 	 * 將直接使用輸入，因此呼叫後若改變 conversion specifications object 將出現問題！<br />
 	 * 
 	 * @example <code>
-	 * library_namespace.Date_to_String.parser.strftime.set_conversion({
-	 date : function() {
-	 return this.getDate();
-	 }
+
+	library_namespace.Date_to_String.parser.strftime.set_conversion({
+		 date : function() {
+		 	return this.getDate();
+		 }
 	 }, 'cmn-Hant-TW');
+
 	 * </code>
 	 * 
 	 * @param {Object}conversion

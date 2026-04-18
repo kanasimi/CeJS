@@ -894,6 +894,7 @@ function test_locale() {
 		[['cmn-Hans-CN', CeL.gettext.to_standard('cn')], 'gettext.to_standard(cn)'],
 		[['cmn-Hans-CN', CeL.gettext.to_standard('zh-cn')], 'gettext.to_standard(zh-cn)'],
 		[['cmn-Hans-CN', CeL.gettext.to_standard('cmn-CN')], 'gettext.to_standard(cmn-CN)'],
+		[['yue-Hant-HK', CeL.gettext.to_standard('yue')], 'gettext.to_standard(yue)'],
 		[['ja-JP', CeL.gettext.to_standard('ja')], 'gettext.to_standard(ja)'],
 		[['ja-JP', CeL.gettext.to_standard('jp')], 'gettext.to_standard(jp)'],
 		[['日本語', CeL.gettext.get_alias('jp')], 'gettext.get_alias(jp)'],
@@ -2626,6 +2627,11 @@ function test_date() {
 				throw 'Gregorian calendar: JD ' + JD;
 			}
 			// 4e6: [ 6239, 7, 11 ]
+
+			if (2400000 < JD && JD < 2500000
+				&& CeL.Julian_day.to_Date(JD).format('%Y,%m,%d') !== CeL.Julian_day.to_YMD(JD, 'CE').join(',')) {
+				throw 'Julian_day.to_Date: JD ' + JD + ' (' + CeL.Julian_day.to_Date(JD).format('%Y,%m,%d') + ' !== ' + CeL.Julian_day.to_YMD(JD, 'CE').join(',') + ')';
+			}
 		}
 
 		CeL.Julian_day.to_YMD(-1401);
