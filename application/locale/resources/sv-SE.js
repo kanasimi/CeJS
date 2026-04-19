@@ -121,6 +121,7 @@
 	"%1 elapsed, %3 at %2": "%1 passerad, %3 vid %2",
 	"First, it takes %1 to get %2 {{PLURAL:%2|page|pages}}.": "F\u00f6rst kr\u00e4vs det %1 f\u00f6r att f\u00e5 %2 {{PLURAL:%2|sida|sidor}}.",
 	"%1 {{PLURAL:%2|page|pages}} processed": "%1 {{PLURAL:%2|sida|sidor}} bearbetade",
+	"debug level": "fels\u00f6kningsniv\u00e5",
 	"%1 {{PLURAL:%1|page|pages}} have not changed,": "%1 {{PLURAL:%1|sida|sidor}} har inte \u00e4ndrats,",
 	"%1 elapsed.": "%1 passerad.",
 	"'''Stopped''', give up editing.": "'''Stannade''', \u00f6verge redigering.",
@@ -183,7 +184,6 @@
 	"Contents of [%1]": "Inneh\u00e5ll av [%1]",
 	"expand": "visa",
 	"collapse": "d\u00f6lj",
-	"Illegal %1: [%2]": "Otill\u00e5ten %1: [%2]",
-	"debug level": "fels\u00f6kningsniv\u00e5"
+	"Illegal %1: [%2]": "Otill\u00e5ten %1: [%2]"
 },
 "sv-SE");

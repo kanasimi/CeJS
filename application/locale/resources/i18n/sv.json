@@ -8,6 +8,7 @@
 	},
 	"españa": "Spanien",
 	"french-republican-calendar": "Franska revolutionskalendern",
+	"untranslated-message-count": "1000+",
 	"clear-log": "Rensa logg",
 	"show-hidden-log": "Visa / dölj logg",
 	"load-failed": "Kunde inte ladda",
@@ -125,6 +126,7 @@
 	"$1-elapsed-$3-at-$2": "%1 passerad, %3 vid %2",
 	"first-it-takes-$1-to-get-$2-pages": "Först krävs det %1 för att få %2 {{PLURAL:%2|sida|sidor}}.",
 	"$1-pages-processed": "%1 {{PLURAL:%2|sida|sidor}} bearbetade",
+	"debug-level": "felsökningsnivå",
 	"$1-pages-have-not-changed": "%1 {{PLURAL:%1|sida|sidor}} har inte ändrats,",
 	"$1-elapsed": "%1 passerad.",
 	"stopped-give-up-editing": "'''Stannade''', överge redigering.",
@@ -187,6 +189,5 @@
 	"contents-of-$1": "Innehåll av [%1]",
 	"expand": "visa",
 	"collapse": "dölj",
-	"illegal-$1-$2": "Otillåten %1: [%2]",
-	"debug-level": "felsökningsnivå"
+	"illegal-$1-$2": "Otillåten %1: [%2]"
 }

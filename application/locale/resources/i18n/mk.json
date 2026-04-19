@@ -6,6 +6,7 @@
 	},
 	"españa": "Шпанија",
 	"french-republican-calendar": "Француски републикански календар",
+	"untranslated-message-count": "1000+",
 	"clear-log": "Исчисти го дневникот",
 	"show-hidden-log": "Прикажи / скриј дневник",
 	"load-failed": "Вчитувањето не успеа",
@@ -97,6 +98,10 @@
 	"$1-elapsed-$3-at-$2": "Изминаа %1, %3 на %2",
 	"first-it-takes-$1-to-get-$2-pages": "Најпрвин, потребно е %1 за добивање на %2 {{PLURAL:%2|страница|страници}}.",
 	"$1-pages-processed": "%1 {{PLURAL:%2|обработена страница|обработени страници}}",
+	"debug-level": "степен на исправка на грешки",
+	"option=true": "option=true",
+	"option=value": "option=value",
+	"usage": "Употреба:",
 	"$1-pages-have-not-changed": "%1 {{PLURAL:%1|страница|страници}} не се изменети,",
 	"$1-elapsed": "поминати %1.",
 	"stopped-give-up-editing": "'''Запрено''', откажано од урдување.",
@@ -168,9 +173,5 @@
 	"contents-of-$1": "Содржина на [%1]",
 	"expand": "отвори",
 	"collapse": "собери",
-	"illegal-$1-$2": "Недозволена %1: [%2]",
-	"debug-level": "степен на исправка на грешки",
-	"option=true": "option=true",
-	"option=value": "option=value",
-	"usage": "Употреба:"
+	"illegal-$1-$2": "Недозволена %1: [%2]"
 }

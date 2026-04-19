@@ -5,6 +5,7 @@
 		]
 	},
 	"french-republican-calendar": "Француз Республикан Календар",
+	"untranslated-message-count": "1000+",
 	"era-calendar-converter": "Эра календар конвертери",
 	"loading": "Чүдүрүг...",
 	"group": "Бөлүк",
@@ -62,6 +63,7 @@
 	"content-is-not-settled": "Контентини дугурушпаан",
 	"no-change": "өскерлиишкин чок",
 	"finished-$1": "доозулган: %1",
+	"debug-level": "эптээшкин деңнели",
 	"luxembourg": "Люксембург",
 	"netherlands": "Недерланд",
 	"bavaria": "Бавариа",
@@ -86,6 +88,5 @@
 	"neo-assyrian": "Чаа Ассирий",
 	"babylon": "Вавилон",
 	"sparta": "Спарта",
-	"maya": "Майа",
-	"debug-level": "эптээшкин деңнели"
+	"maya": "Майа"
 }
