@@ -9687,7 +9687,7 @@
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3119}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20190101.featured_content_maintainer.js#L1132}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3119}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20190101.featured_content_maintainer.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-days-later": {
