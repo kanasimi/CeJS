@@ -2631,19 +2631,19 @@
 		"message": "You may need to set %1 = %2!",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: parameter name, %2: parameter value",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L246}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L244}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-the-main-functions-and-necessary-dependencies-to-operate-mediawiki": {
 		"message": "Load the main functions and necessary dependencies to operate MediaWiki.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L520}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L518}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"all-wiki-submodules-are-loaded": {
 		"message": "All wiki submodules are loaded.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L553}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L551}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-the-$1-for-$2-and-do-not-set-them-because-the-values-already-exist-and-$3-is-not-set": {
@@ -2779,7 +2779,7 @@
 		"message": "Get %1 {{PLURAL:%1|page|pages}} from %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page count, %2: list label",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L926}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L966}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1932}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L2012}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L926}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L966}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1932}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L2019}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-results": {
@@ -2806,14 +2806,14 @@
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3253}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3262}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3301}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3310}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2821,14 +2821,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3387}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3396}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3986}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3995}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2933,7 +2933,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3991}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1043}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1105}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3029}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3070}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3082}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L476}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L689}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L882}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L941}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1031}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1196}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1776}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L422}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L3991}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1043}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1105}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3050}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3091}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3103}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L476}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L689}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L882}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L941}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1031}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1196}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1776}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L422}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"there-are-more-than-one-$1-in-$2": {
@@ -10572,7 +10572,7 @@
 		"message": "Duplicate task name %1! Will overwrite old task with new task: %2→%3",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: task name, %2: old task configuration, %3, new task configuration",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3421}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L909}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3442}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L909}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-task(s)-from-$2": {
