@@ -3349,6 +3349,7 @@ function test_wiki() {
 		[['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties: true }).interwiki_prefix], 'site_name #17'],
 		[['dewikinews', CeL.wiki.site_name('de:ttt', { family: 'wikinews' })], 'site_name #18'],
 		[['wikidatawiki', CeL.wiki.site_name('https://www.wikidata.org/w/api.php')], 'site_name #19'],
+		[['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons',{get_all_properties : true}).API_URL], 'site_name #20'],
 	]);
 
 	all_error_count += CeL.test('wiki: CeL.wiki.namespace', function (assert) {

@@ -208,9 +208,7 @@ function module_code(library_namespace) {
 		// console.trace(API_URL);
 		// setup session, as wiki site of pywikibot.Site().
 		if (API_URL) {
-			// e.g., 'cmn'
-			if (API_URL in wiki_API.language_code_to_site_alias)
-				API_URL = wiki_API.language_code_to_site_alias[API_URL];
+			// 將 API_URL 當作語言代碼或 project name。 e.g., 'cmn'
 			wiki_API.setup_API_language(this /* session */, API_URL);
 			wiki_API.setup_API_URL(this /* session */, API_URL);
 		}

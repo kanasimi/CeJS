@@ -482,6 +482,11 @@ function module_code(library_namespace) {
 
 		project = String(project);
 		var lower_case = project.toLowerCase();
+
+		if (lower_case in language_code_to_site_alias) {
+			project = lower_case = language_code_to_site_alias[lower_case];
+		}
+
 		if (lower_case in api_URL.alias) {
 			project = api_URL.alias[lower_case];
 		}
@@ -619,7 +624,11 @@ function module_code(library_namespace) {
 		if (API_URL && typeof API_URL === 'string'
 		// && wiki_API.is_wiki_API(session)
 		) {
-			session.API_URL = api_URL(API_URL);
+			API_URL = language_to_site_name(API_URL, {
+				get_all_properties : true
+			});
+
+			session.API_URL = api_URL(API_URL.API_URL);
 			// remove cache
 			delete session.last_page;
 			delete session[KEY_HOST_SESSION];
@@ -834,7 +843,7 @@ function module_code(library_namespace) {
 			family = options;
 			options = null;
 		} else {
-			in_session = wiki_API.session_of_options(options);
+			in_session = session_of_options(options);
 			family = options && options.family;
 		}
 		// console.trace(language);
@@ -864,11 +873,11 @@ function module_code(library_namespace) {
 		}
 		// console.trace(language);
 
-		matched = wiki_API.namespace(language, options);
+		matched = get_namespace(language, options);
 		// console.trace([ matched, language ]);
 		if (matched && !isNaN(matched)
 		//
-		&& (matched !== wiki_API.namespace.hash.project
+		&& (matched !== get_namespace.hash.project
 		// e.g., 'wikidata'
 		|| language.trim().toLowerCase() === 'project')) {
 			// e.g., input "language" of [[Category:title]]
@@ -943,7 +952,7 @@ function module_code(library_namespace) {
 			}
 			// console.trace([ language, family ]);
 
-		} else if (matched = wiki_API.hostname_of_API_URL(language)) {
+		} else if (matched = hostname_of_API_URL(language)) {
 			// treat language as API_URL.
 			API_URL = language;
 			// console.trace(matched);
@@ -979,9 +988,8 @@ function module_code(library_namespace) {
 			library_namespace.error('language_to_site_name: Invalid language: '
 					+ language);
 			if (false) {
-				console.trace([ language,
-						wiki_API.hostname_of_API_URL(language), session,
-						in_session ]);
+				console.trace([ language, hostname_of_API_URL(language),
+						session, in_session ]);
 			}
 		}
 
@@ -989,8 +997,9 @@ function module_code(library_namespace) {
 		family = family || session && session.family || in_session
 				&& in_session.family;
 		// console.trace(family);
-		if (!family || family === 'wiki')
-			family = 'wikipedia';
+		if (!family || family === 'wiki') {
+			family = language in api_URL.wikimedia ? 'wikimedia' : 'wikipedia';
+		}
 
 		if (false) {
 			console.trace([ API_URL, session && session.API_URL, language,
@@ -1010,7 +1019,7 @@ function module_code(library_namespace) {
 		&& /^test/i.test(site = site[1])) {
 			// e.g., @ console @ https://commons.wikimedia.org/
 			project = site;
-			// assert: (project in wiki_API.api_URL.wikimedia)
+			// assert: (project in api_URL.wikimedia)
 
 			// 'commonswiki'
 			site += 'wiki';
@@ -1020,13 +1029,13 @@ function module_code(library_namespace) {
 			// e.g., 'zh' + 'wikinews' → 'zhwikinews'
 			site += (family === 'wikipedia'
 			// using "commonswiki" instead of "commonswikimedia"
-			|| (language in wiki_API.api_URL.wikimedia) ? 'wiki' : family);
+			|| (language in api_URL.wikimedia) ? 'wiki' : family);
 		}
 		// console.trace(site);
 		library_namespace.debug(site, 3, 'language_to_site_name');
 
 		project = project || language === 'www' ? family
-				: language in wiki_API.api_URL.wikimedia ? language : null;
+				: language in api_URL.wikimedia ? language : null;
 		if (project) {
 			// e.g., get from API_URL
 			// wikidata, commons: multilingual
@@ -1042,7 +1051,7 @@ function module_code(library_namespace) {
 
 		// throw site;
 		if (options && options.get_all_properties) {
-			var family_prefix = wiki_API.api_URL.shortcut_of_project[family];
+			var family_prefix = api_URL.shortcut_of_project[family];
 			// for API_URL==="https://lingualibre.org/api.php",
 			// is_guessing_language=true && family_prefix===undefined
 			site = {
@@ -1120,7 +1129,7 @@ function module_code(library_namespace) {
 	function get_namespace(namespace, options) {
 		options = library_namespace.setup_options(options);
 		var is_page_title = options.is_page_title;
-		if (wiki_API.is_page_data(namespace)) {
+		if (get_page_content.is_page_data(namespace)) {
 			namespace = namespace.title;
 			is_page_title = true;
 		}
@@ -1857,7 +1866,7 @@ function module_code(library_namespace) {
 	function prefix_page_name(page_name) {
 		page_name = String(page_name);
 
-		page_name = wiki_API.remove_non_functional_wikitext(page_name);
+		page_name = remove_non_functional_wikitext(page_name);
 
 		// [[mw:Help:Magic words#Escaped characters]]
 		page_name = page_name
@@ -3438,7 +3447,7 @@ function module_code(library_namespace) {
 			wiki_API.API_URL = wiki_API.API_URL.toLowerCase().replace(/-.+$/,
 					'');
 			// e.g., 'cmn'
-			// Cannot use `wiki_API.language_code_to_site_alias`
+			// Cannot use `wiki_API.wiki_API.language_code_to_site_alias`
 			if (wiki_API.API_URL in language_code_to_site_alias)
 				wiki_API.API_URL = language_code_to_site_alias[wiki_API.API_URL];
 		}
