@@ -3349,7 +3349,7 @@ function test_wiki() {
 		[['s:de:', CeL.wiki.site_name('de:s:ttt', { get_all_properties: true }).interwiki_prefix], 'site_name #17'],
 		[['dewikinews', CeL.wiki.site_name('de:ttt', { family: 'wikinews' })], 'site_name #18'],
 		[['wikidatawiki', CeL.wiki.site_name('https://www.wikidata.org/w/api.php')], 'site_name #19'],
-		[['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons',{get_all_properties : true}).API_URL], 'site_name #20'],
+		[['https://commons.wikimedia.org/w/api.php', CeL.wiki.site_name('commons', { get_all_properties: true }).API_URL], 'site_name #20'],
 	]);
 
 	all_error_count += CeL.test('wiki: CeL.wiki.namespace', function (assert) {
@@ -6087,6 +6087,30 @@ function test_wiki() {
 				_finish_test(test_name);
 			});
 		});
+
+		var testwiki = CeL.wiki.login(Object.assign({ API_URL: 'test' }, login_options));
+
+		testwiki.run(function test_expand_transclusion_testwiki() {
+			var test_name = 'testwiki: expand_transclusion';
+			_setup_test(test_name);
+
+			var options = CeL.wiki.add_session_to_options(testwiki, { on_page_title: 'ABC', allow_promise: true });
+			var promise = Promise.resolve();
+
+			promise = promise.then(function () {
+				var _options = Object.assign({}, options);
+				_options.max_template_depth = 1;
+				return CeL.wiki.expand_transclusion('{{subst:subst test 1}}', _options);
+			}).then(function (parsed) {
+				//console.trace(parsed);
+				assert(['* {{if empty}}{{if empty|1}}{{if empty||2}}\n* 12\n* 12', parsed.toString()], 'CeL.wiki.expand_transclusion(): {{subst:subst test 1}}');
+			});
+
+			return promise.then(function (parsed) {
+				_finish_test(test_name);
+			});
+		});
+
 
 		_setup_test('wiki: CeL.wiki.convert_Chinese() #1');
 		CeL.wiki.convert_Chinese('中国', function (text) {

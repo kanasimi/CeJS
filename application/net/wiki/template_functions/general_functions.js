@@ -109,10 +109,13 @@ function module_code(library_namespace) {
 		// Error.stackTraceLimit = Infinity;
 		// console.trace([ this, parameters, options ]);
 		// console.trace(options && options.template_token_called);
-		for (/* let */var index = 0; index < token.length; index++) {
+		for (/* let */var index = 1; index < token.length; index++) {
 			var value = parameters[index];
-			if (value)
-				return value;
+			if (value) {
+				value = value.toString().trim();
+				if (value)
+					return value;
+			}
 		}
 		return '';
 	}

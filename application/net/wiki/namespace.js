@@ -3292,6 +3292,7 @@ function module_code(library_namespace) {
 							+ 'General configurations are not set.');
 				}
 			}
+
 			// console.trace(configurations);
 			// TODO: valid configurations 檢測數值是否合適。
 			session.latest_task_configuration = configurations;
@@ -3317,6 +3318,83 @@ function module_code(library_namespace) {
 				// delete configurations.L10n;
 			}
 
+			if (configurations
+			// 不自動轉換 wikidata entity 成為 local project 之 page title。
+			&& !options.no_entity_to_title) {
+				traversal_configurations(configurations).then(function() {
+					run_configuration_adapter.is_initializing_process = true;
+					session.run(run_configuration_adapter, configurations);
+				});
+				return;
+			}
+
+			run_configuration_adapter(configurations);
+		}
+
+		function traversal_configurations(object) {
+			var promise = Promise.resolve();
+
+			for ( var key in object) {
+				var value = object[key];
+				if (typeof value === 'object') {
+					promise = promise.then(traversal_configurations(value));
+					// console.trace([ key, value ]);
+					continue;
+				}
+
+				promise = promise.then(convert_entity_to_local_page_title(
+						object, key));
+			}
+
+			return promise;
+		}
+
+		function convert_entity_to_local_page_title(base_namespace, config_name) {
+			var value = base_namespace[config_name];
+
+			if (!value || typeof value !== 'string')
+				return;
+
+			// @see PATTERN_entity_id @ CeL.application.net.wiki.data
+			var matched = value.match(/^(Q\d{1,10})$/)
+			// e.g., [[:{{label|Q8095366}}]] → "Category:待自動替換的維基百科模板"
+			|| value.match(/[|](Q\d{1,10})[}|]/);
+
+			if (!matched) {
+				return;
+			}
+
+			return new Promise(function(resolve, reject) {
+				session.data(matched[1], function(entity, error) {
+					if (error) {
+						library_namespace
+								.error('convert_entity_to_local_page_title: '
+										+ 'Failed to get entity [' + matched[1]
+										+ ']: ' + error);
+						reject();
+						return;
+					}
+
+					try {
+						var page_title = entity.sitelinks[
+						// 讀入QID對應的 page title。
+						wiki_API.site_name(session)].title;
+						base_namespace[config_name] = page_title;
+						resolve();
+					} catch (e) {
+						library_namespace
+								.error('convert_entity_to_local_page_title: '
+								//
+								+ 'Failed to get page title of entity ['
+										+ matched[1] + ']: ' + e);
+						reject();
+						return;
+					}
+				});
+			});
+		}
+
+		function run_configuration_adapter(configurations) {
 			if (typeof configuration_adapter === 'function') {
 				// 每次更改過設定之後，重新執行一次。
 				// 檢查從網頁取得的設定，檢測數值是否合適。

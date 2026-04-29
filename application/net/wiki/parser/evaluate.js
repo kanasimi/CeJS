@@ -378,8 +378,8 @@ function module_code(library_namespace) {
 			// token = evaluate_parsed(token, options, template_depth_now);
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
 			var _parsed = wiki_API.parse(wikitext, options);
-			if (template_depth_now >= (options.max_template_depth
-			//
+			if (false && template_depth_now >= (options.max_template_depth
+			// ↑ false: subst 無視 max_template_depth，都會展開。
 			|| DEFAULT_MAX_TEMPLATE_DEPTH)
 			//
 			|| !_parsed || _parsed.type !== 'transclusion') {
@@ -389,9 +389,11 @@ function module_code(library_namespace) {
 				return page_data ? token : _parsed;
 			}
 			// expand template
-			_parsed = expand_transclusion(_parsed, options,
-			//
-			template_depth_now);
+			_parsed = expand_transclusion(_parsed, Object.assign(Object
+					.clone(options), {
+				template_token_called : _parsed
+			}) // , template_depth_now
+			);
 			return _parsed;
 		}, {
 			modify : true
