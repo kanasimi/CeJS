@@ -2256,6 +2256,41 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// @see [[WP:TDOC]], [[Module:Documentation/config]]
+	// cfg['doc-subpage'] = 'doc'
+	// cfg['doc-link-display'] = '/doc'
+	// ks: '/دَستاویز'
+	/* const */var TDOC_subpage_postfix = '/doc';
+
+	function is_TDOC(page_title, options) {
+		page_title = normalize_page_name(page_title, options);
+		return page_title && String(page_title).endsWith(TDOC_subpage_postfix);
+	}
+
+	// main page title to TDOC subpage title
+	function to_TDOC(page_title, options) {
+		page_title = normalize_page_name(page_title, options);
+		if (page_title) {
+			if (is_TDOC(page_title, options))
+				return page_title;
+			return String(page_title) + TDOC_subpage_postfix;
+		}
+	}
+
+	function TDOC_to_main(page_title, options) {
+		page_title = normalize_page_name(page_title, options);
+		if (page_title) {
+			if (!is_TDOC(page_title, options))
+				return page_title;
+			return String(page_title).slice(0, -TDOC_subpage_postfix.length);
+		}
+	}
+
+	// @see [[WP:TSTYLE]], [[Wikipedia:TemplateStyles]]
+	/* const */var TSTYLE_subpage_postfix = '/styles.css';
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * 將 page data list 轉為 hash。<br />
 	 * cf. Array.prototype.to_hash @ data.native
@@ -4482,6 +4517,10 @@ function module_code(library_namespace) {
 		},
 
 		is_page_data : get_page_content.is_page_data,
+
+		is_TDOC : is_TDOC,
+		to_TDOC : to_TDOC,
+		TDOC_to_main : TDOC_to_main,
 
 		title_of : get_page_title,
 		// CeL.wiki.title_link_of() 常用於 summary 或 log/debug message。

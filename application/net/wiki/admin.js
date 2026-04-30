@@ -136,7 +136,23 @@ function module_code(library_namespace) {
 	function wiki_operator(action, default_parameters, options, callback) {
 		// default_parameters
 		// Warning: 除 pageid/title/token 之外，這邊只要是能指定給 API 的，皆必須列入！
-		var parameters = draw_parameters(options, default_parameters);
+		var parameters;
+
+		if (library_namespace.is_Object(action) && !callback) {
+			parameters = action;
+			action = parameters.action;
+			// shift arguments
+			callback = options;
+			options = default_parameters;
+			var session = wiki_API.session_of_options(options);
+			if (parameters && !parameters.token && session && session.token) {
+				parameters.token = session.token[(options.token_type || 'csrf')
+						+ 'token'];
+			}
+		} else {
+			parameters = draw_parameters(options, default_parameters);
+		}
+
 		// console.log(parameters);
 		if (!library_namespace.is_Object(parameters)) {
 			// error occurred.
@@ -157,10 +173,12 @@ function module_code(library_namespace) {
 			action : action
 		}, function(response, error) {
 			// console.log(JSON.stringify(response));
-			if (wiki_API.query.handle_error(response, error, callback)) {
-				return;
+			error = wiki_API.query.handle_error(response, error);
+			if (error) {
+				callback(response, error);
+			} else {
+				callback(response[action]);
 			}
-			callback(response[action]);
 		}, parameters, options);
 	}
 
@@ -226,33 +244,52 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// @see wiki_API.is_protected
-	// Change the protection level of a page.
-	wiki_API.protect = function(options, callback) {
-		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
+	wiki_API_protect.default_protect_level = 'edit=sysop|move=sysop';
 
-		/**
-		 * response: <code>
+	/**
+	 * Change the protection level of a page.
+	 * 
+	 * @param {Object}options
+	 *            附加參數/設定選擇性/特殊功能與選項。 {title: 'title', reason: '存檔保護作業',
+	 *            protections: 'edit=sysop|move=sysop'}
+	 * @param {Function}callback
+	 *            回調函數，function(response, error){...} response: API response
+	 *            data. error: error message.
+	 * 
+	 * @returns
+	 * 
+	 * response: <code>
 		{"protect":{"title":"title","reason":"存檔保護作業","protections":[{"edit":"sysop","expiry":"infinite"},{"move":"sysop","expiry":"infinite"}]}}
 		{"servedby":"mw1203","error":{"code":"nosuchpageid","info":"There is no page with ID 2006","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
-		 * </code>
-		 */
+	</code>
+	 * 
+	 * @see wiki_API.is_protected
+	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=protect
+	 */
+	function wiki_API_protect(options, callback) {
+		var action = 'protect';
+		if (wiki_API.need_get_API_parameters(action, options, wiki_API_protect,
+				arguments)) {
+			return;
+		}
 
-		wiki_operator('protect', {
-			// protections: e.g., 'edit=sysop|move=sysop', 一般說來edit應與move同步。
-			protections : true,
+		var parameters = wiki_API.extract_parameters(options, {
+			action : action,
+
 			// 在正式場合，最好給個好的理由。
 			// reason: @see [[MediaWiki:Protect-dropdown]]
-			reason : false,
+			// reason : '',
+
 			// expiry : 'infinite',
-			expiry : false,
-			tags : false,
-			cascade : false,
-			watchlist : false
-		}, Object.assign({
-			protections : 'edit=sysop|move=sysop'
-		}, options), callback);
-	};
+
+			// protections: e.g., 'edit=sysop|move=sysop', 一般說來edit應與move同步。
+			protections : wiki_API_protect.default_protect_level
+		}, true);
+
+		wiki_operator(parameters, options, callback);
+	}
+
+	wiki_API.protect = wiki_API_protect;
 
 	// ----------------------------------------------------
 

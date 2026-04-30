@@ -5574,6 +5574,12 @@ function test_wiki() {
 		parsed.each('template', function (token) { if (CeL.wiki.is_template('To del', token)) { return parsed.each.remove_token; } });
 		assert([parsed.toString(), '[[L]]'], 'parsed.each.remove_token #4');
 
+		assert([false, CeL.wiki.is_TDOC('Template:t')], 'wiki.is_TDOC() #1');
+		assert([true, CeL.wiki.is_TDOC('Template:t/doc')], 'wiki.is_TDOC() #2');
+		assert(['Template:T/doc', CeL.wiki.to_TDOC('Template:t')], 'wiki.to_TDOC() #1');
+		assert(['Template:T/doc', CeL.wiki.to_TDOC('Template:t/doc')], 'wiki.to_TDOC() #2');
+		assert(['Template:T', CeL.wiki.TDOC_to_main('Template:t')], 'wiki.TDOC_to_main() #1');
+		assert(['Template:T', CeL.wiki.TDOC_to_main('Template:t/doc')], 'wiki.TDOC_to_main() #2');
 
 		wikitext = '\n{{tT}} [[L]]_<p>f</p> {{tt|1}}<p class="s">s</p>a{{TT|2}}'; parsed = CeL.wiki.parser(wikitext).parse(); 0;
 		parsed.list = [];
@@ -6096,6 +6102,19 @@ function test_wiki() {
 
 			var options = CeL.wiki.add_session_to_options(testwiki, { on_page_title: 'ABC', allow_promise: true });
 			var promise = Promise.resolve();
+
+			promise = promise.then(function () {
+				return new Promise(function (resolve, reject) {
+					CeL.wiki.protect(CeL.wiki.add_session_to_options(testwiki, {
+						title: 'Template:subst test 1',
+						reason: 'protect test'
+					}), resolve);
+				});
+			}).then(function (result) {
+				// '{"title":"Template:Subst test 1","reason":"protect test","protections":[{"edit":"sysop","expiry":"infinite"},{"move":"sysop","expiry":"infinite"}]}'
+				//console.log(result);
+				assert(['sysop', result.protections[0].edit], 'CeL.wiki.protect()');
+			});
 
 			promise = promise.then(function () {
 				var _options = Object.assign({}, options);
@@ -6678,7 +6697,9 @@ var all_test_groups = {
 		'application.net.wiki.template_functions',
 
 		// for CeL.read_file()
-		'application.storage'
+		'application.storage',
+		// for CeL.wiki.protect()
+		'application.net.wiki.admin'
 	], test_wiki]
 };
 
