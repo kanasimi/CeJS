@@ -3353,7 +3353,7 @@ function module_code(library_namespace) {
 				// delete configurations.L10n;
 			}
 
-			if (configurations
+			if (configurations && !is_wikidata_session(session)
 			// 不自動轉換 wikidata entity 成為 local project 之 page title。
 			&& !options.no_entity_to_title) {
 				traversal_configurations(configurations).then(function() {
@@ -3611,6 +3611,26 @@ function module_code(library_namespace) {
 				'is_wikidata_site_nomenclature');
 		return /^[a-z_\d]{2,20}?(?:wiki(?:[a-z]{4,7})?|wiktionary)$/
 				.test(site_or_language);
+	}
+
+	// ------------------------------------------------------------------------
+
+	function is_wikidata_session(session) {
+		if (!session || !session.API_URL)
+			return false;
+
+		if (session.API_URL.includes('.wikidata.'))
+			return true;
+
+		if (session.configurations
+				&& session.configurations.namespace_hash
+				&& session.configurations.namespace_hash.wikidata === get_namespace.hash.project)
+			return true;
+
+		if (session.latest_site_configurations
+				&& session.latest_site_configurations.general
+				&& session.latest_site_configurations.general["wikibase-conceptbaseuri"])
+			return true;
 	}
 
 	// ------------------------------------------------------------------------
@@ -3946,7 +3966,21 @@ function module_code(library_namespace) {
 	var KEY_API_parameters_promise_hash = typeof Symbol === 'function' ? Symbol('API parameters promise hash')
 			: '\0API parameters promise hash';
 
-	// TODO: 'query+*'
+	/**
+	 * 檢查是否已 cache 使用 API path 的參數與規範。尚未 cache 的話就執行 cache 作業。
+	 * 
+	 * @param {String}path
+	 *            action path. e.g., 'query+revisions' for
+	 *            action=query&prop=revisions, 'edit' for action=edit
+	 * @param {Object}options
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * @param {Function}caller
+	 * @param {Arguments}caller_arguments
+	 * 
+	 * @returns {Boolean|Promise}如果需要取得參數，則回傳 Promise；否則回傳 false。
+	 * 
+	 * TODO: 'query+*'
+	 */
 	function need_get_API_parameters(path, options, caller, caller_arguments) {
 		var session = wiki_API.session_of_options(options);
 		if (!session) {
@@ -4119,7 +4153,29 @@ function module_code(library_namespace) {
 
 	wiki_API.get_API_parameters = get_API_parameters;
 
-	// extract_parameters_from_options
+	// @inner
+	function extract_token(from_parameters, action, extract_to) {
+		if (!extract_to || extract_to.token) {
+			return;
+		}
+
+		var session = wiki_API.session_of_options(action)
+				|| wiki_API.session_of_options(from_parameters);
+
+		if (!session || !session.token) {
+			return;
+		}
+
+		var token_type = action.token_type || from_parameters.token_type
+		// use "csrf" token retrieved from action=query&meta=tokens
+		|| 'csrf';
+		if (!token_type.endsWith('token'))
+			token_type += 'token';
+
+		extract_to.token = session.token[token_type];
+	}
+
+	// 自 options 汲取出 parameters。 extract_parameters_from_options
 	// 應盡量少用混雜的方法，如此可能有安全疑慮(security problem)。
 	// @see ibrary_namespace.import_options()
 	function extract_parameters(from_parameters, action,/* use GET */
@@ -4151,12 +4207,22 @@ function module_code(library_namespace) {
 		}
 
 		var extract_to = use_original_action ? action
-		// use POST
-		// : Object.create(null)
-		: new library_namespace.Search_parameters();
+				: new library_namespace.Search_parameters();
+		if (use_original_action) {
+			extract_to = action;
+		} else {
+			// use POST
+			extract_to
+			// = Object.create(null)
+			= new library_namespace.Search_parameters();
+			// Reset action
+			if (action.action)
+				extract_to.action = action.action;
+		}
 
-		var parameters = action.parameters || Object.keys(from_parameters);
-		// console.trace(parameters);
+		var parameters = action.parameters
+				|| Object.keys(from_parameters).append(Object.keys(action));
+		// console.trace(parameters, from_parameters, action);
 
 		if (!session || !path) {
 			library_namespace.warn('No session or no path settled!');
@@ -4165,6 +4231,13 @@ function module_code(library_namespace) {
 			}
 		}
 
+		/**
+		 * 自 from_parameters 汲取出 key 之 parameters。
+		 * 
+		 * @param {String}key
+		 *            parameter name. e.g., 'title', 'pageid', ...
+		 * @returns
+		 */
 		function for_each_parameter(key) {
 			// if (typeof key !== 'string') return;
 
@@ -4187,7 +4260,8 @@ function module_code(library_namespace) {
 					return;
 				}
 			}
-			var value = from_parameters[key];
+			var value = key in from_parameters ? from_parameters[key]
+					: action[key];
 			if (!wiki_API.is_valid_parameters_value(value)) {
 				return;
 			}
@@ -4218,9 +4292,9 @@ function module_code(library_namespace) {
 				// console.trace(key, information, value);
 				// console.trace(action, from_parameters);
 
-				if (_key in action && action[_key] === value) {
-					// e.g., 設定 query_props : 'pageprops', @
-					// 20160517.interlanguage_link_to_wikilinks.js
+				if (prefix && (_key in action) && action[_key] === value) {
+					// e.g., 設定 query_props : 'pageprops',
+					// @ 20160517.interlanguage_link_to_wikilinks.js
 					// 由於 props : 'pageprops' 應該是給 action=query 用的，
 					// ppprops 不該採用同樣的值。
 					return;
@@ -4284,12 +4358,14 @@ function module_code(library_namespace) {
 				: [ path ];
 		for (var index = 0; index < path_list.length; index++) {
 			path = path_list[index];
-			limited_parameters = path && session
+			var parameters_config = path && session
 					&& session.API_parameters[path];
-			if (limited_parameters) {
-				prefix = limited_parameters.prefix;
-				limited_parameters = limited_parameters.parameter_Map;
+			if (parameters_config) {
+				prefix = parameters_config.prefix;
+				limited_parameters = parameters_config.parameter_Map;
 				// assert: !!limited_parameters === true
+			} else {
+				prefix = limited_parameters = null;
 			}
 			if (session && !limited_parameters && path)
 				library_namespace.error('No API parameters for: ' + path);
@@ -4297,6 +4373,28 @@ function module_code(library_namespace) {
 
 			// exclude {key: false}
 			parameters.forEach(for_each_parameter);
+
+			// 檢查必須指定的參數。
+			parameters_config.parameters.forEach(function(parameter_config) {
+				if (!('required' in parameter_config)) {
+					return;
+				}
+
+				// This parameter is required.
+				var parameter_name = parameter_config.name;
+				if (parameter_name === 'token' && !extract_to[parameter_name]) {
+					extract_token(from_parameters, action, extract_to);
+					if (!extract_to[parameter_name])
+						delete extract_to[parameter_name];
+				}
+
+				if (!(parameter_name in extract_to)) {
+					library_namespace.error('extract_parameters: '
+							+ 'No property ' + JSON.stringify(parameter_name)
+							+ ' specified!');
+					// console.trace(extract_to);
+				}
+			});
 		}
 
 		delete extract_to[''];
