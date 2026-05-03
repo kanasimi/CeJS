@@ -376,6 +376,7 @@ function module_code(library_namespace) {
 				library_namespace.debug(
 						'options 指定的頁面資料不同於 session 最後取得的頁面資料，捨棄 cache。', 1,
 						'wiki_API_rollback');
+				delete session.last_page;
 				page_data = null;
 			} else {
 				// 將最後一個版本的編輯者當作回退對象。
