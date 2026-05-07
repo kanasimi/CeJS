@@ -338,6 +338,9 @@ function module_code(library_namespace) {
 		// console.trace([ action, options ]);
 
 		var session = wiki_API.session_of_options(options);
+		var maxlag = !isNaN(options.maxlag) ? options.maxlag : session
+				&& !isNaN(session.maxlag) ? session.maxlag
+				: wiki_API_query.default_maxlag;
 		if (!/^-?\d+$/.test(action.search_params.maxlag)) {
 			if (action.search_params.maxlag) {
 				library_namespace
@@ -345,9 +348,6 @@ function module_code(library_namespace) {
 								+ action.search_params.maxlag);
 			}
 			// respect maxlag
-			var maxlag = !isNaN(options.maxlag) ? options.maxlag : session
-					&& !isNaN(session.maxlag) ? session.maxlag
-					: wiki_API_query.default_maxlag;
 			if (/^-?\d+$/.test(maxlag))
 				action.search_params.maxlag = maxlag;
 		}
@@ -662,7 +662,9 @@ function module_code(library_namespace) {
 			}))) {
 				// new API version
 				var waiting = response.error.lag;
-				if (typeof waiting !== 'number') {
+				if (typeof waiting === 'number') {
+					waiting *= 1000
+				} else {
 					// old API version & new API version
 					waiting = response.error.info
 					// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
@@ -672,13 +674,17 @@ function module_code(library_namespace) {
 				}
 				// assert: waiting > 0
 				// console.trace(response);
-				library_namespace.debug('The ' + response.error.code
+				library_namespace.log_temporary('wiki_API_query: '
+				//
+				+ 'The ' + response.error.code
 				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
-				+ (response.error.code === 'maxlag' ? ' ' + maxlag + ' s' : '')
+				+ (response.error.code === 'maxlag' ? ' ' + library_namespace.age_of(0, maxlag * 1000, {
+					digits : 1
+				}) : '')
 				// waiting + ' ms'
 				+ ' hitted. Waiting ' + library_namespace.age_of(0, waiting, {
 					digits : 1
-				}) + ' to re-execute wiki_API.query().', 1, 'wiki_API_query');
+				}) + ' to re-execute...');
 				// console.log([ original_action, POST_data ]);
 				setTimeout(wiki_API_query.bind(null, original_action, callback,
 						POST_data, options), waiting);

@@ -194,6 +194,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// console.trace(session[KEY_HOST_SESSION]);
+		// assert: KEY_HOST_SESSION in session === false
+
+		if (wiki_API.is_wikidata_session(session)) {
+			library_namespace.warn('The session is already wikidata session!');
+		}
+
 		if (session.data_session) {
 			library_namespace.debug('直接清空佇列。', 2, 'setup_data_session');
 			// TODO: 強制中斷所有正在執行之任務。

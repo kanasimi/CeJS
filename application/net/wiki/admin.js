@@ -161,8 +161,6 @@ function module_code(library_namespace) {
 		wiki_operator(parameters, options, callback);
 	}
 
-	wiki_API['delete'] = wiki_API_delete;
-
 	// ----------------------------------------------------
 
 	/**
@@ -226,8 +224,6 @@ function module_code(library_namespace) {
 		// console.log(options);
 		wiki_operator(parameters, options, callback);
 	}
-
-	wiki_API.move_to = wiki_API_move_to;
 
 	// ----------------------------------------------------
 
@@ -293,8 +289,6 @@ function module_code(library_namespace) {
 
 		wiki_operator(parameters, options, callback);
 	}
-
-	wiki_API.protect = wiki_API_protect;
 
 	// ----------------------------------------------------
 
@@ -426,8 +420,6 @@ function module_code(library_namespace) {
 		wiki_operator(parameters, options, callback);
 	}
 
-	wiki_API.rollback = wiki_API_rollback;
-
 	// ----------------------------------------------------
 
 	// 目前的修訂，不可隱藏。
@@ -442,6 +434,21 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// export 導出.
+
+	// @inner
+	library_namespace.set_method(wiki_API, {
+		'delete' : wiki_API_delete,
+		move_to : wiki_API_move_to,
+		protect : wiki_API_protect,
+		rollback : wiki_API_rollback
+	});
+
+	// ------------------------------------------
+
+	// @static
+	Object.assign(wiki_API, {
+	//
+	});
 
 	// 不設定(hook)本 module 之 namespace，僅執行 module code。
 	return library_namespace.env.not_to_extend_keyword;

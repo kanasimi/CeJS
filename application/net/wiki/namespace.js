@@ -3357,28 +3357,31 @@ function module_code(library_namespace) {
 			// 不自動轉換 wikidata entity 成為 local project 之 page title。
 			&& !options.no_entity_to_title) {
 				traversal_configurations(configurations).then(function() {
-					run_configuration_adapter.is_initializing_process = true;
-					session.run(run_configuration_adapter, configurations);
+					register_redirects_of_values
+					//
+					.is_initializing_process = true;
+					session.run(register_redirects_of_values, configurations);
 				});
 				return;
 			}
 
-			run_configuration_adapter(configurations);
+			register_redirects_of_values(configurations);
 		}
 
-		function traversal_configurations(object) {
+		// ----------------------------
+
+		function traversal_configurations(configurations) {
 			var promise = Promise.resolve();
 
-			for ( var key in object) {
-				var value = object[key];
+			for ( var key in configurations) {
+				var value = configurations[key];
 				if (typeof value === 'object') {
 					promise = promise.then(traversal_configurations(value));
-					// console.trace([ key, value ]);
 					continue;
 				}
 
 				promise = promise.then(convert_entity_to_local_page_title(
-						object, key));
+						configurations, key));
 			}
 
 			return promise;
@@ -3428,6 +3431,39 @@ function module_code(library_namespace) {
 				});
 			});
 		}
+
+		// ----------------------------
+
+		function register_redirects_of_values(configurations, page_list) {
+			var do_register_redirects = !page_list;
+			if (!page_list)
+				page_list = [];
+
+			for ( var key in configurations) {
+				var value = configurations[key];
+				if (typeof value === 'object') {
+					register_redirects_of_values(value);
+					continue;
+				}
+
+				if (session.is_namespace(value, 'Template'))
+					page_list.push(value);
+			}
+
+			if (do_register_redirects) {
+				if (page_list.length === 0) {
+					run_configuration_adapter(configurations);
+				} else {
+					// console.trace(page_list);
+					session.register_redirects(page_list,
+							run_configuration_adapter
+									.bind(null, configurations));
+				}
+			}
+			return page_list;
+		}
+
+		// ----------------------------
 
 		function run_configuration_adapter(configurations) {
 			if (typeof configuration_adapter === 'function') {
@@ -4549,6 +4585,7 @@ function module_code(library_namespace) {
 		normalize_title_parameter : normalize_title_parameter,
 		set_parameters : set_parameters,
 		is_wikidata_site_nomenclature : is_wikidata_site_nomenclature,
+		is_wikidata_session : is_wikidata_session,
 		language_code_to_site_alias : language_code_to_site_alias,
 
 		PATTERN_URL_prefix : PATTERN_URL_prefix,
