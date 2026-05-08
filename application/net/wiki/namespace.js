@@ -3442,7 +3442,7 @@ function module_code(library_namespace) {
 			for ( var key in configurations) {
 				var value = configurations[key];
 				if (typeof value === 'object') {
-					register_redirects_of_values(value);
+					register_redirects_of_values(value, page_list);
 					continue;
 				}
 
@@ -3450,17 +3450,18 @@ function module_code(library_namespace) {
 					page_list.push(value);
 			}
 
-			if (do_register_redirects) {
-				if (page_list.length === 0) {
-					run_configuration_adapter(configurations);
-				} else {
-					// console.trace(page_list);
-					session.register_redirects(page_list,
-							run_configuration_adapter
-									.bind(null, configurations));
-				}
+			if (!do_register_redirects) {
+				return;
 			}
-			return page_list;
+
+			if (page_list.length === 0) {
+				run_configuration_adapter(configurations);
+				return;
+			}
+
+			// console.trace(page_list);
+			session.register_redirects(page_list, run_configuration_adapter
+					.bind(null, configurations));
 		}
 
 		// ----------------------------
