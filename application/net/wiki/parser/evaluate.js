@@ -58,6 +58,8 @@ function module_code(library_namespace) {
 		if (!parameters)
 			parameters = Object.create(null);
 
+		var session = wiki_API.session_of_options(options);
+
 		var parsed = wikitext;
 		if (typeof wikitext === 'string') {
 			parsed = wiki_API.parse(wikitext, options);
@@ -65,8 +67,25 @@ function module_code(library_namespace) {
 		// console.trace([ wikitext, options ]);
 		// console.trace(parsed);
 
-		var have_template_parameters, has_complex_parameter_name;
+		var have_template_parameters, has_complex_parameter_name, need_convert_parameter_again;
 		for_each_subelement.call(parsed, 'parameter', function(token) {
+			if ('from_parameter_NO' in token) {
+				/**
+				 * No more expand, e.g., [[Template:无锡地铁车站编号]] <code>
+
+				[[Template:T1]]:
+				{{T2|{{#if:{{{1|}}}|{{{1|}}}|1}}}}
+
+				[[Template:T2]]:
+				{{T3|{{{1}}}}}
+
+				expand T1 時，會不斷重複 convert_parameter( {{{1|}}} ) 。
+
+				</code>
+				 */
+				return;
+			}
+
 			have_template_parameters = true;
 			var value = token[0];
 			if (typeof value !== 'string') {
@@ -79,29 +98,45 @@ function module_code(library_namespace) {
 			// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 			if (value in parameters) {
 				// 先將 parsed 充作 parent 使用。
-				var parsed = token;
+				var parsed_parameter = token;
 				// 預防循環參照。
 				// e.g., parameters[1] = `{{{1}}}`
-				while (parsed = parsed.parent) {
+				while (parsed_parameter = parsed_parameter.parent) {
 					// console.trace(parsed);
-					if (parsed.parameter_NO === value)
+					if (parsed_parameter.parameter_NO === value)
 						return;
 				}
 
-				// 避免污染原 parameter。
-				parsed = wiki_API.parse(parameters[value].toString(), options);
-				if (Array.isArray(parsed)) {
+				parsed_parameter = wiki_API.parse(
+				// .toString(): 避免污染原 parameter。
+				parameters[value].toString(), options);
+				if (Array.isArray(parsed_parameter)) {
 					// 預防循環參照。
-					parsed.parameter_NO = value;
-					for_each_subelement.call(parsed,
+					parsed_parameter.parameter_NO = value;
+					for_each_subelement.call(parsed_parameter,
 					//
-					library_namespace.null_function, {
+					function(token) {
+						if (token.type === 'parameter') {
+							// 預防循環參照。
+							token.from_parameter_NO = value;
+							parsed_parameter.has_inner_parameter = true;
+						}
+					}, {
 						// for convert_parameter()
 						add_index : 'all'
 					});
 				}
 				// console.trace(parsed);
-				return parsed;
+
+				if (!options.force_convert_parameter
+						&& parsed_parameter.has_inner_parameter
+						&& session.is_namespace(options.transclusion_from_page,
+								'template')) {
+					need_convert_parameter_again = true;
+					return;
+				}
+
+				return parsed_parameter;
 			}
 
 			if (token.length < 2) {
@@ -132,6 +167,9 @@ function module_code(library_namespace) {
 
 		if (have_template_parameters)
 			parsed.have_template_parameters = true;
+		if (need_convert_parameter_again)
+			parsed.need_convert_parameter_again = true;
+
 		// console.trace([ has_complex_parameter_name, parsed.toString() ]);
 		return parsed;
 	}
@@ -174,6 +212,16 @@ function module_code(library_namespace) {
 
 		function return_parsed() {
 			if (Array.isArray(parsed)) {
+				if (options.need_convert_parameter_again) {
+					options = library_namespace.new_options(options);
+					options.force_convert_parameter = true;
+					parsed = convert_parameter(parsed,
+					//
+					options.template_token_called
+							&& options.template_token_called.parameters,
+							options);
+				}
+
 				parsed.template_depth_now = template_depth_now;
 			}
 			return parsed;
@@ -283,6 +331,7 @@ function module_code(library_namespace) {
 		// console.trace(wikitext);
 		// Error.stackTraceLimit = 10;
 		var parsed = convert_parameter(wikitext, parameters, options);
+		var need_convert_parameter_again = parsed.need_convert_parameter_again;
 		// console.trace(page_data);
 		if (page_data) {
 			// cache template code
@@ -336,7 +385,9 @@ function module_code(library_namespace) {
 		// e.g., "=={{USA}} USA=="
 		delete options.target_array;
 
+		// 重新轉成 wikitext 再 parse() 會丟失 .parameter_NO, .from_parameter_NO。
 		parsed = wiki_API.parser(wikitext, options).parse();
+
 		if (parsed.length === 1 && typeof parsed[0] === 'string'
 				&& parsed[0].includes('{{')) {
 			library_namespace.warn('simplify_transclusion: ' + 'Cannot parse '
@@ -349,7 +400,7 @@ function module_code(library_namespace) {
 		}
 
 		if (options.template_token_called !== template_token_called) {
-			options = Object.clone(options);
+			options = library_namespace.new_options(options);
 			// 紀錄正呼叫的 template token。
 			options.template_token_called = template_token_called;
 		}
@@ -405,6 +456,10 @@ function module_code(library_namespace) {
 			parsed = wiki_API.parser(wikitext, options).parse();
 			if (/{{/.test(parsed)) {
 				// console.trace(page_data && page_data.title || wikitext);
+			}
+			if (need_convert_parameter_again) {
+				options = library_namespace.new_options(options);
+				options.need_convert_parameter_again = true;
 			}
 			var promise = evaluate_parsed(parsed, options, template_depth_now);
 			// console.trace([ promise ]);
@@ -530,11 +585,25 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// 類似 wiki_API_expandtemplates() try_to_expand_templates
-	// ** 僅能提供簡單的演算功能，但提供 cache，不必每次從伺服器重新取得嵌入的頁面。
-	// [[Special:ExpandTemplates]]
-	// 使用上注意: 應設定 options[KEY_on_page_title_option]
-	// 可考慮是否採用 CeL.wiki.wikitext_to_plain_text()
+	/**
+	 * 展開 template wikitext。僅能提供簡單的演算功能，但提供 cache，不必每次從伺服器重新取得嵌入的頁面。 類似
+	 * wiki_API_expandtemplates() try_to_expand_templates 。 可考慮是否採用
+	 * CeL.wiki.wikitext_to_plain_text()
+	 * 
+	 * 使用上注意: 可能設定過 .skip_inner_traversal，之後執行 .each() 必須重新 parse。
+	 * 
+	 * 使用上注意: 應設定 options[KEY_on_page_title_option]
+	 * 
+	 * @param {String}wikitext
+	 *            模板 wikitext。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * @param {Number}[template_depth_now]
+	 *            expansion depth now. 當前迭代呼叫層數。
+	 * @returns
+	 * 
+	 * @see [[Special:ExpandTemplates]]
+	 */
 	function expand_transclusion(wikitext, options, template_depth_now) {
 		if (!wikitext)
 			return wikitext;

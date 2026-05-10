@@ -663,8 +663,9 @@ function module_code(library_namespace) {
 				// new API version
 				var waiting = response.error.lag;
 				if (typeof waiting === 'number') {
-					waiting *= 1000
+					waiting *= 1000;
 				} else {
+					// @see [[mw:Manual:Maxlag parameter]]
 					// old API version & new API version
 					waiting = response.error.info
 					// /Waiting for [^ ]*: [0-9.-]+ seconds? lagged/
@@ -672,13 +673,25 @@ function module_code(library_namespace) {
 					waiting = waiting && +waiting[1] * 1000
 							|| edit_time_interval;
 				}
+
+				if (waiting > wiki_API_query.max_waiting_time) {
+					waiting = wiki_API_query.max_waiting_time;
+				}
+
 				// assert: waiting > 0
 				// console.trace(response);
 				library_namespace.log_temporary('wiki_API_query: '
-				//
+				/**
+				 * <code>
+				伺服器負載過高，處理新請求需時超過 5 分鐘。待 11.2 分鐘後再試。
+				The server is overloaded, and processing new requests is taking more than 5 minutes. Try again after 11.2 minutes.
+				 </code>
+				 */
 				+ 'The ' + response.error.code
 				// 請注意，由於上游服務器逾時，緩存層（Varnish 或 squid）也可能會生成帶有503狀態代碼的錯誤消息。
-				+ (response.error.code === 'maxlag' ? ' ' + library_namespace.age_of(0, maxlag * 1000, {
+				+ (response.error.code === 'maxlag' ? ' '
+				//
+				+ library_namespace.age_of(0, maxlag * 1000, {
 					digits : 1
 				}) : '')
 				// waiting + ' ms'
@@ -818,7 +831,10 @@ function module_code(library_namespace) {
 	 * 
 	 * @see pywikibot.config.minthrottle @ https://doc.wikimedia.org/pywikibot/stable/api_ref/pywikibot.config.html#settings-to-avoid-server-overload
 	 */
-	wiki_API_query.default_edit_time_interval = 5000;
+	wiki_API_query.default_edit_time_interval = 5 * 1000;
+
+	/** {Nuimber}最長等待時間。 */
+	wiki_API_query.max_waiting_time = 1 * 60 * 1000;
 
 	// 用戶相關功能，避免延遲回應以使用戶等待。 The user is waiting online.
 	// Only respect maxlag. 因為數量太多，只好增快速度。

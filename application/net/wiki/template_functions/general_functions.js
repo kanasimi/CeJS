@@ -14,7 +14,8 @@ TODO:
 
 </code>
  * 
- * @see [[Special:MostTranscludedPages]], [[Wikipedia:資料庫報告/高引用量模板列表]], [[Template:High-use]]
+ * @see [[Special:MostTranscludedPages]], [[Wikipedia:資料庫報告/高引用量模板列表]],
+ *      [[Template:High-use]]
  * 
  * @since 2021/1/24 16:6:50
  */
@@ -485,9 +486,9 @@ function module_code(library_namespace) {
 		var valid_parameters = this.valid_parameters, valid_RegExp_parameters = this.valid_RegExp_parameters;
 		var invalid_parameters = Object.keys(template_token.parameters)
 		//
-		.filter(function() {
+		.filter(function(parameter) {
 			if (valid_parameters.has(parameter))
-				return;
+				return false;
 			return !valid_RegExp_parameters.some(function(pattern) {
 				return pattern.test(parameter);
 			});
@@ -523,7 +524,7 @@ function module_code(library_namespace) {
 		for (var index = 1; index < token.length; index++) {
 			var value = parameters[index];
 			if (value)
-				valid_parameters.add(String(value));
+				valid_parameters.add(String(value).trim());
 			if (value = parameters['regexp' + index]) {
 				try {
 					value = new RegExp('^'
