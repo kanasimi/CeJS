@@ -2735,12 +2735,13 @@ function module_code(library_namespace) {
 				matched.pfn = wiki_element_to_key(
 				//
 				parse_wikitext(matched[2], options, queue));
-				if (/^ *#/.test(matched.pfn)) {
+				if (/^[ *\n]*#/.test(matched.pfn)) {
 					if (typeof matched.pfn === 'string')
 						matched.pfn = matched.pfn.trim();
 
 					// allow {{#in<!-- -->voke:...}}
-					invoke_properties = /^ *#invoke *$/.test(matched.pfn)
+					invoke_properties = /^[ *\n]*#invoke[ *\n]*$/
+							.test(matched.pfn)
 							&& Object.create(null);
 					// will set later
 					parameters[0] = '';

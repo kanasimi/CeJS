@@ -5004,8 +5004,11 @@ function test_wiki() {
 		// https://www.mediawiki.org/wiki/Manual:Expr_parser_function_syntax#Comparisons
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifexpr:1e23=.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifexpr:}} #2');
 		wikitext = '{{#ifexpr: {{{1}}} > 0 and {{{1}}} < 1.0 or {{#ifeq:{{{decimal}}}| yes}} |is decimal |not decimal}}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()]);
-		assert(['magic_word_function', parsed.type]);
+		assert([wikitext, parsed.toString()], 'wiki.parse: magic_word_function #1');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: magic_word_function #1-1');
+		wikitext = '{{<!-- -->\n \n#invoke:String}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: magic_word_function #2');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: magic_word_function #2-1');
 
 
 		if (typeof Intl !== 'object' || !Intl.DisplayNames) {
