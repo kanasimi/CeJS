@@ -104,6 +104,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function expand_module_If_empty(options) {
+		// options.template_token_called: See simplify_transclusion(
 		/* const */var token = options && options.template_token_called
 				|| this;
 		/* const */var parameters = token.parameters;
@@ -474,13 +475,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// 有缺陷的簡易型 Lua patterns to JavaScript RegExp
-	function Lua_pattern_to_RegExp_pattern(pattern) {
-		return String(pattern).replace(/%l/g, 'a-z').replace(/%u/g, 'A-Z')
-		// e.g., %d, %s, %S, %w, %W
-		.replace(/%/g, '\\');
-	}
-
 	// https://en.wikipedia.org/wiki/Module:Check_for_unknown_parameters
 	function check_template_for_unknown_parameters(template_token, options) {
 		var valid_parameters = this.valid_parameters, valid_RegExp_parameters = this.valid_RegExp_parameters;
@@ -545,6 +539,136 @@ function module_code(library_namespace) {
 		}
 		token.check_template = check_template_for_unknown_parameters
 				.bind(token);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	/**
+	 * Lua patterns to JavaScript RegExp. A simple and flawed implementation.
+	 * 有缺陷的簡易型 Lua pattern to JavaScript RegExp 轉換器。<br />
+	 * Lua patterns are not regular expressions, and have some special
+	 * characters that are not supported in JavaScript RegExp. This function
+	 * attempts to convert Lua patterns to JavaScript RegExp patterns, but it is
+	 * not a complete implementation and may not cover all cases.
+	 * 
+	 * @param {String}pattern
+	 *            The Lua pattern to convert. Lua 模式字符串。
+	 * @param {String}[flags]
+	 *            Optional RegExp flags, e.g., 'g' for global search.
+	 * @returns {String|RegExp} The converted JavaScript RegExp pattern, or a
+	 *          RegExp object if flags are provided. 轉換後的 JavaScript RegExp
+	 *          模式字串，或者如果提供了 flags，則返回一個 RegExp 對象。
+	 * 
+	 * @see https://www.lua.org/manual/5.4/manual.html#6.4.1
+	 *      https://www.lua.org/pil/20.2.html
+	 */
+	function Lua_pattern_to_RegExp_pattern(pattern, flags) {
+		function NYI() {
+			throw new Error('Lua_pattern_to_RegExp_pattern: NYI');
+		}
+
+		var buffer = [];
+		pattern = String(pattern).replace(/\[[^\]]*\]/g, function(all) {
+			var token = '\x01s__' + buffer.length + '\x01e__';
+			all = all
+			//
+			.replace(/%a/g, '\\w').replace(/%A/g, '\\w')
+			//	
+			.replace(/%l/g, 'a-z').replace(/%L/g, NYI)
+			//
+			.replace(/%u/g, 'A-Z').replace(/%U/g, NYI)
+			//
+			.replace(/%x/g, '\da-fA-F').replace(/%X/g, NYI)
+			//
+			.replace(/%z/g, '\\0').replace(/%Z/g, NYI)
+			//
+			.replace(/%([dDsSwW.\-*])/g, '\\$1');
+
+			buffer.push(all);
+			return token;
+		})
+		//
+		.replace(/\\/g, '\\\\')
+		//
+		.replace(/%a/g, '\\w').replace(/%A/g, '\\w')
+		//	
+		.replace(/%l/g, '[a-z]').replace(/%L/g, '[^a-z]')
+		//
+		.replace(/%u/g, '[A-Z]').replace(/%U/g, '[^A-Z]')
+		//
+		.replace(/%x/g, '[\da-fA-F]').replace(/%X/g, '[^\da-fA-F]')
+		//
+		.replace(/%z/g, '\\0').replace(/%Z/g, '[^\\0]')
+		//
+		.replace(/%([dDsSwW.\-*])/g, '\\$1')
+		//
+		.replace(/%b/g, NYI)
+		//
+		.replace(/([^\\])-/g, '$1*?')
+		//
+		.replace(/\x01s__(\d+)\x01e__/g, function(all, index) {
+			return buffer[index];
+		});
+
+		if (flags)
+			pattern = new RegExp(pattern, flags/* 'g' */);
+		return pattern;
+	}
+
+	// [[w:en:Module:String]]
+	function expand_module_String(options) {
+		/* const */var token = this;
+		var parameters = token.parameters;
+		function get_parameter(NO) {
+			if (!(NO in parameters))
+				return;
+			var value = parameters[NO].toString();
+			if (/{{/.test(value)) {
+				var _value = wiki_API.parse.wiki_element_to_key(
+						wiki_API.expand_transclusion(value, options))
+						.toString();
+				if (/{{/.test(_value)) {
+					throw new Error('expand_module_String: NYI');
+				}
+				value = _value;
+			}
+			// 使用未命名參數時，參數前後的空格會保留。
+			return NO > 0 ? value : value.trim();
+		}
+
+		switch (token.function_name) {
+		case 'len':
+			return (get_parameter('s') || get_parameter(1)).length;
+
+		case 'endswith':
+			return (get_parameter('source') || get_parameter(1))
+					.endsWith(get_parameter('pattern') || get_parameter(2)) ? 'yes'
+					: '';
+
+		case 'replace':
+			var pattern = get_parameter('pattern') || get_parameter(2);
+			pattern = Lua_pattern_to_RegExp_pattern(pattern, 'g');
+			return (get_parameter('source') || get_parameter(1)).replace(
+					pattern, get_parameter('replace') || get_parameter(3));
+
+		case 'count':
+		case 'escapePattern':
+		case 'find':
+		case 'findpagetext':
+		case 'join':
+		case 'match':
+		case 'pos':
+		case 'rep':
+		case 'str_find':
+		case 'sub':
+		case 'sublength':
+			throw new Error('expand_module_String: NYI');
+		}
+
+		return new wiki_API.wiki_error(
+		//
+		[ 'Script error: The function "%1" does not exist.',
+				token.function_name ]);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -730,7 +854,13 @@ function module_code(library_namespace) {
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
 		'Pin message' : parse_template_Pin_message,
 
-		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters
+		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters,
+
+		'Module:String' : {
+			properties : {
+				expand : expand_module_String
+			}
+		}
 	};
 
 	// --------------------------------------------------------------------------------------------

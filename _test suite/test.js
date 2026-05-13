@@ -4913,6 +4913,9 @@ function test_wiki() {
 		assert(['A___B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A [[ \n ]] B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #7');
 		assert(['A___B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A \n_B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #8');
 
+		assert(['{{{1}}}', CeL.wiki.expand_transclusion('{{{1}}}').toString()], 'wiki.expand_transclusion: {{{1}}}');
+		assert(['', CeL.wiki.expand_transclusion('{{{1|}}}').toString()], 'wiki.expand_transclusion: {{{1|}}}');
+		assert(['', CeL.wiki.expand_transclusion('{{{1||2}}}').toString()], 'wiki.expand_transclusion: {{{1||2}}}');
 		assert(['STRING', CeL.wiki.expand_transclusion('{{uc:string}}').toString()], 'wiki.expand_transclusion: {{UC:}}');
 		assert(['string', CeL.wiki.expand_transclusion('{{lc:STRING}}').toString()], 'wiki.expand_transclusion: {{LC:}}');
 		assert(['String', CeL.wiki.expand_transclusion('{{UCFIRST:string}}').toString()], 'wiki.expand_transclusion: {{UCFIRST:}}');
@@ -5027,6 +5030,8 @@ function test_wiki() {
 		assert(['<testtag a1="q">inner HTML</testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag|inner HTML|a1="p"|a1="q"}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #4');
 		assert(['<testtag attr="v"></testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag||attr="v"}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #5');
 		assert(['<testtag ="v2" attr="" a1="f" a2=""p" a3="q"" a4="r" a5="r"f" a6="r\'f" a7="r"f"></testtag>', CeL.wiki.expand_transclusion('{{#tag:testtag||=v1|attr=|=v2||a1=\'f\'|||a2="p|a3=q"|a4=\'r\'|a5=\'r"f\'|a6=\'r\'f\'|a7="r"f"}}').toString()], 'wiki.expand_transclusion: {{#testtag:}} #6');
+
+		assert([' 1a3 ', CeL.wiki.expand_transclusion('{{#invoke:String|replace| 123 |2|a}}').toString()], 'wiki.expand_transclusion: {{#invoke:String}} #1');
 
 		assert(['is', CeL.wiki.expand_transclusion('{{PLURAL:1|is|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #1');
 		assert(['are', CeL.wiki.expand_transclusion('{{PLURAL:2|is|are}}').toString()], 'wiki.expand_transclusion: {{PLURAL:}} #2');

@@ -997,7 +997,7 @@ function module_code(library_namespace) {
 
 			// 去除註解 comments。
 			if (t.type === 'comment') {
-				return;
+				return false;
 			}
 
 			has_no_string = true;
