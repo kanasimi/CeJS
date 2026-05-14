@@ -2878,6 +2878,8 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// Get SBOMs (Software Bill of Materials).
+
 	// https://www.mediawiki.org/w/api.php?action=help&modules=sitematrix
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=paraminfo
 

@@ -668,20 +668,31 @@ function module_code(library_namespace) {
 
 			// Error.stackTraceLimit = Infinity;
 			// console.trace(token);
-			token = repeatedly_expand_template_token(token, options,
-					template_depth_now);
-			// console.trace(token);
-			// Error.stackTraceLimit = 10;
-			if (!token || token.type !== 'transclusion')
-				return token;
+			var expanded_token = repeatedly_expand_template_token(token,
+					options, template_depth_now);
 
-			token = expand_template_name(token);
-			if (library_namespace.is_thenable(token)) {
-				return token.then(fetch_and_resolve_template);
+			var eligible = !options.filter_template_to_be_expanded
+					|| options.filter_template_to_be_expanded(
+							set_shell(expanded_token), options);
+
+			if (!eligible) {
+				if (Array.isArray(token))
+					token.template_depth_now = template_depth_now;
+				return token;
 			}
 
-			// console.trace(token);
-			return fetch_and_resolve_template(token);
+			// console.trace(expanded_token);
+			// Error.stackTraceLimit = 10;
+			if (!expanded_token || expanded_token.type !== 'transclusion')
+				return expanded_token;
+
+			expanded_token = expand_template_name(expanded_token);
+			if (library_namespace.is_thenable(expanded_token)) {
+				return expanded_token.then(fetch_and_resolve_template);
+			}
+
+			// console.trace(expanded_token);
+			return fetch_and_resolve_template(expanded_token);
 		}, {
 			// for get_template_depth_now_of_token(token)
 			add_index : 'all',
@@ -767,29 +778,66 @@ function module_code(library_namespace) {
 			}
 
 			return new Promise(function(resolve, reject) {
-				function evaluate(page_data, error) {
+				function check_template_data(page_data, error) {
 					if (error) {
 						// e.g. 頁面不存在，不做更改。
 						library_namespace.error('expand_transclusion: '
 								+ wiki_API.title_link_of(page_title) + ': '
 								+ error);
-						// reject(error);
-						resolve();
+						reject(error);
 						return;
 					}
 
-					page_data = simplify_transclusion(page_data, token,
+					if (false) {
+						console.trace('解析並登記模板資料: '
+								+ wiki_API.title_link_of(page_title) + '。');
+					}
+					var parsed = simplify_transclusion(page_data, token,
 					// 當前迭代呼叫層數 = template_depth_now + 1: 已經 `session.page()`
 					// 展開過一次。
 					options, template_depth_now + 1);
-					if (page_data.template_depth_now
+
+					var eligible = !options.filter_template_to_be_expanded
+							|| options.filter_template_to_be_expanded(parsed,
+									options);
+					// console.trace(parsed, eligible);
+					if (!library_namespace.is_thenable(eligible)) {
+						check_eligible(eligible, parsed);
+						return;
+					}
+
+					eligible.then(function(eligible) {
+						check_eligible(eligible, parsed);
+					});
+				}
+
+				function check_eligible(eligible, parsed) {
+					if (!eligible) {
+						library_namespace.debug(
+						//
+						wiki_API.title_link_of(page_title)
+						//
+						+ ' has element that should not be substituted.'
+						//
+						+ ' Skip it.', 3, 'expand_transclusion');
+
+						parsed = token;
+						parsed.skip_inner_traversal = true;
+						// resolve(parsed);
+						// return;
+					}
+
+					if (parsed.template_depth_now
 					//
 					>= (options.max_template_depth
 					//
 					|| DEFAULT_MAX_TEMPLATE_DEPTH)) {
-						page_data.skip_inner_traversal = true;
+						parsed.skip_inner_traversal = true;
+						// resolve(parsed);
+						// return;
 					}
-					resolve(page_data);
+
+					resolve(parsed);
 				}
 
 				/**
@@ -811,7 +859,9 @@ function module_code(library_namespace) {
 						page_title = wiki_API.to_namespace(page_title,
 								'Template');
 					}
-					wiki_API.page(page_title, evaluate, page_options);
+					wiki_API.page(page_title,
+					//
+					check_template_data, page_options);
 					return;
 				}
 
@@ -824,7 +874,9 @@ function module_code(library_namespace) {
 				if (!session.templates_now_fetching)
 					session.templates_now_fetching = Object.create(null);
 				if (page_title in session.templates_now_fetching) {
-					session.templates_now_fetching[page_title].push(evaluate);
+					session.templates_now_fetching[page_title]
+					//
+					.push(check_template_data);
 					if (false) {
 						console.trace([ session.templates_now_fetching
 						//
@@ -832,7 +884,9 @@ function module_code(library_namespace) {
 					}
 					return;
 				}
-				session.templates_now_fetching[page_title] = [ evaluate ];
+				session.templates_now_fetching[page_title]
+				//
+				= [ check_template_data ];
 
 				if (false) {
 					console.trace(page_title);
@@ -855,12 +909,13 @@ function module_code(library_namespace) {
 					session.page(page_data || page_title, function(page_data,
 							error) {
 						// console.trace([ page_data, page_title, error ]);
-						var evaluate_list
+						var check_template_data_list
 						//
 						= session.templates_now_fetching[page_title];
 						delete session.templates_now_fetching[page_title];
-						evaluate_list.forEach(function(evaluate) {
-							evaluate(page_data, error);
+						check_template_data_list.forEach(function(
+								check_template_data) {
+							check_template_data(page_data, error);
 						});
 					}, page_options);
 				}, {
@@ -883,6 +938,8 @@ function module_code(library_namespace) {
 			// console.trace(parsed.toString());
 			return parsed;
 		}
+
+		// ------------------------------------------------
 
 		// Error.stackTraceLimit = Infinity;
 		// console.trace(promise);
