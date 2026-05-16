@@ -4413,27 +4413,32 @@ function module_code(library_namespace) {
 			// exclude {key: false}
 			parameters.forEach(for_each_parameter);
 
-			// 檢查必須指定的參數。
-			parameters_config.parameters.forEach(function(parameter_config) {
-				if (!('required' in parameter_config)) {
-					return;
-				}
+			if (parameters_config) {
+				parameters_config.parameters
+				// 檢查必須指定的參數。
+				.forEach(function(parameter_config) {
+					if (!('required' in parameter_config)) {
+						return;
+					}
 
-				// This parameter is required.
-				var parameter_name = parameter_config.name;
-				if (parameter_name === 'token' && !extract_to[parameter_name]) {
-					extract_token(from_parameters, action, extract_to);
-					if (!extract_to[parameter_name])
-						delete extract_to[parameter_name];
-				}
+					// This parameter is required.
+					var parameter_name = parameter_config.name;
+					if (parameter_name === 'token'
+							&& !extract_to[parameter_name]) {
+						extract_token(from_parameters, action, extract_to);
+						if (!extract_to[parameter_name])
+							delete extract_to[parameter_name];
+					}
 
-				if (!(parameter_name in extract_to)) {
-					library_namespace.error('extract_parameters: '
-							+ 'No property ' + JSON.stringify(parameter_name)
-							+ ' specified!');
-					// console.trace(extract_to);
-				}
-			});
+					if (!(parameter_name in extract_to)) {
+						library_namespace.error('extract_parameters: '
+								+ 'No property '
+								+ JSON.stringify(parameter_name)
+								+ ' specified!');
+						// console.trace(extract_to);
+					}
+				});
+			}
 		}
 
 		delete extract_to[''];

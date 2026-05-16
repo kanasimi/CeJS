@@ -100,9 +100,10 @@ function module_code(library_namespace) {
 			error = wiki_API.query.handle_error(response, error);
 			if (error) {
 				callback(response, error);
-			} else {
-				callback(response[action]);
+				return;
 			}
+
+			callback(response[action]);
 		}, parameters, options);
 	}
 

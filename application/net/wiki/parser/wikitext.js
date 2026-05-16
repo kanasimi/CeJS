@@ -3102,7 +3102,22 @@ function module_code(library_namespace) {
 							parameters[0] = matched[2];
 							// 保持 parameters[0] 為 magic word。
 							parameters.unshift(matched[1] + ':');
+							// e.g., '{{safesubst:#invoke:CS1
+							// translator|cite_web_fr}}' @ {{Lien web}}
+							// @ [[山东省]]
+							if (parameters.name === 'SAFESUBST'
+									|| parameters.name === 'SUBST') {
+								matched[2] = matched[2]
+										.match(/^\s*#invoke:(.+)$/);
+								if (matched[2]) {
+									parameters.module_name = wiki_API
+											.normalize_title(wiki_element_to_key(
+													matched[2][1], options)
+													.toString().trim());
+								}
+							}
 						}
+
 					} else if (Array.isArray(parameters[0])
 					// e.g., `{{safesubst:#if:{{{2|}}}}}`
 					// e.g., `{{safesubst:#if:{{{2|}}}|{{{2}}}|{{{1}}}}}`

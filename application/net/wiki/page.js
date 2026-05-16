@@ -1722,9 +1722,9 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/api.php?action=help&modules=flow-parsoid-utils
 
 	/**
-	 * 展開 template 內容
+	 * 展開 template 內容。
 	 * 
-	 * 這種方法不能展開 module
+	 * 這種方法不能展開 module。
 	 * 
 	 * @example <code>
 
@@ -1736,9 +1736,22 @@ function module_code(library_namespace) {
 
 	 </code>
 	 * 
+	 * @param {String}wikitext
+	 *            模板 wikitext。
+	 * @param {Function}callback
+	 *            回調函數。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * 
+	 * @see wiki_API_pre_save_transform
 	 * @see wiki_API.protect
 	 */
 	function wiki_API_expandtemplates(wikitext, callback, options) {
+		if (wiki_API.need_get_API_parameters('expandtemplates', options,
+				wiki_API_expandtemplates, arguments)) {
+			return;
+		}
+
 		var post_data = {
 			text : wikitext,
 			prop : 'wikitext'
@@ -1787,6 +1800,99 @@ function module_code(library_namespace) {
 	};
 
 	wiki_API.expandtemplates = wiki_API_expandtemplates;
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * 解析 wikitext，將 wikitext 轉換成 HTML。 parse wikitext into HTML.
+	 * 
+	 * @example <code>
+
+	CeL.wiki.pre_save_transform('{{subst:Lien web|url=http://w.w.w}}', function(
+			wikitext) {
+		console.log(wikitext);
+	}, CeL.wiki.add_session_to_options(wiki, {
+		on_page_title : '山东省'
+	}));
+
+
+	let wikitext = await CeL.wiki.pre_save_transform('{{subst:Lien web|url=http://w.w.w}}', wiki.append_session_to_options({
+		on_page_title : '山东省'
+	}));
+
+	</code>
+	 * 
+	 * @param {String}wikitext
+	 *            模板 wikitext。
+	 * @param {Function}[callback]
+	 *            回調函數。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * 
+	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=parse
+	 */
+	function wiki_API_parse_wikitext_into_HTML(wikitext, callback, options) {
+		var action = 'parse';
+		var need_wait_promise = wiki_API.need_get_API_parameters(action,
+				options, wiki_API_parse_wikitext_into_HTML, arguments);
+		if (need_wait_promise) {
+			return need_wait_promise;
+		}
+
+		if (callback && typeof callback !== 'function') {
+			// shift arguments
+			options = library_namespace.setup_options(options);
+			callback = null;
+		}
+
+		var parameters = wiki_API.extract_parameters(options, {
+			action : action,
+			text : wikitext
+		}, true);
+
+		// var KEY_on_page_title_option = 'on_page_title';
+		if (false && options && options.on_page_title
+				&& !('title' in parameters)) {
+			parameters.title = options.on_page_title;
+		}
+
+		return new Promise(function(resolve, reject) {
+
+			wiki_API.query({
+				action : action
+			}, function(response, error) {
+				// console.log(JSON.stringify(response));
+				error = wiki_API.query.handle_error(response, error);
+				if (error) {
+					callback && callback(response, error);
+					reject(error);
+					return;
+				}
+
+				var text = response[action].text['*'];
+				callback && callback(text);
+				resolve(text);
+			}, parameters, options);
+
+		});
+	}
+
+	function wiki_API_pre_save_transform(wikitext, callback, options) {
+		if (callback && typeof callback !== 'function') {
+			// shift arguments
+			options = library_namespace.setup_options(options);
+			callback = null;
+		}
+
+		options = Object.assign({
+			pst : 1,
+			onlypst : 1
+		}, options);
+
+		return wiki_API_parse_wikitext_into_HTML(wikitext, callback, options);
+	}
+
+	wiki_API.pre_save_transform = wiki_API_pre_save_transform;
 
 	// ------------------------------------------------------------------------
 
