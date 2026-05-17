@@ -1979,7 +1979,6 @@ function module_code(library_namespace) {
 		case '#iferror':
 			// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
 			var message = get_parameter_String(1);
-			message = eval_expr(message);
 			token = wiki_API.wiki_error.has_error(message, options) ? get_parameter_String(2)
 					|| ''
 					: get_parameter_String(3) || message.toString() || '';

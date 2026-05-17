@@ -8324,7 +8324,10 @@ function module_code(library_namespace) {
 				// 否則:
 				// CeL.DOM.HTML_to_Unicode('%EF%BC%BB %EF%BC%BD')
 				// !== decodeURIComponent('%EF%BC%BB %EF%BC%BD')
-				unicode_text = decodeURIComponent(unicode_text);
+				unicode_text = decodeURIComponent(options.soft_fix_chars ? unicode_text
+				// 輕微修正百分比符號問題。
+				.replace_till_stable(/%(%|$)/g, encodeURIComponent('%') + '$1')
+						: unicode_text);
 			} catch (e) {
 				// URIError: URI malformed
 			}

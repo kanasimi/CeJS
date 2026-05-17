@@ -615,7 +615,10 @@ function module_code(library_namespace) {
 		return pattern;
 	}
 
-	// [[w:en:Module:String]]
+	// --------------------------------------------------------------------------------------------
+	// String-handling templates, e.g., [[Template:Str left]]
+
+	// [[w:en:Module:String]], [[w:en:Module:Ustring]]
 	function expand_module_String(options) {
 		/* const */var token = this;
 		var parameters = token.parameters;
@@ -628,7 +631,7 @@ function module_code(library_namespace) {
 						wiki_API.expand_transclusion(value, options))
 						.toString();
 				if (/{{/.test(_value)) {
-					throw new Error('expand_module_String: NYI');
+					throw new Error('expand_module_String: 無法處理特殊參數。');
 				}
 				value = _value;
 			}
@@ -664,6 +667,44 @@ function module_code(library_namespace) {
 		case 'sublength':
 			throw new Error('expand_module_String: NYI');
 		}
+
+		return new wiki_API.wiki_error(
+		//
+		[ 'Script error: The function "%1" does not exist.',
+				token.function_name ]);
+	}
+
+	function expand_module_Ustring() {
+		/* const */var token = this;
+		var parameters = token.parameters;
+		function get_parameter(NO) {
+			if (!(NO in parameters))
+				return;
+			var value = parameters[NO].toString().replace(/^\\/, '');
+			if (/{{/.test(value)) {
+				var _value = wiki_API.parse.wiki_element_to_key(
+						wiki_API.expand_transclusion(value, options))
+						.toString();
+				if (/{{/.test(_value)) {
+					throw new Error('expand_module_Ustring: 無法處理特殊參數。');
+				}
+				value = _value;
+			}
+			// 使用未命名參數時，參數前後的空格會保留。
+			return NO > 0 ? value : value.trim();
+		}
+
+		switch (token.function_name) {
+		case 'sub':
+			return get_parameter(2) ? get_parameter('s1').slice(
+					+get_parameter(1), +get_parameter(2)) : get_parameter('s1')
+					.slice(+get_parameter(1));
+
+		case 'len':
+			throw new Error('expand_module_Ustring: NYI');
+		}
+
+		throw new Error('expand_module_String: NYI');
 
 		return new wiki_API.wiki_error(
 		//
@@ -856,6 +897,11 @@ function module_code(library_namespace) {
 
 		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters,
 
+		'Module:Ustring' : {
+			properties : {
+				expand : expand_module_Ustring
+			}
+		},
 		'Module:String' : {
 			properties : {
 				expand : expand_module_String

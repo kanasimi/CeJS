@@ -5002,6 +5002,8 @@ function test_wiki() {
 		assert(['3', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: 1 + 2 }} }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #6');
 		assert(['', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: 1 + X }} }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #7');
 		assert(['correct', CeL.wiki.expand_transclusion('{{#iferror: {{#expr: . }} | error | correct }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #8');
+		assert(['1+ 2', CeL.wiki.expand_transclusion('{{#iferror: 1+ 2|error}}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #9');
+		assert(['', CeL.wiki.expand_transclusion('{{#iferror:|error}}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #10');
 
 		assert(['no', CeL.wiki.expand_transclusion('{{#ifexpr: | yes | no}}').toString()], 'wiki.expand_transclusion: {{#ifexpr:}} #1');
 		// https://www.mediawiki.org/wiki/Manual:Expr_parser_function_syntax#Comparisons
@@ -5803,14 +5805,21 @@ function test_wiki() {
 			var test_name = 'enwiki: expand_transclusion';
 			_setup_test(test_name);
 
-			var options = CeL.wiki.add_session_to_options(enwiki, { on_page_title: 'ABC', allow_promise: true });
 			var promise = Promise.resolve();
 
 			promise = promise.then(function () {
-				return CeL.wiki.expand_transclusion('{{w|ABC}}{{w|ABC|DEF}}', options);
-			}).then(function (parsed) {
-				//console.trace(parsed);
-				assert(['[[ABC]][[ABC|DEF]]', parsed.toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{w}}');
+				var options = CeL.wiki.add_session_to_options(enwiki, { on_page_title: 'ABC', allow_promise: true });
+				return Promise.all([
+					'{{w|ABC}}{{w|ABC|DEF}}',
+					'{{str rightc |Lorem ipsum dolor sit amet |10}}'
+				].map(function (wikitext) {
+					return CeL.wiki.expand_transclusion(wikitext, options);
+				}));
+			}).then(function (results) {
+				//console.trace(results);
+				var i = 0;
+				assert(['[[ABC]][[ABC|DEF]]', results[i++].toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{w}}');
+				assert(['r sit amet', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str rightc}} )');
 			});
 
 			return promise.then(function (parsed) {

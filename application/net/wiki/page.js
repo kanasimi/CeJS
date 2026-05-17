@@ -1839,9 +1839,9 @@ function module_code(library_namespace) {
 			return need_wait_promise;
 		}
 
-		if (callback && typeof callback !== 'function') {
+		if (callback && typeof callback !== 'function' && !options) {
 			// shift arguments
-			options = library_namespace.setup_options(options);
+			options = library_namespace.setup_options(callback);
 			callback = null;
 		}
 
@@ -1877,10 +1877,11 @@ function module_code(library_namespace) {
 		});
 	}
 
+	// @see [[w:en:User:AnomieBOT/source/tasks/TemplateSubster/Base.pm]]
 	function wiki_API_pre_save_transform(wikitext, callback, options) {
-		if (callback && typeof callback !== 'function') {
+		if (callback && typeof callback !== 'function' && !options) {
 			// shift arguments
-			options = library_namespace.setup_options(options);
+			options = library_namespace.setup_options(callback);
 			callback = null;
 		}
 

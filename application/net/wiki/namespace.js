@@ -1966,6 +1966,7 @@ function module_code(library_namespace) {
 		// [[A&quot;A]]→[[A"A]]
 		// fix "&#39;". 由於裡面包含"#"，所以必須在 PATTERN_anchor_of_page_title 之前處理。
 		page_name = library_namespace.HTML_to_Unicode(page_name, {
+			soft_fix_chars : true,
 			predefined : true,
 			entity : true,
 			numeric : true,
@@ -4264,7 +4265,8 @@ function module_code(library_namespace) {
 		// console.trace(parameters, from_parameters, action);
 
 		if (!session || !path) {
-			library_namespace.warn('No session or no path settled!');
+			library_namespace.warn('extract_parameters: '
+					+ 'No session or no path settled!');
 			if (session) {
 				console.trace([ session, path, action, from_parameters ]);
 			}

@@ -2482,7 +2482,8 @@ function module_code(library_namespace) {
 	 * search wikitext: using prefix "insource:". e.g.,
 	 * https://www.mediawiki.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
 	 * 
-	 * TODO: [[:en:Template:Regex]] "hastemplate:", "incategory:", "intitle:",
+	 * TODO: [[mw:Help:CirrusSearch]], [[Template:Search link]],
+	 * [[w:en:Template:Regex]] "hastemplate:", "incategory:", "intitle:",
 	 * "linksto:", "morelike:", "prefer-recent:", "boost-templates:",
 	 * "namespace:"
 	 * 
@@ -2510,7 +2511,7 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/API:Search_and_discovery
 	 *      https://www.mediawiki.org/wiki/Help:CirrusSearch
 	 */
-	wiki_API.search = function wiki_API_search(key, callback, options) {
+	function wiki_API_search(key, callback, options) {
 		if (typeof options !== 'object' && (options === 'max' || options > 0)) {
 			options = {
 				srlimit : options
@@ -2602,7 +2603,9 @@ function module_code(library_namespace) {
 				callback(data, error);
 			}
 		}, null, options);
-	};
+	}
+
+	wiki_API.search = wiki_API_search;
 
 	wiki_API.search.default_parameters = {
 		// |プロジェクト
