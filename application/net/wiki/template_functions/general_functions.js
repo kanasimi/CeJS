@@ -618,25 +618,28 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 	// String-handling templates, e.g., [[Template:Str left]]
 
+	function get_parameter_of_token(NO, token, options) {
+		var parameters = token.parameters;
+		if (!(NO in parameters))
+			return;
+		var value = parameters[NO].toString();
+		if (/{{/.test(value)) {
+			var _value = wiki_API.parse.wiki_element_to_key(
+					wiki_API.expand_transclusion(value, options)).toString();
+			if (/{{/.test(_value)) {
+				throw new Error('get_parameter_of_token: 無法處理特殊參數。');
+			}
+			value = _value;
+		}
+		// 使用未命名參數時，參數前後的空格會保留。
+		return NO > 0 ? value : value.trim();
+	}
+
 	// [[w:en:Module:String]], [[w:en:Module:Ustring]]
 	function expand_module_String(options) {
 		/* const */var token = this;
-		var parameters = token.parameters;
 		function get_parameter(NO) {
-			if (!(NO in parameters))
-				return;
-			var value = parameters[NO].toString();
-			if (/{{/.test(value)) {
-				var _value = wiki_API.parse.wiki_element_to_key(
-						wiki_API.expand_transclusion(value, options))
-						.toString();
-				if (/{{/.test(_value)) {
-					throw new Error('expand_module_String: 無法處理特殊參數。');
-				}
-				value = _value;
-			}
-			// 使用未命名參數時，參數前後的空格會保留。
-			return NO > 0 ? value : value.trim();
+			return get_parameter_of_token(NO, token, options);
 		}
 
 		switch (token.function_name) {
@@ -674,24 +677,10 @@ function module_code(library_namespace) {
 				token.function_name ]);
 	}
 
-	function expand_module_Ustring() {
+	function expand_module_Ustring(options) {
 		/* const */var token = this;
-		var parameters = token.parameters;
 		function get_parameter(NO) {
-			if (!(NO in parameters))
-				return;
-			var value = parameters[NO].toString().replace(/^\\/, '');
-			if (/{{/.test(value)) {
-				var _value = wiki_API.parse.wiki_element_to_key(
-						wiki_API.expand_transclusion(value, options))
-						.toString();
-				if (/{{/.test(_value)) {
-					throw new Error('expand_module_Ustring: 無法處理特殊參數。');
-				}
-				value = _value;
-			}
-			// 使用未命名參數時，參數前後的空格會保留。
-			return NO > 0 ? value : value.trim();
+			return get_parameter_of_token(NO, token, options);
 		}
 
 		switch (token.function_name) {
