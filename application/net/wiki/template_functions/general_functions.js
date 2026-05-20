@@ -624,18 +624,21 @@ function module_code(library_namespace) {
 			return;
 		var value = parameters[NO].toString();
 		if (/{{/.test(value)) {
-			var _value = wiki_API.parse.wiki_element_to_key(
-					wiki_API.expand_transclusion(value, options)).toString();
-			if (/{{/.test(_value)) {
-				throw new Error('get_parameter_of_token: 無法處理特殊參數。');
+			var _value = wiki_API.expand_transclusion(value, options);
+			if (!library_namespace.is_thenable(_value)) {
+				_value = wiki_API.parse.wiki_element_to_key(_value);
 			}
-			value = _value;
+			if (library_namespace.is_thenable(_value) || /{{/.test(_value)) {
+				throw new Error('get_parameter_of_token: 無法處理特殊參數 ' + _value);
+			}
+			value = _value.toString();
 		}
 		// 使用未命名參數時，參數前後的空格會保留。
 		return NO > 0 ? value : value.trim();
 	}
 
-	// [[w:en:Module:String]], [[w:en:Module:Ustring]]
+	// [[w:en:Module:String]]
+	// e.g., [[Template:Str rightc]] @ [[Template:Infobox 越南省市]]
 	function expand_module_String(options) {
 		/* const */var token = this;
 		function get_parameter(NO) {
@@ -677,6 +680,7 @@ function module_code(library_namespace) {
 				token.function_name ]);
 	}
 
+	// [[w:en:Module:Ustring]]
 	function expand_module_Ustring(options) {
 		/* const */var token = this;
 		function get_parameter(NO) {
