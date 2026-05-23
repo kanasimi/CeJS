@@ -7737,6 +7737,9 @@ function module_code(library_namespace) {
 
 	}
 
+	/** {S}繼承前一個標記的時間。如英語字典之省略符號，將以本node之內含文字代替。 */
+	var KEY_Inherit_time = '~';
+
 	/**
 	 * 計算已具紀年標記之指定 HTML node 之紀年值。
 	 * 
@@ -7790,9 +7793,8 @@ function module_code(library_namespace) {
 					var era_data = library_namespace.DOM_data(node_to_test,
 							'era');
 					era = library_namespace.set_text(node_to_test);
-					if (era_data !== '~') {
-						// '~':如英語字典之省略符號，將以本node之內含文字代替。
-						era = era_data.replace('~', era);
+					if (era_data !== KEY_Inherit_time) {
+						era = era_data.replace(KEY_Inherit_time, era);
 					}
 					// console.log(era);
 
@@ -7829,9 +7831,8 @@ function module_code(library_namespace) {
 			// ------------------------------------
 			// 解析 era。
 			era = library_namespace.set_text(node);
-			if (era_data !== '~') {
-				// '~':如英語字典之省略符號，將以本node之內含文字代替。
-				era = era_data.replace('~', ' ' + era);
+			if (era_data !== KEY_Inherit_time) {
+				era = era_data.replace(KEY_Inherit_time, ' ' + era);
 			}
 			// console.log([ 'era:', era ]);
 
@@ -8236,8 +8237,9 @@ function module_code(library_namespace) {
 	// 十二地支時辰. e.g., 光緒十九年八月初二日丑刻
 	時干支_PATTERN = generate_pattern(/(支)[時刻]/, false, 'g'),
 	// see era_text_to_HTML.build_pattern()
-	REPLACED_data_era = '$1<' + set_up_era_nodes.default_tag
-			+ ' data-era="~">$2</' + set_up_era_nodes.default_tag + '>$3';
+	REPLACED_data_era = '$1<' + set_up_era_nodes.default_tag + ' data-era="'
+			+ KEY_Inherit_time + '">$2</' + set_up_era_nodes.default_tag
+			+ '>$3';
 
 	/**
 	 * 將具有紀年日期資訊的純文字文本(e.g., 史書原文)，轉成供 set_up_era_node() 用之 HTML。<br />
@@ -8253,26 +8255,36 @@ function module_code(library_namespace) {
 		if (!史籍紀年_PATTERN)
 			era_text_to_HTML.build_pattern();
 
-		if (typeof text === 'string') {
-			// search
-			// 預防 `史籍紀年_PATTERN` 於利用到 pattern 前後，這部分被吃掉。
-			// 像 "十年，七月庚辰" 就會在 match 了 "十年，" 後，無法 match 到 "七月"。
-			var matched, list = [], last_index = 0;
-			while (matched = 史籍紀年_PATTERN.exec(text)) {
-				// @see REPLACED_data_era
-				list.push(text.slice(last_index, matched.index
-						+ matched[1].length), '<'
-						+ set_up_era_nodes.default_tag + ' data-era="~">'
-						+ matched[2] + '</' + set_up_era_nodes.default_tag
-						+ '>');
-				史籍紀年_PATTERN.lastIndex -= matched[3].length;
-				last_index = 史籍紀年_PATTERN.lastIndex;
-			}
-			list.push(text.slice(last_index));
-			text = list.join('');
+		var base;
+		function get_base() {
+			if (base === KEY_Inherit_time)
+				return base;
 
+			var base = options && options.base;
+			if (base) {
+				if (is_Date(base)) {
+					// base = base.toISOString();
+					base = KEY_Inherit_time;
+				} else {
+					base = base.toString();
+				}
+			} else {
+				base = KEY_Inherit_time;
+			}
+
+			return base;
+		}
+
+		function replace_additionally_era(text) {
 			// search for 僅紀年亦轉換的情況。 e.g., '天皇'.
-			text = text.replace(ERA_ONLY_PATTERN, REPLACED_data_era)
+			text = text.replace(ERA_ONLY_PATTERN, function(all, $1, $2, $3) {
+				// @see REPLACED_data_era
+				return $1 + '<' + set_up_era_nodes.default_tag
+				//
+				+ ' data-era="' + get_base() + '">' + $2 + '</'
+				//
+				+ set_up_era_nodes.default_tag + '>' + $3;
+			})
 			//
 			.replace(朔干支_PATTERN, REPLACED_data_era)
 			//
@@ -8297,17 +8309,45 @@ function module_code(library_namespace) {
 			})
 			// format
 			.replace(/\n/g, '<br />');
+
+			return text;
 		}
 
-		if (node) {
-			if (typeof node === 'string')
-				node = document.getElementById(node);
-			node.innerHTML = text;
-			// console.log(node);
-			// set_up_era_node(node, options);
-			set_up_era_nodes(null, options);
-		} else
+		if (typeof text === 'string') {
+			// search
+			// 預防 `史籍紀年_PATTERN` 於利用到 pattern 前後，這部分被吃掉。
+			// 像 "十年，七月庚辰" 就會在 match 了 "十年，" 後，無法 match 到 "七月"。
+			var matched, list = [], last_index = 0;
+			while (matched = 史籍紀年_PATTERN.exec(text)) {
+				if (!matched[1] && 干支_PATTERN.test(matched[2])
+						&& matched[3] === '年') {
+					// e.g., "縄文時代神武天皇1年1月1日"
+					matched[2] += matched[3];
+					matched[3] = '';
+				}
+				// @see REPLACED_data_era
+				list.push(replace_additionally_era(text.slice(last_index,
+						matched.index + matched[1].length)), '<'
+						+ set_up_era_nodes.default_tag + ' data-era="'
+						+ get_base() + '">' + matched[2] + '</'
+						+ set_up_era_nodes.default_tag + '>');
+				史籍紀年_PATTERN.lastIndex -= matched[3].length;
+				last_index = 史籍紀年_PATTERN.lastIndex;
+			}
+			list.push(replace_additionally_era(text.slice(last_index)));
+			text = list.join('');
+		}
+
+		if (!node) {
 			return text;
+		}
+
+		if (typeof node === 'string')
+			node = document.getElementById(node);
+		node.innerHTML = text;
+		// console.log(node);
+		// set_up_era_node(node, options);
+		set_up_era_nodes(null, options);
 	}
 
 	/**

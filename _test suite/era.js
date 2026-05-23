@@ -2053,7 +2053,11 @@ function translate_era(era) {
 					span : ' ',
 					C : 'note'
 				}, {
-					span : CeL.era.to_HTML(note),
+					span : CeL.era.to_HTML(note, null, {
+						// base : date
+						// base : era
+						base : date && date.紀年名
+					}),
 					C : 'note'
 				});
 			}
@@ -2150,7 +2154,7 @@ function translate_era(era) {
 		}
 
 		// gettext_config:{"id":"contemporary-period"}
-		if (format === '共存紀年')
+		if (format === '共存紀年') {
 			if (Array.isArray(output = date.共存紀年))
 				output.forEach(function(era, index) {
 					output[index] = [ ' [' + (index + 1) + '] ',
@@ -2162,7 +2166,7 @@ function translate_era(era) {
 					C : 'fadeout'
 				};
 
-		else {
+		} else {
 			// get the result
 			output = date.format({
 				parser : 'CE',
