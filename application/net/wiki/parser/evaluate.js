@@ -760,8 +760,8 @@ function module_code(library_namespace) {
 			var page_title = token.page_title.toString();
 			// @see PATTERN_page_name @ CeL.application.net.wiki.namespace
 			if (is_invalid_page_title(page_title)) {
-				library_namespace.warn('expand_transclusion: Cannot expand '
-						+ token);
+				library_namespace.warn('expand_transclusion: '
+						+ 'Cannot expand ' + token);
 				// Error.stackTraceLimit = Infinity;
 				// console.trace(token);
 				// Error.stackTraceLimit = 10;
@@ -770,8 +770,9 @@ function module_code(library_namespace) {
 
 			var max_template_depth = options.max_template_depth
 					|| DEFAULT_MAX_TEMPLATE_DEPTH;
-			if (template_depth_now >= max_template_depth
-					|| get_template_depth_now_of_token(token) >= max_template_depth) {
+			if ((template_depth_now >= max_template_depth || get_template_depth_now_of_token(token) >= max_template_depth)
+					&& (!options.ignore_template_depth_limit || options
+							.ignore_template_depth_limit(token))) {
 				library_namespace.debug('已達最大層數 ' + max_template_depth
 						+ '，不再展開: ' + token, 2, 'expand_transclusion');
 				return token;
