@@ -2737,7 +2737,7 @@ function module_code(library_namespace) {
 				parse_wikitext(matched[2], options, queue));
 				if (/^[ *\n]*#/.test(matched.pfn)) {
 					if (typeof matched.pfn === 'string')
-						matched.pfn = matched.pfn.trim();
+						matched.pfn = matched.pfn.trim().toLowerCase();
 
 					// allow {{#in<!-- -->voke:...}}
 					invoke_properties = /^[ *\n]*#invoke[ *\n]*$/
@@ -2893,6 +2893,13 @@ function module_code(library_namespace) {
 							= wiki_element_to_key(value, options)
 							// || 'main'
 							;
+							if (typeof invoke_properties.function_name
+							//
+							=== 'string') {
+								invoke_properties.function_name
+								//
+								= invoke_properties.function_name.trim();
+							}
 						} else {
 							// 警告: 不該尋找下一個可用的 parameter serial。
 							// 無名parameters有自己一套計數，不因具名parameters而跳過。

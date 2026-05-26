@@ -5811,7 +5811,16 @@ function test_wiki() {
 				var options = CeL.wiki.add_session_to_options(enwiki, { on_page_title: 'ABC', allow_promise: true });
 				return Promise.all([
 					'{{w|ABC}}{{w|ABC|DEF}}',
-					'{{str rightc |Lorem ipsum dolor sit amet |10}}'
+					'{{str rightc |Lorem ipsum dolor sit amet |10}}',
+					// [[w:en:Template:Str sub new]]
+					'{{str sub new|1234567890|3|7}}',
+					'{{str sub new|1234567890|3|-3}}',
+					'{{str sub new|1234567890|3}}',
+					'{{str sub new|1234567890|12}}',
+					'{{Str sub new|s=abcd=fgh|i=3|j=7}}',
+					'{{#invoke:string|sub|s=abcd=fgh|i=3|j=7}}',
+					// [[w:en:Template:Str index]]
+					//'{{str index|0123456789ABCDEF|0}}'
 				].map(function (wikitext) {
 					return CeL.wiki.expand_transclusion(wikitext, options);
 				}));
@@ -5820,6 +5829,14 @@ function test_wiki() {
 				var i = 0;
 				assert(['[[ABC]][[ABC|DEF]]', results[i++].toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{w}}');
 				assert(['r sit amet', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str rightc}} )');
+				// [[w:en:Template:Str sub new]]
+				assert(['34567', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new ||+|+ }} )');
+				assert(['345678', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new ||+|-}} )');
+				assert(['34567890', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new ||+ }} )');
+				assert(results[i++].toString().includes('String subset index out of range'), 'CeL.wiki.expand_transclusion( {{str sub new ||++ }} )');
+				assert(['cd=fg', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{#invoke:string|sub|=|+|+ }} )');
+				// [[w:en:Template:Str index]]
+				//assert(results[i++].toString().includes('String index out of range'), 'CeL.wiki.expand_transclusion( {{str index ||0 }} )');
 			});
 
 			return promise.then(function (parsed) {

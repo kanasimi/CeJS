@@ -2379,6 +2379,10 @@ function module_code(library_namespace) {
 					token.not_evaluated = true;
 					return token;
 				}
+				if (!Array.isArray(promise)) {
+					// e.g., wiki_API.wiki_error()
+					promise = promise.toString();
+				}
 				token = wiki_API.parse(promise, options);
 				if (Array.isArray(token)) {
 					token.template_depth_now = template_depth_now + 1;

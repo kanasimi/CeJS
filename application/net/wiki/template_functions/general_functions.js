@@ -638,7 +638,6 @@ function module_code(library_namespace) {
 	}
 
 	// [[w:en:Module:String]]
-	// e.g., [[Template:Str rightc]] @ [[Template:Infobox 越南省市]]
 	function expand_module_String(options) {
 		/* const */var token = this;
 		function get_parameter(NO) {
@@ -660,6 +659,27 @@ function module_code(library_namespace) {
 			return (get_parameter('source') || get_parameter(1)).replace(
 					pattern, get_parameter('replace') || get_parameter(3));
 
+		case 'sub':
+			// function str.sub( frame )
+			var target_string = get_parameter('s');
+			var start_index = (get_parameter('i') || 1) - 1;
+			if (start_index < 0)
+				start_index += target_string.length + 1;
+			var end_index = +get_parameter('j') || -1;
+			if (end_index < 0)
+				end_index += target_string.length + 1;
+			if (start_index < 0 || end_index < 0
+					|| start_index > target_string.length
+					|| end_index > target_string.length) {
+				return new wiki_API.wiki_error(
+						'String Module Error: String subset index out of range');
+			}
+			if (start_index > end_index) {
+				return new wiki_API.wiki_error(
+						'String Module Error: String subset indices out of order');
+			}
+			return target_string.substring(start_index, end_index);
+
 		case 'count':
 		case 'escapePattern':
 		case 'find':
@@ -669,7 +689,6 @@ function module_code(library_namespace) {
 		case 'pos':
 		case 'rep':
 		case 'str_find':
-		case 'sub':
 		case 'sublength':
 			throw new Error('expand_module_String: NYI');
 		}
@@ -687,17 +706,35 @@ function module_code(library_namespace) {
 			return get_parameter_of_token(NO, token, options);
 		}
 
+		// https://www.mediawiki.org/wiki/Extension:Scribunto/Lua_reference_manual#Ustring_library
 		switch (token.function_name) {
 		case 'sub':
+			// e.g., [[Template:Str rightc]] @ [[Template:Infobox 越南省市]]
 			return get_parameter(2) ? get_parameter('s1').slice(
 					+get_parameter(1), +get_parameter(2)) : get_parameter('s1')
 					.slice(+get_parameter(1));
 
+		case 'byte':
+		case 'byteoffset':
+		case 'char':
+		case 'codepoint':
+		case 'gcodepoint':
+		case 'find':
+		case 'format':
+		case 'gmatch':
+		case 'gsub':
+		case 'isutf8':
+		case 'lower':
+		case 'match':
+		case 'rep':
+		case 'toNFC':
+		case 'toNFD':
+		case 'toNFKC':
+		case 'toNFKD':
+		case 'upper':
 		case 'len':
 			throw new Error('expand_module_Ustring: NYI');
 		}
-
-		throw new Error('expand_module_String: NYI');
 
 		return new wiki_API.wiki_error(
 		//
