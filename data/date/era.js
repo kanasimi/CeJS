@@ -6530,12 +6530,16 @@ function module_code(library_namespace) {
 				tmp2 = date.trim();
 				if (options.base
 						&& (tmp = tmp2.match(/([朔晦])日?/)
-								|| tmp2.match(/^(望)日?$/)))
+								|| tmp2.match(/^(望)日?$/))) {
 					日 = tmp[1];
-				if (options.base && (tmp = tmp2.match(/([明隔去])年/)))
+				}
+				if (options.base && (tmp = tmp2.match(/([明隔去])年/))) {
 					年 = tmp[1];
-				if (tmp = tmp2.replace(to_era_Date.ignore_pattern, ''))
+				}
+				// TODO: 以 options.base 為基礎推算干支年。
+				if (tmp = tmp2.replace(to_era_Date.ignore_pattern, '')) {
 					偵測集.push(tmp);
+				}
 				library_namespace.debug('無法辨識出 [' + date + '] 之紀年樣式'
 						+ (tmp ? '，直接當紀年名稱處理' : '') + '。', 2, 'to_era_Date');
 			}
@@ -8255,24 +8259,25 @@ function module_code(library_namespace) {
 		if (!史籍紀年_PATTERN)
 			era_text_to_HTML.build_pattern();
 
-		var base;
-		function get_base() {
-			if (base === KEY_Inherit_time)
-				return base;
+		var era_data, had_set_era_data;
+		function get_era_data() {
+			if (had_set_era_data)
+				return KEY_Inherit_time;
 
-			var base = options && options.base;
-			if (base) {
-				if (is_Date(base)) {
-					// base = base.toISOString();
-					base = KEY_Inherit_time;
+			var era_data = options && options.era_data;
+			if (era_data) {
+				if (is_Date(era_data)) {
+					// era_data = era_data.toISOString();
+					era_data = KEY_Inherit_time;
 				} else {
-					base = base.toString();
+					era_data = era_data.toString();
 				}
 			} else {
-				base = KEY_Inherit_time;
+				era_data = KEY_Inherit_time;
 			}
 
-			return base;
+			had_set_era_data = true;
+			return era_data;
 		}
 
 		function replace_additionally_era(text) {
@@ -8281,7 +8286,7 @@ function module_code(library_namespace) {
 				// @see REPLACED_data_era
 				return $1 + '<' + set_up_era_nodes.default_tag
 				//
-				+ ' data-era="' + get_base() + '">' + $2 + '</'
+				+ ' data-era="' + get_era_data() + '">' + $2 + '</'
 				//
 				+ set_up_era_nodes.default_tag + '>' + $3;
 			})
@@ -8329,7 +8334,7 @@ function module_code(library_namespace) {
 				list.push(replace_additionally_era(text.slice(last_index,
 						matched.index + matched[1].length)), '<'
 						+ set_up_era_nodes.default_tag + ' data-era="'
-						+ get_base() + '">' + matched[2] + '</'
+						+ get_era_data() + '">' + matched[2] + '</'
 						+ set_up_era_nodes.default_tag + '>');
 				史籍紀年_PATTERN.lastIndex -= matched[3].length;
 				last_index = 史籍紀年_PATTERN.lastIndex;

@@ -2054,9 +2054,9 @@ function translate_era(era) {
 					C : 'note'
 				}, {
 					span : CeL.era.to_HTML(note, null, {
-						// base : date
-						// base : era
-						base : date && date.紀年名
+						// era_data : date
+						// era_data : era
+						era_data : date && date.紀年名 && (date.紀年名 + '~')
 					}),
 					C : 'note'
 				});
