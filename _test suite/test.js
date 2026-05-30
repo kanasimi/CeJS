@@ -5819,6 +5819,8 @@ function test_wiki() {
 					'{{str sub new|1234567890|12}}',
 					'{{Str sub new|s=abcd=fgh|i=3|j=7}}',
 					'{{#invoke:string|sub|s=abcd=fgh|i=3|j=7}}',
+					'{{str sub new|abcd=fgh|3|7}}',
+					'{{str sub new|1=abcd=fgh|2=3|3=7}}',
 					// [[w:en:Template:Str index]]
 					//'{{str index|0123456789ABCDEF|0}}'
 				].map(function (wikitext) {
@@ -5834,7 +5836,10 @@ function test_wiki() {
 				assert(['345678', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new ||+|-}} )');
 				assert(['34567890', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new ||+ }} )');
 				assert(results[i++].toString().includes('String subset index out of range'), 'CeL.wiki.expand_transclusion( {{str sub new ||++ }} )');
+				assert(['cd=fg', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new |sub|=|+|+ }} )');
 				assert(['cd=fg', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{#invoke:string|sub|=|+|+ }} )');
+				assert(results[i++].toString().includes('String subset index out of range'), 'CeL.wiki.expand_transclusion( {{str sub new |=|+ }} )');
+				assert(['cd=fg', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new |sub|=|=|= }} )');
 				// [[w:en:Template:Str index]]
 				//assert(results[i++].toString().includes('String index out of range'), 'CeL.wiki.expand_transclusion( {{str index ||0 }} )');
 			});

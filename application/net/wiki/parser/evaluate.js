@@ -513,7 +513,17 @@ function module_code(library_namespace) {
 			// console.trace(options);
 			// expand template, .expand_template(), .to_wikitext()
 			// https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
-			var promise = token.expand(options, template_depth_now);
+			var promise;
+			try {
+				promise = token.expand(options, template_depth_now);
+			} catch (e) {
+				// 當 token.expand() 尚未實作時，可丟出 new Error('NYI')。
+				if (e && /NYI/.test(e.message)) {
+					library_namespace.error(e);
+				}
+				// other error
+				break;
+			}
 			template_depth_now++;
 			if (library_namespace.is_thenable(promise)) {
 				// e.g., general_expand_template()
@@ -2368,7 +2378,15 @@ function module_code(library_namespace) {
 
 			// console.trace(token);
 			if (typeof token.expand === 'function') {
-				var promise = token.expand(options, template_depth_now);
+				var promise;
+				try {
+					promise = token.expand(options, template_depth_now);
+				} catch (e) {
+					if (e && /NYI/.test(e.message))
+						return NYI();
+					// other errors should be thrown to upper level.
+					throw e;
+				}
 				if (promise === undefined || promise === token) {
 					return NYI();
 				}
