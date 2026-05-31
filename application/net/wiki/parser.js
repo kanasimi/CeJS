@@ -2412,6 +2412,9 @@ function module_code(library_namespace) {
 		if (Array.isArray(token) && (!token.type || token.type === 'plain')) {
 			// 對於容器，如元素列表，一一插入其子元素。
 			token.forEach(function(subtoken) {
+				if (wiki_API.is_parsed_element(subtoken)) {
+					subtoken.to_insert = true;
+				}
 				insert_layout_element.call(parsed, subtoken, options);
 			});
 			return;
@@ -2482,10 +2485,45 @@ function module_code(library_namespace) {
 			} else {
 				library_namespace.error('insert_layout_element: '
 						+ wiki_API.site_name(session)
-						+ ' 之 default_layout_order 未包含 ' + location + ' ('
+						+ ' 之 default_layout_order 未包含 '
+						+ (location || token.type || typeof token) + ' ('
 						+ token + ')');
 			}
+
+			if (!(parsed_index >= 0)
+			// 參考錨點: 都找不到就把這個放在這個後面。
+			&& options.reference_anchor_node
+			// e.g., [[Talk:拉丁美洲文學]], [[Talk:瓊瑤]]
+			&& (typeof token !== 'object' || token.type in {
+				comment : true,
+				transclusion : true,
+				section_title : true,
+				category : true
+			})
+			// && options.insert_after_reference_anchor
+			&& options.reference_anchor_position === 'after') {
+				if (typeof options.reference_anchor_node !== 'number') {
+					parsed_index = parsed
+							.indexOf(options.reference_anchor_node);
+				}
+				if (parsed_index >= 0) {
+					while (parsed[++parsed_index]
+							&& parsed[parsed_index].to_insert) {
+						// 假如有多個元素需要插入，維持順序。
+					}
+					if (parsed_index > parsed.length) {
+						parsed_index = NOT_FOUND;
+					} else if (typeof token === 'string') {
+						// e.g., [[Talk:拉丁美洲文學]]
+						// 令插入 {String} 時依然維持順序。
+						token = [ token ];
+						token.to_insert = true;
+					}
+				}
+			}
+
 			// console.trace(parsed_index);
+
 			if (!(parsed_index >= 0)) {
 				if (options.force_insert) {
 					// Nothing matched: Insert as the latest element
