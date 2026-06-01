@@ -8,6 +8,7 @@
 			"Kanashimi",
 			"McDutchie",
 			"Robby",
+			"Siebrand",
 			"Verdy p"
 		]
 	},
@@ -728,7 +729,7 @@
 	"the-downloaded-file-will-be-placed-in-the-default-directory": "; Repositories: {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}\n; References: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L142}}\n; Scope: 執行時 console 訊息 work_crawler_loader.js",
 	"to-use-the-graphical-interface-please-execute-`$1`": "; Parameters: %1: start_gui_electron.*\n; Repositories: {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}\n; References: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L210}}\n; Scope: 執行時 console 訊息 work_crawler_loader.js",
 	"option=true": "顯示幫助信息/用法說明。\n; Repositories: {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}\n; References: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L223}}\n; Scope: 執行時 console 訊息 work_crawler_loader.js",
-	"option=value": "顯示幫助信息/用法說明。\n; Repositories: {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}\n; References: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L225}}\n; Scope: 執行時 console 訊息 work_crawler_loader.js",
+	"option=value": "Displays help information/usage instructions.\n; Repositories: {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}\n; References: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L225}}\n; Scope: 執行時 console 訊息 work_crawler_loader.js",
 	"usage": "顯示幫助信息/用法說明。\n; Repositories: {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}\n; References: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L230}}\n; Scope: 執行時 console 訊息 work_crawler_loader.js",
 	"work-title-work-id": "顯示幫助信息/用法說明。有些舊的CLI無法顯示\"🆔\"。\n; Repositories: {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}\n; References: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L236}}\n; Scope: 執行時 console 訊息 work_crawler_loader.js",
 	"work-list-file": "顯示幫助信息/用法說明。\n; Repositories: {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}\n; References: {{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L245}}\n; Scope: 執行時 console 訊息 work_crawler_loader.js",
