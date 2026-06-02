@@ -2456,6 +2456,51 @@ function module_code(library_namespace) {
 		layout_index;
 		// console.trace(location, layout_indices, parsed_index);
 
+		/**
+		 * Guess insert_after_templates
+		 * 
+		 * @inner
+		 */
+		function guess_insert_after_templates() {
+			var template_order_of_layout_of_location = get_template_order_of_layout(
+					session, location);
+			if (!template_order_of_layout_of_location)
+				return;
+
+			function test_templates(template_list) {
+				for (var _index = 0;; _index++) {
+					if ((session || wiki_API).is_template(
+							template_list[_index], token)) {
+						insert_after_templates = template_list.slice(0, _index);
+						break;
+					}
+					if (_index === template_list.length) {
+						insert_after_templates = null;
+						break;
+					}
+				}
+				// console.trace(insert_after_templates);
+			}
+
+			// console.trace(template_order_of_layout_of_location);
+			if (Array.isArray(template_order_of_layout_of_location)) {
+				test_templates(template_order_of_layout_of_location);
+				return;
+			}
+
+			if (library_namespace
+					.is_Object(template_order_of_layout_of_location)) {
+				// e.g., template_order_of_layout_of_location =
+				// {"article_lead_section":["討論頁重定向",...],"appendices":["Reflist",...],...}
+				for ( var _location in template_order_of_layout_of_location) {
+					test_templates(template_order_of_layout_of_location[_location]);
+					if (insert_after_templates) {
+						return;
+					}
+				}
+			}
+		}
+
 		if (!(parsed_index >= 0)) {
 			// 未解析出此 location。
 			layout_index = default_layout_order.indexOf(location);
@@ -2486,8 +2531,8 @@ function module_code(library_namespace) {
 				library_namespace.error('insert_layout_element: '
 						+ wiki_API.site_name(session)
 						+ ' 之 default_layout_order 未包含 '
-						+ (location || token.type || typeof token) + ' ('
-						+ token + ')');
+						+ (location || token.type || '{' + typeof token + '}')
+						+ ' (' + token + ')');
 			}
 
 			if (!(parsed_index >= 0)
@@ -2538,28 +2583,8 @@ function module_code(library_namespace) {
 		}
 
 		var insert_after_templates = options.insert_after_templates;
-		// Guess insert_after_templates
 		if (!insert_after_templates && token.type === 'transclusion') {
-			var template_order_of_layout_of_location = get_template_order_of_layout(
-					session, location);
-			if (template_order_of_layout_of_location) {
-				for (var _index = 0;; _index++) {
-					if ((session || wiki_API)
-							.is_template(
-									template_order_of_layout_of_location[_index],
-									token)) {
-						insert_after_templates = template_order_of_layout_of_location
-								.slice(0, _index);
-						break;
-					}
-					if (_index === template_order_of_layout_of_location.length) {
-						insert_after_templates = null;
-						break;
-					}
-				}
-				// console.trace(insert_after_templates);
-				// console.trace(template_order_of_layout_of_location);
-			}
+			guess_insert_after_templates();
 		}
 		if (insert_after_templates) {
 			// console.trace(!!session, location, parsed_index, parsed.length);
