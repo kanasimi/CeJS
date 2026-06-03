@@ -212,7 +212,7 @@ function module_code(library_namespace) {
 
 		var file_path_list = conversion_group_options;
 		if (library_namespace.is_Object(file_path_list)) {
-			if (!file_path_list.file_path) {
+			if (!file_path_list.file_path && !file_path_list.file_name) {
 				library_namespace
 						.error('add_conversions: Invalid file_path_list: '
 								+ JSON.stringify(file_path_list));
@@ -600,7 +600,13 @@ function module_code(library_namespace) {
 
 			files : [ [ {
 				sort_name : '主要繁簡轉換'
-			}, 'STPhrases', 'STCharacters',
+			}, {
+				file_name : 'STPhrases',
+				remove_comments : '#'
+			}, {
+				file_name : 'STCharacters',
+				remove_comments : '#'
+			},
 			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的辭典檔。
 			'additional.to_TW.auto-generated',
 			// 後來的會覆蓋前面的。
@@ -612,9 +618,14 @@ function module_code(library_namespace) {
 			// ** 下面的是上面詞彙與單字轉換後的再轉換。
 			[ {
 				sort_name : '再轉換'
-			}, 'TWPhrasesIT',
-			// ↑ TWPhrasesIT.txt 有許多常用詞彙，在 corrections_to_TW.txt 取消。
-			'TWPhrasesName', 'TWPhrasesOther',
+			}, {
+				// TWPhrases.txt 有許多常用詞彙，在 corrections_to_TW.txt 取消。
+				file_name : 'TWPhrases',
+				remove_comments : '#'
+			}, {
+				file_name : 'TWVariantsPhrases',
+				remove_comments : '#'
+			},
 			// 若要篩選或增減 conversion files，可參考範例：
 			// start_downloading() @ CeL.application.net.work_crawler.task
 			{
@@ -623,8 +634,11 @@ function module_code(library_namespace) {
 			} ],
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/s2twp.json
 			[ {
-				sort_name : '變體字'
-			}, 'TWVariants' ] ],
+				sort_name : '變體字轉換'
+			}, {
+				file_name : 'TWVariants',
+				remove_comments : '#'
+			} ] ],
 			// 手動修正表
 			corrections : 'corrections_to_TW.txt'
 		},
@@ -635,9 +649,23 @@ function module_code(library_namespace) {
 
 			// https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
 			// https://github.com/BYVoid/OpenCC/blob/master/node/dicts.gypi
-			files : [ 'TWVariantsRevPhrases', [ {
+			files : [ [ {
+				sort_name : '變體字轉換'
+			}, {
+				file_name : 'TWVariantsRevPhrases',
+				remove_comments : '#'
+			}, {
+				file_name : 'TWPhrasesRev',
+				remove_comments : '#'
+			} ], [ {
 				sort_name : '主要繁簡轉換'
-			}, 'TSPhrases', 'TSCharacters',
+			}, {
+				file_name : 'TSPhrases',
+				remove_comments : '#'
+			}, {
+				file_name : 'TSCharacters',
+				remove_comments : '#'
+			},
 			// 以 generate_additional_table.js 合併新同文堂和 ConvertZZ 的辭典檔。
 			'additional.to_CN.auto-generated',
 			// 後來的會覆蓋前面的。

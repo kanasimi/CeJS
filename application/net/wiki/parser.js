@@ -1838,6 +1838,9 @@ function module_code(library_namespace) {
 		}
 	};
 
+	/** {Array}可重複存在的 layout elements。 */
+	setup_layout_elements.allow_duplicate_templates = [ 'Translated page' ];
+
 	// 暫時代用。
 	setup_layout_elements.template_order_of_layout.zhwiki.talk_page_lead = setup_layout_elements.template_order_of_layout.enwiki.talk_page_lead;
 
@@ -2559,6 +2562,7 @@ function module_code(library_namespace) {
 					if (parsed_index > parsed.length) {
 						parsed_index = NOT_FOUND;
 					} else if (typeof token === 'string') {
+						// @see function set_shell(parsed)
 						// e.g., [[Talk:拉丁美洲文學]]
 						// 令插入 {String} 時依然維持順序。
 						token = [ token ];
@@ -2716,6 +2720,22 @@ function module_code(library_namespace) {
 						+ wiki_API.title_link_of(parsed.page || 'null page')
 						+ ' 有多個 ' + token + '，無法判別該取捨哪一個: '
 						+ layout_element_list);
+			}
+
+			if (layout_element_list.length > 0) {
+				setup_layout_elements.allow_duplicate_templates
+				// 排除可重複存在的 layout elements。
+				.forEach(function(template_name) {
+					for (var index = 0;
+					//
+					index < layout_element_list.length; index++) {
+						if (session && session.is_template(
+						//
+						template_name, layout_element_list[0])) {
+							layout_element_list.splice(index--, 1);
+						}
+					}
+				});
 			}
 
 			if (layout_element_list.length > 0) {

@@ -120,7 +120,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 排除/移除注解。 strip/remove javascript comments.
+	 * 排除/移除註解。 strip/remove javascript comments.
 	 * CeL.data.Convert_Pairs.remove_comments(text)
 	 * 
 	 * @see http://vrana.github.io/JsShrink/
@@ -128,10 +128,22 @@ function module_code(library_namespace) {
 	 * @see http://upshots.org/javascript/javascript-regexp-to-remove-comments
 	 * @see http://marijnhaverbeke.nl//uglifyjs
 	 */
-	function remove_comments(text) {
+	function remove_comments(text, type) {
+		text = String(text);
+
+		if (type === '#') {
+			//console.log([ text, type ]);
+			text = text
+			//
+			.replace(/#.*/g, '');
+			//console.log([ text, type ]);
+			return text;
+		}
+
 		// 僅作最簡單之處理，未考量: "// .. /*", "// .. */", "// /* .. */",
-		// 以及 RegExp, "", '' 中注解的情況!
-		return String(text)
+		// 以及 RegExp, "", '' 中註解的情況!
+
+		text = text
 		// /* ... */
 		.replace(/\/\*[\s\S]*?\*\//g, '')
 		// // ...
@@ -139,7 +151,7 @@ function module_code(library_namespace) {
 
 		// text.replace(/<\!--[\s\S]*?-->/g, '');
 
-		// TODO: /^#/
+		return text;
 	}
 
 	library_namespace.set_method(Convert_Pairs, {
@@ -245,8 +257,10 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof source === 'string') {
-			if (options.remove_comments)
-				source = Convert_Pairs.remove_comments(source);
+			if (options.remove_comments) {
+				source = Convert_Pairs.remove_comments(source,
+						options.remove_comments);
+			}
 			// console.trace([ source ]);
 			if (!source.trim())
 				return;
@@ -523,7 +537,7 @@ function module_code(library_namespace) {
 		if (dictionary_path !== this.path) {
 			dictionary_path = this.path;
 		} else if (!save_new && this.remove_comments) {
-			library_namespace.warn('移除注解後再存檔，會失去原先的注解！請考慮設定 save_new flag。');
+			library_namespace.warn('移除註解後再存檔，會失去原先的註解！請考慮設定 save_new flag。');
 		}
 
 		if (!encoding) {

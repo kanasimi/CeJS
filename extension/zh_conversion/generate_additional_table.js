@@ -22,12 +22,14 @@ CeL.run(['application.storage',]);
 let files_config = {
 	to_TW: {
 		method: 'CN_to_TW',
-		OpenCC: ['STPhrases', 'STCharacters', 'TWPhrasesName', 'TWVariants', 'TWPhrasesIT', 'TWPhrasesOther'],
+		// @see https://github.com/BYVoid/OpenCC/blob/master/data/config/s2tw.json
+		OpenCC: ['STPhrases', 'STCharacters', 'TWPhrases', 'TWVariantsPhrases', 'TWVariants'],
 		tongwen: ['s2t-phrase.json', 's2t-char.json']
 	},
 	to_CN: {
 		method: 'TW_to_CN',
-		OpenCC: ['TWVariantsRevPhrases', 'TSPhrases', 'TSCharacters'],
+		// @see https://github.com/BYVoid/OpenCC/blob/master/data/config/tw2s.json
+		OpenCC: ['TWVariantsRevPhrases', 'TWPhrasesRev', 'TSPhrases', 'TSCharacters'],
 		tongwen: ['t2s-phrase.json', 't2s-char.json']
 	},
 };
@@ -45,7 +47,7 @@ files_config = files_config[convert_type];
 
 const base_dictionary = CeL.get_module_path('extension.zh_conversion', '');
 
-const pair_Map = new CeL.Convert_Pairs(null, { path: files_config.OpenCC.map(name => base_dictionary + 'OpenCC' + CeL.env.path_separator + name + '.txt') }).pair_Map;
+const pair_Map = new CeL.Convert_Pairs(null, { path: files_config.OpenCC.map(name => base_dictionary + 'OpenCC' + CeL.env.path_separator + name + '.txt'), remove_comments: '#' }).pair_Map;
 const additional_Map = new Map;
 const conflict_Set = new Set;
 const recommend_Map = new Map;
