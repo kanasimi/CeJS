@@ -211,9 +211,9 @@ function module_code(library_namespace) {
 			var dictionary_path = this.path;
 			var original_value = pair_Map.get(key);
 			if (value === original_value) {
-				library_namespace.info('set_pair_Map_value: 重複設定相同的['
+				library_namespace.info('set_pair_Map_value: 重複設定相同的 '
 				//
-				+ key + ']=[' + value + ']'
+				+ JSON.stringify(key) + ' → ' + JSON.stringify(value)
 				//
 				+ (dictionary_path ? ' (' + dictionary_path + ')' : ''));
 				return false;
