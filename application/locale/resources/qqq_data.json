@@ -2657,7 +2657,7 @@
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <bdi><code>{{int:Comma-separator}}</code></bdi> ([[translatewiki:MediaWiki:Comma-separator]]).\nBe careful to the presence of a trailing space when appropriate for your language (if it is needed, you can input it as <code>&amp;#32;</code> to avoid its trimming when editing this message.\nSee also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3166}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5244}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1526}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L169}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1923}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L700}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L712}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3598}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3605}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3612}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L639}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L258}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3166}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5244}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1526}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L169}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1923}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L700}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L712}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3602}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3609}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3616}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L639}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L258}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"check-the-emergency-stop-page-$1": {
@@ -2940,42 +2940,42 @@
 		"message": "There are more than one %1 in %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: layout type, %2: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1886}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1889}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"expression-error-unrecognized-word-$1": {
 		"message": "Expression error: Unrecognized word \"%1\".",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr unrecognised word}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L982}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L992}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"expression-error-unrecognized-punctuation-character-$1": {
 		"message": "Expression error: Unrecognized punctuation character \"%1\".",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr unrecognised punctuation}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L987}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L997}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"division-by-zero": {
 		"message": "Division by zero.",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr division by zero}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1034}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1044}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"in-$1-result-is-not-a-number": {
 		"message": "In %1: Result is not a number.",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr not a number}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1123}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1133}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"error-invalid-depth-in-path-$1-(tried-to-access-a-node-above-the-root-node)": {
 		"message": "Error: Invalid depth in path: \"%1\" (tried to access a node above the root node).",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc rel2abs invalid depth}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L2189}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L2199}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {
@@ -3190,7 +3190,7 @@
 		"message": "Total %1 {{PLURAL:%1|article|articles}}.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number of articles",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L480}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L502}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2344}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2393}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L480}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L502}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2345}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2394}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"number-of-templates": {
@@ -3439,138 +3439,138 @@
 	"only-inserted-or-modified-templates-section-titles-non-specific-meaning-text": {
 		"message": "Only inserted or modified templates / section titles / non-specific-meaning-text",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L757}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L760}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"pre-existing-text": {
 		"message": "Pre-existing text",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L990}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L993}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"only-inserted-punctuation-symbols": {
 		"message": "Only inserted punctuation / symbols",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L997}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1000}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"skip-the-edit-for-including-wp-trans-transclusion-<code>&lt-$1&gt-<-code>": {
 		"message": "Skip the edit for including [[WP:TRANS|transclusion]] <code>&lt;%1&gt;</code>",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: tag name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1022}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1025}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"maybe-user-$1-edit-text-signed-by-$2-or-$1-help-correcting-the-text": {
 		"message": "Maybe user %1 edit text signed by %2, or %1 help correcting the text",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: user name, %2: user name list",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1127}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1130}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"it-seems-the-user-$1-did-not-signed-with-link": {
 		"message": "It seems the user %1 did not signed with link.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: user name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1152}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1155}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-user-may-have-appended-date-and-signature-but-it-is-not-clear.-still-need-to-append-signature-for-$1-$2": {
 		"message": "The user may have appended date and signature, but it is not clear. Still '''need to append signature for %1 %2'''",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: \"IP user\" or \"user\", %2: user name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1177}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1180}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"need-to-append-signature-for-$1-$2": {
 		"message": "'''Need to append signature for %1 %2'''",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: \"IP user\" or \"user\", %2: user name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1179}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1182}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"ip-user": {
 		"message": "IP user",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1182}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1185}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"user": {
 		"message": "user",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1184}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1187}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"($1-characters-modified)": {
 		"message": "(%1 {{PLURAL:%1|character|characters}} modified)",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number of characters",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1256}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1259}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"(new-page)": {
 		"message": "(new page)",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1277}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1280}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"pages-that-are-not-linked-to-the-signature-such-as-$1.-thank-you-for-your-participation": {
 		"message": "Pages that are not linked to the signature, such as %1. Thank you for your participation.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page list",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1338}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1341}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-remind-you-to-add-a-link-when-signing-such-as-the-$2-pages-listed-in-the-notification": {
 		"message": "[[%1|Remind you to add a link when signing]], such as the %2 {{PLURAL:%2|page|pages}} listed in the notification.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: log to page, %2: number of pages",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1342}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1345}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"if-you-have-updated-your-past-messages-please-add-a-signature-at-the-end": {
 		"message": "If you have updated your past messages, please add a signature at the end.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1345}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1348}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$3-signing-special-diff-$1-comment-by-$2": {
 		"message": "[[%3|Signing]] [[Special:Diff/%1|comment by %2]].",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: revid, %2: user name, %3: log to page",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1381}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1384}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"this-tool-is-only-for-recording": {
 		"message": "This tool is only for recording.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1385}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1388}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"you-may-re-edit-the-text-whatever-you-want": {
 		"message": "You may re-edit the text whatever you want.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1387}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1390}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"pages-that-may-require-a-signature-such-as-$1.-thank-you-for-your-participation": {
 		"message": "Pages that may require a signature, such as %1. Thank you for your participation.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page list",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1399}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1402}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-remind-to-sign-such-as-the-$2-pages-listed-in-the-notification": {
 		"message": "[[%1|Remind to sign]], such as the %2 pages listed in the notification.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: log to page, %2: number of pages",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1403}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1406}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"please-remember-to-sign-when-you-leave-messages": {
 		"message": "Please remember to sign when you leave messages",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1414}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1417}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"generate-topic-list-$1-topics": {
@@ -3584,37 +3584,37 @@
 	"update-section-counters-and-article-assessment-icons": {
 		"message": "Update section counters and article assessment icons",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L704}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L705}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-list-of-vital-articles": {
 		"message": "Update list of vital articles",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2342}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2360}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2391}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2343}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2361}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2392}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"keep-different-ratings-in-$2": {
 		"message": "Keep %1 different {{PLURAL:%1|rating|ratings}} in %2.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3124}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3125}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-the-same-ratings-as-template-wpbs-in-$2": {
 		"message": "Remove %1 same {{PLURAL:%1|rating|ratings}} as {{WPBS}} in %2.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3144}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3145}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-wikiproject-templates": {
 		"message": "%1 WikiProject {{PLURAL:%1|template|templates}}.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3425}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3426}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"vital-articles-update-report": {
 		"message": "Vital articles update report",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3715}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3719}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-pages-modified": {
@@ -5842,7 +5842,7 @@
 	},
 	"option=value": {
 		"message": "option=value",
-		"notes": "顯示幫助信息/用法說明。",
+		"notes": "Displays help information/usage instructions.",
 		"scope": "執行時 console 訊息 work_crawler_loader.js",
 		"original_message_language_code": "en-US",
 		"references": "{{GitHub|kanasimi/work_crawler/blob/master/work_crawler_loader.js#L225}}",
@@ -6824,7 +6824,7 @@
 		"scope": "work_crawler.js: create_ebook()",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: ebook_file_path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1097}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L128}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L92}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1097}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L104}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L140}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"convert-simplified-chinese-to-traditional-chinese-«$1»": {
@@ -8487,7 +8487,7 @@
 		"scope": "CeL.application.platform.nodejs: remove_fso(); epub_hans_to_hant.js",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: directory path",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L373}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L439}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2752}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L86}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L373}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L439}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2752}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L98}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"removing-file-$1": {
@@ -9115,7 +9115,7 @@
 		"notes": "Packing up epub file",
 		"scope": "CeL.application.storage.EPUB: archive_to_ZIP()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2600}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L180}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L2600}}\n: {{GitHub|kanasimi/work_crawler/blob/master/book.cmn-Hant-TW/epub_hans_to_hant.js#L192}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/work_crawler|work_crawler|link=hidden}}"
 	},
 	"removing-empty-directory-$1": {
@@ -9687,7 +9687,7 @@
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3119}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20190101.featured_content_maintainer.js#L1191}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3119}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20190101.featured_content_maintainer.js#L1192}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-days-later": {
@@ -10426,7 +10426,7 @@
 		"message": "Cannot move to %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: move target",
-		"references": "{{GitHub|kanasimi/wikiapi/blob/master/Wikiapi.js#L625}}",
+		"references": "{{GitHub|kanasimi/wikiapi/blob/master/Wikiapi.js#L627}}",
 		"repositories": "{{GitHub|kanasimi/wikiapi|wikiapi|link=hidden}}"
 	},
 	"very-sorry.-undo-the-robot-s-wrong-edits.-($1)": {
@@ -10694,7 +10694,7 @@
 	"hi-maybe-you-can-change-the-format-of-your-signature": {
 		"message": "Hi, maybe you can change the format of your signature",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1355}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1358}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	}
 }
