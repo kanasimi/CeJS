@@ -2543,10 +2543,10 @@ function module_code(library_namespace) {
 			&& options.reference_anchor_node
 			// e.g., [[Talk:拉丁美洲文學]], [[Talk:瓊瑤]]
 			&& (typeof token !== 'object' || token.type in {
-				comment : true,
-				transclusion : true,
 				section_title : true,
-				category : true
+				category : true,
+				transclusion : true,
+				comment : true
 			})
 			// && options.insert_after_reference_anchor
 			&& options.reference_anchor_position === 'after') {

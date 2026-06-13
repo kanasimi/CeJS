@@ -114,20 +114,59 @@ function module_code(library_namespace) {
 	 * @param {Object}template_object
 	 *            parameters 形式的 object。<br />
 	 *            e.g., { '1': value, '2': value, parameter1 : value1 }
-	 * @param {Object}[post_processor]
+	 * @param {Function}[post_processor]
 	 *            post-processor for text_array
 	 */
 	function template_object_to_wikitext(template_name, template_object,
 			post_processor) {
+		if (!post_processor && typeof template_object === 'function') {
+			// shift arguments.
+			post_processor = template_object;
+			template_object = undefined;
+		}
+
+		if (!template_object) {
+			if (Array.isArray(template_name)) {
+				// clone
+				template_object = template_name.slice();
+				template_name = template_object[0];
+				template_object[0] = undefined;
+			} else {
+				template_object = Object.create(null);
+			}
+		}
+
+		if (!template_name) {
+			throw new Error('template_object_to_wikitext: ' + '未指定模板名稱!');
+		}
+
 		var text_array = [ '{{' + template_name ], index = 1;
 
-		if (!template_object)
-			template_object = Object.create(null);
+		// @see [[Template:Escape template list]]
+		function escape_parameter(parameter) {
+			parameter = String(parameter)
+			//
+			.replace(/[{}]/g, function(char) {
+				// <nowiki>char</nowiki>
+				return '&#' + char.charCodeAt(0) + ';';
+			})
+			//
+			.replace(/\|/g, '{{!}}')
+			// .replace(/=/g, '{{=}}')
+			;
+			return parameter;
+		}
 
 		// 先置放數字 parameters。
 		while (true) {
 			var value = template_object[index];
 			if (!is_valid_parameters_value(value)) {
+				if (is_valid_parameters_value(template_object[index + 1])
+						|| is_valid_parameters_value(template_object[index + 2])) {
+					// 最多可跳過兩個 parameters，簡化結構。
+					text_array[index++] = '';
+					continue;
+				}
 				break;
 			}
 
@@ -135,7 +174,7 @@ function module_code(library_namespace) {
 				value = typeof value.toString === 'function' ? value.toString()
 						: String(value);
 			}
-			value = String(value);
+			value = escape_parameter(value);
 
 			if (value.includes('='))
 				value = index + '=' + value;
@@ -149,9 +188,10 @@ function module_code(library_namespace) {
 				// 已處理過。
 				continue;
 			}
+
 			var value = template_object[key];
 			if (is_valid_parameters_value(value)) {
-				value = String(value);
+				value = escape_parameter(value);
 				if (value.includes('\n') && !text_array.at(-1).endsWith('\n')) {
 					text_array[text_array.length - 1] += '\n';
 				}
@@ -321,14 +361,16 @@ function module_code(library_namespace) {
 		if (Array.isArray(parameter_value)) {
 			if (parameter_value.type !== 'plain')
 				parameter_value = [ parameter_value ];
+			// @see PATTERN_invalid_page_name_characters.test() @
+			// parse_transclusion() @ CeL.application.net.wiki.parser.wikitext
 			parameter_value = parameter_value.filter(function(token) {
 				// if (options.omit_numbered_parameters === 'lenient')
 				// 採用比較寬鬆的標準。
 				return !(token.type in {
-					parameter : true,
+					transclusion : true,
 					// e.g., {{!}} {{=}}
 					magic_word_function : true,
-					transclusion : true,
+					parameter : true,
 					comment : true
 				});
 			}).join('');

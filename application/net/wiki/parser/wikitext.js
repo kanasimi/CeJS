@@ -2515,14 +2515,56 @@ function module_code(library_namespace) {
 						= wiki_API
 								.normalize_title(category_matched[1], options);
 					}
-				} else {
-					parameters.is_link = !PATTERN_language_startup
-					// || /^\s*:/.test(page_name.toString())
-					|| !PATTERN_language_startup.test(page_name.toString());
 
-					// https://www.mediawiki.org/wiki/Manual:Interwiki#Interwiki_links_to_other_languages
-					// https://www.mediawiki.org/wiki/Manual:$wgExtraInterlanguageLinkPrefixes
-					// parameters.is_interlanguage_link = !parameters.is_link;
+				} else {
+					if (interwikimap_mapper
+					//
+					&& (matched = parameters.page_title.match(/^(\w+):(.+)$/))) {
+						matched[1] = matched[1].trim();
+						matched.map = interwikimap_mapper[matched[1]];
+						if (matched.map) {
+							// https://en.wikipedia.org/wiki/Help:Interwiki_linking#Prefix_codes_for_linking_to_Wikimedia_sister_projects
+							// https://www.mediawiki.org/wiki/Manual:$wgExtraInterlanguageLinkPrefixes
+							parameters.interwiki_prefix = matched[1];
+							parameters.interwiki_name = matched[2];
+							parameters.interwiki_url = matched.map.url.replace(
+							// TODO: should use `new URI()`
+							/\$1/, encodeURIComponent(matched[2].replace(/ /g,
+									'_')));
+						}
+					}
+
+					matched = page_name.toString().replace(
+							/<\!--([\s\S]*)-->/g, '');
+					// .is_plain_link
+					parameters.is_link = !PATTERN_language_startup
+					// || /^\s*:/.test(matched)
+					|| !PATTERN_language_startup.test(matched);
+
+					if (PATTERN_language_startup) {
+						matched = /^\w+: *[^\s:]/
+								.test(parameters.interwiki_name)
+								// e.g., [[w:zh:title]]
+								&& parameters.interwiki_name
+										.match(PATTERN_language_startup)
+								// e.g., [[:zh:w:title]]
+								|| parameters.page_title
+										.match(PATTERN_language_startup);
+						if (matched && matched[2]) {
+							// https://en.wikipedia.org/wiki/Help:Interlanguage_links#Inline_links_(links_in_the_text_of_the_article)
+							// https://www.mediawiki.org/wiki/Manual:Interwiki#Interwiki_links_to_other_languages
+							parameters.interlanguage_prefix = matched[1];
+							parameters.interlanguage_title = matched[2];
+							// parameters.is_interlanguage_link = true;
+
+						} else {
+							// e.g., [[BBC]], [[ja]]
+						}
+					}
+
+					// TODO: [[w:en:title]], [[:en:w:title]]:
+					// parameters.wiki_family_prefix
+					// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects#How_to_link
 				}
 
 				if (false) {
@@ -2631,6 +2673,10 @@ function module_code(library_namespace) {
 		// session === wiki_API?
 		&& session.configurations && session.configurations.extensiontag_hash
 				|| wiki_extensiontags;
+
+		var interwikimap_mapper = session && session.latest_site_configurations
+				&& session.latest_site_configurations.interwikimap
+				&& session.latest_site_configurations.interwikimap.mapper;
 
 		var PATTERN_file_prefix;
 		if (session
@@ -2991,7 +3037,7 @@ function module_code(library_namespace) {
 					// 處理某些特殊屬性的值。
 					if (false && /url$/i.test(key)) {
 						try {
-							// 有些參數值會迴避"="，此時使用decodeURIComponent可能會更好。
+							// 有些參數值會迴避 "="，此時用 decodeURIComponent() 可能會更好。
 							value = decodeURI(value);
 						} catch (e) {
 							// TODO: handle exception
@@ -3169,6 +3215,7 @@ function module_code(library_namespace) {
 
 					// 假如 parameter name 有特殊的 token 就不該視為 template。
 					// 警告: 這個方法可能將非模板當成模板。
+					// @see may_omit_numbered_parameter_value()
 					if (PATTERN_invalid_page_name_characters.test((Array
 							.isArray(parameters[0]) ? parameters[0]
 							: [ parameters[0] ]).filter(function(token) {

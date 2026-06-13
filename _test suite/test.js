@@ -4900,8 +4900,10 @@ function test_wiki() {
 		assert(["''v''", CeL.wiki.next_meaningful_element(parsed, 2).toString()], 'CeL.wiki.next_meaningful_element() #1-3');
 
 		assert(['{{t|v1|v2|p1=vp1|p2=vp2}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', p2: 'vp2' })], 'template_object_to_wikitext: #1');
-		assert(['{{t|v1|v2|4=v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', 4: 'v4', p1: 'vp1' })], 'template_object_to_wikitext: #2');
+		assert(['{{t|v1|v2||v4|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 4: 'v4', 2: 'v2', 1: 'v1', p1: 'vp1' })], 'template_object_to_wikitext: #2');
 		assert(['{{t|v1|v2|p1=vp1}}', CeL.wiki.parse.template_object_to_wikitext('t', { 1: 'v1', 2: 'v2', p1: 'vp1', q2: 'vq2' }, function (text_array) { return text_array.filter(function (text, index) { return !/^q/.test(text); }); })], 'template_object_to_wikitext: #3');
+		assert(['{{t|v1|v2||v4}}', CeL.wiki.parse.template_object_to_wikitext('t', [, 'v1', 'v2', , 'v4'])], 'template_object_to_wikitext: #4');
+		assert(['{{t|v1||v3|v4}}', CeL.wiki.parse.template_object_to_wikitext(['t', 'v1', , 'v3', 'v4'])], 'template_object_to_wikitext: #5');
 
 		// [[Special:ExpandTemplates]]
 		assert(['A_B', CeL.wiki.evaluate_parser_function_token.call(CeL.wiki.parse('{{anchorencode:A_B}}')).toString()], 'wiki.evaluate_parser_function_token.call: {{ANCHORENCODE:}} #1');
@@ -5985,11 +5987,35 @@ function test_wiki() {
 
 			var wikitext = '[[ja:東京]]';
 			var parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			assert([false, parsed.is_link], 'zhwiki: .is_link #1-1');
+			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-1');
 
 			wikitext = '[[:ja:東京]]';
 			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			assert([true, parsed.is_link], 'zhwiki: .is_link #2-1');
+			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-2');
+
+			wikitext = '[[ja:]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-3');
+
+			wikitext = '[[:ja:]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-4');
+
+			wikitext = '[[ : en :]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-5');
+
+			wikitext = '[[ <!----> : en :]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-6');
+
+			wikitext = '[[ <!---->  en :]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-7');
+
+			wikitext = '[[w:ja:東京]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert([true, !!parsed.is_link], 'zhwiki: .is_link #2-1');
 
 			wikitext = '[[commons:東京]]';
 			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));

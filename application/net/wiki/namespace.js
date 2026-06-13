@@ -908,18 +908,14 @@ function module_code(library_namespace) {
 		// console.trace([ interwiki_pattern, interwikimap ]);
 		if (Array.isArray(interwikimap)) {
 			matched = language.match(interwiki_pattern);
-			if (matched && interwikimap.some(function(map) {
-				if (map.prefix === matched[1]) {
-					// console.log(map);
-					// API_URL = map.url;
-					return matched = map
-					//
-					.url.replace(/\/wiki\/\$1/, '/w/api.php')
-					//
-					.replace(/\$1/, '');
-				}
-			})) {
-				language = matched;
+			if (matched && interwikimap.mapper[matched[1]]) {
+				// console.log(interwikimap.mapper[matched[1]]);
+				// API_URL = interwikimap.mapper[matched[1]].url;
+				language = interwikimap.mapper[matched[1]]
+				//
+				.url.replace(/\/wiki\/\$1/, '/w/api.php')
+				//
+				.replace(/\$1/, '');
 			}
 		} else if (language in language_code_to_site_alias) {
 			// e.g., 'lzh' → 'zh-classical'
@@ -3037,12 +3033,22 @@ function module_code(library_namespace) {
 		// session.has_languagevariants &&
 		configurations.interwikimap;
 		if (interwikimap) {
+			interwikimap.mapper = Object.create(null);
 			// prefix_pattern
 			site_configurations.interwiki_pattern = new RegExp('^\\s*('
-					+ interwikimap.map(function(interwiki) {
-						return interwiki.prefix;
-					}).join('|') + ')(?::(.*))?$', 'i');
-			// 不可刪除 configurations.interwikimap: 還會用到。
+			//
+			+ interwikimap.map(function(interwiki_data) {
+				var prefix = interwiki_data.prefix;
+				var mapper = interwikimap.mapper;
+				if (prefix in mapper) {
+					library_namespace.error('adapt_site_configurations: '
+					//
+					+ '重複設定 interwikimap[' + prefix + ']');
+				}
+				mapper[prefix] = interwiki_data;
+				return prefix;
+			}).join('|') + ')(?::(.*))?$', 'i');
+			// 不可刪除 configurations.interwikimap: language_to_site_name() 還會用到。
 		}
 
 		var language_codes = configurations.languages;
@@ -3069,8 +3075,11 @@ function module_code(library_namespace) {
 			// delete configurations.languagevariants;
 		}
 
+		// PATTERN_interlanguage_startup
+		// https://en.wikipedia.org/wiki/Help:Interwiki_linking#Prefix_codes_for_linking_to_Wikimedia_sister_projects
+		// [ all title, interwiki prefix code, page title ]
 		site_configurations.PATTERN_language_startup = new RegExp('^\\s*('
-				+ language_codes.join('|') + ')(?::(.*))?$', 'i');
+				+ language_codes.join('|') + ')\\s*(?::(.*))?$', 'i');
 
 		// --------------------------------------------------------------------
 
