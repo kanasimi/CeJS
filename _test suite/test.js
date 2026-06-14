@@ -6042,6 +6042,17 @@ function test_wiki() {
 			assert([true, parsed.is_link], 'zhwiki: .is_link #8-1');
 
 
+			wikitext = '[[w:en:title]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['w', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interwiki_prefix], 'zhwiki: parse.interwiki_link() #1-1');
+			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interlanguage_prefix], 'zhwiki: parse.interwiki_link() #1-2');
+
+			wikitext = '[[:en:w:title]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interwiki_prefix], 'zhwiki: parse.interwiki_link() #2-1');
+			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interlanguage_prefix], 'zhwiki: parse.interwiki_link() #2-2');
+
+
 			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
 			parsed.each('tempLate:NoteTA', function (token) {

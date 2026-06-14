@@ -45,6 +45,95 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	var PATTERN_interwiki_title = /^\s*([\w\-]+)\s*:\s*([^\s:].+)$/;
+
+	/**
+	 * 解析 interwiki link，獲得 interwiki prefix、interwiki name、interwiki url 等資訊。
+	 * 
+	 * @param {Array|String}link_title
+	 *            {Array}link token or {String}page title
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns { interwiki_prefix, interwiki_name, interwiki_url,
+	 *          interlanguage_prefix, interlanguage_title }
+	 */
+	function parse_interwiki_link(link_title, options) {
+		var interwiki_data = Object.create(null);
+
+		var session = wiki_API.session_of_options(options);
+
+		var interwikimap_mapper = session && session.latest_site_configurations
+				&& session.latest_site_configurations.interwikimap
+				&& session.latest_site_configurations.interwikimap.mapper;
+
+		var page_title
+		// e.g., {Array}link token
+		= link_title.page_title
+		// e.g., {String}page title
+		|| link_title.toString().replace(/<\!--([\s\S]*?)-->/g, '');
+
+		var matched = interwikimap_mapper
+				&& page_title.match(PATTERN_interwiki_title);
+
+		if (matched) {
+			var namespace = matched[1].trim();
+			var map_data = interwikimap_mapper[namespace];
+			if (map_data) {
+				// https://en.wikipedia.org/wiki/Help:Interwiki_linking#Prefix_codes_for_linking_to_Wikimedia_sister_projects
+				// https://www.mediawiki.org/wiki/Manual:$wgExtraInterlanguageLinkPrefixes
+				interwiki_data.interwiki_prefix = namespace;
+				interwiki_data.interwiki_name = wiki_API.normalize_title(
+				// @see parse_wikilink() @
+				// CeL.application.net.wiki.parser.wikitext
+				matched[2], Object.assign({
+					// preserve_head_colon : true,
+					no_convert_interface_message : true
+				}, options));
+				interwiki_data.interwiki_url = map_data.url.replace(
+				// TODO: should use `new URI()`
+				/\$1/, encodeURIComponent(matched[2].replace(/ /g, '_')));
+			}
+		}
+
+		var PATTERN_language_startup = session
+		// session === wiki_API?
+		&& session.configurations
+				&& session.configurations.PATTERN_language_startup;
+
+		if (PATTERN_language_startup) {
+			matched = interwiki_data.interwiki_name
+			// e.g., [[w:zh:title]]
+			&& interwiki_data.interwiki_name.match(PATTERN_language_startup)
+			// e.g., [[:zh:w:title]]
+			|| matched;
+			if (matched && matched[2]) {
+				// https://en.wikipedia.org/wiki/Help:Interlanguage_links#Inline_links_(links_in_the_text_of_the_article)
+				// https://www.mediawiki.org/wiki/Manual:Interwiki#Interwiki_links_to_other_languages
+				interwiki_data.interlanguage_prefix = matched[1];
+				interwiki_data.interlanguage_title = wiki_API.normalize_title(
+				// @see parse_wikilink() @
+				// CeL.application.net.wiki.parser.wikitext
+				matched[2], Object.assign({
+					// preserve_head_colon : true,
+					no_convert_interface_message : true
+				}, options));
+				// interwiki_data.is_interlanguage_link = true;
+
+			} else {
+				// e.g., [[BBC]], [[ja]]
+			}
+		}
+
+		// TODO: [[w:en:title]], [[:en:w:title]]:
+		// interwiki_data.wiki_family_prefix
+		// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects#How_to_link
+
+		return interwiki_data;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// @see Nullish coalescing operator (??)
 	// exclude NaN, null, undefined
 	function is_valid_parameters_value(value) {
@@ -2719,6 +2808,8 @@ function module_code(library_namespace) {
 	// CeL.wiki.parse.*(wikitext) 僅處理單一 token，傳回 parse 過的 data。
 	// TODO: 統合於 CeL.wiki.parser 之中。
 	Object.assign(wiki_API.parse, {
+		interwiki_link : parse_interwiki_link,
+
 		template : parse_template,
 		set_template_object_parameters : set_template_object_parameters,
 		template_object_to_wikitext : template_object_to_wikitext,
