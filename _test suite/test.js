@@ -6044,13 +6044,33 @@ function test_wiki() {
 
 			wikitext = '[[w:en:title]]';
 			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['w', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interwiki_prefix], 'zhwiki: parse.interwiki_link() #1-1');
-			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interlanguage_prefix], 'zhwiki: parse.interwiki_link() #1-2');
+			assert(['w', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interwiki.prefix], 'zhwiki: parse.interwiki_link() #1-1');
+			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interlanguage.prefix], 'zhwiki: parse.interwiki_link() #1-2');
 
+			var interwiki_data;
 			wikitext = '[[:en:w:title]]';
 			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interwiki_prefix], 'zhwiki: parse.interwiki_link() #2-1');
-			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interlanguage_prefix], 'zhwiki: parse.interwiki_link() #2-2');
+			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['en', interwiki_data.interwiki && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #2-1');
+			assert(['en', interwiki_data.interlanguage && interwiki_data.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #2-2');
+
+			wikitext = '[[Commons:title]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['commons', interwiki_data.wiki_family && interwiki_data.wiki_family.family], 'zhwiki: parse.interwiki_link() #3-1');
+			assert(['Title', interwiki_data.wiki_family && interwiki_data.wiki_family.name], 'zhwiki: parse.interwiki_link() #3-2');
+			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #3-3');
+			wikitext = '[[:Commons:title]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['commons', interwiki_data.wiki_family && interwiki_data.wiki_family.family], 'zhwiki: parse.interwiki_link() #4-1');
+			assert(['Title', interwiki_data.wiki_family && interwiki_data.wiki_family.name], 'zhwiki: parse.interwiki_link() #4-2');
+			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #4-3');
+
+			wikitext = '[[s:w:title]]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #5-1');
 
 
 			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";

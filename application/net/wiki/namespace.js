@@ -3049,6 +3049,47 @@ function module_code(library_namespace) {
 				return prefix;
 			}).join('|') + ')(?::(.*))?$', 'i');
 			// 不可刪除 configurations.interwikimap: language_to_site_name() 還會用到。
+
+			interwikimap.language = Object.create(null);
+			interwikimap.family = Object.create(null);
+			var url_map = Object.create(null);
+			interwikimap.forEach(function(interwiki_data) {
+				if (url_map[interwiki_data.url]) {
+					url_map[interwiki_data.url].push(interwiki_data);
+				} else {
+					url_map[interwiki_data.url] = [ interwiki_data ];
+				}
+
+				if (!('local' in interwiki_data))
+					return;
+
+				if ('language' in interwiki_data) {
+					interwikimap
+					//
+					.language[interwiki_data.prefix] = interwiki_data;
+				} else {
+					interwikimap
+					//
+					.family[interwiki_data.prefix] = interwiki_data;
+				}
+			});
+
+			interwikimap.alias = Object.create(null);
+			for ( var url in url_map) {
+				if (url_map[url].length < 2)
+					continue;
+				// console.log(url_map[url]);
+				var alias = url_map[url].map(function(interwiki_data) {
+					return interwiki_data.prefix;
+				});
+				alias.sort(function(_1, _2) {
+					return _2.length - _1.length;
+				});
+				alias.forEach(function(prefix) {
+					interwikimap.alias[prefix] = alias;
+				});
+			}
+			// console.log(interwikimap.alias);
 		}
 
 		var language_codes = configurations.languages;

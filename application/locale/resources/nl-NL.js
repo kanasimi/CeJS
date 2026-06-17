@@ -91,7 +91,7 @@
 	"\u5408\u4f75\u6b77\u53f2\u6642\u671f": "Historische perioden combineren",
 	"\u64f4\u5f35\u7bc4\u570d\u81f3\u541b\u4e3b\u5728\u4e16\u6642\u6bb5": "De levensduur van de heersers aanpassen",
 	"\u8acb\u9078\u64c7\u6240\u6b32\u8f09\u5165\u4e4b\u8cc7\u6599\u5716\u5c64\u3002": "Selecteer de laag die u wilt laden.",
-	"\u5df2\u8f09\u5165 %1 \u7b46\u8cc7\u6599\u3002": "function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'entries' : 'entry') + ' loaded.'; }",
+	"\u5df2\u8f09\u5165 %1 \u7b46\u8cc7\u6599\u3002": function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'entries' : 'entry') + ' loaded.'; },
 	"Data will be presented at next calculation.": "Gegevens worden bij de volgende berekening weergegeven.",
 	"Aries": "Ram",
 	"Taurus": "Stier",

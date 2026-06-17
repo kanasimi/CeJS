@@ -2518,6 +2518,7 @@ function module_code(library_namespace) {
 					}
 
 				} else {
+					// 可配合 parse_interwiki_link() 取得資料。
 					matched = page_name.toString().replace(
 							/<\!--([\s\S]*?)-->/g, '');
 					// .is_plain_link
