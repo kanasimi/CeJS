@@ -981,34 +981,49 @@ function module_code(library_namespace) {
 	 * @param {Array|String}token
 	 *            wiki element token
 	 * @returns {String|Array} key
+	 * 
+	 * @see remove_non_functional_wikitext(wikitext)
 	 */
 	function wiki_element_to_key(token) {
-		if (!Array.isArray(token))
+		if (!Array.isArray(token)) {
+			if (typeof token === 'string') {
+				token = token
+				// 去除註解。 Remove comments. "<!-- comment -->"
+				.replace(/<\!--[\s\S]*?-->/g, '').trim();
+			}
 			return token;
+		}
 
-		var has_no_string;
+		var has_element;
 		// key token must accept '\n'. e.g., "key_ \n _key = value"
-		var _token = token.filter(function(t) {
-			if (t.type === 'plain')
-				t = wiki_element_to_key(t);
+		var filtered_token = token.filter(function(_token) {
+			if (_token.type === 'plain') {
+				_token = wiki_element_to_key(_token);
+			}
 
-			if (!Array.isArray(t))
-				return t;
+			if (_token.type === 'tag') {
+				// e.g., <nowiki></nowiki>
+				_token = wiki_element_to_key(_token[1]);
+			}
+
+			if (!Array.isArray(_token)) {
+				return _token === 0 ? _token.toString() : _token;
+			}
 
 			// 去除註解 comments。
-			if (t.type === 'comment') {
+			if (_token.type === 'comment') {
 				return false;
 			}
 
-			has_no_string = true;
+			has_element = true;
 			return true;
 		});
 
-		// console.trace([ has_no_string, _token ]);
-		if (token.type === 'plain' && !has_no_string)
-			return _token.join('');
+		// console.trace([ has_element, _token ]);
+		if (token.type === 'plain' && !has_element)
+			return filtered_token.join('');
 		// 注意: 這時 不會回傳 {String}!
-		return set_wiki_type(_token, token.type);
+		return set_wiki_type(filtered_token, token.type);
 	}
 
 	// for_each_subelement() 的超簡化版
@@ -1807,7 +1822,13 @@ function module_code(library_namespace) {
 					return all;
 				}
 			}
-			URL[0].parent = URL;
+
+			if (Array.isArray(URL[0])) {
+				URL[0].parent = URL;
+				URL[0].url = wiki_element_to_key(URL[0]);
+				if (Array.isArray(URL[0].url))
+					URL[0].url = URL[0].url.join('');
+			}
 
 			if (delimiter || parameters) {
 				// assert: /^\s*$/.test(delimiter)

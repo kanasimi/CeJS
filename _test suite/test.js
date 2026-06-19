@@ -6073,6 +6073,36 @@ function test_wiki() {
 			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #5-1');
 
 
+			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist?hidemyself=1&hidebots=1&hidecategorization=1&hideWikibase=1&limit=500&days=3&enhanced=1&urlversion=2 監視清單]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #1-1');
+
+			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist 監視清單]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #2-1');
+			assert(['[[Special:Watchlist|監視清單]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #2-2');
+
+			wikitext = '[https://en.wikipedia.org/wiki/Special:Watchlist watchlist]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['en', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #3-1');
+			assert(['[[:en:Special:Watchlist|watchlist]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #3-2');
+
+			wikitext = '[https://en.wikisource.org/wiki/A]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['s:en', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #4-1');
+			assert(['[[s:en:A|A]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #4-2');
+
+			wikitext = '[https://ja.wikisource.org/wiki/%E6%9E%95%E8%8D%89%E5%AD%90]';
+			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['s:ja', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #5-1');
+			assert(['[[s:ja:枕草子|枕草子]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #5-2');
+
+
 			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
 			parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
 			parsed.each('tempLate:NoteTA', function (token) {

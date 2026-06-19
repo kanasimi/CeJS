@@ -24,6 +24,7 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki.namespace',
 
+	// library_namespace.to_RegExp_pattern()
 	require : 'data.native.'
 	// for library_namespace.get_URL
 	// + '|application.net.Ajax.'
@@ -573,6 +574,9 @@ function module_code(library_namespace) {
 		v : 'wikiversity',
 		voy : 'wikivoyage',
 		wikt : 'wiktionary',
+
+		// --------------------------------------
+		// project without language prefix
 
 		// project: *.wikimedia.org
 		m : 'meta',
@@ -1736,7 +1740,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 去除註解、<nowiki>等不起作用的元素。 Remove comments, <nowiki>, and other
+	 * 去除註解、<nowiki> 等不起作用的元素。 Remove comments, <nowiki>, and other
 	 * non-functional elements.
 	 * 
 	 * TODO: 將本函數放在 CeL.application.net.wiki.parser.wikitext，會造成
@@ -1747,6 +1751,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String} wikitext with non-functional elements removed
 	 * 
+	 * @see wiki_element_to_key(token)
 	 * @seealso is_meaningful_token()
 	 */
 	function remove_non_functional_wikitext(wikitext) {
@@ -2986,6 +2991,9 @@ function module_code(library_namespace) {
 	//
 	};
 
+	// @see get_first_domain_name_of_session(session)
+	var PATTERN_language_of_wiki_url = /\/\/([^.]+)\./;
+
 	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
 	// @see https://noc.wikimedia.org/wiki.php?wiki=jawiktionary
 	function adapt_site_configurations(session, configurations) {
@@ -3020,82 +3028,21 @@ function module_code(library_namespace) {
 
 			site_configurations.magiclinks = Object.keys(general.magiclinks);
 			site_configurations.lang_fallback = general.fallback.map(function(
-					lang) {
-				return lang.code;
+					language_data) {
+				return language_data.code;
 			});
 		}
 
-		// https://en.wikipedia.org/wiki/Wikipedia:Village_pump_(technical)/Archive_210#About_wikia_flag_in_Special:Interwiki
-		// changing [[Special:Interwiki]] matrix for all Wikimedia projects
-		// should be brought up at [[meta:Talk:Interwiki map]].
-		// Local projects can not override this list.
-		var interwikimap =
-		// session.has_languagevariants &&
-		configurations.interwikimap;
-		if (interwikimap) {
-			interwikimap.mapper = Object.create(null);
-			// prefix_pattern
-			site_configurations.interwiki_pattern = new RegExp('^\\s*('
-			//
-			+ interwikimap.map(function(interwiki_data) {
-				var prefix = interwiki_data.prefix;
-				var mapper = interwikimap.mapper;
-				if (prefix in mapper) {
-					library_namespace.error('adapt_site_configurations: '
-					//
-					+ '重複設定 interwikimap[' + prefix + ']');
-				}
-				mapper[prefix] = interwiki_data;
-				return prefix;
-			}).join('|') + ')(?::(.*))?$', 'i');
-			// 不可刪除 configurations.interwikimap: language_to_site_name() 還會用到。
-
-			interwikimap.language = Object.create(null);
-			interwikimap.family = Object.create(null);
-			var url_map = Object.create(null);
-			interwikimap.forEach(function(interwiki_data) {
-				if (url_map[interwiki_data.url]) {
-					url_map[interwiki_data.url].push(interwiki_data);
-				} else {
-					url_map[interwiki_data.url] = [ interwiki_data ];
-				}
-
-				if (!('local' in interwiki_data))
-					return;
-
-				if ('language' in interwiki_data) {
-					interwikimap
-					//
-					.language[interwiki_data.prefix] = interwiki_data;
-				} else {
-					interwikimap
-					//
-					.family[interwiki_data.prefix] = interwiki_data;
-				}
-			});
-
-			interwikimap.alias = Object.create(null);
-			for ( var url in url_map) {
-				if (url_map[url].length < 2)
-					continue;
-				// console.log(url_map[url]);
-				var alias = url_map[url].map(function(interwiki_data) {
-					return interwiki_data.prefix;
-				});
-				alias.sort(function(_1, _2) {
-					return _2.length - _1.length;
-				});
-				alias.forEach(function(prefix) {
-					interwikimap.alias[prefix] = alias;
-				});
-			}
-			// console.log(interwikimap.alias);
-		}
+		// --------------------------------------------------------------------
 
 		var language_codes = configurations.languages;
 		if (Array.isArray(language_codes)) {
-			language_codes = language_codes.map(function(language) {
-				return language.code;
+			configurations.languages.mapper = Object.create(null);
+			language_codes = language_codes.map(function(language_data) {
+				configurations.languages.mapper[language_data.code]
+				//
+				= language_data;
+				return language_data.code;
 			});
 		} else {
 			language_codes = [];
@@ -3121,6 +3068,235 @@ function module_code(library_namespace) {
 		// [ all title, interwiki prefix code, page title ]
 		site_configurations.PATTERN_language_startup = new RegExp('^\\s*('
 				+ language_codes.join('|') + ')\\s*(?::(.*))?$', 'i');
+
+		// --------------------------------------------------------------------
+
+		function convert_url_parameters(url_pattern) {
+			url_pattern = url_pattern.replace_till_stable(/\$\d(\D)/g,
+					'__para1__$1').replace(/\$\d$/, '__para2__');
+
+			url_pattern = library_namespace.to_RegExp_pattern(url_pattern);
+
+			url_pattern = url_pattern.replace(/https?:/, 'https?:');
+			url_pattern = url_pattern.replace(/__para1__/g, '(.+?)').replace(
+					/__para2__/, '(.+)');
+
+			return url_pattern;
+		}
+
+		function set_url_pattern(interwikimap_data) {
+			var url_pattern = convert_url_parameters(interwikimap_data.url);
+
+			interwikimap_data.url_pattern = new RegExp(url_pattern);
+
+		}
+
+		var session_language = session.language
+		// e.g., wikidata
+		|| 'en';
+		var family_with_language = Object.create(null);
+		function check_family_with_language(interwikimap_data) {
+			var url = interwikimap_data.url;
+			if (!url
+			// [[chapter:ja:T]] 找不到網域: https://zh.wikimedia.org/
+			|| url.includes('.wikimedia.org')
+			// e.g., url: 'https://en.wikipedia.org/wiki/Wikipedia:$1',
+			// [[wikipediawikipedia:ja:T]] 也不會重新導向到 jawiki
+			|| !/\/\$\d$/.test(url)) {
+				return;
+			}
+
+			var language_code = url.match(PATTERN_language_of_wiki_url);
+			if (!language_code)
+				return;
+
+			language_code = language_code[1];
+			// e.g., language_code: 'www', 'nostalgia', 'beta'
+			if (!(language_code in configurations.languages.mapper)
+			// e.g., .prefix: 'zh-cn', 'zh-tw'
+			|| ('localinterwiki' in interwikimap_data)
+			// e.g., 排除 .prefix: 'w'
+			&& interwikimap_data.prefix.length > 1
+					&& language_code !== interwikimap_data.prefix) {
+				return;
+			}
+
+			if (false && language_code !== session_language) {
+				return;
+			}
+			if (false && interwikimap_data.prefix.endsWith(language_code)) {
+				return;
+			}
+
+			var url_pattern = url.replace(PATTERN_language_of_wiki_url,
+					'//__language_code__.');
+			url_pattern = convert_url_parameters(url_pattern);
+			url_pattern = url_pattern.replace('__language_code__', '([^.]+)');
+			if (Array.isArray(family_with_language[url_pattern])) {
+				family_with_language[url_pattern].push(interwikimap_data);
+			} else {
+				family_with_language[url_pattern] = [ interwikimap_data ];
+			}
+		}
+
+		// https://en.wikipedia.org/wiki/Wikipedia:Village_pump_(technical)/Archive_210#About_wikia_flag_in_Special:Interwiki
+		// changing [[Special:Interwiki]] matrix for all Wikimedia projects
+		// should be brought up at [[meta:Talk:Interwiki map]].
+		// Local projects can not override this list.
+		var interwikimap =
+		// session.has_languagevariants &&
+		configurations.interwikimap;
+		if (interwikimap) {
+			interwikimap.mapper = Object.create(null);
+			// prefix_pattern
+			site_configurations.interwiki_pattern = new RegExp('^\\s*('
+			//
+			+ interwikimap.map(function(interwikimap_data) {
+				var prefix = interwikimap_data.prefix;
+				var mapper = interwikimap.mapper;
+				if (prefix in mapper) {
+					library_namespace.error('adapt_site_configurations: '
+					//
+					+ '重複設定 interwikimap[' + prefix + ']');
+				}
+				mapper[prefix] = interwikimap_data;
+				return prefix;
+			}).join('|') + ')(?::(.*))?$', 'i');
+			// 不可刪除 configurations.interwikimap: language_to_site_name() 還會用到。
+
+			interwikimap.language = Object.create(null);
+			interwikimap.family = Object.create(null);
+			var url_map = Object.create(null);
+			interwikimap.forEach(function(interwikimap_data) {
+				if (url_map[interwikimap_data.url]) {
+					url_map[interwikimap_data.url].push(interwikimap_data);
+				} else {
+					url_map[interwikimap_data.url] = [ interwikimap_data ];
+				}
+
+				if (!('local' in interwikimap_data))
+					return;
+
+				if ('language' in interwikimap_data) {
+					interwikimap.language[interwikimap_data.prefix]
+					//
+					= interwikimap_data;
+					if ('localinterwiki' in interwikimap_data) {
+						check_family_with_language(interwikimap_data);
+					}
+				} else {
+					interwikimap.family[interwikimap_data.prefix]
+					//
+					= interwikimap_data;
+					check_family_with_language(interwikimap_data);
+				}
+			});
+			interwikimap.host_end_of_family_with_language = Object.create(null);
+			for ( var url_pattern in family_with_language) {
+				var interwikimap_data_list = family_with_language[url_pattern];
+				interwikimap_data_list.sort(function(_1, _2) {
+					if (session_language) {
+						var language_code_1 = _1.url
+								.match(PATTERN_language_of_wiki_url)[1];
+						var language_code_2 = _2.url
+								.match(PATTERN_language_of_wiki_url)[1];
+						if (!_1.language
+						// e.g., _1.prefix === 'cmn'
+						&& !library_namespace.gettext.to_standard(_1.prefix)
+								&& language_code_1 === session_language
+								&& language_code_2 !== session_language) {
+							return -1;
+						}
+						if (!_2.language
+						// e.g., _2.prefix === 'cmn'
+						&& !library_namespace.gettext.to_standard(_2.prefix)
+								&& language_code_1 !== session_language
+								&& language_code_2 === session_language) {
+							return 1;
+						}
+					}
+
+					// 短 → 長
+					return _1.prefix.length - _2.prefix.length;
+				});
+
+				var interwikimap_data = interwikimap_data_list[0];
+				var matched = interwikimap_data.url
+						.match(/\/\/[^.]+(\.[^\/]+)/)[1];
+				interwikimap_data.url_pattern_of_family_with_language = new RegExp(
+						url_pattern);
+				if (interwikimap.host_end_of_family_with_language[matched]) {
+					interwikimap.host_end_of_family_with_language[matched]
+							.push(interwikimap_data);
+				} else {
+					interwikimap.host_end_of_family_with_language[matched] = [ interwikimap_data ];
+				}
+			}
+			if (false) {
+				console.trace(session_language, session.API_URL,
+				// interwikimap.host_end_of_family_with_language,
+				family_with_language);
+			}
+			// Release memory. 釋放被占用的記憶體。
+			family_with_language = null;
+
+			interwikimap.alias = Object.create(null);
+			interwikimap.host_map = Object.create(null);
+			for ( var url in url_map) {
+				var interwikimap_data_list = url_map[url];
+
+				var language_code = url.match(PATTERN_language_of_wiki_url);
+				if (language_code) {
+					language_code = language_code[1];
+					if (interwikimap_data_list
+					//
+					.some(function(interwikimap_data) {
+						return ('language' in interwikimap_data)
+								&& language_code === interwikimap_data.prefix;
+					})) {
+						interwikimap_data_list.language_code = language_code;
+					} else {
+						language_code = null;
+					}
+				}
+
+				var _url = new library_namespace.URI(url);
+				if (Array.isArray(interwikimap.host_map[_url.host])) {
+					interwikimap.host_map[_url.host]
+							.push(interwikimap_data_list);
+				} else {
+					interwikimap.host_map[_url.host] = [ interwikimap_data_list ];
+				}
+
+				if (interwikimap_data_list.length < 2) {
+					// assert: interwikimap_data_list.length === 1
+					set_url_pattern(interwikimap_data_list[0]);
+					continue;
+				}
+
+				// console.log(interwikimap_data_list);
+				interwikimap_data_list.sort(function(_1, _2) {
+					if (language_code) {
+						// 確保 interwikimap_data_list[0].prefix 與 url 一致。
+						if (_1.prefix === language_code)
+							return -1;
+						if (_2.prefix === language_code)
+							return 1;
+					}
+
+					// 長 → 短
+					return _2.prefix.length - _1.prefix.length;
+				});
+				set_url_pattern(interwikimap_data_list[0]);
+
+				interwikimap_data_list.forEach(function(interwikimap_data) {
+					interwikimap.alias[interwikimap_data.prefix]
+					//
+					= interwikimap_data_list;
+				});
+			}
+			// console.log(interwikimap.alias);
+		}
 
 		// --------------------------------------------------------------------
 

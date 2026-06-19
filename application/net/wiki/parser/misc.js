@@ -45,6 +45,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// [ all title, interwiki prefix code, page title ]
 	var PATTERN_interwiki_title = /^\s*([\w\-]+)\s*:\s*([^\s:].+)$/;
 
 	/**
@@ -58,18 +59,18 @@ function module_code(library_namespace) {
 	 * @returns { interwiki: {prefix, name, url}, interlanguage: {prefix, title} }
 	 */
 	function parse_interwiki_link(link_title, options) {
-		var interwiki_data = Object.create(null);
-
 		var session = wiki_API.session_of_options(options);
 
 		var interwikimap = session && session.latest_site_configurations
 				&& session.latest_site_configurations.interwikimap;
 
+		var interwiki_data = Object.create(null);
+
 		var page_title
 		// e.g., {Array}link token
 		= link_title.page_title
 		// e.g., {String}page title
-		|| link_title.toString().replace(/<\!--([\s\S]*?)-->/g, '');
+		|| String(wiki_API.parse.wiki_element_to_key(link_title));
 
 		var matched = interwikimap.mapper
 				&& page_title.match(PATTERN_interwiki_title);
@@ -90,6 +91,7 @@ function module_code(library_namespace) {
 						no_convert_interface_message : true
 					}, options)),
 					url : map_data.url.replace(
+					// ' ' → '_': 在 URL 上可更簡潔。
 					// TODO: should use `new URI()`
 					/\$1/, encodeURIComponent(matched[2].replace(/ /g, '_')))
 				};
@@ -134,7 +136,7 @@ function module_code(library_namespace) {
 		if (interwiki_data.interwiki) {
 			var family = interwiki_data.interwiki.prefix;
 			if (family in interwikimap.alias) {
-				family = interwikimap.alias[family][0];
+				family = interwikimap.alias[family][0].prefix;
 			} else if (family in wiki_API.api_URL.alias) {
 				family = wiki_API.api_URL.alias[family];
 			}
@@ -159,6 +161,141 @@ function module_code(library_namespace) {
 		}
 
 		return interwiki_data;
+	}
+
+	function parse_interwiki_url(url, options) {
+		if (!url)
+			return;
+
+		var session = wiki_API.session_of_options(options);
+
+		var interwikimap = session && session.latest_site_configurations
+				&& session.latest_site_configurations.interwikimap;
+
+		var external_link;
+		if (url.type === 'external_link') {
+			external_link = url;
+			url = url[0];
+		}
+		if (url.url)
+			url = url.url;
+		if (!url)
+			return;
+
+		url = String(url);
+
+		var _url = new library_namespace.URI(url);
+		if (!_url)
+			return;
+
+		function remove_language_of_url(url) {
+			if (typeof url === 'string') {
+				url = new library_namespace.URI(url);
+			}
+			var host = url.host;
+			return host.replace(/^[^.]+/, '');
+		}
+
+		var prefix, name, interwikimap_data, interwikimap_data_list;
+		interwikimap_data_list = interwikimap.host_end_of_family_with_language[remove_language_of_url(_url)];
+		if (interwikimap_data_list
+		//
+		&& interwikimap_data_list.some(function(_interwikimap_data) {
+			var matched =
+			//
+			url.match(_interwikimap_data.url_pattern_of_family_with_language);
+			if (!matched)
+				return;
+
+			interwikimap_data = _interwikimap_data;
+			name = matched;
+			return true;
+		})) {
+			prefix = name[1];
+			name = name[2];
+			if (remove_language_of_url(interwikimap_data.url) !== remove_language_of_url(session.API_URL)) {
+				prefix = interwikimap_data.prefix + ':' + prefix;
+			}
+
+		} else {
+			var interwiki_group_list = interwikimap.host_map[_url.host];
+			if (!interwiki_group_list
+			//
+			|| !interwiki_group_list.some(function(_interwikimap_data_list) {
+				interwikimap_data_list = _interwikimap_data_list;
+				interwikimap_data = interwikimap_data_list[0];
+				var matched = url.match(interwikimap_data.url_pattern);
+				name = matched && matched[1];
+				return name;
+			})) {
+				return;
+			}
+
+		}
+
+		try {
+			name = decodeURIComponent(name);
+		} catch (e) {
+			// TODO: handle exception
+		}
+		name = name.replace(/_/g, ' ');
+
+		var interwik_data = {
+			prefix : prefix || interwikimap_data.prefix,
+			url : _url,
+			name : name
+		};
+
+		if (!interwikimap_data.language
+				&& interwikimap_data_list.length > 1
+				&& interwik_data.prefix.length > interwikimap_data_list.at(-1).prefix.length) {
+			interwik_data.shortcut_prefix = interwikimap_data_list.at(-1).prefix;
+		}
+
+		if (!_url.search) {
+			interwik_data.wikilink = [ '[[', [] ];
+
+			if (prefix) {
+				if (prefix.includes(':')) {
+					interwik_data.wikilink[1].push(prefix, ':');
+				} else if (prefix !== session.language) {
+					interwik_data.wikilink[1].push(':', prefix, ':');
+				}
+
+			} else if (!('localinterwiki' in interwikimap_data)) {
+				// ↑ localinterwiki: 跨維基連結是否指向目前維基。
+				// https://www.mediawiki.org/wiki/API:Siteinfo#Interwikimap
+				if (interwikimap_data.language) {
+					interwik_data.wikilink[1].push(
+					// 跨語言連結不加 ':' prefix 會被當成維基數據中的跨語言連結。
+					':',
+					// 在 adapt_site_configurations() 中已確保
+					// interwikimap_data_list[0].prefix 與 url 一致，
+					// 不必使用 interwik_data.shortcut_prefix。
+					interwik_data.prefix);
+				} else {
+					interwik_data.wikilink[1]
+							.push(interwik_data.shortcut_prefix
+									|| interwik_data.prefix);
+				}
+				interwik_data.wikilink[1].push(':');
+			}
+			interwik_data.wikilink[1].push(name);
+
+			interwik_data.wikilink[1] = interwik_data.wikilink[1].join('');
+			interwik_data.wikilink.push('|',
+			// display_text 別包含 prefix。
+			external_link && external_link[2] ? external_link[2] : name, ']]');
+
+			if (interwik_data.wikilink[1] === interwik_data.wikilink[3]
+					.toString()) {
+				interwik_data.wikilink.splice(2, 2);
+			}
+
+			interwik_data.wikilink = interwik_data.wikilink.join('');
+		}
+
+		return interwik_data;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -2837,7 +2974,10 @@ function module_code(library_namespace) {
 	// CeL.wiki.parse.*(wikitext) 僅處理單一 token，傳回 parse 過的 data。
 	// TODO: 統合於 CeL.wiki.parser 之中。
 	Object.assign(wiki_API.parse, {
+		// CeL.wiki.parse.interwiki_link()
 		interwiki_link : parse_interwiki_link,
+		// CeL.wiki.parse.interwiki_url()
+		interwiki_url : parse_interwiki_url,
 
 		template : parse_template,
 		set_template_object_parameters : set_template_object_parameters,
