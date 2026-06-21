@@ -49,7 +49,7 @@ function module_code(library_namespace) {
 			check_encoding = null;
 			return encode_URI_component(string, encoding);
 		}
-		check_encoding(encoding);
+		check_encoding && check_encoding(encoding);
 		return encodeURIComponent(string);
 	};
 	var encode_URI = function(string, encoding) {
@@ -61,7 +61,7 @@ function module_code(library_namespace) {
 			check_encoding = null;
 			return encode_URI(string, encoding);
 		}
-		check_encoding(encoding);
+		check_encoding && check_encoding(encoding);
 		return encodeURI(string);
 	};
 	var decode_URI_component = function(string, encoding) {
@@ -74,7 +74,7 @@ function module_code(library_namespace) {
 			check_encoding = null;
 			return decode_URI_component(string, encoding);
 		}
-		check_encoding(encoding);
+		check_encoding && check_encoding(encoding);
 		return decodeURIComponent(string);
 	};
 	var decode_URI = decode_URI_component;
@@ -356,7 +356,9 @@ function module_code(library_namespace) {
 		|| library_namespace.is_WWW() && {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
 			// file|telnet|ftp|https
-			protocol : location.protocol,
+			protocol : location.protocol === 'file:'
+			//
+			? 'https:' : location.protocol,
 			hostname : location.hostname,
 			port : location.port,
 			host : location.host,
@@ -396,8 +398,15 @@ function module_code(library_namespace) {
 				uri.protocol = 'https:';
 		}
 
-		if (matched[1])
+		if (matched[1]) {
 			uri.protocol = matched[1].toLowerCase();
+		} else if (!uri.protocol) {
+			if (false) {
+				throw new Error('Invalid URI: No protocol. (' + (typeof uri)
+						+ ') ' + uri);
+			}
+			uri.protocol = '';
+		}
 		// uri._protocol = uri.protocol.slice(0, -1).toLowerCase();
 		// library_namespace.debug('protocol [' + uri._protocol + ']', 2);
 
@@ -427,16 +436,30 @@ function module_code(library_namespace) {
 			// 處理 host
 			// host=hostname:port
 			uri.hostname = uri.host = matched[1];
+			if (matched[2] && !uri.protocol) {
+				// guess protocol
+				for ( var protocol in port_of_protocol) {
+					if (port_of_protocol[protocol] == matched[2]) {
+						uri.protocol = protocol;
+						break;
+					}
+				}
+			}
 			if (matched[2]
-					&& matched[2] != port_of_protocol[uri.protocol.slice(0, -1)
-							.toLowerCase()]) {
+			// node.js 下 '//www.example.com:8080/' 不會設定 uri.protocol
+			&& (!uri.protocol || matched[2] !=
+			//
+			port_of_protocol[uri.protocol.slice(0, -1).toLowerCase()])) {
 				// uri[KEY_port] = parseInt(matched[2], 10);
 				uri.port = String(parseInt(matched[2], 10));
 				uri.host += ':' + uri.port;
-			} else if (false) {
-				uri[KEY_port] = parseInt(matched[2]
-						|| port_of_protocol[uri.protocol.slice(0, -1)
-								.toLowerCase()]);
+			} else {
+				if (false) {
+					uri[KEY_port] = parseInt(matched[2]
+							|| port_of_protocol[uri.protocol.slice(0, -1)
+									.toLowerCase()]);
+				}
+				uri.port = '';
 			}
 
 		} else {

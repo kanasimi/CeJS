@@ -3072,8 +3072,10 @@ function module_code(library_namespace) {
 		// --------------------------------------------------------------------
 
 		function convert_url_parameters(url_pattern) {
-			url_pattern = url_pattern.replace_till_stable(/\$\d(\D)/g,
-					'__para1__$1').replace(/\$\d$/, '__para2__');
+			url_pattern = url_pattern
+			// e.g., 'https://www.imdb.com/name/nm$1/'
+			.replace_till_stable(/\$\d(\D)/g, '__para1__$1').replace(/\$\d$/,
+					'__para2__');
 
 			url_pattern = library_namespace.to_RegExp_pattern(url_pattern);
 
@@ -3081,6 +3083,8 @@ function module_code(library_namespace) {
 			url_pattern = url_pattern.replace(/__para1__/g, '(.+?)').replace(
 					/__para2__/, '(.+)');
 
+			url_pattern = url_pattern.replace(/\/$/, '/?');
+			url_pattern = '^' + url_pattern + '$';
 			return url_pattern;
 		}
 

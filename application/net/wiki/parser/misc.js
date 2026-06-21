@@ -252,45 +252,64 @@ function module_code(library_namespace) {
 			interwik_data.shortcut_prefix = interwikimap_data_list.at(-1).prefix;
 		}
 
-		if (!_url.search) {
-			interwik_data.wikilink = [ '[[', [] ];
+		// ------------------------------------------------
 
-			if (prefix) {
-				if (prefix.includes(':')) {
-					interwik_data.wikilink[1].push(prefix, ':');
-				} else if (prefix !== session.language) {
-					interwik_data.wikilink[1].push(':', prefix, ':');
-				}
-
-			} else if (!('localinterwiki' in interwikimap_data)) {
-				// ↑ localinterwiki: 跨維基連結是否指向目前維基。
-				// https://www.mediawiki.org/wiki/API:Siteinfo#Interwikimap
-				if (interwikimap_data.language) {
-					interwik_data.wikilink[1].push(
-					// 跨語言連結不加 ':' prefix 會被當成維基數據中的跨語言連結。
-					':',
-					// 在 adapt_site_configurations() 中已確保
-					// interwikimap_data_list[0].prefix 與 url 一致，
-					// 不必使用 interwik_data.shortcut_prefix。
-					interwik_data.prefix);
-				} else {
-					interwik_data.wikilink[1]
-							.push(interwik_data.shortcut_prefix
-									|| interwik_data.prefix);
-				}
-				interwik_data.wikilink[1].push(':');
+		var link_title = [];
+		if (prefix) {
+			if (prefix.includes(':')) {
+				link_title.push(prefix, ':');
+			} else if (prefix !== session.language) {
+				link_title.push(':', prefix, ':');
 			}
-			interwik_data.wikilink[1].push(name);
 
-			interwik_data.wikilink[1] = interwik_data.wikilink[1].join('');
-			interwik_data.wikilink.push('|',
-			// display_text 別包含 prefix。
-			external_link && external_link[2] ? external_link[2] : name, ']]');
+		} else if (!('localinterwiki' in interwikimap_data)) {
+			// ↑ localinterwiki: 跨維基連結是否指向目前維基。
+			// https://www.mediawiki.org/wiki/API:Siteinfo#Interwikimap
+			if (interwikimap_data.language) {
+				link_title.push(
+				// 跨語言連結不加 ':' prefix 會被當成維基數據中的跨語言連結。
+				':',
+				// 在 adapt_site_configurations() 中已確保
+				// interwikimap_data_list[0].prefix 與 url 一致，
+				// 不必使用 interwik_data.shortcut_prefix。
+				interwik_data.prefix);
+			} else {
+				link_title.push(interwik_data.shortcut_prefix
+						|| interwik_data.prefix);
+			}
+			link_title.push(':');
+		}
+		link_title.push(name);
 
-			if (interwik_data.wikilink[1] === interwik_data.wikilink[3]
+		interwik_data.link_title = link_title.join('');
+
+		// Release memory. 釋放被占用的記憶體。
+		link_title = null;
+
+		// ------------------------------------------------
+
+		// display_text 別包含 prefix。
+		interwik_data.display_text = external_link && external_link[2] ? external_link[2]
+				: name;
+
+		var search = _url.search.replace(/^\?/, '');
+		if (search) {
+			// https://www.mediawiki.org/wiki/Help:Magic_words#URL_data
+			// https://en.wikipedia.org/wiki/Help:Magic_words#Paths
+			// TODO: use {{fullurl}}, e.g., [[w:ja:Template:利用者の投稿記録リンク]]
+			interwik_data.url_magic_word = [ '{{fullurl:',
+					interwik_data.link_title, '|', search, '}}' ].join('');
+			// 警告: 必須檢查 interwiki_data.display_text
+
+		} else {
+			interwik_data.wikilink = [ '[[', interwik_data.link_title ];
+
+			if (interwik_data.link_title !== interwik_data.display_text
 					.toString()) {
-				interwik_data.wikilink.splice(2, 2);
+				interwik_data.wikilink.push('|', interwik_data.display_text);
 			}
+
+			interwik_data.wikilink.push(']]');
 
 			interwik_data.wikilink = interwik_data.wikilink.join('');
 		}
