@@ -6077,6 +6077,8 @@ function test_wiki() {
 			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #1-1');
+			assert(['Special:Watchlist', interwiki_data && interwiki_data.name], 'zhwiki: parse.interwiki_url() #1-2');
+			assert(['Special:Watchlist', interwiki_data && interwiki_data.link_title], 'zhwiki: parse.interwiki_url() #1-3');
 
 			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist 監視清單]';
 			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));

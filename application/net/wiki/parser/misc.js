@@ -95,6 +95,10 @@ function module_code(library_namespace) {
 					// TODO: should use `new URI()`
 					/\$1/, encodeURIComponent(matched[2].replace(/ /g, '_')))
 				};
+
+				if (namespace === interwikimap.localinterwiki_prefix) {
+					interwiki_data.localinterwiki_prefix = interwikimap.localinterwiki_prefix;
+				}
 			}
 		}
 
@@ -212,7 +216,7 @@ function module_code(library_namespace) {
 			return true;
 		})) {
 			prefix = name[1];
-			name = name[2];
+			name = name[2].replace(/[?#].*/g, '');
 			if (remove_language_of_url(interwikimap_data.url) !== remove_language_of_url(session.API_URL)) {
 				prefix = interwikimap_data.prefix + ':' + prefix;
 			}
@@ -298,14 +302,15 @@ function module_code(library_namespace) {
 			// https://en.wikipedia.org/wiki/Help:Magic_words#Paths
 			// TODO: use {{fullurl}}, e.g., [[w:ja:Template:利用者の投稿記録リンク]]
 			interwik_data.url_magic_word = [ '{{fullurl:',
-					interwik_data.link_title, '|', search, '}}' ].join('');
-			// 警告: 必須檢查 interwiki_data.display_text
+					interwik_data.link_title.replace(/^:/, ''), '|', search,
+					// decodeURIComponent(_url.hash),
+					'}}' ].join('');
 
 		} else {
-			interwik_data.wikilink = [ '[[', interwik_data.link_title ];
+			interwik_data.wikilink = [ '[[',
+					interwik_data.link_title + decodeURIComponent(_url.hash) ];
 
-			if (interwik_data.link_title !== interwik_data.display_text
-					.toString()) {
+			if (interwik_data[1] !== interwik_data.display_text.toString()) {
 				interwik_data.wikilink.push('|', interwik_data.display_text);
 			}
 

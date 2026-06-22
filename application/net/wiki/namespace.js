@@ -3141,6 +3141,9 @@ function module_code(library_namespace) {
 			} else {
 				family_with_language[url_pattern] = [ interwikimap_data ];
 			}
+			if ('localinterwiki' in interwikimap_data) {
+				family_with_language[url_pattern].is_localinterwiki = true;
+			}
 		}
 
 		// https://en.wikipedia.org/wiki/Wikipedia:Village_pump_(technical)/Archive_210#About_wikia_flag_in_Special:Interwiki
@@ -3150,6 +3153,7 @@ function module_code(library_namespace) {
 		var interwikimap =
 		// session.has_languagevariants &&
 		configurations.interwikimap;
+		session.localinterwiki_prefixes = [];
 		if (interwikimap) {
 			interwikimap.mapper = Object.create(null);
 			// prefix_pattern
@@ -3234,6 +3238,9 @@ function module_code(library_namespace) {
 							.push(interwikimap_data);
 				} else {
 					interwikimap.host_end_of_family_with_language[matched] = [ interwikimap_data ];
+				}
+				if (interwikimap_data_list.is_localinterwiki) {
+					interwikimap.localinterwiki_prefix = interwikimap_data.prefix;
 				}
 			}
 			if (false) {
