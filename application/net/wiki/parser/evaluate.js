@@ -1982,7 +1982,9 @@ function module_code(library_namespace) {
 			expression = eval_expr(expression);
 			if (expression instanceof wiki_API.wiki_error)
 				return expression.toString();
-			token = get_parameter_String(expression ? 2 : 3) || '';
+			token = get_parameter_String(expression && expression !== '0' ? 2
+					: 3)
+					|| '';
 			token = wiki_API.trim_token(token);
 			// console.trace(token);
 			break;

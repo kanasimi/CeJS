@@ -1210,8 +1210,8 @@ function module_code(library_namespace) {
 				|| to_template_token.type !== 'transclusion'
 				|| !Array.isArray(from_template_token)
 				|| from_template_token.type !== 'transclusion') {
-			throw new Error(
-					'merge_template_parameters: Invalid template token!');
+			throw new Error('merge_template_parameters: '
+					+ 'Invalid template token!');
 			return;
 		}
 

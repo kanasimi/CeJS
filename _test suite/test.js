@@ -5813,7 +5813,7 @@ function test_wiki() {
 				var options = CeL.wiki.add_session_to_options(enwiki, { on_page_title: 'ABC', allow_promise: true });
 				return Promise.all([
 					'{{w|ABC}}{{w|ABC|DEF}}',
-					'{{str rightc |Lorem ipsum dolor sit amet |10}}',
+					'{{str right |Lorem ipsum dolor sit amet |10}}',
 					// [[w:en:Template:Str sub new]]
 					'{{str sub new|1234567890|3|7}}',
 					'{{str sub new|1234567890|3|-3}}',
@@ -5832,7 +5832,7 @@ function test_wiki() {
 				//console.trace(results);
 				var i = 0;
 				assert(['[[ABC]][[ABC|DEF]]', results[i++].toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{w}}');
-				assert(['r sit amet', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str rightc}} )');
+				assert(['m dolor sit amet', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str right}} )');
 				// [[w:en:Template:Str sub new]]
 				assert(['34567', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new ||+|+ }} )');
 				assert(['345678', results[i++].toString()], 'CeL.wiki.expand_transclusion( {{str sub new ||+|-}} )');

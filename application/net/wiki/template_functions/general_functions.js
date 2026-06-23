@@ -622,6 +622,7 @@ function module_code(library_namespace) {
 		var parameters = token.parameters;
 		if (!(NO in parameters))
 			return;
+
 		var value = parameters[NO].toString();
 		if (/{{/.test(value)) {
 			var _value = wiki_API.expand_transclusion(value, options);
@@ -640,24 +641,33 @@ function module_code(library_namespace) {
 	// [[w:en:Module:String]]
 	function expand_module_String(options) {
 		/* const */var token = this;
+		var index = 1;
+		// 警告: 本函數中取用 get_parameter(NO) 必須嚴格按照 [[Module:String]]
+		// 的順序，且每一參數僅能取用一次。
 		function get_parameter(NO) {
-			return get_parameter_of_token(NO, token, options);
+			var parameter_value = get_parameter_of_token(NO, token, options);
+			if (parameter_value === undefined) {
+				// @see function str._getParameters @ [[Module:String]]
+				parameter_value = get_parameter_of_token(index++, token,
+						options);
+			}
+			return parameter_value;
 		}
 
 		switch (token.function_name) {
 		case 'len':
-			return (get_parameter('s') || get_parameter(1)).length;
+			return get_parameter('s').length;
 
 		case 'endswith':
-			return (get_parameter('source') || get_parameter(1))
-					.endsWith(get_parameter('pattern') || get_parameter(2)) ? 'yes'
-					: '';
+			var source = get_parameter('source');
+			var pattern = get_parameter('pattern');
+			return source.endsWith(pattern) ? 'yes' : '';
 
 		case 'replace':
-			var pattern = get_parameter('pattern') || get_parameter(2);
+			var source = get_parameter('source');
+			var pattern = get_parameter('pattern');
 			pattern = Lua_pattern_to_RegExp_pattern(pattern, 'g');
-			return (get_parameter('source') || get_parameter(1)).replace(
-					pattern, get_parameter('replace') || get_parameter(3));
+			return source.replace(pattern, get_parameter('replace'));
 
 		case 'sub':
 			// function str.sub( frame )
