@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Andrekowacs",
+			"EGobi",
 			"Felipe L. Ewald",
 			"Lc97",
 			"Mellogabi03",
@@ -1284,7 +1285,7 @@
 	"automatically-replace-the-display-text-of-links-$1→$2": "Substituir automaticamente o texto de exibição dos links: %1→%2",
 	"get-list-of-$1-from-$2": "Obter lista de %1 from %2.",
 	"list-types-$1": "Tipos de lista: %1.",
-	"namespaces-$1": "Namespaces: %1.",
+	"namespaces-$1": "Espaços nominais: %1.",
 	"convert-$1-to-wikilink": "Converter %1 em wikilink",
 	"hi-maybe-you-can-change-the-format-of-your-signature": "Olá, talvez você possa alterar o formato de sua assinatura"
 }

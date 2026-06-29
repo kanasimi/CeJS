@@ -132,11 +132,11 @@ function module_code(library_namespace) {
 		text = String(text);
 
 		if (type === '#') {
-			//console.log([ text, type ]);
+			// console.log([ text, type ]);
 			text = text
 			//
 			.replace(/#.*/g, '');
-			//console.log([ text, type ]);
+			// console.log([ text, type ]);
 			return text;
 		}
 
@@ -211,11 +211,13 @@ function module_code(library_namespace) {
 			var dictionary_path = this.path;
 			var original_value = pair_Map.get(key);
 			if (value === original_value) {
-				library_namespace.info('set_pair_Map_value: 重複設定相同的 '
-				//
-				+ JSON.stringify(key) + ' → ' + JSON.stringify(value)
-				//
-				+ (dictionary_path ? ' (' + dictionary_path + ')' : ''));
+				if (options.show_debug_messages) {
+					library_namespace.info('set_pair_Map_value: ' + '重複設定相同的 '
+					//
+					+ JSON.stringify(key) + ' → ' + JSON.stringify(value)
+					//
+					+ (dictionary_path ? ' (' + dictionary_path + ')' : ''));
+				}
 				return false;
 			}
 

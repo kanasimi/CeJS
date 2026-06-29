@@ -245,7 +245,10 @@ function module_code(library_namespace) {
 			// 在 convert_text() 開始轉換之後就不會再修改辭典檔，因此可移除 .pair_Map。
 			may_remove_pair_Map : !options
 			// @see convert_text(text, options)
-			|| !options.mode
+			|| !options.mode,
+
+			// @sww CeL.data.Convert_Pairs
+			show_debug_messages : options && options.show_debug_messages
 		};
 
 		var new_tailored_key_Set = new Set;

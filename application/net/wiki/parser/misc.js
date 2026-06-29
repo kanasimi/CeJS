@@ -1206,6 +1206,8 @@ function module_code(library_namespace) {
 	// target_template_token, source_template_token
 	function merge_template_parameters(to_template_token, from_template_token,
 			options) {
+		// assert: 整個過程不動到 from_template_token。
+
 		if (!Array.isArray(to_template_token)
 				|| to_template_token.type !== 'transclusion'
 				|| !Array.isArray(from_template_token)
@@ -1215,8 +1217,11 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		options = library_namespace.setup_options(options);
+
 		// assert: 不動到 from_template_token。
-		var normalize_parameter = options && options.normalize_parameter;
+		// 用來比較兩個參數值是否相同，而非把參數改成正規化的值。
+		var normalize_parameter = options.normalize_parameter;
 
 		// 紀錄有衝突的 parameter_name
 		var conflict_parameters = [], parameters_to_copy = [];
@@ -1237,7 +1242,7 @@ function module_code(library_namespace) {
 				from_value = normalize_parameter(from_value, parameter_name);
 				to_value = normalize_parameter(to_value, parameter_name);
 			}
-			if (from_value.toString() === to_value.toString()) {
+			if (String(from_value) === String(to_value)) {
 				// Skip the same values.
 				continue;
 			}
@@ -1246,8 +1251,10 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(conflict_parameters, parameters_to_copy);
-		if (conflict_parameters.length > 0)
+		if (conflict_parameters.length > 0) {
+			// 既然有衝突，不能完全合併，就兩個都別動。
 			return conflict_parameters;
+		}
 
 		// assert: 在這之前都不動到 to_template_token。
 
@@ -1269,6 +1276,8 @@ function module_code(library_namespace) {
 			= from_template_token.parameters[parameter_name];
 		});
 		// console.trace(to_template_token, to_template_token.length);
+
+		// wiki_API.inplace_reparse_element(to_template_token, options);
 	}
 
 	// ------------------------------------------------------------------------
