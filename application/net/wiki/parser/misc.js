@@ -135,6 +135,7 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: [[w:en:title]], [[:en:w:title]]:
+		// Wikimedia projects 維基姐妹計畫
 		// https://www.mediawiki.org/wiki/Manual:Wiki_family
 		// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects#How_to_link
 		if (interwiki_data.interwiki) {
@@ -167,6 +168,7 @@ function module_code(library_namespace) {
 		return interwiki_data;
 	}
 
+	// parse_interwiki_external_link
 	function parse_interwiki_url(url, options) {
 		if (!url)
 			return;
@@ -189,8 +191,11 @@ function module_code(library_namespace) {
 		url = String(url);
 
 		var _url = new library_namespace.URI(url);
-		if (!_url)
+		if (!_url) {
+			library_namespace.debug('Invalid URL: ' + url, 2,
+					'parse_interwiki_url');
 			return;
+		}
 
 		function remove_language_of_url(url) {
 			if (typeof url === 'string') {
@@ -209,7 +214,13 @@ function module_code(library_namespace) {
 			//
 			url.match(_interwikimap_data.url_pattern_of_family_with_language);
 			if (!matched)
-				return;
+				return false;
+
+			if (_interwikimap_data.extract_wiki_title_from_url) {
+				matched = _interwikimap_data.extract_wiki_title_from_url(url);
+				if (!matched)
+					return false;
+			}
 
 			interwikimap_data = _interwikimap_data;
 			name = matched;
@@ -232,6 +243,9 @@ function module_code(library_namespace) {
 				name = matched && matched[1];
 				return name;
 			})) {
+				// TODO: 檢查非正規 interwiki links
+				// e.g., http://語言前綴.wikipedia.org/w/index.php?title=頁面標題
+				// @see [[w:zh:Template:Fullurl]]
 				return;
 			}
 
@@ -244,16 +258,28 @@ function module_code(library_namespace) {
 		}
 		name = name.replace(/_/g, ' ');
 
-		var interwik_data = {
+		var interwiki_data = {
 			prefix : prefix || interwikimap_data.prefix,
 			url : _url,
 			name : name
 		};
 
+		// @see adapt_site_configurations(session, configurations)
+		if ('local' in interwikimap_data) {
+			if (prefix ? !prefix.includes(':')
+					: 'language' in interwikimap_data) {
+				interwiki_data.is_interlanguage = true;
+			} else {
+				interwiki_data.is_wiki_family = true;
+			}
+		} else {
+			// non-local interwiki links
+		}
+
 		if (!interwikimap_data.language
 				&& interwikimap_data_list.length > 1
-				&& interwik_data.prefix.length > interwikimap_data_list.at(-1).prefix.length) {
-			interwik_data.shortcut_prefix = interwikimap_data_list.at(-1).prefix;
+				&& interwiki_data.prefix.length > interwikimap_data_list.at(-1).prefix.length) {
+			interwiki_data.shortcut_prefix = interwikimap_data_list.at(-1).prefix;
 		}
 
 		// ------------------------------------------------
@@ -275,17 +301,17 @@ function module_code(library_namespace) {
 				':',
 				// 在 adapt_site_configurations() 中已確保
 				// interwikimap_data_list[0].prefix 與 url 一致，
-				// 不必使用 interwik_data.shortcut_prefix。
-				interwik_data.prefix);
+				// 不必使用 interwiki_data.shortcut_prefix。
+				interwiki_data.prefix);
 			} else {
-				link_title.push(interwik_data.shortcut_prefix
-						|| interwik_data.prefix);
+				link_title.push(interwiki_data.shortcut_prefix
+						|| interwiki_data.prefix);
 			}
 			link_title.push(':');
 		}
 		link_title.push(name);
 
-		interwik_data.link_title = link_title.join('');
+		interwiki_data.link_title = link_title.join('');
 
 		// Release memory. 釋放被占用的記憶體。
 		link_title = null;
@@ -293,33 +319,37 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 
 		// display_text 別包含 prefix。
-		interwik_data.display_text = external_link && external_link[2] ? external_link[2]
+		interwiki_data.display_text = external_link && external_link[2] ? external_link[2]
 				: name;
 
-		var search = _url.search.replace(/^\?/, '');
+		var search;
+		if (!interwikimap_data.extract_wiki_title_from_url
+				|| Object.keys(_url.search_params).join() !== 'title') {
+			search = _url.search.replace(/^\?/, '');
+		}
 		if (search) {
 			// https://www.mediawiki.org/wiki/Help:Magic_words#URL_data
 			// https://en.wikipedia.org/wiki/Help:Magic_words#Paths
 			// TODO: use {{fullurl}}, e.g., [[w:ja:Template:利用者の投稿記録リンク]]
-			interwik_data.url_magic_word = [ '{{fullurl:',
-					interwik_data.link_title.replace(/^:/, ''), '|', search,
+			interwiki_data.url_magic_word = [ '{{fullurl:',
+					interwiki_data.link_title.replace(/^:/, ''), '|', search,
 					// decodeURIComponent(_url.hash),
 					'}}' ].join('');
 
 		} else {
-			interwik_data.wikilink = [ '[[',
-					interwik_data.link_title + decodeURIComponent(_url.hash) ];
+			interwiki_data.wikilink = [ '[[',
+					interwiki_data.link_title + decodeURIComponent(_url.hash) ];
 
-			if (interwik_data[1] !== interwik_data.display_text.toString()) {
-				interwik_data.wikilink.push('|', interwik_data.display_text);
+			if (interwiki_data[1] !== interwiki_data.display_text.toString()) {
+				interwiki_data.wikilink.push('|', interwiki_data.display_text);
 			}
 
-			interwik_data.wikilink.push(']]');
+			interwiki_data.wikilink.push(']]');
 
-			interwik_data.wikilink = interwik_data.wikilink.join('');
+			interwiki_data.wikilink = interwiki_data.wikilink.join('');
 		}
 
-		return interwik_data;
+		return interwiki_data;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -336,10 +366,10 @@ function module_code(library_namespace) {
 	wiki_API.is_valid_parameters_value = is_valid_parameters_value;
 
 	// 僅添加有效的 parameters。基本上等同於 Object.assign()，只是不添加無效值。
-	function set_template_object_parameters(template_object, parameters,
+	function set_template_object_parameters(parameters_object, parameters,
 			value_mapping) {
-		if (!template_object)
-			template_object = Object.create(null);
+		if (!parameters_object)
+			parameters_object = Object.create(null);
 
 		for ( var key in parameters) {
 			var value = parameters[key];
@@ -347,17 +377,17 @@ function module_code(library_namespace) {
 				value = value_mapping[value];
 			// 不添加無效值。
 			if (is_valid_parameters_value(value)) {
-				template_object[key] = value;
+				parameters_object[key] = value;
 			}
 		}
 
-		return template_object;
+		return parameters_object;
 	}
 
 	/**
 	 * 將 parameters 形式的 object 轉成 wikitext。
 	 * 
-	 * 警告: 不保證 template_object 的順序！
+	 * 警告: 不保證 parameters_object 的順序！
 	 * 
 	 * @example<code>
 
@@ -390,28 +420,28 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}template_name
 	 *            template name
-	 * @param {Object}template_object
+	 * @param {Object}parameters_object
 	 *            parameters 形式的 object。<br />
 	 *            e.g., { '1': value, '2': value, parameter1 : value1 }
 	 * @param {Function}[post_processor]
 	 *            post-processor for text_array
 	 */
-	function template_object_to_wikitext(template_name, template_object,
+	function template_object_to_wikitext(template_name, parameters_object,
 			post_processor) {
-		if (!post_processor && typeof template_object === 'function') {
+		if (!post_processor && typeof parameters_object === 'function') {
 			// shift arguments.
-			post_processor = template_object;
-			template_object = undefined;
+			post_processor = parameters_object;
+			parameters_object = undefined;
 		}
 
-		if (!template_object) {
+		if (!parameters_object) {
 			if (Array.isArray(template_name)) {
 				// clone
-				template_object = template_name.slice();
-				template_name = template_object[0];
-				template_object[0] = undefined;
+				parameters_object = template_name.slice();
+				template_name = parameters_object[0];
+				parameters_object[0] = undefined;
 			} else {
-				template_object = Object.create(null);
+				parameters_object = Object.create(null);
 			}
 		}
 
@@ -438,10 +468,10 @@ function module_code(library_namespace) {
 
 		// 先置放數字 parameters。
 		while (true) {
-			var value = template_object[index];
+			var value = parameters_object[index];
 			if (!is_valid_parameters_value(value)) {
-				if (is_valid_parameters_value(template_object[index + 1])
-						|| is_valid_parameters_value(template_object[index + 2])) {
+				if (is_valid_parameters_value(parameters_object[index + 1])
+						|| is_valid_parameters_value(parameters_object[index + 2])) {
 					// 最多可跳過兩個 parameters，簡化結構。
 					text_array[index++] = '';
 					continue;
@@ -462,13 +492,13 @@ function module_code(library_namespace) {
 			text_array[index++] = value;
 		}
 
-		for ( var key in template_object) {
+		for ( var key in parameters_object) {
 			if (key in text_array) {
 				// 已處理過。
 				continue;
 			}
 
-			var value = template_object[key];
+			var value = parameters_object[key];
 			if (is_valid_parameters_value(value)) {
 				value = escape_parameter(value);
 				if (value.includes('\n') && !text_array.at(-1).endsWith('\n')) {
@@ -605,17 +635,23 @@ function module_code(library_namespace) {
 		return parameter.trim().replace(/^([^={}]+)\s+=\s+/, '$1=');
 	}
 
+	// is_positional_parameter_name()
+	// cf. library_namespace.is_digits()
+	function is_numbered_parameter_name(parameter_name) {
+		return /^[1-9]\d*$/.test(parameter_name);
+	}
+
 	// @inner
 	function may_omit_numbered_parameter_name(template_token, parameter_name,
 			next_insert_index) {
-		if (!library_namespace.is_digits(parameter_name))
+		if (!is_numbered_parameter_name(parameter_name))
 			return false;
 
 		next_insert_index = +next_insert_index || template_token.length;
 		for (var index = next_insert_index; index > 1;) {
 			var piece = template_token[--index];
 			var latest_parameter_name = String(piece[0]);
-			if (library_namespace.is_digits(latest_parameter_name)) {
+			if (is_numbered_parameter_name(latest_parameter_name)) {
 				return +latest_parameter_name === parameter_name - 1;
 			}
 		}
@@ -1063,7 +1099,7 @@ function module_code(library_namespace) {
 		// console.trace(index, replace_to);
 
 		if (replace_to === KEY_remove_parameter) {
-			if (library_namespace.is_digits(parameter_name)) {
+			if (is_numbered_parameter_name(parameter_name)) {
 				// For numeral parameter_name, just replace to empty value.
 				template_token[index] = '';
 				// Warning: this will NOT change .index_of , .parameters !
@@ -1123,7 +1159,7 @@ function module_code(library_namespace) {
 
 		// 注意: 假如 numbered parameter 本來就沒有添上 1= 之類，那麼就算 .includes('=')
 		// 也不會再主動添加。
-		if (!spaces[1] && library_namespace.is_digits(parameter_name)) {
+		if (!spaces[1] && is_numbered_parameter_name(parameter_name)) {
 			var matched = replace_to.match(/^\s*(\d+)\s*=\s*([\s\S]*)$/);
 			if (matched && matched[1] == parameter_name
 					&& may_omit_numbered_parameter_value(matched[2], options)) {
@@ -1160,7 +1196,7 @@ function module_code(library_namespace) {
 		if (index === 0 || index + 1 < template_token.length) {
 			// index === 0: template name 無影響。
 			// index + 1 < template_token.length: 最末尾沒有 parameter 了，影響較小。
-		} else if (!library_namespace.is_digits(parameter_name)) {
+		} else if (!is_numbered_parameter_name(parameter_name)) {
 			// TODO: NG: {{t|a=a|1}} → {{t|a|1}}
 			if (!PATERN_parameter_name.test(replace_to)) {
 				library_namespace.warn('replace_parameter: '
@@ -1231,7 +1267,7 @@ function module_code(library_namespace) {
 			|| !to_template_token.parameters[parameter_name]
 					&& (from_template_token.parameters[parameter_name]
 					// 警告: 對於數字 parameter 尚有bug。
-					|| library_namespace.is_digits(parameter_name))) {
+					|| is_numbered_parameter_name(parameter_name))) {
 				parameters_to_copy.push(parameter_name);
 				continue;
 			}
@@ -3015,6 +3051,9 @@ function module_code(library_namespace) {
 		template : parse_template,
 		set_template_object_parameters : set_template_object_parameters,
 		template_object_to_wikitext : template_object_to_wikitext,
+
+		is_numbered_parameter_name : is_numbered_parameter_name,
+
 		// CeL.wiki.parse.replace_parameter()
 		replace_parameter : replace_parameter,
 		merge_template_parameters : merge_template_parameters,

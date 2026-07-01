@@ -54,6 +54,7 @@ function module_code(library_namespace) {
 	}
 
 	// 演算/轉換 wikitext 中的所有 {{{parameter}}}。
+	// 警告: convert_parameter() 不會改變 token.parameters，因此可能需要 re-parse。
 	function convert_parameter(wikitext, parameters, options) {
 		if (!parameters)
 			parameters = Object.create(null);
@@ -566,8 +567,27 @@ function module_code(library_namespace) {
 
 			// console.trace(promise);
 
-			// re-parse
-			token = wiki_API.parse(promise.toString(), options);
+			if (false) {
+				token = expand_transclusion(promise.toString(),
+				// 不用 wiki_API.parse() 以容許 token.expand() 回傳 templates。
+				Object.assign(Object.create(null), options, {
+					// valler
+					template_token_called : token
+				}), template_depth_now);
+
+			} else {
+				promise = promise.toString();
+				if (promise.includes('{{{')) {
+					// 容許 token.expand() 回傳 templates。
+					promise = convert_parameter(promise, token.parameters,
+							options);
+					// 警告: convert_parameter() 不會改變 token.parameters，因此可能需要
+					// re-parse。
+					promise = promise.toString();
+				}
+				// re-parse
+				token = wiki_API.parse(promise, options);
+			}
 		}
 
 		if (Array.isArray(token))
@@ -1613,7 +1633,8 @@ function module_code(library_namespace) {
 					// 避免循環設定。
 					key.evaluated = true;
 				}
-				token[attribute_name] = key;
+				// assert: key is String
+				token[attribute_name] = key.trim();
 			}
 
 			var promise = wiki_API.parse
@@ -2382,6 +2403,7 @@ function module_code(library_namespace) {
 			if (typeof token.expand === 'function') {
 				var promise;
 				try {
+					// function expand_module_*
 					promise = token.expand(options, template_depth_now);
 				} catch (e) {
 					if (e && /NYI/.test(e.message))

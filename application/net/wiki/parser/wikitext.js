@@ -358,7 +358,7 @@ function module_code(library_namespace) {
 	// var PATTERN_transclusion =
 	// /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:(\||{{\s*!\s*}})[^<>\[\]]*)*?)}}/g;
 	/**
-	 * {RegExp}wikilink內部連結的匹配模式。
+	 * {RegExp}wikilink 內部連結的匹配模式。
 	 * 
 	 * @see PATTERN_wikilink
 	 */
@@ -1988,6 +1988,7 @@ function module_code(library_namespace) {
 			|| /^\s*\/\//.test(page_name);
 		}
 
+		// parse wikilink 內部連結
 		// TODO: suffix https://en.wikipedia.org/wiki/Help:Pipe_trick
 		// TODO: 緊接在連結前面的 /[a-zA-Z\x80-\x10ffff]+/ 會顯示為連結的一部分。
 		// https://phabricator.wikimedia.org/T263266
@@ -5052,7 +5053,7 @@ function module_code(library_namespace) {
 					PATTERN_language_conversion, parse_language_conversion);
 
 			// ----------------------------------------------------
-			// wikilink
+			// wikilink 內部連結
 			// [[~:~|~]], [[~:~:~|~]]
 
 			// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！

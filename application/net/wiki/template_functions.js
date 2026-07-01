@@ -1182,8 +1182,9 @@ function module_code(library_namespace) {
 		if (function_config.adapter) {
 			function_config = function_config.adapter;
 		}
-		if (typeof function_config === 'function')
+		if (typeof function_config === 'function') {
 			return function_config(template_token, index, parent, options);
+		}
 	}
 
 	function set_proto_properties(template_name, template_properties, options) {

@@ -2991,7 +2991,20 @@ function module_code(library_namespace) {
 	//
 	};
 
+	var wiki_index_url_tail = '/w/index.php?$1';
+
+	// return [, language_code, title ]
+	function extract_wiki_title_from_url(url) {
+		var _url = new library_namespace.URI(url);
+		var title = _url.search_params.title;
+		if (!title)
+			return;
+		var language_code = _url.hostname.replace(/\..+/, '');
+		return [ , language_code, title ];
+	}
+
 	// @see get_first_domain_name_of_session(session)
+	// [, 語言前綴 language_code ]
 	var PATTERN_language_of_wiki_url = /\/\/([^.]+)\./;
 
 	// @see [[Special:Interwiki]] 跨維基資料 跨 wiki 字首
@@ -3056,8 +3069,8 @@ function module_code(library_namespace) {
 
 			// language fallbacks
 			site_configurations.lang_fallbacks = Object.create(null);
-			for ( var lang_code in languagevariants.zh) {
-				site_configurations.lang_fallbacks[lang_code] = languagevariants.zh[lang_code].fallbacks;
+			for ( var language_code in languagevariants.zh) {
+				site_configurations.lang_fallbacks[language_code] = languagevariants.zh[language_code].fallbacks;
 			}
 			// Release memory. 釋放被占用的記憶體。
 			// delete configurations.languagevariants;
@@ -3079,7 +3092,7 @@ function module_code(library_namespace) {
 
 			url_pattern = library_namespace.to_RegExp_pattern(url_pattern);
 
-			url_pattern = url_pattern.replace(/https?:/, 'https?:');
+			url_pattern = url_pattern.replace(/https?:/, '(?:https?:)?');
 			url_pattern = url_pattern.replace(/__para1__/g, '(.+?)').replace(
 					/__para2__/, '(.+)');
 
@@ -3106,7 +3119,7 @@ function module_code(library_namespace) {
 			|| url.includes('.wikimedia.org')
 			// e.g., url: 'https://en.wikipedia.org/wiki/Wikipedia:$1',
 			// [[wikipediawikipedia:ja:T]] 也不會重新導向到 jawiki
-			|| !/\/\$\d$/.test(url)) {
+			|| !/\/\$\d$/.test(url) && !url.endsWith(wiki_index_url_tail)) {
 				return;
 			}
 
@@ -3175,30 +3188,46 @@ function module_code(library_namespace) {
 			interwikimap.language = Object.create(null);
 			interwikimap.family = Object.create(null);
 			var url_map = Object.create(null);
-			interwikimap.forEach(function(interwikimap_data) {
-				if (url_map[interwikimap_data.url]) {
-					url_map[interwikimap_data.url].push(interwikimap_data);
+			function register_family_with_language(interwikimap_data) {
+				var url = interwikimap_data.url;
+				if (url_map[url]) {
+					url_map[url].push(interwikimap_data);
 				} else {
-					url_map[interwikimap_data.url] = [ interwikimap_data ];
+					url_map[url] = [ interwikimap_data ];
 				}
 
-				if (!('local' in interwikimap_data))
+				if (!('local' in interwikimap_data)) {
+					// 非基金會計畫（像Gutenberg計畫等）的外部連結。
+					// non-local interwiki links
 					return;
+				}
 
 				if ('language' in interwikimap_data) {
 					interwikimap.language[interwikimap_data.prefix]
-					//
+					// 跨語言連結的外部連結。
 					= interwikimap_data;
 					if ('localinterwiki' in interwikimap_data) {
 						check_family_with_language(interwikimap_data);
 					}
 				} else {
 					interwikimap.family[interwikimap_data.prefix]
-					//
+					// Wikimedia projects 維基基金會計畫
+					// （Wikimedia sister projects、維基姊妹計畫、維基姊妹項目、維基媒體姊妹專案
+					// 、wiki family）的外部連結。
 					= interwikimap_data;
 					check_family_with_language(interwikimap_data);
 				}
-			});
+
+				if (url.endsWith('/wiki/$1')) {
+					interwikimap_data = Object.clone(interwikimap_data);
+					interwikimap_data.url = url.replace('/wiki/$1',
+							wiki_index_url_tail);
+					// return [, language_code, title ]
+					interwikimap_data.extract_wiki_title_from_url = extract_wiki_title_from_url;
+					register_family_with_language(interwikimap_data);
+				}
+			}
+			interwikimap.forEach(register_family_with_language);
 			interwikimap.host_end_of_family_with_language = Object.create(null);
 			for ( var url_pattern in family_with_language) {
 				var interwikimap_data_list = family_with_language[url_pattern];

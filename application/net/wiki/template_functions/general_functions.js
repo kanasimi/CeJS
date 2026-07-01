@@ -103,6 +103,12 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	function function_does_not_exist_error(token) {
+		return new wiki_API.wiki_error([
+				'Script error: The function "%1" does not exist.',
+				token.function_name ]);
+	}
+
 	function expand_module_If_empty(options) {
 		// options.template_token_called: See simplify_transclusion(
 		/* const */var token = options && options.template_token_called
@@ -475,6 +481,122 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// @see [[w:en:Module:Template wrapper]]
+	// [[w:en:Wikipedia:Wrapper templates]]
+	function expand_module_Template_wrapper(options) {
+		/* const */var token = this;
+		if (token.function_name !== 'wrap') {
+			return function_does_not_exist_error(token);
+		}
+
+		var parameters = token.parameters;
+		if (!parameters._template) {
+			return new wiki_API.wiki_error(
+					// `error_msg`
+					'<code style=\"color:inherit; border:inherit; padding:inherit;\">&#124;_template=</code> missing or empty');
+		}
+
+		var caller_parameters = options.template_token_called;
+		caller_parameters = caller_parameters && caller_parameters.parameters;
+		var parameters_object = Object.create(null);
+
+		var exclude_Set = new Set(
+				'_template,_exclude,_reuse,_alias-map,_include-positional'
+						.split(','));
+
+		var reuse_Set = new Set();
+		if (parameters._reuse) {
+			parameters._reuse.toString().split(',')
+			//
+			.forEach(function(parameter) {
+				reuse_Set.add(parameter.trim());
+			});
+		}
+
+		var alias_Map = new Map();
+		if (parameters['_alias-map']) {
+			parameters['_alias-map'].toString().split(',')
+			//
+			.forEach(function(parameter) {
+				parameter = parameter.match(/^([^:]+):(.*)/);
+				if (parameter)
+					alias_Map.set(parameter[1].trim(), parameter[2].trim());
+			});
+		}
+
+		var include_positional = 'yes' === String(parameters['_include-positional']);
+
+		for ( var parameter_name in parameters) {
+			if (exclude_Set.has(parameter_name)) {
+				continue;
+			}
+
+			var value = parameters[parameter_name];
+			if (wiki_API.is_valid_parameters_value(value)) {
+				parameters_object[parameter_name] = value;
+			}
+		}
+
+		if (parameters._exclude) {
+			parameters._exclude.toString().split(',')
+			//
+			.forEach(function(parameter) {
+				exclude_Set.add(parameter.trim());
+			});
+		}
+
+		function check_reset(already_set, parameter_name) {
+			if (!already_set) {
+				return;
+			}
+			// keep order
+			var value = parameters_object[parameter_name];
+			delete parameters_object[parameter_name];
+			parameters_object[parameter_name] = value;
+		}
+
+		for ( var parameter_name in caller_parameters) {
+			// @see set_template_object_parameters()
+			if (alias_Map.has(parameter_name)) {
+				parameter_name = alias_Map.get(parameter_name);
+
+			} else if (/\d/.test(parameter_name)) {
+				var model = parameter_name.replace(/\d+/, '#');
+				if (alias_Map.has(model)) {
+					var id = parameter_name.match(/\d+/);
+					parameter_name = alias_Map.get(model).replace(/#/, id);
+				}
+			}
+
+			var already_set = parameter_name in parameters_object;
+			if (exclude_Set.has(parameter_name)
+			// _reused parameters cannot be overridden.
+			|| reuse_Set.has(parameter_name)) {
+				check_reset(already_set, parameter_name);
+				continue;
+			}
+
+			if (!include_positional
+			//
+			&& wiki_API.parse.is_numbered_parameter_name(parameter_name)) {
+				check_reset(already_set, parameter_name);
+				continue;
+			}
+
+			var value = caller_parameters[parameter_name];
+			if (wiki_API.is_valid_parameters_value(value)) {
+				parameters_object[parameter_name] = value;
+			}
+			check_reset(already_set, parameter_name);
+		}
+
+		var wikitext = wiki_API.parse.template_object_to_wikitext(
+				parameters._template, parameters_object);
+		return wikitext;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// https://en.wikipedia.org/wiki/Module:Check_for_unknown_parameters
 	function check_template_for_unknown_parameters(template_token, options) {
 		var valid_parameters = this.valid_parameters, valid_RegExp_parameters = this.valid_RegExp_parameters;
@@ -703,10 +825,7 @@ function module_code(library_namespace) {
 			throw new Error('expand_module_String: NYI');
 		}
 
-		return new wiki_API.wiki_error(
-		//
-		[ 'Script error: The function "%1" does not exist.',
-				token.function_name ]);
+		return function_does_not_exist_error(token);
 	}
 
 	// [[w:en:Module:Ustring]]
@@ -746,10 +865,7 @@ function module_code(library_namespace) {
 			throw new Error('expand_module_Ustring: NYI');
 		}
 
-		return new wiki_API.wiki_error(
-		//
-		[ 'Script error: The function "%1" does not exist.',
-				token.function_name ]);
+		return function_does_not_exist_error(token);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -934,6 +1050,12 @@ function module_code(library_namespace) {
 
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
 		'Pin message' : parse_template_Pin_message,
+
+		'Module:Template wrapper' : {
+			properties : {
+				expand : expand_module_Template_wrapper
+			}
+		},
 
 		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters,
 
