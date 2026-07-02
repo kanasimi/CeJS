@@ -1277,7 +1277,7 @@
 	"Automatically replace the display text of links: %1\u2192%2": "Substituir automaticamente o texto de exibi\u00e7\u00e3o dos links: %1\u2192%2",
 	"Get list of %1 from %2.": "Obter lista de %1 from %2.",
 	"List types: %1.": "Tipos de lista: %1.",
-	"Namespaces: %1.": "Namespaces: %1.",
+	"Namespaces: %1.": "Espa\u00e7os nominais: %1.",
 	"Convert %1 to wikilink": "Converter %1 em wikilink",
 	"Hi, maybe you can change the format of your signature": "Ol\u00e1, talvez voc\u00ea possa alterar o formato de sua assinatura"
 },

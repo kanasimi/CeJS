@@ -245,7 +245,7 @@
 	"Error: connect ETIMEDOUT %1": "Verbindingstime-out naar server: %1",
 	"Error: getaddrinfo ENOTFOUND %1": "De domeinnaam kon niet worden gevonden: %1",
 	"Error: Timeout %1": "Verbindingstime-out overschreden %1",
-	"Error: read ECONNRESET": "Verbinding gereset door peer",
+	"Error: read ECONNRESET": "Verbinding opnieuw ingesteld door peer",
 	"Error: socket hang up": "Socket opgehangen",
 	"Error: unexpected end of file": "Onvolledige gegevens ontvangen",
 	"Error: write ECONNABORTED": "Software heeft verbinding afgebroken",

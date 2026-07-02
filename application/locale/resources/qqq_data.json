@@ -1625,7 +1625,7 @@
 		"message": "The bot operation is completed %1% in total",
 		"original_message_language_code": "en-US",
 		"notes": "Overall progress. 整體作業進度。用在編輯摘要時通常放在最後面，預防擠掉更重要的內容。; Repositories: {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1064}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4005}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L720}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1099}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L216}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1064}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4005}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L718}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1099}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L216}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"finished": {
@@ -2101,7 +2101,7 @@
 		"scope": "CeL.application.net: parse_search()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: parameters",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L795}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L818}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"set-$1-to-a-non-string-$2": {
@@ -2110,7 +2110,7 @@
 		"scope": "CeL.application.net: parameters_toString()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: key, %2: value",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L980}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L1003}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"a-total-of-$1-parameters": {
@@ -2119,7 +2119,7 @@
 		"scope": "CeL.application.net: parameters_toString()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: length of parameters",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L1026}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L1049}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"error-connect-econnrefused-$1": {
@@ -2637,13 +2637,13 @@
 	"load-the-main-functions-and-necessary-dependencies-to-operate-mediawiki": {
 		"message": "Load the main functions and necessary dependencies to operate MediaWiki.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L518}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L521}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"all-wiki-submodules-are-loaded": {
 		"message": "All wiki submodules are loaded.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L551}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki.js#L554}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-the-$1-for-$2-and-do-not-set-them-because-the-values-already-exist-and-$3-is-not-set": {
@@ -2657,7 +2657,7 @@
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <bdi><code>{{int:Comma-separator}}</code></bdi> ([[translatewiki:MediaWiki:Comma-separator]]).\nBe careful to the presence of a trailing space when appropriate for your language (if it is needed, you can input it as <code>&amp;#32;</code> to avoid its trimming when editing this message.\nSee also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3166}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5244}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1526}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L169}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1923}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L703}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L715}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3602}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3609}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3616}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L639}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L258}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3166}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5244}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1526}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L169}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1923}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L701}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L713}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3602}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3609}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3616}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L639}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L266}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"check-the-emergency-stop-page-$1": {
@@ -2800,20 +2800,20 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L353}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1569}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L420}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L425}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L429}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L878}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L1011}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L972}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1061}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1068}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L354}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1569}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L420}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L425}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L429}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L878}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L1011}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L972}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1061}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1068}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3350}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3566}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3399}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3615}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2821,14 +2821,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3599}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3815}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L4232}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L4448}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2870,7 +2870,7 @@
 	"does-not-exist": {
 		"message": "Does not exist",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L882}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1058}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1070}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L882}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1056}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1068}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-cache-file-is-saved": {
@@ -2933,7 +2933,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L4098}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1052}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1114}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3061}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3102}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3114}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L476}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L891}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L950}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1031}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1196}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1776}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L422}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L114}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L243}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L282}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L4098}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1052}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1114}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3069}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3110}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3122}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L476}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L891}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L950}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1031}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1196}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1776}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L422}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L140}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L116}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L245}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L284}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260620.convert_interwiki_links.js#L105}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"there-are-more-than-one-$1-in-$2": {
@@ -2947,35 +2947,35 @@
 		"message": "Expression error: Unrecognized word \"%1\".",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr unrecognised word}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L992}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1068}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"expression-error-unrecognized-punctuation-character-$1": {
 		"message": "Expression error: Unrecognized punctuation character \"%1\".",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr unrecognised punctuation}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L997}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1073}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"division-by-zero": {
 		"message": "Division by zero.",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr division by zero}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1044}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1120}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"in-$1-result-is-not-a-number": {
 		"message": "In %1: Result is not a number.",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr not a number}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1133}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1209}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"error-invalid-depth-in-path-$1-(tried-to-access-a-node-above-the-root-node)": {
 		"message": "Error: Invalid depth in path: \"%1\" (tried to access a node above the root node).",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc rel2abs invalid depth}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L2199}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L2273}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {
@@ -3275,7 +3275,7 @@
 	"convert-interlanguage-link-templates-to-wikilinks": {
 		"message": "Convert interlanguage link templates to wikilinks",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L3}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L709}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L3}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L707}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"here-is-a-list-of-interlanguage-links-that-need-to-be-manually-corrected.-this-list-will-be-updated-automatically-by-the-robot": {
@@ -3289,14 +3289,14 @@
 		"message": "edit-mark",
 		"original_message_language_code": "en-US",
 		"notes": "Short text to mark the links available for editing. For example, the \"E\" at the footer navigational templates. 簡短的文字以標示可供編輯的連結。例如導航模板的\"編\"。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L435}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L433}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"a-total-of-$1-occurrences": {
 		"message": "... A total of %1 {{PLURAL:%1|occurrence|occurrences}}.",
 		"original_message_language_code": "en-US",
 		"notes": "It happened %1 times in total.",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L444}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L442}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"report-generation-date-$1": {
@@ -3304,136 +3304,136 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: generation date, 報告產生時間",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L464}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L498}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L462}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L506}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"cleanup-report-for-interlanguage-link-templates": {
 		"message": "Cleanup report for interlanguage link templates",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L483}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L481}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"preserve-interlanguage-links-because-of-the-preserve-parameter-is-set": {
 		"message": "Preserve interlanguage links because of the \"preserve\" parameter is set.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L746}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L744}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-task-does-not-process-talk-pages": {
 		"message": "The task does not process talk pages",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L824}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L822}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-local-link-target-links-back-to-the-page-itself.-mos-circular": {
 		"message": "The local link target links back to the page itself. [[MOS:CIRCULAR]]?",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L848}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L853}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L846}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L851}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-local-page-is-too-new.-will-try-again-next-time": {
 		"message": "The local page is too new. Will try again next time.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L868}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L871}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L866}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L869}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"links-to-non-main-namespace": {
 		"message": "Links to non-main namespace",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1234}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1237}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L898}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L901}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1232}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1235}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L896}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L899}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"missing-converted-local-page-or-the-foreign-local-page-is-not-link-to-wikidata": {
 		"message": "缺少轉換後的本地頁面，或者外部/本地頁面未鏈接到維基數據。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "リンク先が他言語版とリンクしていないもの。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L947}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L945}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title-but-the-foreign-page-directs-to-a-different-local-title": {
 		"message": "跨語言模板的本地標題與外語標題相同，但外語頁面導向不同的本地標題。",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1018}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1016}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-local-title-in-the-interlanguage-template-is-same-as-the-foreign-language-title": {
 		"message": "跨語言模板的本地標題與外語標題相同",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1033}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1031}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"local-page-title-contains-the-local-title-in-the-interlanguage-template": {
 		"message": "Local page title contains the local title in the interlanguage template",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1045}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1043}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"from-the-parameter-of-template": {
 		"message": "From the parameter of template",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1061}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1059}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"from-foreign-language-title": {
 		"message": "From foreign language title",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1065}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1063}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-local-title-is-different-from-the-one-given-by-the-template-parameters": {
 		"message": "The local title is different from the one given by the template parameters.",
 		"original_message_language_code": "en-US",
 		"notes": "リンク先の他言語版とのリンクが仮リンクに記されているものと違うもの。仮リンクに記された「他言語版へのリンク先」とリンクしている「日本語版のページ名」が「第1引数のリンク先」と一致しないもの。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1079}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1077}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-corresponding-foreign-language-page-does-not-exist": {
 		"message": "The corresponding foreign language page does not exist.",
 		"original_message_language_code": "en-US",
 		"notes": "對應頁面/指向的頁面不存在。仮リンクに記された「他言語版へのリンク先」が存在せず（赤リンク）、どの記事からもリンクされていないもの。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1096}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1176}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1094}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1174}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-corresponding-foreign-language-page-is-a-disambiguation-page": {
 		"message": "The corresponding foreign language page is a disambiguation page.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1110}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1182}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1108}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1180}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-corresponding-foreign-language-page-is-redirected-to-a-section": {
 		"message": "The corresponding foreign language page is redirected to a section.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1130}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1128}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"syntax-error-in-the-interlanguage-link-template": {
 		"message": "Syntax error in the interlanguage link template.",
 		"original_message_language_code": "en-US",
 		"notes": "仮リンクに記されるべき「他言語版の言語コード」が空白である場合。仮リンクに記されるべき「他言語版へのリンク先」が空白である場合。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1248}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1281}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1335}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1349}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1246}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1279}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1333}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1347}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"could-not-retrieve-the-foreign-page.-i-will-retry-next-time": {
 		"message": "Could not retrieve the foreign page. I will retry next time.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1287}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1285}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-registered-interwiki-link-templates-were-found": {
 		"message": "No registered interwiki link templates were found.",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1423}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1432}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1369}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1378}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"maybe-there-are-unregistered-interwiki-link-templates-or-some-transcluded-templates-articles-with-interwiki-link-templates-that-have-local-articles-(usually-in-the-last-section-of-the-page)": {
 		"message": "也許存在未註冊的跨維基鏈接模板，或者一些包含本地文章（通常在頁面的最後部分）的跨維基鏈接模板的嵌入模板/文章？",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1427}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L1373}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"only-inserted-or-modified-templates-section-titles-non-specific-meaning-text": {
@@ -5935,14 +5935,14 @@
 		"message": "%1 必須更名為 %2 才能起作用！",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: input template name, %2: normalized template name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions.js#L1374}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions.js#L1375}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-convert-lua-pattern-to-regexp-pattern-$1": {
 		"message": "Cannot convert Lua pattern to RegExp pattern: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Lua pattern",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L533}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L657}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-detect-work-id-from-url-$1": {
@@ -10412,14 +10412,14 @@
 		"message": "未設定文字：%1",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: number of line",
-		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1790}}",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L1794}}",
 		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
 	"this-rule-seems-unnecessary": {
 		"message": "這條規則似乎沒有必要",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: conversion rule",
-		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L2302}}",
+		"references": "{{GitHub|kanasimi/Chinese_converter/blob/master/Chinese_converter.js#L2306}}",
 		"repositories": "{{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
 	"cannot-move-to-$1": {
@@ -10572,7 +10572,7 @@
 		"message": "Duplicate task name %1! Will overwrite old task with new task: %2→%3",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: task name, %2: old task configuration, %3, new task configuration",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3453}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L918}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3461}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L918}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-task(s)-from-$2": {
@@ -10682,13 +10682,13 @@
 		"original_message_language_code": "en-US",
 		"notes": "因編輯摘要的連結不像文章內的可繁簡轉換之技術問題，中文翻譯特別為 red link 作了特殊註記。; Parameters: %1: Converted internal links",
 		"parameters": "%1: Converted internal links",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L701}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L699}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"also-fix-bad-language-codes-$1": {
 		"message": "Also fix bad language codes: %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L713}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L711}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"hi-maybe-you-can-change-the-format-of-your-signature": {
