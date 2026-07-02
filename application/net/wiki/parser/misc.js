@@ -453,6 +453,9 @@ function module_code(library_namespace) {
 
 		// @see [[Template:Escape template list]]
 		function escape_parameter(parameter) {
+			if (wiki_API.is_parsed_element(parameter))
+				return parameter;
+
 			parameter = String(parameter)
 			//
 			.replace(/[{}]/g, function(char) {

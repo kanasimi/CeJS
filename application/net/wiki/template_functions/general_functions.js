@@ -497,12 +497,12 @@ function module_code(library_namespace) {
 		}
 
 		var caller_parameters = options.template_token_called;
-		caller_parameters = caller_parameters && caller_parameters.parameters;
+		caller_parameters = caller_parameters && caller_parameters.parameters
+				|| Object.create(null);
 		var parameters_object = Object.create(null);
 
-		var exclude_Set = new Set(
-				'_template,_exclude,_reuse,_alias-map,_include-positional'
-						.split(','));
+		var exclude_Set = new Set([ '_template', '_exclude', '_reuse',
+				'_alias-map', '_include-positional' ]);
 
 		var reuse_Set = new Set();
 		if (parameters._reuse) {
@@ -524,8 +524,6 @@ function module_code(library_namespace) {
 			});
 		}
 
-		var include_positional = 'yes' === String(parameters['_include-positional']);
-
 		for ( var parameter_name in parameters) {
 			if (exclude_Set.has(parameter_name)) {
 				continue;
@@ -536,6 +534,8 @@ function module_code(library_namespace) {
 				parameters_object[parameter_name] = value;
 			}
 		}
+
+		// ------------------------------------------------
 
 		if (parameters._exclude) {
 			parameters._exclude.toString().split(',')
@@ -563,7 +563,7 @@ function module_code(library_namespace) {
 			} else if (/\d/.test(parameter_name)) {
 				var model = parameter_name.replace(/\d+/, '#');
 				if (alias_Map.has(model)) {
-					var id = parameter_name.match(/\d+/);
+					var id = parameter_name.match(/\d+/)[0];
 					parameter_name = alias_Map.get(model).replace(/#/, id);
 				}
 			}
@@ -576,6 +576,7 @@ function module_code(library_namespace) {
 				continue;
 			}
 
+			var include_positional = 'yes' === String(parameters['_include-positional']);
 			if (!include_positional
 			//
 			&& wiki_API.parse.is_numbered_parameter_name(parameter_name)) {
@@ -585,7 +586,8 @@ function module_code(library_namespace) {
 
 			var value = caller_parameters[parameter_name];
 			if (wiki_API.is_valid_parameters_value(value)) {
-				parameters_object[parameter_name] = value;
+				parameters_object[parameter_name] = value === 'unset' ? ''
+						: value;
 			}
 			check_reset(already_set, parameter_name);
 		}

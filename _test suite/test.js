@@ -6132,6 +6132,29 @@ function test_wiki() {
 			var promise = Promise.resolve();
 
 			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion('{{Ifsubst|yes|no}}', options);
+			}).then(function (parsed) {
+				//console.trace(parsed);
+				assert(['no', parsed.toString()], 'CeL.wiki.expand_transclusion( {{Ifsubst}} )');
+			});
+
+			promise = promise.then(function () {
+				// https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=expandtemplates&format=json&text=%7B%7BIfsubst%7Cyes%7Cno%7D%7D&formatversion=2
+				return CeL.wiki.expand_transclusion('{{safesubst:Ifsubst|yes|no}}', options);
+			}).then(function (parsed) {
+				//console.trace(parsed);
+				assert(['no', parsed.toString()], 'CeL.wiki.expand_transclusion( {{safesubst:Ifsubst}} )');
+			});
+
+			promise = promise.then(function () {
+				var _options = Object.assign({ mode: 'PST' }, options);
+				return CeL.wiki.expand_transclusion('{{safesubst:Ifsubst|yes|no}}', _options);
+			}).then(function (parsed) {
+				//console.trace(parsed);
+				assert(['yes', parsed.toString()], 'CeL.wiki.expand_transclusion( {{safesubst:Ifsubst}}, mode: PST )');
+			});
+
+			promise = promise.then(function () {
 				return CeL.wiki.expand_transclusion('{{a|條目|顯示文字|name=錨點名稱}}', options);
 			}).then(function (parsed) {
 				//console.trace(parsed);

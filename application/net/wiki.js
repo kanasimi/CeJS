@@ -398,7 +398,10 @@ function module_code(library_namespace) {
 		if (object instanceof wiki_error)
 			return object;
 
-		object = wiki_API.parse(object, options);
+		if (typeof object === 'string') {
+			object = wiki_API.parse(object, options);
+		}
+
 		var has_error;
 		wiki_API.parser.parser_prototype.each.call([ object ], 'tag', function(
 				tag_token) {

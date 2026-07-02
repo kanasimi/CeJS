@@ -68,8 +68,9 @@ function module_code(library_namespace) {
 		// console.trace([ wikitext, options ]);
 		// console.trace(parsed);
 
-		var have_template_parameters, has_complex_parameter_name, need_convert_parameter_again;
-		for_each_subelement.call(parsed, 'parameter', function(token) {
+		var have_template_parameters, has_complex_parameter_name, need_convert_parameter_again, need_re_parse;
+		for_each_subelement.call(parsed, 'parameter', function(token, index,
+				parent) {
 			if ('from_parameter_NO' in token) {
 				/**
 				 * No more expand, e.g., [[Template:无锡地铁车站编号]] <code>
@@ -145,13 +146,27 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// set_shell(token[1])
-			token = [ token[1] ];
-			convert_parameter(token, parameters, options);
-			return token[0];
+			token = token[1];
+			if (typeof token === 'string') {
+				// 經過解析，替代數值為無特殊作用之 plain text。
+			} else {
+				// set_shell(token[1])
+				token = [ token ];
+				token = convert_parameter(token, parameters, options);
+				// assert: token.length === 1
+				token = token[0];
+			}
+			if (/subst:/i.test(token))
+				need_re_parse = true;
+			return token;
 		}, {
 			modify : true
 		});
+
+		if (need_re_parse) {
+			// e.g., `{{ {{{|safesubst:}}}ifsubst||}}`
+			parsed = wiki_API.parse(parsed.toString(), options);
+		}
 
 		// console.trace([ has_complex_parameter_name, parsed.toString() ]);
 		if (has_complex_parameter_name) {
@@ -160,7 +175,9 @@ function module_code(library_namespace) {
 				// Re-parse again
 				parsed = convert_parameter(has_complex_parameter_name,
 						parameters, options);
-			} else if (wikitext) {
+				return parsed;
+			}
+			if (wikitext) {
 				// assert: wikitext === has_complex_parameter_name
 				parsed.has_complex_parameter_name = true;
 			}
@@ -175,6 +192,26 @@ function module_code(library_namespace) {
 		return parsed;
 	}
 
+	// @inner
+	function evaluate_magic_word_function(token, options, template_depth_now) {
+		// assert: token.type === 'magic_word_function'
+
+		// console.trace(token);
+
+		if (!token.need_subst && options.mode === 'PST' && !(token.name in {
+			'#invoke' : true,
+			SAFESUBST : true
+		})) {
+			return;
+		}
+		token = evaluate_parser_function_token.call(token, options,
+				template_depth_now);
+		if (wiki_API.wiki_error.has_error(token)) {
+			return token.toString();
+		}
+		return token;
+	}
+
 	function set_shell(parsed) {
 		// assert: wiki_API.is_parsed_element(parsed)
 		if (parsed.type !== 'plain') {
@@ -185,7 +222,17 @@ function module_code(library_namespace) {
 		return parsed;
 	}
 
-	// 演算 wikitext 中的所有 magic word。
+	/**
+	 * 演算 wikitext 中的所有 magic word。
+	 * 
+	 * @param {Array}parsed
+	 *            要演算的 wiki code。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * @param {Number}[template_depth_now]
+	 *            expansion depth now. 當前迭代呼叫層數。
+	 * @returns {Array} 演算過的 wiki code。
+	 */
 	function evaluate_parsed(parsed, options, template_depth_now) {
 		if (!parsed)
 			return parsed === undefined ? '' : /* 0 || '' */parsed;
@@ -204,8 +251,7 @@ function module_code(library_namespace) {
 		var promise = for_each_subelement.call(parsed, 'magic_word_function',
 		//
 		function(token) {
-			// console.trace(token);
-			return evaluate_parser_function_token.call(token, options,
+			return evaluate_magic_word_function(token, options,
 					template_depth_now);
 		}, {
 			modify : true
@@ -331,7 +377,14 @@ function module_code(library_namespace) {
 		// Error.stackTraceLimit = Infinity;
 		// console.trace(wikitext);
 		// Error.stackTraceLimit = 10;
-		var parsed = convert_parameter(wikitext, parameters, options);
+		var parsed;
+		if (options.mode === 'PST') {
+			// https://www.mediawiki.org/wiki/Help:Pre-save_transform
+			// 不先處理 {{|safesubst:}}}
+			parsed = wiki_API.parse(wikitext, options);
+		} else {
+			parsed = convert_parameter(wikitext, parameters, options);
+		}
 		var need_convert_parameter_again = parsed.need_convert_parameter_again;
 		// console.trace(page_data);
 		if (page_data) {
@@ -440,6 +493,8 @@ function module_code(library_namespace) {
 				// '{{Namespace detect|main=Article text}}')`
 				return page_data ? token : _parsed;
 			}
+
+			// _parsed.need_subst = true;
 			// expand template
 			_parsed = expand_transclusion(_parsed, Object.assign(Object
 					.clone(options), {
@@ -800,7 +855,8 @@ function module_code(library_namespace) {
 
 			var max_template_depth = options.max_template_depth
 					|| DEFAULT_MAX_TEMPLATE_DEPTH;
-			if ((template_depth_now >= max_template_depth || get_template_depth_now_of_token(token) >= max_template_depth)
+			if (!token.need_subst
+					&& (template_depth_now >= max_template_depth || get_template_depth_now_of_token(token) >= max_template_depth)
 					&& (!options.ignore_template_depth_limit || options
 							.ignore_template_depth_limit(token))) {
 				library_namespace.debug('已達最大層數 ' + max_template_depth
@@ -1492,13 +1548,8 @@ function module_code(library_namespace) {
 							return for_each_subelement.remove_token;
 
 						if (token.type === 'magic_word_function') {
-							// console.trace(token);
-							token = evaluate_parser_function_token.call(token,
-									options, template_depth_now);
-							if (wiki_API.wiki_error.has_error(token)) {
-								return token.toString();
-							}
-							return token;
+							return evaluate_magic_word_function(token, options,
+									template_depth_now);
 						}
 					}, {
 						modify : true
@@ -2371,8 +2422,15 @@ function module_code(library_namespace) {
 			var wikitext = token.toString().replace(/^({{)[^:]+:/, '$1');
 			var parsed = wiki_API.parse(wikitext, options);
 			// TODO: SAFESUBST:在模板包含對其他模板或解析器函數的呼叫時，允許遞歸替換。
+			parsed.need_subst = true;
 			// expand template
-			return expand_transclusion(parsed, options, template_depth_now);
+			if (parsed.type === 'magic_word_function') {
+				parsed = evaluate_parsed(parsed, options, template_depth_now);
+			} else {
+				parsed = expand_transclusion(parsed, options,
+						template_depth_now);
+			}
+			return parsed;
 
 			// TODO:
 			// case 'MSGNW':
