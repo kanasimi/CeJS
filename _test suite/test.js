@@ -4321,11 +4321,15 @@ function test_wiki() {
 		wikitext = "'''b''bi'''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['bold', parsed[0].type], "''' bold '''");
-		// '''''t''''' → <i><b>t</b></i>
+		// '''''ib''''' → <i><b>ib</b></i>
 		wikitext = "'''''Italic and bold formatting'''''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['italic', parsed[0].type], "'''''t''''' will render as <i><b>t</b></i>");
+		assert(['italic', parsed[0].type], "'''''ib''''' will render as <i><b>ib</b></i>");
 		assert(['bold', parsed[0][1].type]);
+		// '''''bi''b''' → <b><i>bi</i>b</b>
+		wikitext = "'''''bi''b'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert(['bold', parsed[0].type], "'''''bi''b''' will render as <b><i>bi</i>b</b>");
 		wikitext = "''Italic'''Italic and bold formatting'''Italic''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['italic', parsed[0].type], "'' '''t''' '' will render as <i><b>t</b></i>");
@@ -5807,10 +5811,39 @@ function test_wiki() {
 			var test_name = 'enwiki: expand_transclusion';
 			_setup_test(test_name);
 
+			var options = CeL.wiki.add_session_to_options(enwiki, { on_page_title: 'ABC', allow_promise: true });
 			var promise = Promise.resolve();
 
 			promise = promise.then(function () {
-				var options = CeL.wiki.add_session_to_options(enwiki, { on_page_title: 'ABC', allow_promise: true });
+				return Promise.all([
+					'{{Ifsubst|yes|no}}',
+					'{{issubst}}'
+				].map(function (wikitext) {
+					return CeL.wiki.expand_transclusion(wikitext, options);
+				}));
+			}).then(function (results) {
+				//console.trace(results);
+				var i = 0;
+				assert(['no', results[i++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{Ifsubst}} )');
+				assert(['', results[i++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{issubst}} )');
+
+
+				// https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=expandtemplates&format=json&text=%7B%7BIfsubst%7Cyes%7Cno%7D%7D&formatversion=2
+				var parsed = CeL.wiki.expand_transclusion('{{safesubst:Ifsubst|yes1|no1}}', options);
+				assert(['no1', parsed.toString()], test_name + ': CeL.wiki.expand_transclusion( {{safesubst:Ifsubst}} )');
+
+				var PST_options = Object.assign({ mode: 'PST' }, options);
+				parsed = CeL.wiki.expand_transclusion('{{safesubst:Ifsubst|yes2|no2}}', PST_options);
+				assert(['yes2', parsed.toString()], test_name + ': CeL.wiki.expand_transclusion( {{safesubst:Ifsubst}}, mode: PST )');
+
+				parsed = CeL.wiki.expand_transclusion('{{safesubst:issubst}}', options);
+				assert(['', parsed.toString()], test_name + ': CeL.wiki.expand_transclusion( {{safesubst:issubst}} )');
+
+				parsed = CeL.wiki.expand_transclusion('{{safesubst:issubst}}', PST_options);
+				assert(['yes', parsed.toString()], test_name + ': CeL.wiki.expand_transclusion( {{safesubst:issubst}}, mode: PST )');
+			});
+
+			promise = promise.then(function () {
 				return Promise.all([
 					'{{w|ABC}}{{w|ABC|DEF}}',
 					'{{str right |Lorem ipsum dolor sit amet |10}}',
@@ -6132,45 +6165,48 @@ function test_wiki() {
 			var promise = Promise.resolve();
 
 			promise = promise.then(function () {
-				return CeL.wiki.expand_transclusion('{{Ifsubst|yes|no}}', options);
-			}).then(function (parsed) {
-				//console.trace(parsed);
-				assert(['no', parsed.toString()], 'CeL.wiki.expand_transclusion( {{Ifsubst}} )');
-			});
+				return Promise.all([
+					'{{Ifsubst|yes|no}}',
+					'{{issubst}}'
+				].map(function (wikitext) {
+					return CeL.wiki.expand_transclusion(wikitext, options);
+				}));
+			}).then(function (results) {
+				//console.trace(results);
+				var i = 0;
+				assert(['no', results[i++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{Ifsubst}} )');
+				assert(['', results[i++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{issubst}} )');
 
-			promise = promise.then(function () {
+
 				// https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=expandtemplates&format=json&text=%7B%7BIfsubst%7Cyes%7Cno%7D%7D&formatversion=2
-				return CeL.wiki.expand_transclusion('{{safesubst:Ifsubst|yes|no}}', options);
-			}).then(function (parsed) {
-				//console.trace(parsed);
-				assert(['no', parsed.toString()], 'CeL.wiki.expand_transclusion( {{safesubst:Ifsubst}} )');
+				var parsed = CeL.wiki.expand_transclusion('{{safesubst:Ifsubst|yes1|no1}}', options);
+				assert(['no1', parsed.toString()], test_name + ': CeL.wiki.expand_transclusion( {{safesubst:Ifsubst}} )');
+
+				var PST_options = Object.assign({ mode: 'PST' }, options);
+				parsed = CeL.wiki.expand_transclusion('{{safesubst:Ifsubst|yes2|no2}}', PST_options);
+				assert(['yes2', parsed.toString()], test_name + ': CeL.wiki.expand_transclusion( {{safesubst:Ifsubst}}, mode: PST )');
+
+				parsed = CeL.wiki.expand_transclusion('{{safesubst:issubst}}', options);
+				assert(['', parsed.toString()], test_name + ': CeL.wiki.expand_transclusion( {{safesubst:issubst}} )');
+
+				parsed = CeL.wiki.expand_transclusion('{{safesubst:issubst}}', PST_options);
+				assert(['yes', parsed.toString()], test_name + ': CeL.wiki.expand_transclusion( {{safesubst:issubst}}, mode: PST )');
 			});
 
 			promise = promise.then(function () {
-				var _options = Object.assign({ mode: 'PST' }, options);
-				return CeL.wiki.expand_transclusion('{{safesubst:Ifsubst|yes|no}}', _options);
-			}).then(function (parsed) {
-				//console.trace(parsed);
-				assert(['yes', parsed.toString()], 'CeL.wiki.expand_transclusion( {{safesubst:Ifsubst}}, mode: PST )');
-			});
-
-			promise = promise.then(function () {
-				return CeL.wiki.expand_transclusion('{{a|條目|顯示文字|name=錨點名稱}}', options);
-			}).then(function (parsed) {
-				//console.trace(parsed);
-				assert(['<span id="錨點名稱"></span>[[條目|顯示文字]]', parsed.toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{a}}');
-			});
-
-			promise = promise.then(function () {
-				return CeL.wiki.expand_transclusion('{{Kai|指引}}改为{{Kai|论述}}', options);
-			}).then(function (parsed) {
-				assert(['<templatestyles src="Template:楷體/styles.css" /><span class="template-kai">指引</span>改为<templatestyles src="Template:楷體/styles.css" /><span class="template-kai">论述</span>', parsed.toString()], 'CeL.wiki.expand_transclusion() fetch page #1');
-			});
-
-			promise = promise.then(function () {
-				return CeL.wiki.expand_transclusion('{{U|user}}\n', options);
-			}).then(function (parsed) {
-				assert(['[[User:user|user]]\n', parsed.toString()], 'CeL.wiki.expand_transclusion() fetch page #2');
+				return Promise.all([
+					'{{a|條目|顯示文字|name=錨點名稱}}',
+					'{{Kai|指引}}改为{{Kai|论述}}',
+					'{{U|user}}\n'
+				].map(function (wikitext) {
+					return CeL.wiki.expand_transclusion(wikitext, options);
+				}));
+			}).then(function (results) {
+				//console.trace(results);
+				var i = 0;
+				assert(['<span id="錨點名稱"></span>[[條目|顯示文字]]', results[i++].toString()], 'CeL.wiki.expand_transclusion() using wiki.template_functions: {{a}}');
+				assert(['<templatestyles src="Template:楷體/styles.css" /><span class="template-kai">指引</span>改为<templatestyles src="Template:楷體/styles.css" /><span class="template-kai">论述</span>', results[i++].toString()], 'CeL.wiki.expand_transclusion() fetch page #1');
+				assert(['[[User:user|user]]\n', results[i++].toString()], 'CeL.wiki.expand_transclusion() fetch page #2');
 			});
 
 			promise = promise.then(function () {
@@ -6268,7 +6304,7 @@ function test_wiki() {
 			});
 
 			promise = promise.then(function () {
-				var _options = Object.assign({}, options);
+				var _options = Object.assign({ mode: 'PST' }, options);
 				_options.max_template_depth = 1;
 				return CeL.wiki.expand_transclusion('{{subst:subst test 1}}', _options);
 			}).then(function (parsed) {

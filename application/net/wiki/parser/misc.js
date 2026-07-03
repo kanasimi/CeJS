@@ -202,7 +202,7 @@ function module_code(library_namespace) {
 				url = new library_namespace.URI(url);
 			}
 			var host = url.host;
-			return host.replace(/^[^.]+/, '');
+			return host.replace(/^[^.]+\.(?:m\.)?/, '.');
 		}
 
 		var prefix, name, interwikimap_data, interwikimap_data_list;
@@ -246,6 +246,11 @@ function module_code(library_namespace) {
 				// TODO: 檢查非正規 interwiki links
 				// e.g., http://語言前綴.wikipedia.org/w/index.php?title=頁面標題
 				// @see [[w:zh:Template:Fullurl]]
+				if (url.includes('wikipedia') && !url.includes('/https://')) {
+					// https://web.archive.org/web/20161012200259/https://zh.wikipedia.org/wiki/%E5%89%8D%E7%94%B0%E5%88%A9%E5%AE%B6
+					library_namespace.debug('Non-standard interwiki link? '
+							+ url, 6, 'parse_interwiki_url');
+				}
 				return;
 			}
 

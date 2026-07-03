@@ -4390,8 +4390,30 @@ function module_code(library_namespace) {
 
 			wikitext = '';
 			var tokens_to_resolve = [];
+			function add_to_queue(type, unit, this_token) {
+				var count = type === 'bold' ? 3 : 2;
+				var token = _set_wiki_type([ unit[1].slice(0, count), '' ],
+						type);
+				unit[1] = unit[1].slice(count);
+				tokens_to_resolve.push(token);
+				queue.push(token);
+				var mark = include_mark + (queue.length - 1) + end_mark;
+				if (this_token) {
+					token.apostrophe_parent = this_token;
+					this_token[KEY_apostrophe_element_content] += mark;
+				} else {
+					wikitext += mark;
+				}
+				// this_token = token;
+				return token;
+			}
+
 			for (var index = 0, this_token = undefined; index < unit_list.length; index++) {
-				var unit = unit_list[index], switch_italic = unit.switch_italic, switch_bold = unit.switch_bold;
+				var unit = unit_list[index];
+				/** 改變 italic 的狀態 */
+				var switch_italic = unit.switch_italic;
+				/** 改變 bold 的狀態 */
+				var switch_bold = unit.switch_bold;
 				if (!switch_italic && !switch_bold) {
 					// assert: unit[1].length === 3 || unit[1].length === 4
 					// 標記b: 其他未設定的都填b
@@ -4495,43 +4517,28 @@ function module_code(library_namespace) {
 
 				// assert: 皆為重新開始 quote，沒有結束的。
 
-				// MediaWiki 把 <b> 放在 <i> 中: <i><b></b></i>
+				// MediaWiki 把 <b> 放在 <i> 中:
+				// ''''ib''''' → <i><b>ib</b></i>
+				// 因此先從<i>開始。
 				if (switch_italic) {
 					// assert: !this_token || this_token.type === 'bold'
 					// assert: unit[1].length === 2 || unit[1].length === 5
-					var token = _set_wiki_type([ unit[1].slice(0, 2), '' ],
-							'italic');
-					// if (switch_bold)
-					unit[1] = unit[1].slice(2);
-					tokens_to_resolve.push(token);
-					queue.push(token);
-					var mark = include_mark + (queue.length - 1) + end_mark;
-					if (this_token) {
-						token.apostrophe_parent = this_token;
-						this_token[KEY_apostrophe_element_content] += mark;
-					} else {
-						wikitext += mark;
+					if (switch_bold && !this_token && unit_list[index + 1]
+							&& unit_list[index + 1][1].length === 2) {
+						// '''''bi''b''' → <b><i>bi</i>b</b>
+						this_token = add_to_queue('bold', unit, this_token);
+						// 已設定過粗體。
+						switch_bold = false;
 					}
-					this_token = token;
+					this_token = add_to_queue('italic', unit, this_token);
 				}
 
 				if (switch_bold) {
 					// assert: !this_token || this_token.type === 'italic'
 					// assert: unit[1].length === 3
-					var token = _set_wiki_type([ unit[1], '' ], 'bold');
-					// needless
-					// unit[1] = unit[1].slice(3);
-					tokens_to_resolve.push(token);
-					queue.push(token);
-					var mark = include_mark + (queue.length - 1) + end_mark;
-					if (this_token) {
-						token.apostrophe_parent = this_token;
-						this_token[KEY_apostrophe_element_content] += mark;
-					} else {
-						wikitext += mark;
-					}
-					this_token = token;
+					this_token = add_to_queue('bold', unit, this_token);
 				}
+				// assert: unit[1].length === 0
 			}
 
 			tokens_to_resolve.forEach(function(token) {
@@ -5194,11 +5201,6 @@ function module_code(library_namespace) {
 			// 可跨行。
 			parse_behavior_switch);
 
-			// 若是要處理<b>, <i>這兩項，也必須調整 wiki_API.section_link()。
-
-			// ''''b''''' → <i><b>b</b></i>
-			// 因此先從<b>開始找。
-
 			// 再解析一次。
 			// e.g., for `[[{{T|P}}]]`, `[[{{#if:A|A|B}}]]`
 			wikitext = wikitext.replace_till_stable(
@@ -5211,6 +5213,7 @@ function module_code(library_namespace) {
 			// → split_text_apostrophe_unit()
 			// 注意: '''{{font color}}''', '''{{tsl}}''', '''{{text}}'''
 
+			// 若是要處理<b>, <i>這兩項，也必須調整 wiki_API.section_link()。
 			if (!options.inside_apostrophe) {
 				// '''~''' ''~'' 不能跨行。
 				wikitext = wikitext.split('\n').map(split_text_apostrophe_unit)

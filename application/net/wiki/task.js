@@ -4874,7 +4874,7 @@ function module_code(library_namespace) {
 			// deprecated:
 
 			// https://www.mediawiki.org/w/api.php?action=help&modules=login
-			var token = Object.assign(Object.create(null), session.token);
+			var token = Object.clone(session.token);
 			// console.log(token);
 			// .csrftoken 是本函式為 cache 加上的，非正規 parameter。
 			delete token.csrftoken;

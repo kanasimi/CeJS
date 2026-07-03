@@ -3148,7 +3148,8 @@ function module_code(library_namespace) {
 			var url_pattern = url.replace(PATTERN_language_of_wiki_url,
 					'//__language_code__.');
 			url_pattern = convert_url_parameters(url_pattern);
-			url_pattern = url_pattern.replace('__language_code__', '([^.]+)');
+			url_pattern = url_pattern.replace('__language_code__\\.',
+					'([^.]+)\\.(?:m\\.)?');
 			if (Array.isArray(family_with_language[url_pattern])) {
 				family_with_language[url_pattern].push(interwikimap_data);
 			} else {

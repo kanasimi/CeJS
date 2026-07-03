@@ -483,6 +483,7 @@ function module_code(library_namespace) {
 
 	// @see [[w:en:Module:Template wrapper]]
 	// [[w:en:Wikipedia:Wrapper templates]]
+	// https://zh.wikipedia.org/wiki/Special:WhatLinksHere?target=Module%3ATemplate+wrapper&namespace=10&hidelinks=1&hideredirs=1&limit=50
 	function expand_module_Template_wrapper(options) {
 		/* const */var token = this;
 		if (token.function_name !== 'wrap') {

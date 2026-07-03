@@ -150,11 +150,15 @@ function module_code(library_namespace) {
 			if (typeof token === 'string') {
 				// 經過解析，替代數值為無特殊作用之 plain text。
 			} else {
+				// incase token.type === 'parameter', itself is a parameter
 				// set_shell(token[1])
 				token = [ token ];
+
 				token = convert_parameter(token, parameters, options);
-				// assert: token.length === 1
-				token = token[0];
+				if (token.length === 1
+						&& (!token.type || token.type === 'plain')) {
+					token = token[0];
+				}
 			}
 			if (/subst:/i.test(token))
 				need_re_parse = true;
@@ -200,6 +204,7 @@ function module_code(library_namespace) {
 
 		if (!token.need_subst && options.mode === 'PST' && !(token.name in {
 			'#invoke' : true,
+			SUBST : true,
 			SAFESUBST : true
 		})) {
 			return;
@@ -485,9 +490,14 @@ function module_code(library_namespace) {
 			var _parsed = wiki_API.parse(wikitext, options);
 			if (false && template_depth_now >= (options.max_template_depth
 			// ↑ false: subst 無視 max_template_depth，都會展開。
-			|| DEFAULT_MAX_TEMPLATE_DEPTH)
+			|| DEFAULT_MAX_TEMPLATE_DEPTH)) {
+				_parsed = null;
+			}
+			if (!_parsed || _parsed.type !== 'transclusion'
 			//
-			|| !_parsed || _parsed.type !== 'transclusion') {
+			&& (_parsed.type !== 'magic_word_function'
+			//
+			|| options.mode !== 'PST')) {
 				// `page_data ?`: 為了維持cache與第一次執行的輸出相同。
 				// 例如在 `await CeL.wiki.expand_transclusion(
 				// '{{Namespace detect|main=Article text}}')`
@@ -496,10 +506,14 @@ function module_code(library_namespace) {
 
 			// _parsed.need_subst = true;
 			// expand template
-			_parsed = expand_transclusion(_parsed, Object.assign(Object
+			_parsed = expand_transclusion(_parsed,
+			//
+			_parsed.type === 'transclusion' ? Object.assign(Object
 					.clone(options), {
+				// caller
 				template_token_called : _parsed
-			}) // , template_depth_now
+			}) : options
+			// , template_depth_now
 			);
 			return _parsed;
 		}, {
@@ -625,8 +639,8 @@ function module_code(library_namespace) {
 			if (false) {
 				token = expand_transclusion(promise.toString(),
 				// 不用 wiki_API.parse() 以容許 token.expand() 回傳 templates。
-				Object.assign(Object.create(null), options, {
-					// valler
+				Object.assign(Object.clone(options), {
+					// caller
 					template_token_called : token
 				}), template_depth_now);
 
@@ -804,7 +818,8 @@ function module_code(library_namespace) {
 					token = wiki_API.parse(token.toString(), options);
 					token = repeatedly_expand_template_token(token, options,
 							template_depth_now);
-					if (token.type === 'plain' && token.length === 1)
+					if (token.length === 1
+							&& (!token.type || token.type === 'plain'))
 						token = token[0];
 					// console.trace(token);
 				}
@@ -856,6 +871,7 @@ function module_code(library_namespace) {
 			var max_template_depth = options.max_template_depth
 					|| DEFAULT_MAX_TEMPLATE_DEPTH;
 			if (!token.need_subst
+					// ↑ subst 無視 max_template_depth，都會展開。
 					&& (template_depth_now >= max_template_depth || get_template_depth_now_of_token(token) >= max_template_depth)
 					&& (!options.ignore_template_depth_limit || options
 							.ignore_template_depth_limit(token))) {

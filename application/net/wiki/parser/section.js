@@ -1771,7 +1771,7 @@ function module_code(library_namespace) {
 			wiki_API.expand_transclusion(wikitext, options))
 			//
 			.then(function(wikitext) {
-				var _options = Object.assign(Object.create(null), options);
+				var _options = Object.clone(options);
 
 				// ↓ 不可這麼做：會造成章節標題不被展開。
 				// Do not need expand templates any more.
