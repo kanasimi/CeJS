@@ -1677,17 +1677,14 @@ function module_code(library_namespace) {
 
 				// test if is #REDIRECT [[title#section]]
 				if (redirect_data.tofragment) {
-					try {
-						redirect_data.to_link = redirect_data.to + '#'
-						// 須注意: 對某些 section 可能 throw！
-						+ decodeURIComponent(redirect_data.tofragment
-						//
-						.replace(/\./g, '%'));
-					} catch (e) {
-						redirect_data.to_link = redirect_data.to + '#'
-						//
-						+ redirect_data.tofragment;
-					}
+					redirect_data.to_link = redirect_data.to
+					//
+					+ wiki_API.parse.url_hash_to_section_title(
+					//
+					redirect_data.tofragment, {
+						to_hash : true
+					});
+
 					library_namespace.debug(wiki_API.title_link_of(title)
 					// →
 					+ ' redirected to section [[' + redirect_data.to + '#'

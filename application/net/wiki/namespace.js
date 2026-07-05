@@ -2991,16 +2991,29 @@ function module_code(library_namespace) {
 	//
 	};
 
-	var wiki_index_url_tail = '/w/index.php?$1';
-
-	// return [, language_code, title ]
-	function extract_wiki_title_from_url(url) {
+	// @inner
+	// @see function parse_interwiki_url(url, options)
+	// return [, 語言前綴 language_code, title ]
+	function extract_wiki_title_from_search(url, matched) {
 		var _url = new library_namespace.URI(url);
 		var title = _url.search_params.title;
 		if (!title)
 			return;
-		var language_code = _url.hostname.replace(/\..+/, '');
-		return [ , language_code, title ];
+		matched[2] = title;
+		// var language_code = _url.hostname.replace(/\..+/, '');
+		// matched[1] = language_code;
+		return matched;
+	}
+
+	// @inner
+	// @see function parse_interwiki_url(url, options)
+	// return [, 語言前綴 language_code, title, variant ]
+	function extract_data_from_variant_url(url, matched) {
+		// var language_code = matched[1];
+		var title = matched[3];
+		matched[3] = matched[2];
+		matched[2] = title;
+		return matched;
 	}
 
 	// @see get_first_domain_name_of_session(session)
@@ -3112,6 +3125,8 @@ function module_code(library_namespace) {
 		// e.g., wikidata
 		|| 'en';
 		var family_with_language = Object.create(null);
+		var wiki_index_url_tail = (configurations.general.script || '/w/index.php')
+				+ '?$1';
 		function check_family_with_language(interwikimap_data) {
 			var url = interwikimap_data.url;
 			if (!url
@@ -3145,11 +3160,25 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			var variants = interwikimap_data.extract_url_data
+			//
+			=== extract_data_from_variant_url && '('
+			//
+			+ configurations.general.variants.map(function(variant) {
+				return variant.code;
+			}).join('|') + ')';
+
 			var url_pattern = url.replace(PATTERN_language_of_wiki_url,
 					'//__language_code__.');
+			if (variants) {
+				url_pattern = url_pattern.replace('$2/', '__variants__/');
+			}
 			url_pattern = convert_url_parameters(url_pattern);
 			url_pattern = url_pattern.replace('__language_code__\\.',
 					'([^.]+)\\.(?:m\\.)?');
+			if (variants) {
+				url_pattern = url_pattern.replace('__variants__', variants);
+			}
 			if (Array.isArray(family_with_language[url_pattern])) {
 				family_with_language[url_pattern].push(interwikimap_data);
 			} else {
@@ -3219,14 +3248,31 @@ function module_code(library_namespace) {
 					check_family_with_language(interwikimap_data);
 				}
 
-				if (url.endsWith('/wiki/$1')) {
-					interwikimap_data = Object.clone(interwikimap_data);
-					interwikimap_data.url = url.replace('/wiki/$1',
-							wiki_index_url_tail);
-					// return [, language_code, title ]
-					interwikimap_data.extract_wiki_title_from_url = extract_wiki_title_from_url;
-					register_family_with_language(interwikimap_data);
+				var articlepath = configurations.general.articlepath
+						|| '/wiki/$1';
+				if (!url.endsWith(articlepath)) {
+					return;
 				}
+
+				var _interwikimap_data = Object.clone(interwikimap_data);
+				_interwikimap_data.url = url.replace(articlepath,
+						wiki_index_url_tail);
+				// return [, 語言前綴 language_code, title ]
+				_interwikimap_data.extract_url_data = extract_wiki_title_from_search;
+				register_family_with_language(_interwikimap_data);
+
+				if (!Array.isArray(configurations.general.variants)
+						|| configurations.general.variants.length === 0) {
+					return;
+				}
+				var variantarticlepath = configurations.general.variantarticlepath
+						|| '/$2/$1';
+				_interwikimap_data = Object.clone(interwikimap_data);
+				_interwikimap_data.url = url.replace(articlepath,
+						variantarticlepath);
+				// return [, 語言前綴 language_code, title, variant ]
+				_interwikimap_data.extract_url_data = extract_data_from_variant_url;
+				register_family_with_language(_interwikimap_data);
 			}
 			interwikimap.forEach(register_family_with_language);
 			interwikimap.host_end_of_family_with_language = Object.create(null);

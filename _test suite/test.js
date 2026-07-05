@@ -2868,6 +2868,12 @@ function test_encoding() {
 		// TODO: Convert_Pairs.reverse 對 duplicated key 不穩定。
 		// [[ 'watasi', CeL.to_romaji('わたし') ], 'convert romaji to kana. 仮名→ロマ字.'],
 	]);
+
+	all_error_count += CeL.test('文字編碼', [
+		// TODO:
+		//[['cmn-Hant-TW', CeL.guess_text_language('阿廖娜·蘭斯卡婭')], 'guess_text_language: 阿廖娜·蘭斯卡婭'],
+		//[['ja-JP', CeL.guess_text_language('鮫島巧')], 'guess_text_language: 鮫島巧'],
+	]);
 }
 
 
@@ -4073,6 +4079,12 @@ function test_wiki() {
 		assert(['=D', parsed.name], 'wiki.parse.transclusion #48-2');
 		assert(['Template:=D', parsed.page_title], 'wiki.parse.transclusion #48-3');
 
+		wikitext = "{{text|'''b'''|''i'''}}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #49');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #49-1');
+		assert(["'''b'''", parsed.parameters[1].toString()], 'wiki.parse.transclusion #49-2');
+		assert(["''i'''", parsed.parameters[2].toString()], 'wiki.parse.transclusion #49-3');
+
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[link#section]]b'; parsed = CeL.wiki.parser(wikitext).parse();
@@ -4320,7 +4332,8 @@ function test_wiki() {
 		assert(['bold', parsed[0].type], "''' bold '''");
 		wikitext = "'''b''bi'''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
-		assert(['bold', parsed[0].type], "''' bold '''");
+		//assert([1, parsed.length]);
+		assert(['bold', parsed[0].type], "'''b''bi'''");
 		// '''''ib''''' → <i><b>ib</b></i>
 		wikitext = "'''''Italic and bold formatting'''''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -4329,20 +4342,32 @@ function test_wiki() {
 		// '''''bi''b''' → <b><i>bi</i>b</b>
 		wikitext = "'''''bi''b'''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		assert([1, parsed.length]);
 		assert(['bold', parsed[0].type], "'''''bi''b''' will render as <b><i>bi</i>b</b>");
 		wikitext = "''Italic'''Italic and bold formatting'''Italic''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		assert([1, parsed.length]);
 		assert(['italic', parsed[0].type], "'' '''t''' '' will render as <i><b>t</b></i>");
 		assert(['bold', parsed[0][1][1].type], "'' '''t''' '' will render as <i><b>t</b></i> #2");
 		wikitext = "''i'''ib'''i'''ib'''i''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
+		assert([1, parsed.length]);
 		assert(['italic', parsed[0].type], "'' '''t''' ... '' will render as <i><b>t</b></i>");
 		assert(['bold', parsed[0][1][1].type], "'' '''t''' ... '' will render as <i><b>t</b></i> #2");
 		assert(['bold', parsed[0][1][3].type], "'' '''t''' ... '' will render as <i><b>t</b></i> #3");
-		wikitext = "'''bold''Italic and bold formatting''bold'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		// "'''bold''Italic and bold formatting''bold'''"
+		wikitext = "'''b''bi''b'''"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		assert(['bold', parsed[0].type], "''' ''t'' ''' will render as <b><i>t</i></b>");
 		assert(['italic', parsed[0][1][1].type], "''' ''t'' ''' will render as <b><i>t</i></b> #2");
+		wikitext = "''i'''ib''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		//assert([1, parsed.length]);
+		assert(['italic', parsed[0].type], "''i'''ib''");
+		wikitext = "''i'''ib'''"; parsed = CeL.wiki.parser(wikitext).parse();
+		assert([wikitext, parsed.toString()]);
+		assert([1, parsed.length]);
+		assert(['italic', parsed[0].type], "''i'''ib'''");
 		wikitext = "a '<s>t</s>' b"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = "a <s>'t'</s> b"; parsed = CeL.wiki.parser(wikitext).parse();
@@ -4638,11 +4663,11 @@ function test_wiki() {
 		wanted_token = null; parsed.each('convert', function (token) { wanted_token = token; return parsed.each.exit; });
 		assert(!wanted_token, 'wiki.parse: HTML tag pre #10-1');
 		// [[w:ja:アスキーアート]]
-		wikitext = "<pre><nowiki>''a'''b''</nowiki></pre>"; parsed = CeL.wiki.parser(wikitext).parse();
+		wikitext = "<pre><nowiki>''i'''Ib''</nowiki></pre>"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #11');
-		wikitext = "<pre>''a'''b''</pre>"; parsed = CeL.wiki.parser(wikitext).parse();
+		wikitext = "<pre>''i'''Ib''</pre>"; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #12');
-		assert(["''a'''b''", parsed[0][1][0]], 'wiki.parse: HTML tag pre #12-1');
+		assert(["''i'''Ib''", parsed[0][1][0]], 'wiki.parse: HTML tag pre #12-1');
 		wikitext = "<pre>{{t|p=<nowiki><!----></nowiki>}}</pre>"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: HTML tag pre #13');
 		assert(['{{t|p=', parsed[1][0]], 'wiki.parse: HTML tag pre #13-1');

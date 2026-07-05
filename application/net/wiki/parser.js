@@ -618,6 +618,9 @@ function module_code(library_namespace) {
 				if (promise) {
 					// console.trace([ index + '/' + length, depth, exit ]);
 				}
+				while (!(index in parent_token) && ++index < length) {
+					// e.g., "'''b''bi'''i"
+				}
 				if (exit || !(index < length)) {
 					// 已遍歷所有本階層節點，或已設定 exit 跳出。
 					if (promise) {

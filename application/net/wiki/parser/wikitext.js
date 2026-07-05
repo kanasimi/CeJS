@@ -4541,6 +4541,21 @@ function module_code(library_namespace) {
 				// assert: unit[1].length === 0
 			}
 
+			var last_token = tokens_to_resolve.length > 1
+					&& tokens_to_resolve.at(-1);
+			if (last_token && last_token.previous_content
+					&& last_token.join('') === '') {
+				// 去掉多餘、不必要的 token。 e.g.,
+				// "'''b''bi'''"
+				// "''i'''ib''"
+
+				// console.trace(arguments, JSON.stringify(wikitext));
+				wikitext = wikitext.slice(0, -wikitext
+						.lastIndexOf(include_mark));
+				delete last_token.previous_content.following_content;
+				tokens_to_resolve.pop();
+			}
+
 			tokens_to_resolve.forEach(function(token) {
 				if (token[0])
 					token[0] = token[0].join('');
@@ -5214,7 +5229,7 @@ function module_code(library_namespace) {
 			// 注意: '''{{font color}}''', '''{{tsl}}''', '''{{text}}'''
 
 			// 若是要處理<b>, <i>這兩項，也必須調整 wiki_API.section_link()。
-			if (!options.inside_apostrophe) {
+			if (!options.inside_transclusion && !options.inside_apostrophe) {
 				// '''~''' ''~'' 不能跨行。
 				wikitext = wikitext.split('\n').map(split_text_apostrophe_unit)
 						.join('\n');

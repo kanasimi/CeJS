@@ -60,9 +60,9 @@ function module_code(library_namespace) {
 	 */
 	function parse_interwiki_link(link_title, options) {
 		var session = wiki_API.session_of_options(options);
+		var configurations = session && session.latest_site_configurations;
 
-		var interwikimap = session && session.latest_site_configurations
-				&& session.latest_site_configurations.interwikimap;
+		var interwikimap = configurations && configurations.interwikimap;
 
 		var interwiki_data = Object.create(null);
 
@@ -168,15 +168,38 @@ function module_code(library_namespace) {
 		return interwiki_data;
 	}
 
+	function url_hash_to_section_title(hash, options) {
+		if (!hash)
+			return '';
+
+		hash = String(hash).replace(/^#/, '');
+
+		// 須注意: 對某些 section 可能 throw！
+		try {
+			hash = decodeURIComponent(hash.replace(/\./g, '%'));
+		} catch (e) {
+			// TODO: handle exception
+		}
+
+		// hash = hash.replace(/_/g, ' ');
+
+		if (options && options.to_hash) {
+			hash = '#' + hash;
+		}
+
+		return hash;
+	}
+
 	// parse_interwiki_external_link
+	// @see URL_to_wiki_link()
 	function parse_interwiki_url(url, options) {
 		if (!url)
 			return;
 
 		var session = wiki_API.session_of_options(options);
+		var configurations = session && session.latest_site_configurations;
 
-		var interwikimap = session && session.latest_site_configurations
-				&& session.latest_site_configurations.interwikimap;
+		var interwikimap = configurations && configurations.interwikimap;
 
 		var external_link;
 		if (url.type === 'external_link') {
@@ -185,10 +208,22 @@ function module_code(library_namespace) {
 		}
 		if (url.url)
 			url = url.url;
-		if (!url)
+		if (!url) {
+			// e.g., '[{{fullurl:Special:Purge/{{PAGENAME}}}} 清除頁面緩存]'
 			return;
+		}
 
 		url = String(url);
+		url = library_namespace.HTML_to_Unicode(url);
+
+		/**
+		 * Wikimedia 網域名轉換 <code>
+
+		[[2005年6月]]: [http://mail.wikipedia.org/pipermail/wikitech-l/2005-June/030030.html 维基百科技术邮件列表存档]
+
+		</code>
+		 */
+		url = url.replace('//mail.wikipedia.org/', '//lists.wikimedia.org/');
 
 		var _url = new library_namespace.URI(url);
 		if (!_url) {
@@ -211,13 +246,28 @@ function module_code(library_namespace) {
 		//
 		&& interwikimap_data_list.some(function(_interwikimap_data) {
 			var matched =
-			//
+			// [, 語言前綴 language_code, title ]
 			url.match(_interwikimap_data.url_pattern_of_family_with_language);
+			var articlepath = configurations
+			//
+			&& configurations.general.articlepath;
+			if (!matched && _url.pathname === '/'
+			// e.g., [http://da.wikipedia.org Danish Wikipedia]
+			&& _interwikimap_data.url.endsWith(articlepath)) {
+				matched = url.replace(/\/?$/, articlepath)
+				//
+				.match(_interwikimap_data.url_pattern_of_family_with_language);
+				if (matched) {
+					matched[2] = '';
+					matched.hostname_only = true;
+				}
+			}
 			if (!matched)
 				return false;
 
-			if (_interwikimap_data.extract_wiki_title_from_url) {
-				matched = _interwikimap_data.extract_wiki_title_from_url(url);
+			if (!matched.hostname_only && _interwikimap_data.extract_url_data) {
+				// return [, 語言前綴 language_code, title ]
+				matched = _interwikimap_data.extract_url_data(url, matched);
 				if (!matched)
 					return false;
 			}
@@ -226,6 +276,7 @@ function module_code(library_namespace) {
 			name = matched;
 			return true;
 		})) {
+			// [, 語言前綴 language_code, title ]
 			prefix = name[1];
 			name = name[2].replace(/[?#].*/g, '');
 			if (remove_language_of_url(interwikimap_data.url) !== remove_language_of_url(session.API_URL)) {
@@ -239,6 +290,7 @@ function module_code(library_namespace) {
 			|| !interwiki_group_list.some(function(_interwikimap_data_list) {
 				interwikimap_data_list = _interwikimap_data_list;
 				interwikimap_data = interwikimap_data_list[0];
+				// [, title ]
 				var matched = url.match(interwikimap_data.url_pattern);
 				name = matched && matched[1];
 				return name;
@@ -246,8 +298,7 @@ function module_code(library_namespace) {
 				// TODO: 檢查非正規 interwiki links
 				// e.g., http://語言前綴.wikipedia.org/w/index.php?title=頁面標題
 				// @see [[w:zh:Template:Fullurl]]
-				if (url.includes('wikipedia') && !url.includes('/https://')) {
-					// https://web.archive.org/web/20161012200259/https://zh.wikipedia.org/wiki/%E5%89%8D%E7%94%B0%E5%88%A9%E5%AE%B6
+				if (_url.hostname.includes('wikipedia')) {
 					library_namespace.debug('Non-standard interwiki link? '
 							+ url, 6, 'parse_interwiki_url');
 				}
@@ -328,7 +379,7 @@ function module_code(library_namespace) {
 				: name;
 
 		var search;
-		if (!interwikimap_data.extract_wiki_title_from_url
+		if (!interwikimap_data.extract_url_data
 				|| Object.keys(_url.search_params).join() !== 'title') {
 			search = _url.search.replace(/^\?/, '');
 		}
@@ -342,8 +393,12 @@ function module_code(library_namespace) {
 					'}}' ].join('');
 
 		} else {
-			interwiki_data.wikilink = [ '[[',
-					interwiki_data.link_title + decodeURIComponent(_url.hash) ];
+			interwiki_data.wikilink = [
+					'[[',
+					interwiki_data.link_title
+							+ url_hash_to_section_title(_url.hash, {
+								to_hash : true
+							}) ];
 
 			if (interwiki_data[1] !== interwiki_data.display_text.toString()) {
 				interwiki_data.wikilink.push('|', interwiki_data.display_text);
@@ -2016,6 +2071,8 @@ function module_code(library_namespace) {
 	 */
 	var PATTERN_redirect_general = /^[\s\n]*#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
+	var PATTERN_redirect_template_source = /^[\s\n]*(?:redirect_word)\s*(?::\s*)?\[\[([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i.source;
+
 	/**
 	 * parse redirect page. 解析重定向資訊，或判斷頁面是否為重定向頁面。<br />
 	 * 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名: "title#section"。
@@ -2074,21 +2131,19 @@ function module_code(library_namespace) {
 		}
 
 		var session = wiki_API.session_of_options(options);
+		var configurations = session && session.latest_site_configurations;
+
 		var PATTERN_redirect;
-		if (session && !(PATTERN_redirect = session.PATTERN_redirect)
-				&& session.latest_site_configurations) {
-			session.latest_site_configurations.magicwords
-					.some(function(magicword) {
-						if (magicword.name !== 'redirect')
-							return;
-						PATTERN_redirect = new RegExp(
-								// PATTERN_redirect_template
-								/^[\s\n]*(?:redirect_word)\s*(?::\s*)?\[\[([^{}\[\]\|<>\t\n�]+)(?:\|[^\[\]{}]+?)?\]\]/i.source
-										.replace('redirect_word',
-												magicword.aliases.join('|')),
-								'case-sensitive' in magicword ? '' : 'i');
-						return true;
-					});
+		if (configurations && !(PATTERN_redirect = session.PATTERN_redirect)) {
+			configurations.magicwords.some(function(magicword) {
+				if (magicword.name !== 'redirect')
+					return false;
+
+				PATTERN_redirect = new RegExp(PATTERN_redirect_template_source
+						.replace('redirect_word', magicword.aliases.join('|')),
+						'case-sensitive' in magicword ? '' : 'i');
+				return true;
+			});
 		}
 
 		// console.trace(PATTERN_redirect);
@@ -2561,6 +2616,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}wiki link
 	 * 
+	 * @see parse_interwiki_url()
 	 * @see [[WP:LINK#跨语言链接]]
 	 */
 	function URL_to_wiki_link(URL, need_add_quote, callback, options) {
@@ -2594,21 +2650,15 @@ function module_code(library_namespace) {
 		}
 
 		/** {String}章節 = URL hash */
-		var section = matched[3] || '';
+		var section = url_hash_to_section_title(matched[3], {
+			to_hash : true
+		});
+
 		// for [[:mw:Multimedia/Media Viewer]],
 		// [[:mw:Extension:MultimediaViewer|媒體檢視器]]
-		if (section) {
-			if (section.startsWith('#/media/File:')) {
-				// 8 === '#/media/'.length
-				return section.slice(8);
-			}
-
-			// 須注意: 對某些 section 可能 throw！
-			try {
-				section = decodeURIComponent(section.replace(/\./g, '%'));
-			} catch (e) {
-				// TODO: handle exception
-			}
+		if (section.startsWith('#/media/File:')) {
+			// 8 === '#/media/'.length
+			return section.slice(8);
 		}
 
 		/** {String}URL之語言 */
@@ -3055,6 +3105,7 @@ function module_code(library_namespace) {
 		interwiki_link : parse_interwiki_link,
 		// CeL.wiki.parse.interwiki_url()
 		interwiki_url : parse_interwiki_url,
+		url_hash_to_section_title : url_hash_to_section_title,
 
 		template : parse_template,
 		set_template_object_parameters : set_template_object_parameters,
