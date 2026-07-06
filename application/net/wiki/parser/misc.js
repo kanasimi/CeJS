@@ -41,7 +41,7 @@ function module_code(library_namespace) {
 	// requiring
 	var wiki_API = library_namespace.application.net.wiki;
 	// @inner
-	var PATTERN_URL_prefix = wiki_API.PATTERN_URL_prefix;
+	var PATTERN_URL_prefix = wiki_API.PATTERN_URL_prefix, PATTERN_invalid_page_name_characters = wiki_API.PATTERN_invalid_page_name_characters;
 
 	// --------------------------------------------------------------------------------------------
 
@@ -196,6 +196,8 @@ function module_code(library_namespace) {
 		if (!url)
 			return;
 
+		options = library_namespace.setup_options(options);
+
 		var session = wiki_API.session_of_options(options);
 		var configurations = session && session.latest_site_configurations;
 
@@ -208,6 +210,7 @@ function module_code(library_namespace) {
 		}
 		if (url.url)
 			url = url.url;
+
 		if (!url) {
 			// e.g., '[{{fullurl:Special:Purge/{{PAGENAME}}}} 清除頁面緩存]'
 			return;
@@ -215,6 +218,14 @@ function module_code(library_namespace) {
 
 		url = String(url);
 		url = library_namespace.HTML_to_Unicode(url);
+
+		if (typeof options.postfix_url === 'function') {
+			url = options.postfix_url(url);
+			if (!url) {
+				return;
+			}
+			// assert: typeof url === 'string'
+		}
 
 		/**
 		 * Wikimedia 網域名轉換 <code>
@@ -340,50 +351,63 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------
 
-		var link_title = [];
-		if (prefix) {
-			if (prefix.includes(':')) {
-				link_title.push(prefix, ':');
-			} else if (prefix !== session.language) {
-				link_title.push(':', prefix, ':');
-			}
+		// display_text 別包含 prefix。
+		interwiki_data.display_text = external_link && external_link[2] || name;
 
-		} else if (!('localinterwiki' in interwikimap_data)) {
-			// ↑ localinterwiki: 跨維基連結是否指向目前維基。
-			// https://www.mediawiki.org/wiki/API:Siteinfo#Interwikimap
-			if (interwikimap_data.language) {
-				link_title.push(
-				// 跨語言連結不加 ':' prefix 會被當成維基數據中的跨語言連結。
-				':',
-				// 在 adapt_site_configurations() 中已確保
-				// interwikimap_data_list[0].prefix 與 url 一致，
-				// 不必使用 interwiki_data.shortcut_prefix。
-				interwiki_data.prefix);
-			} else {
-				link_title.push(interwiki_data.shortcut_prefix
-						|| interwiki_data.prefix);
+		if (PATTERN_invalid_page_name_characters.test(name)) {
+			interwiki_data.is_invalid_page_title = true;
+			library_namespace.error('parse_interwiki_url: '
+					+ (options.page_data ? wiki_API
+							.title_link_of(options.page_data)
+							+ ': ' : '') + 'Invalid page title '
+					+ JSON.stringify(name) + ' in interwiki link: '
+					+ (external_link || url));
+
+		} else {
+			var link_title = [];
+			if (prefix) {
+				if (prefix.includes(':')) {
+					link_title.push(prefix, ':');
+				} else if (prefix !== session.language) {
+					link_title.push(':', prefix, ':');
+				}
+
+			} else if (!('localinterwiki' in interwikimap_data)) {
+				// ↑ localinterwiki: 跨維基連結是否指向目前維基。
+				// https://www.mediawiki.org/wiki/API:Siteinfo#Interwikimap
+				if (interwikimap_data.language) {
+					link_title.push(
+					// 跨語言連結不加 ':' prefix 會被當成維基數據中的跨語言連結。
+					':',
+					// 在 adapt_site_configurations() 中已確保
+					// interwikimap_data_list[0].prefix 與 url 一致，
+					// 不必使用 interwiki_data.shortcut_prefix。
+					interwiki_data.prefix);
+				} else {
+					link_title.push(interwiki_data.shortcut_prefix
+							|| interwiki_data.prefix);
+				}
+				link_title.push(':');
 			}
-			link_title.push(':');
+			link_title.push(name);
+
+			link_title = link_title.join('');
+			interwiki_data.link_title = link_title;
 		}
-		link_title.push(name);
-
-		interwiki_data.link_title = link_title.join('');
-
-		// Release memory. 釋放被占用的記憶體。
-		link_title = null;
 
 		// ------------------------------------------------
 
-		// display_text 別包含 prefix。
-		interwiki_data.display_text = external_link && external_link[2] ? external_link[2]
-				: name;
-
 		var search;
 		if (!interwikimap_data.extract_url_data
-				|| Object.keys(_url.search_params).join() !== 'title') {
+		// 假如有其他參數，就不能轉換為純 wikilink。
+		|| Object.keys(_url.search_params).join() !== 'title') {
 			search = _url.search.replace(/^\?/, '');
 		}
-		if (search) {
+
+		if (!interwiki_data.link_title) {
+			;
+
+		} else if (search) {
 			// https://www.mediawiki.org/wiki/Help:Magic_words#URL_data
 			// https://en.wikipedia.org/wiki/Help:Magic_words#Paths
 			// TODO: use {{fullurl}}, e.g., [[w:ja:Template:利用者の投稿記録リンク]]
@@ -393,12 +417,11 @@ function module_code(library_namespace) {
 					'}}' ].join('');
 
 		} else {
-			interwiki_data.wikilink = [
-					'[[',
-					interwiki_data.link_title
-							+ url_hash_to_section_title(_url.hash, {
-								to_hash : true
-							}) ];
+			interwiki_data.wikilink = [ '[[', interwiki_data.link_title
+			//
+			+ url_hash_to_section_title(_url.hash, {
+				to_hash : true
+			}) ];
 
 			if (interwiki_data[1] !== interwiki_data.display_text.toString()) {
 				interwiki_data.wikilink.push('|', interwiki_data.display_text);

@@ -381,11 +381,14 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=protocols&utf8&format=json
 	 */
-	var PATTERN_external_link_global = new RegExp(
+	var PATTERN_external_link = new RegExp(
 			PATTERN_URL_WITH_PROTOCOL_GLOBAL.source
 			// 允許 [//example.com/]
 			.replace('):)', '):|\\/\\/)').replace(/^\([^()]+\)/, /\[/.source)
-					+ /(?:([^\S\n]+)([^\]]*))?\]/.source, 'ig'),
+					+ /(?:([^\S\n]+)([^\]]*))?\]/.source, 'i'),
+
+	PATTERN_external_link_global = new RegExp(PATTERN_external_link.source,
+			'ig'),
 
 	// 若包含 br|hr| 會導致 "aa<br>\nbb</br>\ncc" 解析錯誤！
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
@@ -1362,7 +1365,7 @@ function module_code(library_namespace) {
 				previous = '';
 			}
 			library_namespace.debug(previous + ' + ' + parameters, 4,
-					'parse_wikitext.convert');
+					'parse_wikitext.language_conversion');
 
 			// console.log(parameters);
 
@@ -1658,10 +1661,28 @@ function module_code(library_namespace) {
 
 		}
 
-		// bare external link
+		// bare external link, parse_url()
 		// [[w:en:Wikipedia:Bare URLs]]
-		function parse_url(all, previous, URL) {
+		function parse_bare_url(all, previous, URL, protocol, URL_others) {
 			var following = '';
+			// protocol.length: 排除 IPv6 之類正規 URL。
+			var index = protocol.length;
+			var matched = URL_others.match(wiki_API.PATTERN_IPv6_prefix);
+			if (matched) {
+				index += matched[0].length;
+			}
+			index = URL.indexOf('[', index);
+			if (index !== NOT_FOUND) {
+				following = URL.slice(index)
+				// assert: following === ''
+				// + (following || '')
+				;
+				URL = URL.slice(0, index);
+			}
+			if (URL === protocol) {
+				return all;
+			}
+
 			if (URL.includes(include_mark)) {
 				// 內部包含{{!}}之類，需再進一步處理。
 
@@ -1682,9 +1703,7 @@ function module_code(library_namespace) {
 						return all;
 
 					following = URL.slice(invalid_token_data[0].length)
-					// assert: following === ''
-					// + (following || '')
-					;
+							+ following;
 					URL = invalid_token_data[0];
 				}
 
@@ -1708,10 +1727,46 @@ function module_code(library_namespace) {
 		function parse_external_link(all, URL, protocol, URL_others, delimiter,
 				parameters) {
 			// assert: all === URL + (delimiter || '') + (parameters || '')
+			// URL === protocol + URL_others
 
-			// including "'''". e.g., [http://a.b/''disply text'']
-			var matched = URL.match(/^(.+?)(''.*)$/);
-			if (matched) {
+			// [...] 自 end_mark 向前回溯。
+			var index = all.length,
+			// 在先的，在前的，前面的； preceding
+			// (previous 反義詞 following, preceding 反義詞 exceeds)
+			previous = '';
+			var matched;
+			// 1 + protocol.length: ('[' + protocol).length - 排除 IPv6 之類正規 URL。
+			while (index > 1 + protocol.length
+					&& (index = all.lastIndexOf('[', index - 1)) > 1 + protocol.length) {
+				matched = all.slice(index);
+				matched = matched.match(PATTERN_external_link);
+				if (!matched) {
+					continue;
+				}
+
+				// shift arguments
+				URL = matched[1];
+				protocol = matched[2];
+				URL_others = matched[3];
+				delimiter = matched[4];
+				parameters = matched[5];
+				previous = all.slice(0, matched.index);
+				// assert: previous.startsWith('[')
+				break;
+			}
+			library_namespace.debug(previous + ' + ' + URL + ' + '
+					+ (delimiter || '') + ' + ' + (parameters || ''), 4,
+					'parse_wikitext.external_link');
+
+			// 往後追溯，從不合理的字元開始算作 display text。
+			// "''" including "'''". e.g., [http://a.b/''disply text'']
+
+			// 排除 IPv6 之類正規 URL。
+			if (wiki_API.PATTERN_IPv6_prefix.test(URL_others)) {
+				;
+			}
+			matched = URL.match(/^(.+?)((?:\[|'').*)$/);
+			if (matched && !wiki_API.PATTERN_IPv6_prefix.test(URL_others)) {
 				// assert: 本階段尚未執行過 split_text_apostrophe_unit(wikitext)
 				URL = matched[1];
 				if (delimiter) {
@@ -1883,7 +1938,7 @@ function module_code(library_namespace) {
 
 			_set_wiki_type(URL, 'external_link');
 			queue.push(URL);
-			return include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
 		function parse_odd_external_link(all, URL, delimiter, parameters) {
@@ -5046,7 +5101,7 @@ function module_code(library_namespace) {
 			if (!options.inside_url) {
 				// 不可跨行。
 				wikitext = wikitext.replace_till_stable(
-						PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_url);
+						PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_bare_url);
 			}
 
 			// ----------------------------------------------------

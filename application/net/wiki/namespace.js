@@ -89,6 +89,7 @@ function module_code(library_namespace) {
 	}
 
 	// https://meta.wikimedia.org/wiki/Help:Page_name#Special_characters
+	// https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	// @see $wgLegalTitleChars
 	var PATTERN_invalid_page_name_characters = /[{}\[\]\|<>\t\n#�]/,
 	// https://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_(technical_restrictions)#Forbidden_characters
@@ -146,7 +147,8 @@ function module_code(library_namespace) {
 	 */
 	PATTERN_URL_WITH_PROTOCOL_GLOBAL
 	// 警告: PATTERN_external_link_global 會用到 '):)'
-	= /(^|[^a-z\d_])(((?:https?|ssh|telnet|ftps?|sftp|gopher|ircs?|news|nntp|worldwind|svn|git|mms):?\/\/|(?:mailto|urn):)((?:\[[a-f\d:]+\]|[^\s\|<>\[\]\/])[^\s\|<>\[\]]*))/ig;
+	= /(^|[^a-z\d_])(((?:https?|ssh|telnet|ftps?|sftp|gopher|ircs?|news|nntp|worldwind|svn|git|mms):?\/\/|(?:mailto|urn):)((?:\[[a-f\d:]+\]|[^\s\|<>\]\/])[^\s\|<>\]]*))/ig;
+	var PATTERN_IPv6_prefix = /^\[[a-f\d:]+\]/i;
 
 	/**
 	 * 匹配以URL網址起始。
@@ -4920,6 +4922,7 @@ function module_code(library_namespace) {
 		// PATTERN_page_name : PATTERN_page_name,
 		PATTERN_file_prefix : PATTERN_file_prefix,
 		PATTERN_URL_WITH_PROTOCOL_GLOBAL : PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+		PATTERN_IPv6_prefix : PATTERN_IPv6_prefix,
 		PATTERN_category_prefix : PATTERN_category_prefix,
 
 		PATTERN_PROJECT_CODE_i : PATTERN_PROJECT_CODE_i
