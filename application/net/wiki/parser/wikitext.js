@@ -4543,8 +4543,9 @@ function module_code(library_namespace) {
 				// "''i'''ib''"
 
 				// console.trace(arguments, JSON.stringify(wikitext));
-				wikitext = wikitext.slice(0, -wikitext
-						.lastIndexOf(include_mark));
+				wikitext = wikitext.slice(0,
+				// assert: wikitext.lastIndexOf(include_mark) > 0
+				wikitext.lastIndexOf(include_mark));
 				delete last_token.previous_content.following_content;
 				tokens_to_resolve.pop();
 			}

@@ -4341,6 +4341,10 @@ function test_wiki() {
 		assert(["'''b'''", parsed.parameters[1].toString()], 'wiki.parse.transclusion #49-2');
 		assert(["''i'''", parsed.parameters[2].toString()], 'wiki.parse.transclusion #49-3');
 
+		wikitext = "{{T}}{{T|1=[[A]] ''i''|2='''b''bi'''}} }}"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #50');
+
+
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
 		wikitext = 'a[[link#section]]b'; parsed = CeL.wiki.parser(wikitext).parse();
