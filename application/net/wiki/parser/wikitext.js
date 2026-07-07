@@ -1671,8 +1671,9 @@ function module_code(library_namespace) {
 			if (matched) {
 				index += matched[0].length;
 			}
-			index = URL.indexOf('[', index);
-			if (index !== NOT_FOUND) {
+			matched = URL.slice(index).match(/\[|''/);
+			if (matched) {
+				index += matched.index;
 				following = URL.slice(index)
 				// assert: following === ''
 				// + (following || '')
@@ -1689,22 +1690,64 @@ function module_code(library_namespace) {
 				var invalid_token_data = has_invalid_token(URL,
 				// TODO: 必須先 expand_template 才能確定到底該不該算做URL的一部分
 				function is_non_url_token(token) {
-					return token && !(token.type in {
-						magic_word_function : true,
+					/**
+					 * URL including template / parameter. e.g., <code>
+					[http://example.com/foo<!---->bar{{text|}} t]
+					[https://tools.wmflabs.org/guc/index.php?uselang={{uselang}}&user={{urlencode:{{{1|{{PAGENAME}}}}}}} 全域貢獻]
+					</code>
+					 */
+
+					if (!token)
+						return typeof token === 'string';
+
+					switch (token.type) {
+					// 這些可以容許當作 URL 的一部分。
+					case 'comment':
+						return false;
+
+					case 'parameter':
 						// e.g., in link template
-						parameter : true,
-						comment : true
-					});
+						return false;
+
+					case 'magic_word_function':
+						// 大部分 magic_word_function 都不包含空白之類非 url 字元。
+						return false;
+
+						if (token.name in {
+							'!' : true,
+							'=' : true,
+							URLENCODE : true,
+							PAGENAME : true
+						}) {
+							return false;
+						}
+						break;
+
+					case 'transclusion':
+						// e.g., [http://example.com/foo{{text|}} t]
+						// 這些模板絕對不會包含空白字元，且常被用於URL的一部分。
+						if ((session || wiki_API).is_template(token,
+								[ 'Uselang' ])) {
+							return false;
+						}
+						break;
+					}
+
+					return true;
 				});
 
 				// [ valid_value, invalid_token_mark, queue_index ]
 				if (invalid_token_data) {
-					if (!invalid_token_data[0])
+					matched = invalid_token_data[0];
+					if (!matched)
 						return all;
 
-					following = URL.slice(invalid_token_data[0].length)
-							+ following;
-					URL = invalid_token_data[0];
+					following = URL.slice(matched.length) + following;
+					URL = matched;
+				}
+				if (URL === protocol) {
+					// e.g., [//<ref></ref>]
+					return all;
 				}
 
 				URL = parse_wikitext(URL,
@@ -1724,158 +1767,79 @@ function module_code(library_namespace) {
 					+ following;
 		}
 
+		// 注意: 註解及 wikilink display text 中的 external link 語法
+		// 不會被識別為 external link!
 		function parse_external_link(all, URL, protocol, URL_others, delimiter,
 				parameters) {
-			// assert: all === URL + (delimiter || '') + (parameters || '')
-			// URL === protocol + URL_others
+			// assert: all ===
+			// '[' + URL + (delimiter || '') + (parameters || '') + ']'
+			// assert: URL === protocol + URL_others
 
-			// [...] 自 end_mark 向前回溯。
-			var index = all.length,
-			// 在先的，在前的，前面的； preceding
-			// (previous 反義詞 following, preceding 反義詞 exceeds)
-			previous = '';
-			var matched;
-			// 1 + protocol.length: ('[' + protocol).length - 排除 IPv6 之類正規 URL。
-			while (index > 1 + protocol.length
-					&& (index = all.lastIndexOf('[', index - 1)) > 1 + protocol.length) {
-				matched = all.slice(index);
-				matched = matched.match(PATTERN_external_link);
-				if (!matched) {
-					continue;
-				}
+			// 不再自 end_mark 向前回溯。
+			// e.g., "[https://www.e[https://www.example.com/path[title]"
 
-				// shift arguments
-				URL = matched[1];
-				protocol = matched[2];
-				URL_others = matched[3];
-				delimiter = matched[4];
-				parameters = matched[5];
-				previous = all.slice(0, matched.index);
-				// assert: previous.startsWith('[')
-				break;
-			}
-			library_namespace.debug(previous + ' + ' + URL + ' + '
-					+ (delimiter || '') + ' + ' + (parameters || ''), 4,
-					'parse_wikitext.external_link');
-
-			// 往後追溯，從不合理的字元開始算作 display text。
-			// "''" including "'''". e.g., [http://a.b/''disply text'']
-
-			// 排除 IPv6 之類正規 URL。
-			if (wiki_API.PATTERN_IPv6_prefix.test(URL_others)) {
-				;
-			}
-			matched = URL.match(/^(.+?)((?:\[|'').*)$/);
-			if (matched && !wiki_API.PATTERN_IPv6_prefix.test(URL_others)) {
-				// assert: 本階段尚未執行過 split_text_apostrophe_unit(wikitext)
-				URL = matched[1];
-				if (delimiter) {
-					parameters = matched[2] + delimiter + parameters;
-				} else {
-					// assert: parameters === undefined
-					parameters = matched[2];
-				}
-				delimiter = '';
-			}
-
-			if (matched = /^\/\//.test(URL)) {
+			var matched = URL.startsWith('//');
+			if (matched) {
 				// https://en.wikipedia.org/wiki/Help:Link#http:_and_https:
 				URL = 'https:' + URL;
 			}
 
-			URL = parse_wikitext(URL, options, queue);
+			URL += (delimiter || '') + (parameters || '');
+			URL = URL.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_bare_url);
+			URL = parse_wikitext(URL, Object.assign(Object.clone(options), {
+				inside_url : true
+			}), queue);
 
 			if (URL.type === 'url') {
 				URL = [ URL ];
+				// delimiter = parameters = '';
+
 			} else if (URL.type === 'plain' && URL[0].type === 'url') {
-				/**
-				 * <code>
-				including template / parameter.
-				e.g.,
-				[http://example.com/foo<!---->bar{{text|}} t]
-				[https://tools.wmflabs.org/guc/index.php?uselang={{uselang}}&user={{urlencode:{{{1|{{PAGENAME}}}}}}} 全域貢獻]
-				</code>
-				 */
-
-				if (URL.some(function(token, index) {
-					if (index === 0) {
-						return false;
-					}
-					if (typeof token === 'string') {
-						// assert: /\s/.test(token) === false
-						return false;
-					}
-
-					switch (token.type) {
-					case 'comment':
-						return false;
-
-					case 'parameter':
-						return false;
-
-					case 'magic_word_function':
-						if (token.name in {
-							URLENCODE : true,
-							PAGENAME : true
-						}) {
-							return false;
-						}
-						break;
-
-					case 'transclusion':
-						// e.g., [http://example.com/foo{{text|}} t]
-						if (token.name in {
-							// 這些模板絕對不會包含空白字元，且常被用於URL的一部分。
-							Uselang : true
-						}) {
-							return false;
-						}
-						break;
-					}
-
-					// URL 從 URL[index] 開始可能包含空白字元。
-					URL.index = index;
-					return true;
-				})) {
+				parameters = URL;
+				URL = [ URL.shift() ];
+				if (typeof parameters[0] === 'string') {
+					delimiter = parameters[0].match(/^\s+/);
 					if (delimiter) {
-						parameters = delimiter + (parameters || '');
+						delimiter = delimiter[0];
+						parameters[0] = parameters[0].slice(delimiter.length);
 					} else {
-						parameters = '';
+						// delimiter = null;
 					}
-
-					delimiter = '';
-					parameters = URL.splice(URL.index, URL.length).join('')
-							+ parameters;
-					// assert: /^\s/.test(parameters) === false
-					delete URL.index;
-
-					if (URL.length > 1) {
-						// URL = [ URL, /* delimiter */'' ];
-						URL = [ URL ];
-					} else {
-						// URL[1] = /* delimiter */'';
-					}
-
 				} else {
-					URL = [ URL, delimiter ];
+					delimiter = null;
 				}
+				if (parameters.length < 2)
+					parameters = parameters[0];
+				// assert: true === delimiter || parameters
+				URL.push(delimiter || '');
+				if (parameters)
+					URL.push(parameters);
+
+				// assert: /^\s/.test(parameters) === false
+
+			} else if (PATTERN_external_link_global.test(matched = all
+					.slice(1 + protocol.length))) {
+				return all.slice(0, 1 + protocol.length)
+						+ matched.replace(PATTERN_external_link_global,
+								parse_external_link);
 
 			} else {
-				library_namespace.error('parse_external_link: Invalid url: '
-						+ URL);
+				// e.g., "[https://<ref></ref>]"
+				// e.g., "[https://[www.example.com/path[title]"
+				library_namespace.warn([ 'parse_external_link: ', {
+					// gettext_config:{"id":"invalid-url-$1"}
+					T : [ '網址無效：%1', String(URL) ]
+				} ]);
 				return all;
 			}
 
+			// assert: URL = [ url, /*delimiter, display_text*/ ];
 			// assert: URL[0].type === 'url'
 			if (matched) {
 				// non-protocol
 				URL[0].non_protocol = true;
 				// 去掉先前添加的 protocol。
 				URL[0][0] = URL[0][0].replace('https:', '');
-				if (URL[0].toString() === '//') {
-					// e.g., [//<ref></ref>]
-					return all;
-				}
 			}
 
 			if (Array.isArray(URL[0])) {
@@ -1885,60 +1849,14 @@ function module_code(library_namespace) {
 					URL[0].url = URL[0].url.join('');
 			}
 
-			if (delimiter || parameters) {
-				// assert: /^\s*$/.test(delimiter)
-				// && typeof delimiter === 'string'
-				// && typeof parameters === 'string'
-				// assert: parameters 已去除最前面的 delimiter (space)。
-				if (normalize) {
-					parameters = parameters.trimEnd();
-					if (delimiter)
-						delimiter = ' ';
-				}
-				// console.trace(parameters);
-
-				// 經過改變，需再進一步處理。
-				if (parameters)
-					parameters = parse_wikitext(parameters, options, queue);
-
-				// 確保 [ url, delimiter, display_text ]，
-				// 否則 .toString() 時 .join() 後會與原先不同。
-				if (URL.length === 1) {
-					URL.push(delimiter, parameters);
-				} else if (URL.length === 2) {
-					URL.push(parameters);
-				} else if (URL.length !== 3) {
-					library_namespace.error('parse_external_link: '
-					// e.g., [http://w.w{{Dead link}}t]
-					// should → [http://w.w t]{{Dead link}}
-					+ 'Invalid external url: ' + URL);
-					return all;
-
-				} else if (parameters
-				// || parameters === 0
-				) {
-					if (URL[2].type === 'plain') {
-						if (parameters.type === 'plain') {
-							URL[2].append(parameters);
-							// or use flat_plain_element(token);
-						} else {
-							URL[2].push(parameters);
-						}
-					} else {
-						if (parameters.type === 'plain') {
-							parameters.unshift(URL[2]);
-							URL[2] = parameters;
-						} else {
-							URL[2] = _set_wiki_type([ URL[2], parameters ],
-									'plain');
-						}
-					}
-				}
-			}
+			// assert: /^\s*$/.test(delimiter)
+			// && typeof delimiter === 'string'
+			// && typeof parameters === 'string'
+			// assert: parameters 已去除最前面的 delimiter (space)。
 
 			_set_wiki_type(URL, 'external_link');
 			queue.push(URL);
-			return previous + include_mark + (queue.length - 1) + end_mark;
+			return include_mark + (queue.length - 1) + end_mark;
 		}
 
 		function parse_odd_external_link(all, URL, delimiter, parameters) {
@@ -2052,7 +1970,7 @@ function module_code(library_namespace) {
 				pipe_separator, display_text) {
 
 			// 自 end_mark 向前回溯。
-			var previous;
+			var previous, following = '';
 			if (display_text && display_text.includes('[[')) {
 				var index = all_link.lastIndexOf('[[');
 				previous = all_link.slice(0, index);
@@ -2065,13 +1983,24 @@ function module_code(library_namespace) {
 					anchor = index[3];
 					pipe_separator = index[4];
 					display_text = index[5];
+					if (all_link.length > index[0].length) {
+						following = all_link.slice(index[0].length
+								- all_link.length);
+						all_link = index[0];
+					}
 				} else {
 					// revert
-					all_link = previous + all_link;
+					all_link = previous + all_link + following;
 					previous = '';
 				}
 			} else {
 				previous = '';
+			}
+
+			if (wiki_API.PATTERN_URL_prefix.test(page_and_anchor.trimStart())) {
+				// "[[http://example.com]]" 會被解析成 external_link
+				// [[ http://example.com]]
+				return previous + all_link + following;
 			}
 
 			// --------------------------------------------
@@ -2117,7 +2046,7 @@ function module_code(library_namespace) {
 				// [ valid_value, invalid_token_mark, queue_index ]
 				if (invalid_token_data) {
 					if (!invalid_token_data.is_pipe_separator)
-						return previous + all_link;
+						return previous + all_link + following;
 
 					if (pipe_separator) {
 						display_text = (pipe_separator || '')
@@ -2125,7 +2054,7 @@ function module_code(library_namespace) {
 					}
 
 					if (!invalid_token_data[0])
-						return all_link;
+						return previous + all_link + following;
 					pipe_separator = queue[invalid_token_data[2]];
 					display_text = page_and_anchor
 							.slice(invalid_token_data[0].length
@@ -2149,7 +2078,7 @@ function module_code(library_namespace) {
 			if (display_text && /\n=+[^=]=+/.test(display_text)) {
 				// incase '[[A|B]\n==T==\n<code>[[]]</code>'
 				// TODO: fix '[[A|B]<code>]]still code'
-				return previous + all_link;
+				return previous + all_link + following;
 			}
 
 			var matched = display_text
@@ -2157,11 +2086,11 @@ function module_code(library_namespace) {
 			&& display_text.match(/{{([^{}][\s\S]*?)$/);
 			if (matched && !matched[1].includes('}}')) {
 				// e.g., `[[File:i.png|\n{{t|]]}}\n]]`
-				return previous + all_link;
+				return previous + all_link + following;
 			}
 
-			library_namespace.debug('[' + previous + '] + [' + all_link + ']',
-					4, 'parse_wikitext.link');
+			library_namespace.debug('[' + previous + '] + [' + all_link
+					+ '] + [' + following + ']', 4, 'parse_wikitext.link');
 
 			var file_matched, category_matched, hash_sign;
 			if (!page_name) {
@@ -2169,9 +2098,11 @@ function module_code(library_namespace) {
 				page_name = '';
 				// anchor, fragment, section_title
 				anchor = page_and_anchor;
+
 			} else if (!page_name.trim()) {
 				// e.g., "[[ ]]", "[[ #...]]"
-				return previous + all_link;
+				return previous + all_link + following;
+
 			} else {
 				if (!anchor) {
 					anchor = '';
@@ -2191,7 +2122,7 @@ function module_code(library_namespace) {
 				}
 				// [[::zh:title]] would be rendered as plaintext
 				if (/^\s*:\s*:/.test(page_name)) {
-					return previous + all_link;
+					return previous + all_link + following;
 				}
 				// test [[file:name|...|...]]
 				file_matched = page_name.match(PATTERN_file_prefix);
@@ -2204,7 +2135,7 @@ function module_code(library_namespace) {
 					&& (PATTERN_file_prefix.test(page_name + 'T')
 					//
 					|| PATTERN_category_prefix.test(page_name + 'T'))) {
-						return previous + all_link;
+						return previous + all_link + following;
 					}
 					// console.log([ page_name, category_matched ]);
 				}
@@ -2235,13 +2166,13 @@ function module_code(library_namespace) {
 					|| page_name.some(is_invalid_page_name))) {
 						// console.trace(page_name);
 						// page_name.oddly = 'link_inside_link';
-						return previous + all_link;
+						return previous + all_link + following;
 					}
 					page_name = [ page_name ];
 					page_name.oddly = matched || true;
 				} else {
 					if (is_invalid_page_name(page_name)) {
-						return previous + all_link;
+						return previous + all_link + following;
 					}
 					var matched = (session || wiki_API).namespace(page_name, {
 						is_page_title : true,
@@ -2281,7 +2212,7 @@ function module_code(library_namespace) {
 				if (!matched) {
 					// console.trace(page_name);
 					// e.g., [[_]]
-					return all_link;
+					return previous + all_link + following;
 				}
 			}
 
@@ -2495,35 +2426,41 @@ function module_code(library_namespace) {
 
 				} else {
 					var parsed_display_text = parse_wikitext(display_text,
-							options, queue);
-					while (for_each_non_plain_subtoken(parsed_display_text,
-					// 一直執行到不包含external_link為止。
-					function(token, index, parent) {
-						if (!token)
-							return;
-						if (token.type === 'external_link') {
-							token.type = 'plain';
-							// assert: token[0].type === 'url'
-							delete token[0].parent;
-							token.push(']');
-							token.unshift('[');
-							if (parent) {
-								parent[index] = token;
-							} else {
-								// assert: parent ===
-								// parsed_display_text
-								parsed_display_text = token;
+					//
+					Object.assign(Object.clone(options), {
+						inside_url : true
+					}), queue);
+					if (false) {
+						// @deprecated: use options.inside_url
+						while (for_each_non_plain_subtoken(parsed_display_text,
+						// 一直執行到不包含external_link為止。
+						function(token, index, parent) {
+							if (!token)
+								return;
+							if (token.type === 'external_link') {
+								token.type = 'plain';
+								// assert: token[0].type === 'url'
+								delete token[0].parent;
+								token.push(']');
+								token.unshift('[');
+								if (parent) {
+									parent[index] = token;
+								} else {
+									// assert: parent ===
+									// parsed_display_text
+									parsed_display_text = token;
+								}
+								return true;
 							}
-							return true;
+							if (token.type === 'url') {
+								// e.g., [[a| https://example.org]]
+								// 無連結功能、無連結作用。
+								token.no_linking_effect = parameters;
+							}
+						})) {
+							parsed_display_text = flat_plain_element(
+									parsed_display_text, options);
 						}
-						if (token.type === 'url') {
-							// e.g., [[a| https://example.org]]
-							// 無連結功能、無連結作用。
-							token.no_linking_effect = parameters;
-						}
-					})) {
-						parsed_display_text = flat_plain_element(
-								parsed_display_text, options);
 					}
 
 					// 需再進一步處理 {{}}, -{}- 之類。
@@ -2658,7 +2595,8 @@ function module_code(library_namespace) {
 			// display_text without pipe_separator '|' ]
 			// anchor && anchor.startsWith('#')
 			queue.push(parameters);
-			return previous + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark
+					+ following;
 		}
 
 		// ----------------------------------------------------------------------------------------
@@ -5073,35 +5011,53 @@ function module_code(library_namespace) {
 			// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
 
 			// ----------------------------------------------------
+			// wikilink 內部連結
+			// [[~:~|~]], [[~:~:~|~]]
+
+			// "[http://a.b/ x[[LLL]]" 解析成 wikilink 而非 external_link，因此必須
+			// parse_wikilink() → parse_external_link()
+
+			// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
+
+			// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
+			// 前面檢查，或是使 display_text 不包含 {{}}。
+
+			// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
+			// 可以解析成圖片, Caption: "{{tl|t}}"
+
+			wikitext = wikitext.replace_till_stable(
+			// or use ((PATTERN_link))
+			PATTERN_wikilink_global, parse_wikilink);
+
+			// ----------------------------------------------------
 			// external link
 			// [http://... ...]
 
-			// 不可跨行。
-			wikitext = wikitext.replace_till_stable(
-					PATTERN_external_link_global, parse_external_link);
-
-			/**
-			 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
-			 * @see [[Category:External link templates]]
-			 */
-
-			if (!options.no_odd_external_link) {
-				wikitext = wikitext.replace_till_stable(
-						/\[([^\[\]\s\n]+)(?:([^\S\n]+)([^\]]*?))?\]/gi,
-						parse_odd_external_link);
-			}
-
-			// ----------------------------------------------------
-			// plain url
-
 			// PATTERN_external_link_global 必須偵測 url pattern，因此必須
-			// parse_external_link() → parse_wikilink()
-			// 又因為 "[[http://example.com]]" 會被解析成 external_link，因此必須
-			// parse_external_link() or parse_external_link() → parse_wikilink()
+			// parse_external_link() → parse_bare_url()
+
 			if (!options.inside_url) {
-				// 不可跨行。
 				wikitext = wikitext.replace_till_stable(
-						PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_bare_url);
+				// external_link 不可跨行。
+				PATTERN_external_link_global, parse_external_link);
+
+				/**
+				 * @see https://github.com/5j9/wikitextparser/blob/master/tests/wikitext/test_external_links.py
+				 * @see [[Category:External link templates]]
+				 */
+
+				if (!options.no_odd_external_link) {
+					wikitext = wikitext.replace_till_stable(
+							/\[([^\[\]\s\n]+)(?:([^\S\n]+)([^\]]*?))?\]/gi,
+							parse_odd_external_link);
+				}
+
+				// ----------------------------------------------------
+				// plain url
+
+				wikitext = wikitext.replace_till_stable(
+				// bare_url 不可跨行。
+				PATTERN_URL_WITH_PROTOCOL_GLOBAL, parse_bare_url);
 			}
 
 			// ----------------------------------------------------
@@ -5128,22 +5084,6 @@ function module_code(library_namespace) {
 
 			wikitext = wikitext.replace_till_stable(
 					PATTERN_language_conversion, parse_language_conversion);
-
-			// ----------------------------------------------------
-			// wikilink 內部連結
-			// [[~:~|~]], [[~:~:~|~]]
-
-			// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
-
-			// 注意: [[p|{{tl|t}}]] 不會被解析成 wikilink，因此 wikilink 應該要擺在 transclusion
-			// 前面檢查，或是使 display_text 不包含 {{}}。
-
-			// 但注意: "[[File:title.jpg|thumb|a{{tl|t}}|param\n=123|{{tl|t}}]]"
-			// 可以解析成圖片, Caption: "{{tl|t}}"
-
-			wikitext = wikitext.replace_till_stable(
-			// or use ((PATTERN_link))
-			PATTERN_wikilink_global, parse_wikilink);
 
 			// ----------------------------------------------------
 			// table: \n{| ... \n|}

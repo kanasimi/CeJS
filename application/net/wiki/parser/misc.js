@@ -262,6 +262,7 @@ function module_code(library_namespace) {
 			var articlepath = configurations
 			//
 			&& configurations.general.articlepath;
+
 			if (!matched && _url.pathname === '/'
 			// e.g., [http://da.wikipedia.org Danish Wikipedia]
 			&& _interwikimap_data.url.endsWith(articlepath)) {
@@ -273,6 +274,7 @@ function module_code(library_namespace) {
 					matched.hostname_only = true;
 				}
 			}
+
 			if (!matched)
 				return false;
 
@@ -303,7 +305,7 @@ function module_code(library_namespace) {
 				interwikimap_data = interwikimap_data_list[0];
 				// [, title ]
 				var matched = url.match(interwikimap_data.url_pattern);
-				name = matched && matched[1];
+				name = matched && matched[1].replace(/[?#].*/g, '');
 				return name;
 			})) {
 				// TODO: 檢查非正規 interwiki links
@@ -423,7 +425,8 @@ function module_code(library_namespace) {
 				to_hash : true
 			}) ];
 
-			if (interwiki_data[1] !== interwiki_data.display_text.toString()) {
+			if (interwiki_data.wikilink[1] !== interwiki_data.display_text
+					.toString()) {
 				interwiki_data.wikilink.push('|', interwiki_data.display_text);
 			}
 

@@ -3548,8 +3548,12 @@ function test_wiki() {
 		wikitext = 'ssh://u@example.org'; parsed = CeL.wiki.parse(wikitext);
 		assert(['url', parsed.type], 'wiki.parse: plain url #12');
 
-		wikitext = 't[http://a.b/ x[[l]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse: external link #1');
+		wikitext = 't[http://a.b/ x[[L]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #1: wiki.parse.link no-external_link');
+		assert(['t[', parsed[0]], 'wiki.parse: external link #1-1');
+		assert(['url', parsed[1].type], 'wiki.parse: external link #1-2');
+		assert(['http://a.b/', parsed[1].toString()], 'wiki.parse: external link #1-3');
+		assert(['link', parsed.at(-1).type], 'wiki.parse: external link #1-4');
 		wikitext = "[http://a.b/  disply text]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #2');
 		assert(['disply text', parsed[2].toString()], 'wiki.parse: external link #2-1');
@@ -3583,6 +3587,7 @@ function test_wiki() {
 		assert(['plain', parsed.type], 'wiki.parse: external link #9-1');
 		assert(['[', parsed[0]], 'wiki.parse: external link #9-2');
 		assert(['external_link', parsed[1].type], 'wiki.parse: external link #9-3');
+		assert(['[http://example.com]', parsed[1].toString()], 'wiki.parse: external link #9-4');
 		wikitext = "[[http://example.com foo bar]]"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #10');
 		assert(['plain', parsed.type], 'wiki.parse: external link #10-1');
@@ -3630,7 +3635,7 @@ function test_wiki() {
 		//assert(['http://windows.microsoft.com/zh-tw/', CeL.wiki.wikitext_to_plain_text(parsed[0].toString())], 'wiki.parse: nowiki #15 錯誤的用法');
 		wikitext = '[https://tools.wmflabs.org/guc/index.php?uselang={{uselang}}&user={{urlencode:{{{1|{{PAGENAME}}}}}}}  全域貢獻]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #16');
-		assert(['url', parsed[0][0].type], 'wiki.parse: external link #16-1');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #16-1');
 		assert(['https://tools.wmflabs.org/guc/index.php?uselang={{uselang}}&user={{urlencode:{{{1|{{PAGENAME}}}}}}}', parsed[0].toString()], 'wiki.parse: external link #16-2');
 		assert(['  ', parsed[1]], 'wiki.parse: external link #16-3');
 		assert(['全域貢獻', parsed[2]], 'wiki.parse: external link #16-4');
@@ -3642,7 +3647,7 @@ function test_wiki() {
 		wikitext = '[{{fullurl:Special:Log|user={{urlencode:{{{1|{{PAGENAME}}}}}}}}} 日志]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #18');
 		assert(['external_link', parsed.type], 'wiki.parse: external link #18-1');
-		assert(['{{fullurl:Special:Log|user={{urlencode:{{{1|{{PAGENAME}}}}}}}}}', parsed[0].toString()], 'wiki.parse: external link #17-2');
+		assert(['{{fullurl:Special:Log|user={{urlencode:{{{1|{{PAGENAME}}}}}}}}}', parsed[0].toString()], 'wiki.parse: external link #18-2');
 		wikitext = '[https://a.b{{t}}]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #19');
 		assert(['external_link', parsed.type], 'wiki.parse: external link #19-1');
@@ -3653,6 +3658,242 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse: external link #21');
 		assert(['external_link', parsed[0].type], 'wiki.parse: external link #21-1');
 		assert([']', parsed[1]], 'wiki.parse: external link #21-2');
+		wikitext = '[http://w.w{{Dead link}}t]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #22 Dead link 錯誤的用法');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #22-1 Dead link 錯誤的用法');
+		assert(['http://w.w', parsed[0].toString()], 'wiki.parse: external link #22-2 Dead link 錯誤的用法');
+
+		wikitext = "https://www.example.com/path''title]dd"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #23');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #23-1');
+		assert(["https://www.example.com/path", parsed[0].toString()], 'wiki.parse: external link #23-2');
+		assert(['italic', parsed[1].type], 'wiki.parse: external link #23-3');
+		assert(["''title]dd", parsed[1].toString()], 'wiki.parse: external link #23-4');
+		wikitext = '[' + wikitext + ']'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #24');
+		assert(['external_link', parsed[0].type], 'wiki.parse: external link #24-1');
+		assert(["[https://www.example.com/path''title]", parsed[0].toString()], 'wiki.parse: external link #24-3');
+		assert(['italic', parsed[0][2].type], 'wiki.parse: external link #24-4');
+		assert(["''title", parsed[0][2].toString()], 'wiki.parse: external link #24-5');
+		assert(["dd]", parsed[1].toString()], 'wiki.parse: external link #24-6');
+
+		wikitext = "//www.example.com/path''title]dd"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #25');
+		assert(['//www.example.com/path', parsed[0]], 'wiki.parse: external link #25-1');
+		wikitext = '[' + wikitext; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #26');
+		assert(['external_link', parsed[0].type], 'wiki.parse: external link #26-1');
+		assert(["[//www.example.com/path''title]", parsed[0].toString()], 'wiki.parse: external link #26-2');
+		assert(["dd", parsed[1].toString()], 'wiki.parse: external link #26-3');
+
+		wikitext = "https://www.e[xample.com/path''title]dd"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #27');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #27-1');
+		assert(["https://www.e", parsed[0].toString()], 'wiki.parse: external link #27-2');
+		assert(["[xample.com/path", parsed[1].toString()], 'wiki.parse: external link #27-3');
+		wikitext = '[' + wikitext; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #28');
+		assert(['external_link', parsed[0].type], 'wiki.parse: external link #28-1');
+		assert(["[https://www.e[xample.com/path''title]", parsed[0].toString()], 'wiki.parse: external link #28-2');
+		assert(["https://www.e", parsed[0][0].toString()], 'wiki.parse: external link #28-3');
+		assert(["[xample.com/path''title", parsed[0][2].toString()], 'wiki.parse: external link #28-4');
+
+		wikitext = "[//www.[example.com/path''title]dd"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #29');
+		assert(['external_link', parsed[0].type], 'wiki.parse: external link #29-1');
+		assert(["//www.", parsed[0][0].toString()], 'wiki.parse: external link #29-2');
+		assert(["[example.com/path''title", parsed[0][2].toString()], 'wiki.parse: external link #29-3');
+
+		wikitext = "[//www.e[xample.com/path''title]dd"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #30');
+		assert(['external_link', parsed[0].type], 'wiki.parse: external link #30-1');
+		assert(["//www.e", parsed[0][0].toString()], 'wiki.parse: external link #30-2');
+		assert(["[xample.com/path''title", parsed[0][2].toString()], 'wiki.parse: external link #30-3');
+
+		wikitext = "//www.e[xample.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse: external link #31');
+		wikitext = '[' + wikitext + ']'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #32');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #32-1');
+		assert(["//www.e", parsed[0].toString()], 'wiki.parse: external link #32-2');
+		assert(["[xample.com/path[title", parsed[2].toString()], 'wiki.parse: external link #32-3');
+
+		wikitext = "https://www.e[xample.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #33');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #33-1');
+		assert(['https://www.e', parsed[0].toString()], 'wiki.parse: external link #33-2');
+		assert(["[xample.com/path[title", parsed[1]], 'wiki.parse: external link #33-3');
+		wikitext = "https://www.e[xample.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #34');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #34-1');
+		assert(['https://www.e', parsed[0].toString()], 'wiki.parse: external link #34-2');
+		assert(["[xample.com/path[title]", parsed[1]], 'wiki.parse: external link #34-3');
+		wikitext = "[https://www.e[xample.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #35');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #35-1');
+		assert(['https://www.e', parsed[0].toString()], 'wiki.parse: external link #35-2');
+		assert(["[xample.com/path[title", parsed[2].toString()], 'wiki.parse: external link #35-3');
+
+		wikitext = "https://www.e[https://www.example.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #36');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #36-1');
+		assert(['https://www.e', parsed[0].toString()], 'wiki.parse: external link #36-2');
+		assert(["[", parsed[1]], 'wiki.parse: external link #36-3');
+		assert(["url", parsed[2].type], 'wiki.parse: external link #36-3');
+		assert(["https://www.example.com/path", parsed[2].toString()], 'wiki.parse: external link #36-4');
+		wikitext = "[https://www.e[https://www.example.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #37');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #37-1');
+		assert(['https://www.e', parsed[0].toString()], 'wiki.parse: external link #37-2');
+		assert(["", parsed[1]], 'wiki.parse: external link #37-3');
+		assert(["[https://www.example.com/path[title", parsed[2]], 'wiki.parse: external link #37-4');
+		wikitext = "[https://www.e[''https://www.example.com/path''[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #38');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #38-1');
+		assert(['https://www.e', parsed[0].toString()], 'wiki.parse: external link #38-2');
+		assert(["", parsed[1]], 'wiki.parse: external link #38-3');
+		assert(["[''https://www.example.com/path''[title", parsed[2].toString()], 'wiki.parse: external link #38-4');
+
+		wikitext = "https://www.e{xample.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #39');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #39-1');
+		assert(['https://www.e{xample.com/path', parsed[0].toString()], 'wiki.parse: external link #39-2');
+		assert(["[title", parsed[1]], 'wiki.parse: external link #39-3');
+		wikitext = "https://www.e{{xample.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #40');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #40-1');
+		assert(['https://www.e{{xample.com/path', parsed[0].toString()], 'wiki.parse: external link #40-2');
+		assert(["[title", parsed[1]], 'wiki.parse: external link #40-3');
+		wikitext = "[https://www.e{{xample.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #41');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #41-1');
+		assert(['https://www.e{{xample.com/path', parsed[0].toString()], 'wiki.parse: external link #41-2');
+		assert(["[title", parsed[2].toString()], 'wiki.parse: external link #41-3');
+
+		wikitext = "https://www.e'xample.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #43');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #43-1');
+		assert(["https://www.e'xample.com/path", parsed[0].toString()], 'wiki.parse: external link #43-2');
+		wikitext = "[https://www.e'xample.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #44');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #44-1');
+		assert(["https://www.e'xample.com/path", parsed[0].toString()], 'wiki.parse: external link #44-2');
+		assert(["[title", parsed[2].toString()], 'wiki.parse: external link #44-3');
+
+		wikitext = "https://www.e''xample.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #45');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #45-1');
+		assert(["https://www.e", parsed[0].toString()], 'wiki.parse: external link #45-2');
+		assert(['italic', parsed[1].type], 'wiki.parse: external link #45-3');
+		assert(["''xample.com/path[title", parsed[1].toString()], 'wiki.parse: external link #45-4');
+		wikitext = "[https://www.e''xample.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #46');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #46-1');
+		assert(["https://www.e", parsed[0].toString()], 'wiki.parse: external link #46-2');
+		assert(['italic', parsed[2].type], 'wiki.parse: external link #46-3');
+		assert(["''xample.com/path[title", parsed[2].toString()], 'wiki.parse: external link #46-4');
+
+		wikitext = "https://[www.example.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse: external link #47');
+		wikitext = "[https://[www.example.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse: external link #48');
+
+		wikitext = "https://www.example.com/https://[www.example.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #49');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #49-1');
+		assert(['https://www.example.com/https://', parsed[0].toString()], 'wiki.parse: external link #49-2');
+		assert(["[www.example.com/path[title", parsed[1]], 'wiki.parse: external link #49-3');
+		wikitext = "[https://www.example.com/https://[www.example.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #50');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #50-1');
+		assert(['https://www.example.com/https://', parsed[0].toString()], 'wiki.parse: external link #50-2');
+		assert(["[www.example.com/path[title", parsed[2].toString()], 'wiki.parse: external link #50-3');
+
+		wikitext = "https://www[.example.com/path[title"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #51');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #51-1');
+		assert(['https://www', parsed[0].toString()], 'wiki.parse: external link #51-2');
+		assert(['[.example.com/path[title', parsed[1]], 'wiki.parse: external link #51-2');
+		wikitext = "[https://www[.example.com/path[title]"; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #52');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #52-1');
+		assert(['https://www', parsed[0].toString()], 'wiki.parse: external link #52-2');
+		assert(['[.example.com/path[title', parsed[2].toString()], 'wiki.parse: external link #52-3');
+
+		wikitext = 'https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/[title'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #53');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #53-1');
+		assert(['https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/', parsed[0].toString()], 'wiki.parse: external link #53-2');
+		wikitext = 'https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/[title]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #54');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #54-1');
+		assert(['https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/', parsed[0].toString()], 'wiki.parse: external link #54-2');
+		wikitext = '[https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/[title]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #55');
+		assert(['external_link', parsed.type], 'wiki.parse: external link #55-1');
+		assert(['url', parsed[0].type], 'wiki.parse: external link #55-2');
+		assert(['https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443/', parsed[0].toString()], 'wiki.parse: external link #55-3');
+		assert(['[title', parsed[2].toString()], 'wiki.parse: external link #55-4');
+
+		wikitext = '[http://[http://a.b/]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #56');
+		assert(['[http://', parsed[0]], 'wiki.parse: external link #56-1');
+		assert(['external_link', parsed[1].type], 'wiki.parse: external link #56-2');
+		assert(['[http://a.b/]', parsed[1].toString()], 'wiki.parse: external link #56-3');
+
+		wikitext = 't[http://a.b/ x[[L]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #57');
+		assert(['plain', parsed.type], 'wiki.parse: external link #57-1');
+		assert(['t', parsed[0]], 'wiki.parse: external link #57-2');
+		assert(['external_link', parsed[1].type], 'wiki.parse: external link #57-3');
+		assert(['[http://a.b/ x[[L]', parsed[1].toString()], 'wiki.parse: external link #57-4');
+		assert(['x[[L', parsed[1][2].toString()], 'wiki.parse: external link #57-5');
+		wikitext = 't[http://[http://a.b/[[L]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #58');
+		assert(['t[http://', parsed[0]], 'wiki.parse: external link #58-1');
+		assert(['external_link', parsed[1].type], 'wiki.parse: external link #58-2');
+		assert(['[http://a.b/[[L]]]', parsed[1].toString()], 'wiki.parse: external link #58-3');
+		assert(['[[L]]', parsed[1][2].toString()], 'wiki.parse: external link #58-3');
+		wikitext = 't[http://a.b/[[L]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #59');
+		assert(['plain', parsed.type], 'wiki.parse: external link #59-1');
+		assert(['t', parsed[0]], 'wiki.parse: external link #59-2');
+		assert(['external_link', parsed[1].type], 'wiki.parse: external link #59-3');
+		assert(['[http://a.b/[[L]]]', parsed[1].toString()], 'wiki.parse: external link #59-4');
+		assert(['[[L]]', parsed[1][2].toString()], 'wiki.parse: external link #59-5');
+		wikitext = 't[http://a.b/[[L]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #60');
+		assert(['plain', parsed.type], 'wiki.parse: external link #60-1');
+		assert(['t[', parsed[0]], 'wiki.parse: external link #60-2');
+		assert(['url', parsed[1].type], 'wiki.parse: external link #60-3');
+		assert(['http://a.b/', parsed[1].toString()], 'wiki.parse: external link #60-4');
+		assert(['[[L]]', parsed[2].toString()], 'wiki.parse: external link #60-5');
+		wikitext = 't[http://a.b/[[L]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #61');
+		assert(['plain', parsed.type], 'wiki.parse: external link #61-1');
+		assert(['t', parsed[0]], 'wiki.parse: external link #61-2');
+		assert(['external_link', parsed[1].type], 'wiki.parse: external link #61-3');
+		assert(['[http://a.b/[[L]', parsed[1].toString()], 'wiki.parse: external link #61-4');
+		assert(['[[L', parsed[1][2].toString()], 'wiki.parse: external link #61-5');
+
+		// @see "[[http://example.com]]"
+		wikitext = '[[ http://example.com]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #62');
+		assert(['plain', parsed.type], 'wiki.parse: external link #62-1');
+		assert(['[[ ', parsed[0]], 'wiki.parse: external link #62-2');
+		assert(['url', parsed[1].type], 'wiki.parse: external link #62-3');
+		assert(['http://example.com', parsed[1].toString()], 'wiki.parse: external link #62-4');
+		assert([']]', parsed[2]], 'wiki.parse: external link #62-5');
+		wikitext = '[[//example.com]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: external link #63');
+		assert(['plain', parsed.type], 'wiki.parse: external link #63-1');
+		assert(['[', parsed[0]], 'wiki.parse: external link #63-2');
+		assert(['external_link', parsed[1].type], 'wiki.parse: external link #63-3');
+		assert(['[//example.com]', parsed[1].toString()], 'wiki.parse: external link #63-4');
+		assert([']', parsed[2]], 'wiki.parse: external link #63-5');
+		wikitext = '[[ //example.com]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse: external link #64');
+
 
 		wikitext = 't<!--='; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
@@ -3779,6 +4020,10 @@ function test_wiki() {
 		assert(['file', parsed.type], 'wiki.parse.file #15');
 		assert(['url', parsed.link.type], 'wiki.parse.file #15');
 		assert(['http://a.b', parsed.link.toString()], 'wiki.parse.file #15');
+		wikitext = '[[File:a.jpg|[[T]]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #16');
+		wikitext = '[[File:a.jpg|[[T|d]]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.file #17');
 
 		wikitext = '[[:Category:cat|sort_key]]'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.category #1-1');
@@ -4259,18 +4504,56 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.link invalid external_link');
 		assert(['[', parsed[0]], 'wiki.parse.link invalid external_link');
 
-		wikitext = '[[t|[https://example.org]]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link');
-		assert(['link', parsed.type], 'wiki.parse.link no-external_link');
-		assert(['plain', parsed[2].type], 'wiki.parse.link no-external_link');
-		assert(['[', parsed[2][0]], 'wiki.parse.link no-external_link');
-		assert(['[https://example.org]', parsed[2].toString()], 'wiki.parse.link no-external_link');
+		wikitext = '[[t|[] ]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #1');
+		assert(['link', parsed.type], 'wiki.parse.link no-external_link #1-1');
+		assert(['[] ]', parsed[2]], 'wiki.parse.link no-external_link #1-2');
+		wikitext = '[[t|[ff] ]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #2');
+		assert(['link', parsed.type], 'wiki.parse.link no-external_link #2-1');
+		assert(['[ff] ]', parsed[2]], 'wiki.parse.link no-external_link #2-2');
+
 		wikitext = '[[t| https://example.org [https://example2.org] ]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link');
-		assert(['link', parsed.type], 'wiki.parse.link no-external_link');
-		assert(['plain', parsed[2].type], 'wiki.parse.link no-external_link');
-		assert(['url', parsed[2][3].type], 'wiki.parse.link no-external_link');
-		assert(['https://example2.org', parsed[2][3].toString()], 'wiki.parse.link no-external_link');
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #3');
+		assert(['link', parsed.type], 'wiki.parse.link no-external_link #3-1');
+		assert([' https://example.org [https://example2.org] ', parsed[2]], 'wiki.parse.link no-external_link #3-2');
+		wikitext = '[[t|[https://example.org] [ [a]  [https://example.org]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #4');
+		assert(['link', parsed.type], 'wiki.parse.link no-external_link #4-1');
+		assert(['[https://example.org] [ [a]  [https://example.org]', parsed[2]], 'wiki.parse.link no-external_link #4-2');
+
+		wikitext = '[[t|[https://example.org]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #5');
+		assert(['link', parsed.type], 'wiki.parse.link no-external_link #5-1');
+		assert(['t', parsed[0][0]], 'wiki.parse.link no-external_link #5-2');
+		assert(['[https://example.org', parsed[2]], 'wiki.parse.link no-external_link #5-3');
+		wikitext = '[[t|[https://example.org]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #6');
+		assert(['link', parsed.type], 'wiki.parse.link no-external_link #6-1');
+		assert(['[https://example.org]', parsed[2]], 'wiki.parse.link no-external_link #6-2');
+		wikitext = '[[t|[https://example.org]]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #7');
+		assert(['plain', parsed.type], 'wiki.parse.link no-external_link #7-1');
+		assert(['link', parsed[0].type], 'wiki.parse.link no-external_link #7-2');
+		assert(['[https://example.org]', parsed[0][2]], 'wiki.parse.link no-external_link #7-3');
+		assert([']', parsed[1]], 'wiki.parse.link no-external_link #7-4');
+
+		wikitext = '[[t|https://example.org]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #8');
+		assert(['link', parsed.type], 'wiki.parse.link no-external_link #8-1');
+		assert(['https://example.org', parsed[2]], 'wiki.parse.link no-external_link #8-2');
+		wikitext = '[[t|https://example.org]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #9');
+		assert(['plain', parsed.type], 'wiki.parse.link no-external_link #9-1');
+		assert(['link', parsed[0].type], 'wiki.parse.link no-external_link #9-2');
+		assert(['https://example.org', parsed[0][2]], 'wiki.parse.link no-external_link #9-3');
+		assert([']', parsed[1]], 'wiki.parse.link no-external_link #9-4');
+		wikitext = '[[t|https://example.org]]]]'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.link no-external_link #10');
+		assert(['plain', parsed.type], 'wiki.parse.link no-external_link #10-1');
+		assert(['link', parsed[0].type], 'wiki.parse.link no-external_link #10-2');
+		assert(['https://example.org', parsed[0][2]], 'wiki.parse.link no-external_link #10-3');
+		assert([']]', parsed[1]], 'wiki.parse.link no-external_link #10-4');
 
 		wikitext = '--{{unsigned|user}}--'; parsed = CeL.wiki.parser(wikitext).parse();
 		assert([wikitext, parsed.toString()]);
@@ -6058,124 +6341,123 @@ function test_wiki() {
 			var parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-1');
 
-			wikitext = '[[:ja:東京]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:ja:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-2');
 
-			wikitext = '[[ja:]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[ja:]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-3');
 
-			wikitext = '[[:ja:]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:ja:]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-4');
 
-			wikitext = '[[ : en :]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[ : en :]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-5');
 
-			wikitext = '[[ <!----> : en :]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[ <!----> : en :]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-6');
 
-			wikitext = '[[ <!---->  en :]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[ <!---->  en :]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-7');
 
-			wikitext = '[[w:ja:東京]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[w:ja:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #2-1');
 
-			wikitext = '[[commons:東京]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[commons:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, parsed.is_link], 'zhwiki: .is_link #3-1');
 
-			wikitext = '[[Wikipedia:嵌入包含]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[Wikipedia:嵌入包含]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, parsed.is_link], 'zhwiki: .is_link #4-1');
 
-			wikitext = '[[file:a.jpg]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[file:a.jpg]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([false, parsed.is_link], 'zhwiki: .is_link #5-1');
 
-			wikitext = '[[:file:a.jpg]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:file:a.jpg]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, parsed.is_link], 'zhwiki: .is_link #6-1');
 
-			wikitext = '[[category:東京]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[category:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([false, parsed.is_link], 'zhwiki: .is_link #7-1');
 
-			wikitext = '[[:category:東京]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:category:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert([true, parsed.is_link], 'zhwiki: .is_link #8-1');
 
 
-			wikitext = '[[w:en:title]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[w:en:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['w', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interwiki.prefix], 'zhwiki: parse.interwiki_link() #1-1');
 			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interlanguage.prefix], 'zhwiki: parse.interwiki_link() #1-2');
 
 			var interwiki_data;
-			wikitext = '[[:en:w:title]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:en:w:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['en', interwiki_data.interwiki && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #2-1');
 			assert(['en', interwiki_data.interlanguage && interwiki_data.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #2-2');
 
-			wikitext = '[[Commons:title]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[Commons:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['commons', interwiki_data.wiki_family && interwiki_data.wiki_family.family], 'zhwiki: parse.interwiki_link() #3-1');
 			assert(['Title', interwiki_data.wiki_family && interwiki_data.wiki_family.name], 'zhwiki: parse.interwiki_link() #3-2');
 			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #3-3');
-			wikitext = '[[:Commons:title]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:Commons:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['commons', interwiki_data.wiki_family && interwiki_data.wiki_family.family], 'zhwiki: parse.interwiki_link() #4-1');
 			assert(['Title', interwiki_data.wiki_family && interwiki_data.wiki_family.name], 'zhwiki: parse.interwiki_link() #4-2');
 			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #4-3');
 
-			wikitext = '[[s:w:title]]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[s:w:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #5-1');
 
 
-			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist?hidemyself=1&hidebots=1&hidecategorization=1&hideWikibase=1&limit=500&days=3&enhanced=1&urlversion=2 監視清單]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist?hidemyself=1&hidebots=1&hidecategorization=1&hideWikibase=1&limit=500&days=3&enhanced=1&urlversion=2 監視清單]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #1-1');
 			assert(['Special:Watchlist', interwiki_data && interwiki_data.name], 'zhwiki: parse.interwiki_url() #1-2');
 			assert(['Special:Watchlist', interwiki_data && interwiki_data.link_title], 'zhwiki: parse.interwiki_url() #1-3');
 
-			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist 監視清單]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist 監視清單]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #2-1');
 			assert(['[[Special:Watchlist|監視清單]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #2-2');
 
-			wikitext = '[https://en.wikipedia.org/wiki/Special:Watchlist watchlist]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[https://en.wikipedia.org/wiki/Special:Watchlist watchlist]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['en', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #3-1');
 			assert(['[[:en:Special:Watchlist|watchlist]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #3-2');
 
-			wikitext = '[https://en.wikisource.org/wiki/A]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[https://en.wikisource.org/wiki/A]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['s:en', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #4-1');
 			assert(['[[s:en:A|A]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #4-2');
 
-			wikitext = '[https://ja.wikisource.org/wiki/%E6%9E%95%E8%8D%89%E5%AD%90]';
-			parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[//ja.wikisource.org/wiki/%E6%9E%95%E8%8D%89%E5%AD%90]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
 			assert(['s:ja', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #5-1');
 			assert(['[[s:ja:枕草子|枕草子]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #5-2');
 
+			wikitext = '[//zh.wikipedia.org/wiki/ABC ABC]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #6-1');
+			assert(['[[ABC]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #6-2');
 
-			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}";
-			parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
+			wikitext = '[https://ko.wikipedia.org/wiki/%ED%95%9C%EC%84%B1%ED%98%B8 韓成浩]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['ko', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #7-1');
+			assert(['[[:ko:한성호|韓成浩]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #7-2');
+			interwiki_data = CeL.wiki.parse.interwiki_link(CeL.wiki.parse(interwiki_data.wikilink), CeL.wiki.add_session_to_options(zhwiki));
+			assert(['ko|한성호', interwiki_data && interwiki_data.interlanguage && [interwiki_data.interlanguage.prefix, interwiki_data.interlanguage.title].join('|')], 'zhwiki: parse.interwiki_url() #7-2');
+
+			wikitext = '[https://ja.wikipedia.org/wiki/%E8%B5%A4%E3%82%81%E3%81%A0%E3%81%8B#.E3.83.86.E3.83.AC.E3.83.93.E3.83.89.E3.83.A9.E3.83.9E 紅鳉魚]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['ja', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #8-1');
+			assert(['[[:ja:赤めだか#テレビドラマ|紅鳉魚]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #8-2');
+			interwiki_data = CeL.wiki.parse.interwiki_link(CeL.wiki.parse(interwiki_data.wikilink), CeL.wiki.add_session_to_options(zhwiki));
+			assert(['ja|赤めだか', interwiki_data && interwiki_data.interlanguage && [interwiki_data.interlanguage.prefix, interwiki_data.interlanguage.title].join('|')], 'zhwiki: parse.interwiki_url() #8-3');
+
+			wikitext = '[//zh.m.wikipedia.org/zh-tw/%E4%BD%A9%E5%8D%93%C2%B7%E8%B2%BB%E5%8D%97%E5%BE%B7%E8%8C%B2 威能帝]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #9-1');
+			assert(['[[佩卓·費南德茲|威能帝]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #9-2');
+
+			wikitext = '[//www.imdb.com/name/nm1720540/ IMDB]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['imdbname', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #10-1');
+			assert(['[[imdbname:1720540|IMDB]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #10-2');
+
+			wikitext = "[http://www.gutenberg.org/ebooks/19942 Voltaire's ''Candide'']"; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['gutenberg', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #11-1');
+			assert(["[[gutenberg:19942|Voltaire's ''Candide'']]", interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #11-2');
+
+			wikitext = '[http://wikisource.org/wiki/Die_gotische_Bibel 拉丁字母寫成的哥德語聖經]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			assert(['oldwikisource', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #12-1');
+			assert(['[[oldwikisource:Die gotische Bibel|拉丁字母寫成的哥德語聖經]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #12-2');
+
+
+			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}"; parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
 			parsed.each('tempLate:NoteTA', function (token) {
 				// console.log(token.conversion_list);
 				assert(["-{A|zh-cn:巴颜喀拉山脉;zh-hk:巴顏喀拉山脈;zh-tw:巴顏喀喇山}-", token.conversion_list.toString()], 'template_functions: remove spaces');
