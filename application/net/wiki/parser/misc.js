@@ -65,6 +65,7 @@ function module_code(library_namespace) {
 		var interwikimap = configurations && configurations.interwikimap;
 
 		var interwiki_data = Object.create(null);
+		var interwiki_name;
 
 		var page_title
 		// e.g., {Array}link token
@@ -83,18 +84,14 @@ function module_code(library_namespace) {
 				// https://www.mediawiki.org/wiki/Manual:$wgExtraInterlanguageLinkPrefixes
 				interwiki_data.interwiki = {
 					prefix : namespace,
-					name : wiki_API.normalize_title(
-					// @see parse_wikilink() @
-					// CeL.application.net.wiki.parser.wikitext
-					matched[2], Object.assign({
-						// preserve_head_colon : true,
-						no_convert_interface_message : true
-					}, options)),
+					name : matched[2],
 					url : map_data.url.replace(
 					// ' ' → '_': 在 URL 上可更簡潔。
 					// TODO: should use `new URI()`
 					/\$1/, encodeURIComponent(matched[2].replace(/ /g, '_')))
 				};
+
+				interwiki_name = matched[2].trim();
 
 				if (namespace === interwikimap.localinterwiki_prefix) {
 					interwiki_data.localinterwiki_prefix = interwikimap.localinterwiki_prefix;
@@ -102,67 +99,117 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (!interwiki_data.interwiki) {
+			return interwiki_data;
+		}
+
+		// --------------------------------------------------------------------
+
+		// Wikimedia projects 維基姐妹計畫
+		// https://www.mediawiki.org/wiki/Manual:Wiki_family
+		// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects#How_to_link
+		var family = interwiki_data.interwiki.prefix;
+		if (family in interwikimap.alias) {
+			family = interwikimap.alias[family][0].prefix;
+		} else if (family in wiki_API.api_URL.alias) {
+			family = wiki_API.api_URL.alias[family];
+		}
+
+		if (interwikimap.family[family]) {
+			// console.trace(family);
+			interwiki_data.wiki_family = {
+				family : interwikimap.family[family].prefix
+			};
+		} else if (family in wiki_API.api_URL.wikimedia) {
+			interwiki_data.wiki_family = {
+				family : family
+			};
+		} else if (family in wiki_API.api_URL.family) {
+			interwiki_data.wiki_family = {
+				family : family
+			};
+		}
+
+		if (interwiki_data.wiki_family) {
+			interwiki_data.wiki_family.prefix = interwiki_data.interwiki.prefix;
+			interwiki_data.wiki_family.name = interwiki_name;
+
+			matched = session
+					&& session.latest_site_configurations
+					&& session.latest_site_configurations.languages.mapper[interwiki_data.interwiki.prefix];
+			if (matched) {
+				interwiki_data.wiki_family.language = matched['*'];
+			}
+		}
+
+		if (interwiki_data.wiki_family && interwiki_name.includes(':')) {
+			matched = wiki_API.namespace(interwiki_name, Object.assign({
+				is_page_title : true
+			}, options));
+			if (matched) {
+				interwiki_data.interwiki.NAMESPACENUMBER = matched;
+				interwiki_data.wiki_family.NAMESPACENUMBER = matched;
+			}
+
+			matched = parse_interwiki_link(wiki_API.parse('[['
+			// 測試 wiki_family.name 是否以 language code 開頭，連結之前須加上 “:”。
+			+ ':' + interwiki_data.wiki_family.name + ']]', options), options);
+			if (matched && matched.interlanguage) {
+				interwiki_data.wiki_family.interlanguage = matched.interlanguage;
+			}
+		}
+
+		// --------------------------------------------------------------------
+
 		var PATTERN_language_startup = session
 		// session === wiki_API?
 		&& session.configurations
 				&& session.configurations.PATTERN_language_startup;
 
-		if (PATTERN_language_startup && interwiki_data.interwiki) {
-			matched = interwiki_data.interwiki.name
-			// e.g., [[w:zh:title]]
-			&& interwiki_data.interwiki.name.match(PATTERN_language_startup)
-			// e.g., [[:zh:w:title]], [[s:w:title]]
-			|| page_title.match(PATTERN_language_startup);
-
-			if (matched && matched[2]) {
-				// https://en.wikipedia.org/wiki/Help:Interlanguage_links#Inline_links_(links_in_the_text_of_the_article)
-				// https://www.mediawiki.org/wiki/Manual:Interwiki#Interwiki_links_to_other_languages
-				interwiki_data.interlanguage = {
-					prefix : matched[1],
-					title : wiki_API.normalize_title(
-					// @see parse_wikilink() @
-					// CeL.application.net.wiki.parser.wikitext
-					matched[2], Object.assign({
-						// preserve_head_colon : true,
-						no_convert_interface_message : true
-					}, options))
-				};
-				// link_title.is_interlanguage_link = true;
-
-			} else {
-				// e.g., [[BBC]], [[ja]]
-			}
+		if (!PATTERN_language_startup) {
+			return interwiki_data;
 		}
 
-		// TODO: [[w:en:title]], [[:en:w:title]]:
-		// Wikimedia projects 維基姐妹計畫
-		// https://www.mediawiki.org/wiki/Manual:Wiki_family
-		// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects#How_to_link
-		if (interwiki_data.interwiki) {
-			var family = interwiki_data.interwiki.prefix;
-			if (family in interwikimap.alias) {
-				family = interwikimap.alias[family][0].prefix;
-			} else if (family in wiki_API.api_URL.alias) {
-				family = wiki_API.api_URL.alias[family];
+		matched = interwiki_name
+		// e.g., [[w:zh:title]]
+		&& interwiki_name.match(PATTERN_language_startup)
+		// e.g., [[:zh:w:title]], [[s:w:title]]
+		|| page_title.match(PATTERN_language_startup);
+
+		if (matched && matched[2]) {
+			// https://en.wikipedia.org/wiki/Help:Interlanguage_links#Inline_links_(links_in_the_text_of_the_article)
+			// https://www.mediawiki.org/wiki/Manual:Interwiki#Interwiki_links_to_other_languages
+			interwiki_data.interlanguage = {
+				prefix : matched[1],
+				title : wiki_API.normalize_title(
+				// @see parse_wikilink() @
+				// CeL.application.net.wiki.parser.wikitext
+				matched[2], Object.assign({
+					// preserve_head_colon : true,
+					no_convert_interface_message : true
+				}, options))
+			};
+			// link_title.is_interlanguage_link = true;
+
+			if (interwiki_data.interlanguage.title.includes(':')) {
+				matched = wiki_API.namespace(
+						interwiki_data.interlanguage.title, Object.assign({
+							is_page_title : true
+						}, options));
+				if (matched) {
+					interwiki_data.interlanguage.NAMESPACENUMBER = matched;
+				}
+
+				matched = parse_interwiki_link(wiki_API.parse('[['
+						+ interwiki_data.interlanguage.title + ']]', options),
+						options);
+				if (matched && matched.wiki_family) {
+					interwiki_data.interlanguage.wiki_family = matched.wiki_family;
+				}
 			}
 
-			if (interwikimap.family[family]) {
-				// console.trace(family);
-				interwiki_data.wiki_family = {
-					family : interwikimap.family[family].prefix,
-					name : interwiki_data.interwiki.name
-				};
-			} else if (family in wiki_API.api_URL.wikimedia) {
-				interwiki_data.wiki_family = {
-					family : family,
-					name : interwiki_data.interwiki.name
-				};
-			} else if (family in wiki_API.api_URL.family) {
-				interwiki_data.wiki_family = {
-					family : family,
-					name : interwiki_data.interwiki.name
-				};
-			}
+		} else {
+			// e.g., [[BBC]], [[ja]]
 		}
 
 		return interwiki_data;
@@ -174,11 +221,15 @@ function module_code(library_namespace) {
 
 		hash = String(hash).replace(/^#/, '');
 
-		// 須注意: 對某些 section 可能 throw！
-		try {
-			hash = decodeURIComponent(hash.replace(/\./g, '%'));
-		} catch (e) {
-			// TODO: handle exception
+		if (/\.[\dA-F]{2}/i.test(hash)) {
+			var code = hash.replace(/\.([\dA-F]{2})/g, '%$1');
+			// assert: /%[\dA-F]{2}/i.test(code)
+			try {
+				// 須注意: 對某些 section 可能 throw！
+				hash = decodeURIComponent(code);
+			} catch (e) {
+				// TODO: handle exception
+			}
 		}
 
 		// hash = hash.replace(/_/g, ' ');
@@ -231,6 +282,7 @@ function module_code(library_namespace) {
 		 * Wikimedia 網域名轉換 <code>
 
 		[[2005年6月]]: [http://mail.wikipedia.org/pipermail/wikitech-l/2005-June/030030.html 维基百科技术邮件列表存档]
+		[[维基媒体基金会]]: [//mail.wikipedia.org/pipermail/wikien-l/2003-March/001887.html Sheldon Rampton's WikiEN-l post]
 
 		</code>
 		 */
@@ -242,6 +294,9 @@ function module_code(library_namespace) {
 					'parse_interwiki_url');
 			return;
 		}
+
+		// 正規化，可去除硬加的 port 之類。
+		url = _url.toString();
 
 		function remove_language_of_url(url) {
 			if (typeof url === 'string') {
@@ -291,7 +346,7 @@ function module_code(library_namespace) {
 		})) {
 			// [, 語言前綴 language_code, title ]
 			prefix = name[1];
-			name = name[2].replace(/[?#].*/g, '');
+			name = name[2];
 			if (remove_language_of_url(interwikimap_data.url) !== remove_language_of_url(session.API_URL)) {
 				prefix = interwikimap_data.prefix + ':' + prefix;
 			}
@@ -305,7 +360,7 @@ function module_code(library_namespace) {
 				interwikimap_data = interwikimap_data_list[0];
 				// [, title ]
 				var matched = url.match(interwikimap_data.url_pattern);
-				name = matched && matched[1].replace(/[?#].*/g, '');
+				name = matched && matched[1];
 				return name;
 			})) {
 				// TODO: 檢查非正規 interwiki links
@@ -325,7 +380,8 @@ function module_code(library_namespace) {
 		} catch (e) {
 			// TODO: handle exception
 		}
-		name = name.replace(/_/g, ' ');
+		// '#' 可能以 '%23' 呈現，在 decodeURIComponent() 之前處理會被遺漏。
+		name = name.replace(/[?#].*/g, '').replace(/_/g, ' ');
 
 		var interwiki_data = {
 			prefix : prefix || interwikimap_data.prefix,

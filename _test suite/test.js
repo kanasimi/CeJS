@@ -2348,7 +2348,10 @@ function test_net() {
 		assert([typeof URL, 'function'], 'CeL.URI() #0');
 		assert(['a.b', (new CeL.URI('http://a.b/?w=4')).hostname], 'CeL.net.URI() #1');
 		assert(['a.b', (new CeL.URI('http://a.b/p?w=4')).hostname], 'CeL.net.URI() #2');
-		assert(["8080", (CeL.URI('http://127.0.0.1:8080')).port], 'CeL.net.URI() #2');
+		assert(["8080", (CeL.URI('http://127.0.0.1:8080')).port], 'CeL.net.URI() #3');
+		assert(['//www.example.com/path/to/file/', CeL.URI('//www.example.com/path/to/file/').toString()], 'CeL.net.URI() #4');
+		assert(['mailto:user@www.example.com', CeL.URI('mailto:user@www.example.com').toString()], 'CeL.net.URI() #5');
+
 		assert(['file:///C:/d/a.htm', (new CeL.URI('a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #1');
 		assert(['file:///C:/a.htm', (new CeL.URI('/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #2');
 		assert(['file:///D:/a.htm', (new CeL.URI('/d:/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #3');
@@ -6335,6 +6338,8 @@ function test_wiki() {
 			_setup_test(test_name);
 			//CeL.run('application.net.wiki.template_functions.zhwiki');
 
+			var options = CeL.wiki.add_session_to_options(zhwiki, { on_page_title: 'Wikipedia:頁面存廢討論/123', allow_promise: false });
+
 			assert(["Template:Tl", zhwiki.normalize_title('t:tl')], 'zhwiki.normalize_title() #1-1');
 			assert(["Wikipedia:小作品", zhwiki.normalize_title('WP:小作品')], 'zhwiki.normalize_title() #1-2');
 
@@ -6342,126 +6347,149 @@ function test_wiki() {
 			assert(["Talk:ß", zhwiki.to_talk_page("Talk:ß")], 'zhwiki.to_talk_page #2');
 
 			var wikitext = '[[ja:東京]]';
-			var parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			var parsed = CeL.wiki.parse(wikitext, options);
 			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-1');
 
-			wikitext = '[[:ja:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:ja:東京]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-2');
 
-			wikitext = '[[ja:]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[ja:]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-3');
 
-			wikitext = '[[:ja:]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:ja:]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-4');
 
-			wikitext = '[[ : en :]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[ : en :]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-5');
 
-			wikitext = '[[ <!----> : en :]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[ <!----> : en :]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #1-6');
 
-			wikitext = '[[ <!---->  en :]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[ <!---->  en :]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([false, !!parsed.is_link], 'zhwiki: .is_link #1-7');
 
-			wikitext = '[[w:ja:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[w:ja:東京]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, !!parsed.is_link], 'zhwiki: .is_link #2-1');
 
-			wikitext = '[[commons:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[commons:東京]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, parsed.is_link], 'zhwiki: .is_link #3-1');
 
-			wikitext = '[[Wikipedia:嵌入包含]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[Wikipedia:嵌入包含]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, parsed.is_link], 'zhwiki: .is_link #4-1');
 
-			wikitext = '[[file:a.jpg]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[file:a.jpg]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([false, parsed.is_link], 'zhwiki: .is_link #5-1');
 
-			wikitext = '[[:file:a.jpg]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:file:a.jpg]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, parsed.is_link], 'zhwiki: .is_link #6-1');
 
-			wikitext = '[[category:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[category:東京]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([false, parsed.is_link], 'zhwiki: .is_link #7-1');
 
-			wikitext = '[[:category:東京]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:category:東京]]'; parsed = CeL.wiki.parse(wikitext, options);
 			assert([true, parsed.is_link], 'zhwiki: .is_link #8-1');
 
 
-			wikitext = '[[w:en:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['w', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interwiki.prefix], 'zhwiki: parse.interwiki_link() #1-1');
-			assert(['en', CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki)).interlanguage.prefix], 'zhwiki: parse.interwiki_link() #1-2');
+			wikitext = '[[w:en:title]]'; parsed = CeL.wiki.parse(wikitext, options);
+			var interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
+			assert(['w', interwiki_data && interwiki_data.interwiki && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #1-1');
+			assert(['en', interwiki_data && interwiki_data.interlanguage && interwiki_data.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #1-2');
 
-			var interwiki_data;
-			wikitext = '[[:en:w:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['en', interwiki_data.interwiki && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #2-1');
-			assert(['en', interwiki_data.interlanguage && interwiki_data.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #2-2');
+			wikitext = '[[:en:w:title]]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
+			assert(['en', interwiki_data && interwiki_data.interwiki && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #2-1');
+			assert(['en', interwiki_data && interwiki_data.interlanguage && interwiki_data.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #2-2');
 
-			wikitext = '[[Commons:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[Commons:title]]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
 			assert(['commons', interwiki_data.wiki_family && interwiki_data.wiki_family.family], 'zhwiki: parse.interwiki_link() #3-1');
 			assert(['Title', interwiki_data.wiki_family && interwiki_data.wiki_family.name], 'zhwiki: parse.interwiki_link() #3-2');
 			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #3-3');
-			wikitext = '[[:Commons:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[:Commons:title]]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
 			assert(['commons', interwiki_data.wiki_family && interwiki_data.wiki_family.family], 'zhwiki: parse.interwiki_link() #4-1');
 			assert(['Title', interwiki_data.wiki_family && interwiki_data.wiki_family.name], 'zhwiki: parse.interwiki_link() #4-2');
 			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #4-3');
 
-			wikitext = '[[s:w:title]]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, CeL.wiki.add_session_to_options(zhwiki));
+			wikitext = '[[s:w:title]]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
 			assert([undefined, interwiki_data.interlanguage], 'zhwiki: parse.interwiki_link() #5-1');
 
+			wikitext = '[[:zh:wikt:Special:Diff/5|diff]]'; parsed = CeL.wiki.parse(wikitext, options);
+			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
+			assert(['zh', interwiki_data.wiki_family.language && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #6-1');
+			assert(['wikt', interwiki_data.interlanguage.wiki_family && interwiki_data.interlanguage.wiki_family.prefix], 'zhwiki: parse.interwiki_link() #6-2');
+			assert([-1, interwiki_data.interlanguage.wiki_family && interwiki_data.interlanguage.wiki_family.NAMESPACENUMBER], 'zhwiki: parse.interwiki_link() #6-3');
 
-			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist?hidemyself=1&hidebots=1&hidecategorization=1&hideWikibase=1&limit=500&days=3&enhanced=1&urlversion=2 監視清單]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #1-1');
-			assert(['Special:Watchlist', interwiki_data && interwiki_data.name], 'zhwiki: parse.interwiki_url() #1-2');
-			assert(['Special:Watchlist', interwiki_data && interwiki_data.link_title], 'zhwiki: parse.interwiki_url() #1-3');
+			wikitext = '[[:en:wikt:Special:BookSources/9|9]]'; parsed = CeL.wiki.parse(wikitext, options);
+			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
+			assert(['en', interwiki_data.wiki_family.language && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #7-1');
+			assert(['wikt', interwiki_data.interlanguage.wiki_family && interwiki_data.interlanguage.wiki_family.prefix], 'zhwiki: parse.interwiki_link() #7-2');
+			assert([-1, interwiki_data.interlanguage.wiki_family && interwiki_data.interlanguage.wiki_family.NAMESPACENUMBER], 'zhwiki: parse.interwiki_link() #7-3');
 
-			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist 監視清單]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #2-1');
-			assert(['[[Special:Watchlist|監視清單]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #2-2');
+			wikitext = '[[s:en:Special:Diff/8|diff]]'; parsed = CeL.wiki.parse(wikitext, options);
+			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
+			assert([undefined, interwiki_data.wiki_family.language], 'zhwiki: parse.interwiki_link() #8-1');
+			assert(['en', interwiki_data.wiki_family.interlanguage && interwiki_data.wiki_family.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #8-2');
+			assert([-1, interwiki_data.wiki_family.interlanguage && interwiki_data.wiki_family.interlanguage.NAMESPACENUMBER], 'zhwiki: parse.interwiki_link() #8-3');
 
-			wikitext = '[https://en.wikipedia.org/wiki/Special:Watchlist watchlist]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['en', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #3-1');
-			assert(['[[:en:Special:Watchlist|watchlist]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #3-2');
+			wikitext = '[[:s:ja:Special:Diff/7|diff]]'; parsed = CeL.wiki.parse(wikitext, options);
+			interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
+			assert([undefined, interwiki_data.wiki_family.language], 'zhwiki: parse.interwiki_link() #9-1');
+			assert(['ja', interwiki_data.wiki_family.interlanguage && interwiki_data.wiki_family.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #9-2');
+			assert([-1, interwiki_data.wiki_family.interlanguage && interwiki_data.wiki_family.interlanguage.NAMESPACENUMBER], 'zhwiki: parse.interwiki_link() #9-3');
 
-			wikitext = '[https://en.wikisource.org/wiki/A]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['s:en', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #4-1');
-			assert(['[[s:en:A|A]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #4-2');
+			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist?hidemyself=1&hidebots=1&hidecategorization=1&hideWikibase=1&limit=500&days=3&enhanced=1&urlversion=2 監視清單]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #1-1');
+			assert(['Special:Watchlist', interwiki_data && interwiki_data.name], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #1-2');
+			assert(['Special:Watchlist', interwiki_data && interwiki_data.link_title], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #1-3');
 
-			wikitext = '[//ja.wikisource.org/wiki/%E6%9E%95%E8%8D%89%E5%AD%90]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['s:ja', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #5-1');
-			assert(['[[s:ja:枕草子|枕草子]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #5-2');
+			wikitext = '[https://zh.wikipedia.org/wiki/Special:Watchlist 監視清單]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #2-1');
+			assert(['[[Special:Watchlist|監視清單]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #2-2');
 
-			wikitext = '[//zh.wikipedia.org/wiki/ABC ABC]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #6-1');
-			assert(['[[ABC]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #6-2');
+			wikitext = '[https://en.wikipedia.org/wiki/Special:Watchlist watchlist]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['en', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #3-1');
+			assert(['[[:en:Special:Watchlist|watchlist]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #3-2');
 
-			wikitext = '[https://ko.wikipedia.org/wiki/%ED%95%9C%EC%84%B1%ED%98%B8 韓成浩]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['ko', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #7-1');
-			assert(['[[:ko:한성호|韓成浩]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #7-2');
-			interwiki_data = CeL.wiki.parse.interwiki_link(CeL.wiki.parse(interwiki_data.wikilink), CeL.wiki.add_session_to_options(zhwiki));
-			assert(['ko|한성호', interwiki_data && interwiki_data.interlanguage && [interwiki_data.interlanguage.prefix, interwiki_data.interlanguage.title].join('|')], 'zhwiki: parse.interwiki_url() #7-2');
+			wikitext = '[https://en.wikisource.org/wiki/A]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['s:en', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #4-1');
+			assert(['[[s:en:A|A]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #4-2');
 
-			wikitext = '[https://ja.wikipedia.org/wiki/%E8%B5%A4%E3%82%81%E3%81%A0%E3%81%8B#.E3.83.86.E3.83.AC.E3.83.93.E3.83.89.E3.83.A9.E3.83.9E 紅鳉魚]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['ja', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #8-1');
-			assert(['[[:ja:赤めだか#テレビドラマ|紅鳉魚]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #8-2');
-			interwiki_data = CeL.wiki.parse.interwiki_link(CeL.wiki.parse(interwiki_data.wikilink), CeL.wiki.add_session_to_options(zhwiki));
-			assert(['ja|赤めだか', interwiki_data && interwiki_data.interlanguage && [interwiki_data.interlanguage.prefix, interwiki_data.interlanguage.title].join('|')], 'zhwiki: parse.interwiki_url() #8-3');
+			wikitext = '[//ja.wikisource.org/wiki/%E6%9E%95%E8%8D%89%E5%AD%90]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['s:ja', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #5-1');
+			assert(['[[s:ja:枕草子|枕草子]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #5-2');
 
-			wikitext = '[//zh.m.wikipedia.org/zh-tw/%E4%BD%A9%E5%8D%93%C2%B7%E8%B2%BB%E5%8D%97%E5%BE%B7%E8%8C%B2 威能帝]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #9-1');
-			assert(['[[佩卓·費南德茲|威能帝]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #9-2');
+			wikitext = '[//zh.wikipedia.org/wiki/ABC ABC]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #6-1');
+			assert(['[[ABC]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #6-2');
 
-			wikitext = '[//www.imdb.com/name/nm1720540/ IMDB]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['imdbname', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #10-1');
-			assert(['[[imdbname:1720540|IMDB]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #10-2');
+			wikitext = '[https://ko.wikipedia.org/wiki/%ED%95%9C%EC%84%B1%ED%98%B8 韓成浩]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['ko', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #7-1');
+			assert(['[[:ko:한성호|韓成浩]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #7-2');
+			interwiki_data = CeL.wiki.parse.interwiki_link(CeL.wiki.parse(interwiki_data.wikilink), options);
+			assert(['ko|한성호', interwiki_data && interwiki_data.interlanguage && [interwiki_data.interlanguage.prefix, interwiki_data.interlanguage.title].join('|')], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #7-2');
 
-			wikitext = "[http://www.gutenberg.org/ebooks/19942 Voltaire's ''Candide'']"; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['gutenberg', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #11-1');
-			assert(["[[gutenberg:19942|Voltaire's ''Candide'']]", interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #11-2');
+			wikitext = '[https://ja.wikipedia.org/wiki/%E8%B5%A4%E3%82%81%E3%81%A0%E3%81%8B#.E3.83.86.E3.83.AC.E3.83.93.E3.83.89.E3.83.A9.E3.83.9E 紅鳉魚]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['ja', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #8-1');
+			assert(['[[:ja:赤めだか#テレビドラマ|紅鳉魚]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #8-2');
+			interwiki_data = CeL.wiki.parse.interwiki_link(CeL.wiki.parse(interwiki_data.wikilink), options);
+			assert(['ja|赤めだか', interwiki_data && interwiki_data.interlanguage && [interwiki_data.interlanguage.prefix, interwiki_data.interlanguage.title].join('|')], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #8-3');
 
-			wikitext = '[http://wikisource.org/wiki/Die_gotische_Bibel 拉丁字母寫成的哥德語聖經]'; parsed = CeL.wiki.parse(wikitext, CeL.wiki.add_session_to_options(zhwiki)); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, CeL.wiki.add_session_to_options(zhwiki));
-			assert(['oldwikisource', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() #12-1');
-			assert(['[[oldwikisource:Die gotische Bibel|拉丁字母寫成的哥德語聖經]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() #12-2');
+			wikitext = '[//zh.m.wikipedia.org/zh-tw/%E4%BD%A9%E5%8D%93%C2%B7%E8%B2%BB%E5%8D%97%E5%BE%B7%E8%8C%B2 威能帝]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #9-1');
+			assert(['[[佩卓·費南德茲|威能帝]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #9-2');
+
+			wikitext = '[//www.imdb.com/name/nm1720540/ IMDB]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['imdbname', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #10-1');
+			assert(['[[imdbname:1720540|IMDB]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #10-2');
+
+			wikitext = "[http://www.gutenberg.org/ebooks/19942 Voltaire's ''Candide'']"; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['gutenberg', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #11-1');
+			assert(["[[gutenberg:19942|Voltaire's ''Candide'']]", interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #11-2');
+
+			wikitext = '[http://wikisource.org/wiki/Die_gotische_Bibel 拉丁字母寫成的哥德語聖經]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			assert(['oldwikisource', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #12-1');
+			assert(['[[oldwikisource:Die gotische Bibel|拉丁字母寫成的哥德語聖經]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #12-2');
 
 
-			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}"; parsed = CeL.wiki.parser(wikitext, CeL.wiki.add_session_to_options(zhwiki)).parse();
+			wikitext = "{{NoteTA|G1=Unit|zh-cn:巴颜喀拉山脉; zh-hk:巴顏喀拉山脈; zh-tw:巴顏喀喇山}}"; parsed = CeL.wiki.parser(wikitext, options).parse();
 			parsed.each('tempLate:NoteTA', function (token) {
 				// console.log(token.conversion_list);
 				assert(["-{A|zh-cn:巴颜喀拉山脉;zh-hk:巴顏喀拉山脈;zh-tw:巴顏喀喇山}-", token.conversion_list.toString()], 'template_functions: remove spaces');
@@ -6470,7 +6498,7 @@ function test_wiki() {
 
 			wikitext = "{{al|A|B}}";
 			// 下面這個測試只能在含入 CeL.application.net.wiki.template_functions.zhwiki 後才能使用。
-			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, CeL.wiki.add_session_to_options(zhwiki)).toString()], 'wiki.section_link + template_functions #1-1');
+			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, options).toString()], 'wiki.section_link + template_functions #1-1');
 			assert(["[[#A、B|A、B]]", CeL.wiki.section_link(wikitext, { site_name: 'zhwiki' }).toString()], 'wiki.section_link + template_functions #1-2');
 
 			assert(['深圳', CeL.wiki.wikitext_to_plain_text('深{{lang|zh|圳}}', { site_name: 'zhwiki' })], 'wikitext_to_plain_text() #1: need use session');

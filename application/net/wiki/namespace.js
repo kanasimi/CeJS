@@ -521,7 +521,7 @@ function module_code(library_namespace) {
 		// console.trace([ wiki_API.API_URL, project ]);
 		var url = new library_namespace.URI(project,
 		//
-		/:\/\//.test(wiki_API.API_URL) && wiki_API.API_URL);
+		/^[\w\d\-]*:?\/\//.test(wiki_API.API_URL) && wiki_API.API_URL);
 		if (url && url.hostname) {
 			// 先測試是否為自訂 API。
 			return /\/api\.php$/.test(project) ? project
@@ -531,6 +531,7 @@ function module_code(library_namespace) {
 			: (url.protocol || api_URL.default_protocol || 'https:') + '//'
 					+ url.hostname + '/w/api.php';
 		}
+		// console.trace(wiki_API.API_URL);
 
 		library_namespace.error('api_URL: Unknown project: [' + project
 				+ ']! Using default API URL.');
@@ -918,7 +919,7 @@ function module_code(library_namespace) {
 				// console.log(interwikimap.mapper[matched[1]]);
 				// API_URL = interwikimap.mapper[matched[1]].url;
 				language = interwikimap.mapper[matched[1]]
-				//
+				// '/wiki/$1': configurations.general.articlepath
 				.url.replace(/\/wiki\/\$1/, '/w/api.php')
 				//
 				.replace(/\$1/, '');
@@ -3120,7 +3121,6 @@ function module_code(library_namespace) {
 			var url_pattern = convert_url_parameters(interwikimap_data.url);
 
 			interwikimap_data.url_pattern = new RegExp(url_pattern);
-
 		}
 
 		var session_language = session.language
@@ -3172,6 +3172,11 @@ function module_code(library_namespace) {
 
 			var url_pattern = url.replace(PATTERN_language_of_wiki_url,
 					'//__language_code__.');
+			// add default port
+			if (false) {
+				url_pattern = url_pattern.replace(/(\/\/[^\/:]+)(\/|$)/,
+						'$1(?:(?:443|80))?$2');
+			}
 			if (variants) {
 				url_pattern = url_pattern.replace('$2/', '__variants__/');
 			}
@@ -3280,7 +3285,13 @@ function module_code(library_namespace) {
 			interwikimap.host_end_of_family_with_language = Object.create(null);
 			for ( var url_pattern in family_with_language) {
 				var interwikimap_data_list = family_with_language[url_pattern];
-				interwikimap_data_list.sort(function(_1, _2) {
+				interwikimap_data_list.sort(function sort_interwikimap_data(_1,
+						_2) {
+					// deprecated 的排後面。 e.g., 'als'
+					if (!_1.deprecated ^ !_2.deprecated) {
+						return !_2.deprecated - !_1.deprecated;
+					}
+
 					if (session_language) {
 						var language_code_1 = _1.url
 								.match(PATTERN_language_of_wiki_url)[1];
@@ -3357,6 +3368,7 @@ function module_code(library_namespace) {
 					interwikimap.host_map[_url.host] = [ interwikimap_data_list ];
 				}
 
+				// 兩個以上才登記 alias。
 				if (interwikimap_data_list.length < 2) {
 					// assert: interwikimap_data_list.length === 1
 					set_url_pattern(interwikimap_data_list[0]);
@@ -3365,14 +3377,31 @@ function module_code(library_namespace) {
 
 				// console.log(interwikimap_data_list);
 				interwikimap_data_list.sort(function(_1, _2) {
-					if (language_code) {
-						// 確保 interwikimap_data_list[0].prefix 與 url 一致。
-						if (_1.prefix === language_code)
-							return -1;
-						if (_2.prefix === language_code)
-							return 1;
+					// deprecated 的排後面。 e.g., 'als'
+					if (!_1.deprecated ^ !_2.deprecated) {
+						return !_2.deprecated - !_1.deprecated;
 					}
 
+					// 有在 interwikimap.family 中的排前面。
+					if ((_1.prefix in interwikimap.family)
+							^ (_2.prefix in interwikimap.family)) {
+						return (_2.prefix in interwikimap.family)
+								- (_1.prefix in interwikimap.family);
+					}
+
+					// 非語言的排前面。
+					if (!_1.language ^ !_2.language) {
+						return !_2.language - !_1.language;
+					}
+
+					if (language_code && ((_1.prefix === language_code)
+					// 語言與 url 中相同的排前面，語言變體排後面。
+					^ (_2.prefix === language_code))) {
+						return (_2.prefix === language_code)
+								- (_1.prefix === language_code);
+					}
+
+					// interwikimap.alias 的第一個盡量選用完整的 prefix。
 					// 長 → 短
 					return _2.prefix.length - _1.prefix.length;
 				});

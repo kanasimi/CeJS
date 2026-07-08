@@ -353,7 +353,7 @@ function module_code(library_namespace) {
 		// console.trace([ matched, base_uri, options ]);
 		uri = base_uri && URI(base_uri) || options.as_URL
 		//
-		|| library_namespace.is_WWW() && {
+		|| matched[2] && library_namespace.is_WWW() && {
 			// protocol包含最後的':',search包含'?',hash包含'#'.
 			// file|telnet|ftp|https
 			protocol : location.protocol === 'file:'
@@ -379,6 +379,11 @@ function module_code(library_namespace) {
 		}
 		// uri.uri = href;
 
+		// https://www.rfc-editor.org/info/rfc3986/#section-3.2
+		// The authority component is preceded by a double slash ("//")
+		if (!uri.authority_prefix)
+			uri.authority_prefix = matched[2] || '';
+
 		/**
 		 * ** filename 可能歸至m[4]!<br />
 		 * 判斷準則:<br />
@@ -391,7 +396,8 @@ function module_code(library_namespace) {
 		path = matched[4] || '';
 		// 可辨識出為 domain 的這個 hostname. e.g., gTLD
 		// https://en.wikipedia.org/wiki/Generic_top-level_domain
-		if (/(?:\w+\.)+(?:com|org|net|info)$/i.test(href)) {
+		if ((uri.authority_prefix || !uri.protocol)
+				&& /(?:\w+\.)+(?:com|org|net|info)$/i.test(href)) {
 			// e.g., URI("www.example.com")
 			path = path || '/';
 			if (uri.protocol === 'file:')
@@ -537,8 +543,9 @@ function module_code(library_namespace) {
 		// https://cdn.dongmanmanhua.cn/16189006774011603165.jpg?x-oss-process=image/quality,q_90
 		.match(/^(([^#?]*\/)?([^\/#?]*))?(\?([^#]*))?(#.*)?$/))) {
 			library_namespace.debug('pathname: [' + matched + ']', 9);
+			uri.pathname = path === '/' && !uri.authority_prefix ? ''
 			// pathname={path}filename
-			uri.pathname = matched[1] || '';
+			: matched[1] || '';
 			if (/%[\dA-F]{2}/i.test(uri.pathname)) {
 				try {
 					// console.trace([ uri.pathname, decodeURI(uri.pathname) ]);
@@ -706,7 +713,8 @@ function module_code(library_namespace) {
 		var uri = this;
 		// console.trace([ uri, uri.search ]);
 		// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
-		var href = (uri.protocol ? uri.protocol + '//' : '')
+		var href = (uri.protocol || '')
+				+ uri.authority_prefix
 				+ (uri.username || uri.password ? uri.username
 						+ (uri.password ? ':' + uri.password : '') + '@' : '')
 				+ uri.host
