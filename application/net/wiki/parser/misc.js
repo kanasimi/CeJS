@@ -56,7 +56,8 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @returns { interwiki: {prefix, name, url}, interlanguage: {prefix, title} }
+	 * @returns { interwiki: {prefix, name, url}, wiki_family: {prefix, family,
+	 *          name}, interlanguage: {prefix, title} }
 	 */
 	function parse_interwiki_link(link_title, options) {
 		var session = wiki_API.session_of_options(options);
@@ -147,8 +148,7 @@ function module_code(library_namespace) {
 				is_page_title : true
 			}, options));
 			if (matched) {
-				interwiki_data.interwiki.NAMESPACENUMBER = matched;
-				interwiki_data.wiki_family.NAMESPACENUMBER = matched;
+				interwiki_data.interwiki.NAMESPACENUMBER = interwiki_data.wiki_family.NAMESPACENUMBER = matched;
 			}
 
 			matched = parse_interwiki_link(wiki_API.parse('[['
@@ -205,6 +205,8 @@ function module_code(library_namespace) {
 						options);
 				if (matched && matched.wiki_family) {
 					interwiki_data.interlanguage.wiki_family = matched.wiki_family;
+					if (matched.wiki_family.NAMESPACENUMBER)
+						interwiki_data.interlanguage.NAMESPACENUMBER = interwiki_data.wiki_family.NAMESPACENUMBER = matched.wiki_family.NAMESPACENUMBER;
 				}
 			}
 
