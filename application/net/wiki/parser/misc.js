@@ -324,10 +324,11 @@ function module_code(library_namespace) {
 			//
 			&& configurations.general.articlepath;
 
-			if (!matched && _url.pathname === '/'
+			if (!matched && /^\/(?:wiki\/?)?$/.test(_url.pathname)
 			// e.g., [http://da.wikipedia.org Danish Wikipedia]
+			// [[乌尔都语维基百科]]: [https://ur.wikipedia.org/wiki/ Urdu Wikipedia]
 			&& _interwikimap_data.url.endsWith(articlepath)) {
-				matched = url.replace(/\/?$/, articlepath)
+				matched = url.replace(/\/?(?:wiki\/?)?$/, articlepath)
 				//
 				.match(_interwikimap_data.url_pattern_of_family_with_language);
 				if (matched) {

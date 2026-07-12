@@ -33,7 +33,10 @@ function module_code(library_namespace) {
 	var check_encoding = function(encoding) {
 		// console.trace(encoding);
 		if (encoding && !/^UTF-?8$/i.test(encoding)) {
-			library_namespace.warn('您必須先載入 CeL.! 這訊息只會顯示一次!');
+			library_namespace.warn(module_name + ': check_encoding: '
+					+ '您必須先載入 ' + library_namespace.Class
+					// 有則用之。 use CeL.data.character.encode_URI()
+					+ '.character! 這訊息只會顯示一次!');
 			check_encoding = null;
 		}
 	},
