@@ -270,15 +270,11 @@ function module_code(library_namespace) {
 		}
 
 		url = String(url);
-		url = library_namespace.HTML_to_Unicode(url);
-
-		if (typeof options.postfix_url === 'function') {
-			url = options.postfix_url(url);
-			if (!url) {
-				return;
-			}
-			// assert: typeof url === 'string'
+		if (url.includes('{{')) {
+			// [[吉胖喵]]: Invalid page title "{{urlencode:胖吉喵}}"
+			url = wiki_API.expand_transclusion(url, options).toString();
 		}
+		url = library_namespace.HTML_to_Unicode(url);
 
 		/**
 		 * Wikimedia 網域名轉換 <code>
@@ -289,6 +285,14 @@ function module_code(library_namespace) {
 		</code>
 		 */
 		url = url.replace('//mail.wikipedia.org/', '//lists.wikimedia.org/');
+
+		if (typeof options.postfix_url === 'function') {
+			url = options.postfix_url(url);
+			if (!url) {
+				return;
+			}
+			// assert: typeof url === 'string'
+		}
 
 		var _url = new library_namespace.URI(url);
 		if (!_url) {

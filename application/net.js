@@ -220,6 +220,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// default port of protocol
 	var port_of_protocol = {
 		// https://tools.ietf.org/html/rfc1928#section-3
 		// The SOCKS service is conventionally located on TCP port 1080.
@@ -238,8 +239,8 @@ function module_code(library_namespace) {
 
 	var PATTERN_URI =
 	// [ all, 1: `protocol:`, 2: '//', 3: host, 4: path ]
-	/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@]*@)?[^\/#?&:.][^\/#?&:]+(?::\d{1,5})?)?(.*)$/i
-	// /^(?:(https?:)\/\/)?(?:([^:@]+)(?::([^@]*))?@)?([^:@]+)(?::(\d{1,5}))?$/
+	/^([\w\-]{2,}:)?(\/\/)?(\/[A-Z]:|(?:[^@\/]*@)?[^\/#?&:.][^\/#?&:]+(?::\d{1,5})?)?(.*)$/i
+	// /^(?:(https?:)\/\/)?(?:([^:@\/]+)(?::([^@\/]*))?@)?([^:@\/]+)(?::(\d{1,5}))?$/
 	;
 
 	/**
@@ -419,7 +420,7 @@ function module_code(library_namespace) {
 		if (href && !/^\/[A-Z]:$/i.test(href)
 				&& (path.charAt(0) === '/' || /[@:]/.test(href))) {
 			// 處理 username:password
-			if (matched = href.match(/^([^@]*)@(.+)$/)) {
+			if (matched = href.match(/^([^@\/]*)@(.+)$/)) {
 				matched.user_passwords = matched[1].match(/^([^:]+)(:(.*))?$/);
 				if (!matched.user_passwords)
 					return;
@@ -433,8 +434,9 @@ function module_code(library_namespace) {
 				uri.username = '';
 			}
 
+			// new URL('http://a. b/') 可正常處理，應允許 \s。
 			// [ all, host, (integer)port ]
-			matched = href.match(/^([^\/#?&\s:]+)(?::(\d{1,5}))?$/);
+			matched = href.match(/^([^\/#?&:]+)(?::(\d{1,5}))?$/);
 			if (!matched) {
 				throw new Error('Invalid host: ' + href);
 			}

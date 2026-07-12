@@ -2351,6 +2351,7 @@ function test_net() {
 		assert(["8080", (CeL.URI('http://127.0.0.1:8080')).port], 'CeL.net.URI() #3');
 		assert(['//www.example.com/path/to/file/', CeL.URI('//www.example.com/path/to/file/').toString()], 'CeL.net.URI() #4');
 		assert(['mailto:user@www.example.com', CeL.URI('mailto:user@www.example.com').toString()], 'CeL.net.URI() #5');
+		assert(["a.b", (CeL.URI('https://a.b/@cc/')).hostname], 'CeL.net.URI() #6');
 
 		assert(['file:///C:/d/a.htm', (new CeL.URI('a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #1');
 		assert(['file:///C:/a.htm', (new CeL.URI('/a.htm', 'file:///c:/d/b.htm')).toString()], 'CeL.net.URI(, base) #2');
@@ -2362,12 +2363,12 @@ function test_net() {
 
 		var href, url, uri;
 		href = 'ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23&a=2&fg2=24#hhh'; url = new URL(href); uri = new CeL.URI(href);
-		assert([href, uri.toString()], 'CeL.net.URI() #3-1');
-		assert([href, url.toString()], 'CeL.net.URI() #3-2');
-		assert([href, (new URL(uri)).toString()], 'CeL.net.URI() #3-3');
-		assert([href, (new CeL.URI(url)).toString()], 'CeL.net.URI() #3-4');
-		assert([uri, CeL.URI(uri)], 'CeL.net.URI() #3-5');
-		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #3-6');
+		assert([href, uri.toString()], 'CeL.net.URI() #1 of ' + href);
+		assert([href, url.toString()], 'CeL.net.URI() #2 of ' + href);
+		assert([href, (new URL(uri)).toString()], 'CeL.net.URI() #3 of ' + href);
+		assert([href, (new CeL.URI(url)).toString()], 'CeL.net.URI() #4 of ' + href);
+		assert([uri, CeL.URI(uri)], 'CeL.net.URI() #5 of ' + href);
+		assert([href, CeL.URI(href).toString()], 'CeL.net.URI() #6 of ' + href);
 
 		assert(['https://www.example.com/pP/qQ', CeL.URI('HTTPS://WWW.EXAMPLE.COM/pP/qQ').toString()], 'CeL.net.URI(upper case)');
 
@@ -2417,8 +2418,8 @@ function test_net() {
 		assert(["碼", uri.search_params.編], 'CeL.net.URI() #5 of ' + href);
 		assert(["$%24%%25%26%3D*", uri.search_params['! %20%%26%3D']], 'CeL.net.URI() #6 of ' + href);
 
-		href = 'http://a.b?道可道=非常道&a=1'; uri = new CeL.URI('http://a.b?道可道=非常道&a=1', null, { charset: 'big5' });
 		CeL.data.character.load("Big5");
+		href = 'http://a.b?道可道=非常道&a=1'; uri = new CeL.URI('http://a.b?道可道=非常道&a=1', null, { charset: 'big5' });
 		assert(["http://a.b?%B9D%A5i%B9D=%ABD%B1%60%B9D&a=1", uri.toString()], 'CeL.net.URI() charset encoding ' + uri.charset);
 
 	});
@@ -4266,9 +4267,9 @@ function test_wiki() {
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #37-1');
 		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #37-2');
 		assert([' {{_|t}} ', parsed[1].toString()], 'wiki.parse.transclusion #37-3');
+		// @see "{{a{{_|text}} | a }}"
 		wikitext = '{{ {{_|text}} | a }}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #38');
-		assert(['plain', parsed.type], 'wiki.parse.transclusion #38-1');
+		assert([wikitext, parsed], 'wiki.parse.transclusion #38');
 		wikitext = '{{text| {{ {{_}} }}  }}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #39');
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #39-1');
@@ -4291,31 +4292,27 @@ function test_wiki() {
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #41-5');
 		assert(['Template:A', parsed.page_title], 'wiki.parse.transclusion #41-6');
 
-		wikitext = '{{text| {{ {{<s> }} }} </s> }}'; parsed = CeL.wiki.parse(wikitext);
+		wikitext = '{{center| {{ {{<s> }} }} </s> }}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #42');
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #42-1');
 		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #42-2');
 		var matched = undefined;
-		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'tag', function (token) { matched = token; });
+		CeL.wiki.parser.parser_prototype.each.call(parsed[1], 'tag', function (token) { matched = token; });
 		assert(['<s> }} }} </s>', matched && matched.toString()], 'wiki.parse.transclusion #42-3');
 
-		// TODO:
-		// "{{text| {{ {{<s>}} </s> }}"
-		// "{{text| {{ {{<s title="{{s}}"> }} }} </s> }}"
-		wikitext = '{{text| {{ {{<s>}} }}</s> }}'; parsed = CeL.wiki.parse(wikitext);
+		wikitext = '{{center| {{ {{<s>}} }}</s> }}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #43');
 		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #43-1');
 		assert(['parameter_unit', parsed[1].type], 'wiki.parse.transclusion #43-2');
 		var matched = undefined;
-		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'tag', function (token) { matched = token; });
+		CeL.wiki.parser.parser_prototype.each.call(parsed[1], 'tag', function (token) { matched = token; });
 		assert(['<s>}} }}</s>', matched && matched.toString()], 'wiki.parse.transclusion #43-3');
 
 		wikitext = '{{a{{_|text}} | a }}'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #44');
-		assert(['plain', parsed.type], 'wiki.parse.transclusion #44-1');
+		assert([wikitext, parsed], 'wiki.parse.transclusion #44');
 		var count = 0;
-		CeL.wiki.parser.parser_prototype.each.call(parsed[1][2], 'transclusion', function (token) { count++; });
-		assert([0, count], 'wiki.parse.transclusion #43-2');
+		CeL.wiki.parser.parser_prototype.each.call(parsed, 'transclusion', function (token) { count++; });
+		assert([0, count], 'wiki.parse.transclusion #44-2');
 
 		wikitext = '{{[[t]]}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #45');
@@ -4346,6 +4343,56 @@ function test_wiki() {
 
 		wikitext = "{{T}}{{T|1=[[A]] ''i''|2='''b''bi'''}} }}"; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #50');
+
+		wikitext = '{{<del>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #51');
+		assert(['tag', parsed[1].type], 'wiki.parse.transclusion #51-1');
+		assert(['<del>}}', parsed[1].toString()], 'wiki.parse.transclusion #51-2');
+
+		wikitext = '{{a<b>b</b>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #52');
+		assert(['tag', parsed[1].type], 'wiki.parse.transclusion #52-1');
+		assert(['<b>b</b>', parsed[1].toString()], 'wiki.parse.transclusion #52-2');
+
+		wikitext = '{{[[t]]}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #53');
+		assert(['link', parsed[1].type], 'wiki.parse.transclusion #53-1');
+		assert(['[[t]]', parsed[1].toString()], 'wiki.parse.transclusion #53-2');
+
+		wikitext = '{{a{{_|text}} | a }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed], 'wiki.parse.transclusion #54');
+
+		// TODO:
+		// @see '{{center| {{ {{<s> }} }} </s> }}'
+		wikitext = '{{center| {{ {{<s>}} </s> }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #55');
+		// assert(['tag', parsed[1].type], 'wiki.parse.transclusion #55-1');
+		// assert(['<s>}} </s>', parsed[1].toString()], 'wiki.parse.transclusion #55-2');
+
+		wikitext = '{{center| {{ {{<s>}} {{</s>}} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #56');
+		// assert(['tag', parsed[1].type], 'wiki.parse.transclusion #56-1');
+		// assert(['<s>}} {{</s>', parsed[1].toString()], 'wiki.parse.transclusion #56-2');
+
+		wikitext = '{{center| {{ {{<s>}}  }}{{</s>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #57');
+		// assert(['tag', parsed[1].type], 'wiki.parse.transclusion #57-1');
+		// assert(['<s>}}  }}{{</s>', parsed[1].toString()], 'wiki.parse.transclusion #57-2');
+
+		wikitext = '{{center| {{ {{<s>}}  }}tt{{</s>}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #58');
+		// assert(['tag', parsed[1].type], 'wiki.parse.transclusion #58-1');
+		// assert(['<s>}}  }}tt{{</s>', parsed[1].toString()], 'wiki.parse.transclusion #58-2');
+
+		wikitext = '{{center| {{_}} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #59');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #59-1');
+		assert([' {{_}} ', parsed.parameters[1].toString()], 'wiki.parse.transclusion #59-2');
+
+		wikitext = '{{center| {{ {{<s title="{{s}}"> }} }} </s> }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse.transclusion #60');
+		assert(['transclusion', parsed.type], 'wiki.parse.transclusion #60-1');
+		assert([' {{ {{<s title="{{s}}"> }} }} </s> ', parsed.parameters[1].toString()], 'wiki.parse.transclusion #60-2');
 
 
 		wikitext = 'a[[link]]b'; parsed = CeL.wiki.parser(wikitext).parse();
@@ -5092,6 +5139,11 @@ function test_wiki() {
 		assert(['link', parsed[1][0].type], 'wiki.parse: nowiki #34-1');
 		assert(['nowiki', parsed[1][0][2][0].tag], 'wiki.parse: nowiki #34-2');
 		assert(['[b]<!-- c -->', CeL.wiki.wikitext_to_plain_text(wikitext)], 'wiki.parse: nowiki #34-3');
+		wikitext = '<ref>[http://a.b <nowiki>[]</nowiki>]</ref>'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: nowiki #35');
+		assert(['external_link', parsed[1][0].type], 'wiki.parse: nowiki #35-1');
+		assert(['tag', parsed[1][0][2].type], 'wiki.parse: nowiki #35-2');
+		assert(['nowiki', parsed[1][0][2].tag], 'wiki.parse: nowiki #35-3');
 
 		// 2024/2/7 18:0:20 Will throw error: Uncaught RangeError: Maximum call stack size exceeded
 		CeL.wiki.parser('<noinclude>\n{{Documentation}}</noinclude>').parse().each(function (token) { });
@@ -5592,6 +5644,7 @@ function test_wiki() {
 		assert(['0', CeL.wiki.expand_transclusion('{{#expr:.}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #198');
 		assert(['1', CeL.wiki.expand_transclusion('{{#expr:.*.+not.}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #199');
 		assert(['123.456', CeL.wiki.expand_transclusion('{{#expr:123.456.789}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #200');
+		// TODO
 		//assert(['-0', CeL.wiki.expand_transclusion('{{#expr: -0}}').toString()], 'wiki.expand_transclusion: {{#expr:}} #201');
 		assert(['', CeL.wiki.expand_transclusion('').toString()], 'wiki.expand_transclusion: {{#expr:}} #20');
 
@@ -6472,7 +6525,7 @@ function test_wiki() {
 			interwiki_data = CeL.wiki.parse.interwiki_link(CeL.wiki.parse(interwiki_data.wikilink), options);
 			assert(['ja|赤めだか', interwiki_data && interwiki_data.interlanguage && [interwiki_data.interlanguage.prefix, interwiki_data.interlanguage.title].join('|')], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #8-3');
 
-			wikitext = '[//zh.m.wikipedia.org/zh-tw/%E4%BD%A9%E5%8D%93%C2%B7%E8%B2%BB%E5%8D%97%E5%BE%B7%E8%8C%B2 威能帝]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
+			wikitext = '[//zh.m.wikipedia.org/zh-tw/{{urlencode:佩卓·費南德茲}} 威能帝]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_url(parsed, options);
 			assert(['zh', interwiki_data && interwiki_data.prefix], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #9-1');
 			assert(['[[佩卓·費南德茲|威能帝]]', interwiki_data && interwiki_data.wikilink && interwiki_data.wikilink.toString()], 'zhwiki: parse.interwiki_url() and parse.interwiki_link() #9-2');
 

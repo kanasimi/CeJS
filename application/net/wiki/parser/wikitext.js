@@ -436,9 +436,15 @@ function module_code(library_namespace) {
 			+ 'pre|nowiki|gallery|indicator|langconvert|timeline|hiero|imagemap|source|syntaxhighlight|poem|quiz|score|templatestyles|templatedata|graph|maplink|mapframe|charinsert|ref|references|inputbox|categorytree|section|math|ce|chem',
 	// <nowiki>不允許內部再解析，但這幾個的內部得再解析。
 	wiki_extensiontags_must_parse_inner = {
+		ref : true,
+
 		onlyinclude : true,
 		includeonly : true,
 		noinclude : true
+	}, invalid_template_name_types = {
+		tag : true,
+		tag_single : true,
+		link : true
 	},
 	/**
 	 * {RegExp}HTML tags 的匹配模式 of <nowiki>。這些 tag 就算中間置入 "<!--" 也不會被當作
@@ -1069,7 +1075,11 @@ function module_code(library_namespace) {
 				var previous_subtoken = element_list.at(-1);
 				if (typeof previous_subtoken === 'string'
 				// e.g., "</s>" only
-				&& (subtoken.type === 'tag_single' && subtoken.slash
+				&& (false && subtoken.type === 'tag_single' && subtoken.slash
+				//
+				&& !(subtoken.tag in {
+					br : true
+				})
 				// Keep new line.
 				|| typeof subtoken === 'string' && !subtoken.startsWith('\n')
 				//
@@ -1085,6 +1095,12 @@ function module_code(library_namespace) {
 		}
 
 		add_subtoken(token.type === 'plain' ? token : [ token ]);
+
+		if (options && options.simplify_plain_element) {
+			while (element_list.length === 1 && element_list.type === 'plain') {
+				element_list = element_list[0];
+			}
+		}
 
 		return element_list;
 	}
@@ -1802,6 +1818,8 @@ function module_code(library_namespace) {
 					if (delimiter) {
 						delimiter = delimiter[0];
 						parameters[0] = parameters[0].slice(delimiter.length);
+						if (!parameters[0])
+							parameters.shift();
 					} else {
 						// delimiter = null;
 					}
@@ -2682,14 +2700,6 @@ function module_code(library_namespace) {
 		// PATTERN_template
 		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
 		function parse_transclusion(all, parameters, offset, original_string) {
-			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('{{'),
-			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
-			// token.parameters[{String}key] = {String}value
-			_parameters = Object.create(null),
-			// token.index_of[{String}key] = {Integer}index
-			parameter_index_of = Object.create(null);
-			var previous = '';
 			if (!(offset >= 0)) {
 				offset = original_string.indexOf(all,
 						PATTERN_for_transclusion.lastIndex);
@@ -2697,9 +2707,22 @@ function module_code(library_namespace) {
 			// assert: offset >= 0
 			var _previous = offset > 0 ? original_string.slice(offset - 1,
 					offset) : '';
-			if (index > 0) {
+			var previous = '';
+			// 自 end_mark 向前回溯。
+			var index = parameters.lastIndexOf('{{');
+			while (index > 0) {
+				var matched = parameters.slice(index + '{{'.length);
+				if (has_invalid_token(matched.replace(/\|[\s\S]*/, ''),
+				//
+				function(token, previous_text) {
+					return token && token.type in invalid_template_name_types;
+				})) {
+					index = parameters.lastIndexOf('{{', index - 1);
+					continue;
+				}
 				previous = _previous = '{{' + parameters.slice(0, index);
-				parameters = parameters.slice(index + '{{'.length);
+				parameters = matched;
+				break;
 			}
 
 			var _following = offset + all.length;
@@ -2773,6 +2796,12 @@ function module_code(library_namespace) {
 
 			// parameter serial starts from 1.
 			var parameter_serial = 1;
+			// 因為可能有 "|length=1.1" 之類的設定，因此不能採用 Array。
+			// token.parameters[{String}key] = {String}value
+			var _parameters = Object.create(null),
+			// token.index_of[{String}key] = {Integer}index
+			parameter_index_of = Object.create(null);
+
 			parameters = parameters.map(function(token, _index) {
 				// trimEnd() of value, will push spaces in token[3].
 				// tail blanks
@@ -2849,14 +2878,14 @@ function module_code(library_namespace) {
 
 				var matched = undefined;
 				// scan for `key=value`
-				token.some(function(t, index) {
-					if (typeof t !== 'string') {
+				token.some(function(_token, index) {
+					if (typeof _token !== 'string') {
 						return;
 						// assert: is_parsed_element(tail)
-						// return is_meaningful_token(t);
+						// return is_meaningful_token(_token);
 					}
 					// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
-					if (t.includes('=')) {
+					if (_token.includes('=')) {
 						// index of "=", index_of_assignment
 						matched = index;
 						return true;
@@ -2878,9 +2907,11 @@ function module_code(library_namespace) {
 					// assert: token === [ '', '', value ].type='parameter_unit'
 
 					var value = token[2];
-					if (Array.isArray(value) && value.some(function(t) {
+					if (Array.isArray(value) && value.some(function(_token) {
 						// e.g., {{t|p<nowiki></nowiki>=v}}
-						return typeof t === 'string' && t.includes('=');
+						return typeof _token === 'string'
+						//
+						&& _token.includes('=');
 					})) {
 						// has_invalid_key_element
 						token.invalid = true;
@@ -2966,12 +2997,12 @@ function module_code(library_namespace) {
 				}
 				// key token must accept '\n'. e.g., "key_ \n _key = value"
 				// assert: token[0].type === 'plain'
-				token.key = token[0].filter(function(t) {
-					if (typeof t === 'string')
+				token.key = token[0].filter(function(_token) {
+					if (typeof _token === 'string')
 						return true;
 					// 去除註解 comments。
 					// e.g., '{{L|p<!-- -->=v}}'
-					if (t.type !== 'comment') {
+					if (_token.type !== 'comment') {
 						matched.has_non_string = true;
 						return true;
 					}
@@ -3080,8 +3111,8 @@ function module_code(library_namespace) {
 				// e.g., '{{text| {{ {{_}} }} }}'
 				|| (parameters[0].type === 'plain' ? parameters[0]
 				//
-				: [ parameters[0] ]).filter(function(t) {
-					return typeof t === 'string';
+				: [ parameters[0] ]).filter(function(_token) {
+					return typeof _token === 'string';
 				}).join('').includes('{{')) {
 					// e.g., '{{ |t}}'
 					// e.g., '{{ <!----> |t}}'
@@ -3168,20 +3199,15 @@ function module_code(library_namespace) {
 
 				} else {
 					if ((parameters[0].type === 'plain' ? parameters[0]
-							: [ parameters[0] ]).some(function(t) {
-						return t.type in {
-							tag : true,
-							tag_single : true,
-							link : true
-						};
+							: [ parameters[0] ]).some(function(token) {
+						return token.type in invalid_template_name_types;
 					})) {
 						// parameters.has_invalid_type
 						// e.g., '{{[[t]]}}'
-						if (!previous)
-							return all;
-						queue.push(all.slice(previous.length));
-						return previous + include_mark + (queue.length - 1)
-								+ end_mark;
+						if (!queue.check_tokens_inside_transclusion)
+							queue.check_tokens_inside_transclusion = [];
+						queue.check_tokens_inside_transclusion.push(all);
+						return all;
 					}
 
 					// 假如 parameter name 有特殊的 token 就不該視為 template。
@@ -4973,6 +4999,43 @@ function module_code(library_namespace) {
 		// [[w:zh:Help:模板]]
 		// 在模板頁面中，用三個大括弧可以讀取參數。
 
+		function check_tokens_inside_transclusion(wikitext) {
+			var check_tokens_inside_transclusion = queue.check_tokens_inside_transclusion;
+			if (!check_tokens_inside_transclusion) {
+				return wikitext;
+			}
+			delete queue.check_tokens_inside_transclusion;
+
+			while (check_tokens_inside_transclusion.length > 0) {
+				var slice = check_tokens_inside_transclusion.shift()
+				var index = wikitext.indexOf(slice);
+				if (index === NOT_FOUND)
+					continue;
+
+				var previous = wikitext.slice(0, index + '{{'.length);
+				var to_parse = wikitext.slice(index + '{{'.length);
+				if (initialized_fix && initialized_fix[1]) {
+					to_parse = to_parse.slice(0, -initialized_fix[1].length);
+				}
+				to_parse = parse_wikitext(to_parse, Object.assign(Object
+						.clone(options), {
+					inside_transclusion : true,
+					no_resolve : true
+				}), queue);
+
+				wikitext = previous + to_parse;
+				if (initialized_fix && initialized_fix[1]) {
+					wikitext += initialized_fix[1];
+				}
+				wikitext = wikitext.replace_till_stable(
+				//
+				PATTERN_for_transclusion, parse_transclusion);
+				break;
+			}
+
+			return wikitext;
+		}
+
 		// 在 <pre> 中這些語法無作用。
 		if (!options.parse_inner_extensiontags
 				|| (options.parse_inner_extensiontags in wiki_extensiontags_must_parse_inner)) {
@@ -4996,8 +5059,10 @@ function module_code(library_namespace) {
 				//
 				PATTERN_for_transclusion, parse_transclusion);
 
-				if (original_wikitext === wikitext)
+				if (original_wikitext === wikitext) {
+					wikitext = check_tokens_inside_transclusion(wikitext);
 					break;
+				}
 			}
 
 			// ----------------------------------------------------
@@ -5308,8 +5373,8 @@ function module_code(library_namespace) {
 				all = text.split('\n');
 				// console.log(all);
 				// 經過改變，需再進一步處理。
-				all = all.map(function(t) {
-					return parse_wikitext(t, options, queue);
+				all = all.map(function(token) {
+					return parse_wikitext(token, options, queue);
 				});
 				// console.log(all);
 				all = _set_wiki_type(all, 'paragraph');
@@ -5337,7 +5402,16 @@ function module_code(library_namespace) {
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue.at(-1);
+		// Error.stackTraceLimit = Infinity;
+		if (initialized_fix && Array.isArray(wikitext)
+				&& wikitext.type === 'plain') {
+			wikitext = flat_plain_element(wikitext, Object.assign(Object
+					.clone(options), {
+				simplify_plain_element : true
+			}));
+		}
 		// console.log(wikitext);
+
 		if (initialized_fix
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
 		// plain: 表示 wikitext 可能是一個頁面。最起碼是以 .join('') 轉換成字串的。
