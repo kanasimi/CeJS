@@ -202,13 +202,22 @@ function module_code(library_namespace) {
 
 		// console.trace(token);
 
-		if (!token.need_subst && options.mode === 'PST' && !(token.name in {
+		if (!token.need_subst && options.mode === 'PST'
+		// 這些魔術字在 PST 模式下，就算超過 options.max_template_depth 也仍然會被解析。
+		&& !(token.name in {
+			'#expr' : true,
+			'#switch' : true,
+			'#time' : true,
+			'LC' : true,
+			'UC' : true,
+
 			'#invoke' : true,
 			SUBST : true,
 			SAFESUBST : true
-		})) {
+		}) && !token.name.startsWith('#if')) {
 			return;
 		}
+
 		token = evaluate_parser_function_token.call(token, options,
 				template_depth_now);
 		if (wiki_API.wiki_error.has_error(token)) {
