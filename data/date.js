@@ -3229,28 +3229,68 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
+	function parse_cmn_date_time(date_time) {
+		var matched, date_time_data = Object.create(null), slice = [];
+		slice.data = date_time_data;
+		var PATTERN = /([^年月日時分秒\/]*)([年月日時分秒\/])/g;
+		var lastIndex = 0;
+		while (matched = PATTERN.exec(date_time)) {
+			lastIndex = PATTERN.lastIndex;
+			matched[1] = matched[1].trim();
+			date_time_data[matched[2]] = matched[1];
+			slice.push(matched[1], matched[2]);
+		}
+		slice.push(date_time.slice(PATTERN.lastIndex));
+		return slice;
+	}
+
 	// parse durations. period 是比較久的時間
 	function parse_period(period) {
-		var matched = period.match(parse_period.PATTERN);
-		if (matched && (!/[日時]/.test(matched[2])
+		// [ all, start, end ]
+		var slice = period.match(parse_period.PATTERN);
+		if (!slice) {
+			return period;
+		}
+
+		// var start_slice = parse_cmn_date_time(slice[1]);
+		// var end_slice = parse_cmn_date_time(slice[2]);
+
+		// TODO: CeL.date.parse_period('7時~8時')
+		if (!slice && (!/[日時]/.test(slice[2])
 		// 預防 "10月22日夜7-8時"
-		|| !/[時分秒\/]/.test(matched[2].match(/^(?:.*?)([年月日時分秒\/])/)[1]))) {
-			(period = matched).shift();
-			if (!period[1].includes('月')
-					&& (matched = period[0].match(/[^年月]+月/))) {
-				period[1] = matched[0] + period[1];
+		|| !/[時分秒\/]/.test(slice[2].match(/^(?:.*?)([年月日時分秒\/])/)[1]))) {
+			var matched;
+			if (slice[2].includes('月')) {
+				if (!slice[1].includes('月'))
+					return period;
+			} else if (matched = slice[1].match(/[^年月]+月/)) {
+				// 2年3月4日~5日: 5日 → 2年3月5日
+				slice[2] = matched[0] + slice[2];
 			}
-			if (!period[1].includes('年')
-					&& (matched = period[0].match(/[^年]+年/))) {
-				period[1] = matched[0] + period[1];
+
+			if (slice[2].includes('年')) {
+				// e.g., CeL.date.parse_period('唐肅宗至德1年7月1日')
+				if (!slice[1].includes('年'))
+					return period;
+			} else if (matched = slice[1].match(/[^年]+年/)) {
+				// 2年3月~4月: 4月 → 2年4月
+				slice[2] = matched[0] + slice[2];
+			} else if (!/[^年月日時分秒\/]+([年月日時分秒\/])/.test(slice[1])) {
+				// CeL.date.parse_period('唐肅宗至德1年7月1日')
+				return period;
 			}
-		} else if (library_namespace.is_debug(2)) {
+
+			period = [ slice[1], slice[2] ];
+
+		} else if (library_namespace.is_debug(3)) {
 			library_namespace.warn('parse_period: Cannot parse period ['
 					+ period + ']');
 		}
+
 		return period;
 	}
 
+	// [ all, start, end ]
 	// '1/1/1-2/1/1' → [, '1/1/1', '2/1/1' ]
 	// 'Neo-Babylonian/Nabopolassar' → null
 	// "[^a-z]": 避免類似 "Neo-Babylonian" 被當作 period。

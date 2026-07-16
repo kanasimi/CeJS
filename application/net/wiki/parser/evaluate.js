@@ -265,8 +265,13 @@ function module_code(library_namespace) {
 		var promise = for_each_subelement.call(parsed, 'magic_word_function',
 		//
 		function(token) {
-			return evaluate_magic_word_function(token, options,
+			token = evaluate_magic_word_function(token, options,
 					template_depth_now);
+			if (false && typeof token === 'string') {
+				token = wiki_API.parse(token, options);
+			}
+
+			return token;
 		}, {
 			modify : true
 		});
@@ -563,8 +568,8 @@ function module_code(library_namespace) {
 			template_depth_now) {
 		options = library_namespace.setup_options(options);
 
-		template_depth_now = Math.max(template_depth_now || 0,
-				get_template_depth_now_of_token(token) || 0);
+		template_depth_now = get_template_depth_now_of_token(token,
+				template_depth_now) || 0;
 
 		while (token && token.type === 'transclusion') {
 			if (typeof token.expand !== 'function') {
@@ -674,7 +679,9 @@ function module_code(library_namespace) {
 	}
 
 	// @inner
-	function get_template_depth_now_of_token(token) {
+	function get_template_depth_now_of_token(token, template_depth_now
+	// , max_template_depth
+	) {
 		if (false) {
 			// method 1
 			token = wiki_API.parse.token_is_children_of(token,
@@ -685,12 +692,23 @@ function module_code(library_namespace) {
 		}
 
 		// --------------------------------------
+
+		if (false && template_depth_now >= max_template_depth) {
+			return true;
+		}
+
 		while (token) {
-			var template_depth_now = token.template_depth_now;
-			if (template_depth_now >= 0)
-				return template_depth_now;
+			var template_depth_now_of_token = token.template_depth_now;
+			// (undefined >= 0) === false
+			if (template_depth_now_of_token >= 0) {
+				return Math.max(template_depth_now_of_token,
+						template_depth_now || 0);
+			}
 			token = token.parent;
 		}
+
+		if (template_depth_now >= 0)
+			return template_depth_now;
 	}
 
 	/**
@@ -784,8 +802,10 @@ function module_code(library_namespace) {
 							set_shell(expanded_token), options);
 
 			if (!eligible) {
-				if (Array.isArray(token))
-					token.template_depth_now = template_depth_now;
+				if (Array.isArray(token)) {
+					token.template_depth_now = get_template_depth_now_of_token(
+							token, template_depth_now);
+				}
 				return token;
 			}
 
@@ -881,7 +901,8 @@ function module_code(library_namespace) {
 					|| DEFAULT_MAX_TEMPLATE_DEPTH;
 			if (!token.need_subst
 					// ↑ subst 無視 max_template_depth，都會展開。
-					&& (template_depth_now >= max_template_depth || get_template_depth_now_of_token(token) >= max_template_depth)
+					&& get_template_depth_now_of_token(token,
+							template_depth_now) >= max_template_depth
 					&& (!options.ignore_template_depth_limit || options
 							.ignore_template_depth_limit(token))) {
 				library_namespace.debug('已達最大層數 ' + max_template_depth
@@ -1501,6 +1522,9 @@ function module_code(library_namespace) {
 		var token = this, allow_promise = session && options
 				&& options.allow_promise;
 
+		template_depth_now = get_template_depth_now_of_token(token,
+				template_depth_now) || 0;
+
 		function NYI(reason) {
 			// delete token.expand;
 			token.not_evaluated = reason || true;
@@ -2104,7 +2128,7 @@ function module_code(library_namespace) {
 			if (library_namespace.is_thenable(key)) {
 				return NYI();
 			}
-			var default_value = '', default_value_candidate;
+			var default_value = '', default_value_candidate, promise = [];
 			for (var index = 2, found; index < token.length; index++) {
 				// var parameter = get_parameter_String(index);
 				var parameter = token[index];
@@ -2115,34 +2139,49 @@ function module_code(library_namespace) {
 						parameter.key = value_to_String(parameter.key, true,
 								true);
 					}
-					parameter.value = value_to_String(parameter.value, true);
-					if (library_namespace.is_thenable(parameter.key)
-							|| library_namespace.is_thenable(parameter.value)) {
-						return NYI();
+					var value = value_to_String(parameter.value, true);
+					if (library_namespace.is_thenable(value)
+					// e.g., {{{{{|safesubst:}}}#switch: {{{1}}}|...}}
+					// @ [[Template:台北捷運色彩]]
+					&& options.mode === 'PST') {
+						value = parameter.value;
 					}
-					if (found || key === parameter.key)
-						return parameter.value;
-					if (parameter.key === '#default')
-						default_value = parameter.value;
+					if (found || key === parameter.key) {
+						if (library_namespace.is_thenable(value)) {
+							return NYI();
+						}
+						return wiki_API.trim_token(value);
+					}
+					if (parameter.key === '#default') {
+						default_value = value;
+					}
+					// 盡可能拖延 .is_thenable() 的判斷，假如能找得到就不管是否有解析不了的 token。
+					if (library_namespace.is_thenable(parameter.key)) {
+						promise.push(parameter.key);
+					}
 				} else {
 					// assert: 'value'
 					default_value_candidate = index;
 					parameter = get_parameter_String(index, true);
-					if (library_namespace.is_thenable(parameter)) {
-						return NYI();
-					}
 					if (key === parameter) {
 						found = true;
+					}
+					if (library_namespace.is_thenable(parameter)) {
+						promise.push(parameter);
 					}
 				}
 			}
 
-			return wiki_API.trim_token(
-			//
-			typeof default_value_candidate === 'number'
-			//
-			? get_parameter_String(default_value_candidate, true)
-					: default_value);
+			// 沒有相符的 key。在有 promise 的情況下，這邊解析出的結果可能有誤。
+			if (typeof default_value_candidate === 'number') {
+				default_value = get_parameter_String(default_value_candidate,
+						true);
+			}
+			if (promise.length > 0
+					|| library_namespace.is_thenable(default_value)) {
+				return NYI();
+			}
+			return wiki_API.trim_token(default_value);
 
 			// ----------------------------------------------------------------
 

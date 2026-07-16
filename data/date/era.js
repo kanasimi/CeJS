@@ -941,7 +941,7 @@ function module_code(library_namespace) {
 		format = object.精 === '年' ? standard_year_format : standard_time_format;
 		name.push(' (', (is_Date(start) ? start : new Date(start))
 				.format(format),
-		// @see CeL.date.parse_period.PATTERN
+		// @see CeL.date.parse_period.PATTERN @ function parse_duration()
 		// [\-–~－—─～〜﹣至]
 		'~', new Date(object.end
 		// 向前一天以取得最後一日。
@@ -4483,8 +4483,9 @@ function module_code(library_namespace) {
 		// [ matched, parser, 起, 訖1, 訖2 ]
 		/^\s*(?:([^:]+):)?\s*([^–~－—─～〜﹣至:]*)(?:[–~－—─～〜﹣至]\s*(.*)|(\+\d+))\s*$/
 		// @see CeL.date.parse_period.PATTERN
-		)))
+		))) {
 			date = [ tmp[2], tmp[3] || tmp[4], tmp[1] ];
+		}
 
 		if (Array.isArray(date) && date.length > 0) {
 			if (!date[2]) {
@@ -4494,15 +4495,16 @@ function module_code(library_namespace) {
 				if (typeof tmp === 'string' && (tmp = tmp
 				// @see CeL.date.parse_period.PATTERN
 				// Must include PERIOD_DASH
-				.match(/^\s*(?:([^:]+):)?\s*([^–~－—─～〜﹣至:]*)/)))
+				.match(/^\s*(?:([^:]+):)?\s*([^–~－—─～〜﹣至:]*)/))) {
 					date = [ tmp[2], date[1], tmp[1] ];
+				}
 			}
 
 			if (/^\d{1,2}\/\d{1,2}$/.test(date[1])
 			//
-			&& (tmp = date[0].match(/^(\d+\/)\d{1,2}\/\d{1,2}$/)))
-				// 補上與起始時間相同年分。
+			&& (tmp = date[0].match(/^(\d+\/)\d{1,2}\/\d{1,2}$/))) {// 補上與起始時間相同年分。
 				date[1] = tmp[1] + date[1];
+			}
 
 			return date;
 		}

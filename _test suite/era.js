@@ -2100,8 +2100,11 @@ function translate_era(era) {
 	era = era.trim();
 
 	var output, date;
-	if (('era_graph' in select_panels) && CeL.parse_period.PATTERN.test(era))
+	if (('era_graph' in select_panels)
+	// CeL.date.parse_period('唐肅宗至德1年7月1日')
+	&& Array.isArray(CeL.parse_period(era))) {
 		return add_tag(era);
+	}
 
 	if (translate_era.draw_recent_era)
 		add_tag(era);
