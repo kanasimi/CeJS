@@ -1103,10 +1103,6 @@ function module_code(library_namespace) {
 		return to_KiB(bytes, type, true);
 	}
 
-	// old alias: CeL.show_KiB(), CeL.show_KB()
-	_.to_KiB = to_KiB;
-	_.to_KB = to_KB;
-
 	// TODO: accept '300K' as 300 KiB
 
 	// 設定 lazy evaluation。
@@ -1282,10 +1278,6 @@ function module_code(library_namespace) {
 		}
 		return i === length ? text : text.slice(0, i);
 	}
-
-	_.bytes_of_char_code = bytes_of_UTF8_char_code;
-	_.byte_count = byte_count_of_UTF8;
-	_.cut_by_bytes = cut_UTF8_by_bytes;
 
 	// ---------------------------------------------------------------------//
 	// for bencode & torrent file data.
@@ -1535,10 +1527,6 @@ function module_code(library_namespace) {
 		return data;
 	}
 
-	_.list_to_Object = list_to_Object;
-	_.parse_bencode = parse_bencode;
-	_.parse_torrent = parse_torrent;
-
 	// ---------------------------------------------------------------------//
 
 	function is_natural(value) {
@@ -1711,7 +1699,59 @@ function module_code(library_namespace) {
 		invalid_value : true
 	};
 
-	_.import_options = import_options;
+	// ---------------------------------------------------------------------//
+
+	/**
+	 * 預先處理篩選器。
+	 * 
+	 * @param {String}filter
+	 *            篩選器原型。
+	 * @returns {RegExp}篩選器。
+	 * 
+	 * @example<code>
+
+	// need only {RegExp}
+	filter = CeL.preprocessing_filter(filter);
+	if (!CeL.is_RegExp(filter)) return;
+
+	postfix = CeL.preprocessing_filter(postfix);
+	if (!CeL.is_RegExp(postfix) || !postfix.replace) return;
+
+	</code>
+	 */
+	function preprocessing_filter(filter) {
+		if (typeof filter === 'string') {
+			var _filter,
+			// 反向篩選
+			reverse_filtering;
+			if (filter.charAt(0) === '!') {
+				reverse_filtering = true;
+				_filter = filter.slice(1);
+			} else {
+				_filter = filter;
+			}
+
+			// CeL.data.native.PATTERN_RegExp_replacement
+			if (library_namespace.PATTERN_RegExp_replacement.test(_filter)) {
+				filter = _filter.to_RegExp({
+					allow_replacement : true
+				});
+				if (reverse_filtering) {
+					filter.reverse_filtering = true;
+				}
+
+				// CeL.PATTERN_RegExp
+			} else if (library_namespace.PATTERN_RegExp.test(_filter)) {
+				filter = _filter.to_RegExp();
+				if (reverse_filtering) {
+					filter.reverse_filtering = true;
+				}
+			}
+
+		}
+
+		return filter;
+	}
 
 	/**
 	 * validity value
@@ -1730,15 +1770,20 @@ function module_code(library_namespace) {
 	function fit_filter(filter, value) {
 		// if (filter === true) return true;
 		if (typeof filter === 'boolean' || filter === null
-				|| typeof filter === 'undefined')
+				|| typeof filter === 'undefined') {
 			return filter;
+		}
 
 		// 驗證 pattern
-		if (library_namespace.is_RegExp(filter))
-			return filter.test(value);
+		if (library_namespace.is_RegExp(filter)) {
+			// 可利用 CeL.preprocessing_filter(filter)
+			value = filter.test(value);
+			return filter.reverse_filtering ? !value : value;
+		}
 
-		if (typeof filter === 'function')
+		if (typeof filter === 'function') {
 			return filter(value);
+		}
 
 		if (typeof filter === 'string') {
 			return filter === value;
@@ -1747,18 +1792,40 @@ function module_code(library_namespace) {
 		}
 
 		// e.g., ['A','B','C']
-		if (Array.isArray(filter))
+		if (Array.isArray(filter)) {
 			return filter.includes(value);
+		}
 
-		if (false && library_namespace.is_Object(filter))
+		if (false && library_namespace.is_Object(filter)) {
 			return value in filter;
+		}
 
 		throw new TypeError('Invalid filter');
 	}
 
-	_.fit_filter = fit_filter;
+	// ------------------------------------------------------------------------
 
-	// ---------------------------------------------------------------------//
+	// export 導出.
+
+	// @static CeL.data.*
+	Object.assign(_, {
+		// old alias: CeL.show_KiB(), CeL.show_KB()
+		to_KiB : to_KiB,
+		to_KB : to_KB,
+
+		bytes_of_char_code : bytes_of_UTF8_char_code,
+		byte_count : byte_count_of_UTF8,
+		cut_by_bytes : cut_UTF8_by_bytes,
+
+		list_to_Object : list_to_Object,
+		parse_bencode : parse_bencode,
+		parse_torrent : parse_torrent,
+
+		import_options : import_options,
+
+		preprocessing_filter : preprocessing_filter,
+		fit_filter : fit_filter
+	});
 
 	return (_// JSDT:_module_
 	);

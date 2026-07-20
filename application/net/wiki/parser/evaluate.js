@@ -890,7 +890,8 @@ function module_code(library_namespace) {
 			// @see PATTERN_page_name @ CeL.application.net.wiki.namespace
 			if (is_invalid_page_title(page_title)) {
 				library_namespace.warn('expand_transclusion: '
-						+ 'Cannot expand ' + token);
+						+ 'Invalid page title ' + JSON.stringify(page_title)
+						+ ', cannot expand ' + token);
 				// Error.stackTraceLimit = Infinity;
 				// console.trace(token);
 				// Error.stackTraceLimit = 10;

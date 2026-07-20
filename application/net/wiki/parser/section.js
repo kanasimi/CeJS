@@ -581,6 +581,9 @@ function module_code(library_namespace) {
 			options = Object.clone(options) || Object.create(null);
 			options.use_element_placeholder = true;
 		}
+		// @see function parse_section_title()
+		delete options.inside_transclusion;
+		delete options.target_array;
 
 		// console.trace(wiki_API.parse(section_title, null, []));
 		// TODO: "==''==text==''==\n"

@@ -3156,7 +3156,6 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// export 導出.
-	// @static
 
 	// @instance 實例相關函數。
 	Object.assign(wiki_API.prototype, {
@@ -3164,7 +3163,7 @@ function module_code(library_namespace) {
 		setup_layout_element_to_insert : setup_layout_element_to_insert
 	});
 
-	// CeL.wiki.*
+	// @static CeL.wiki.*
 	Object.assign(wiki_API, {
 		KEY_page_data : typeof Symbol === 'function' ? Symbol('page data')
 				: 'page data',

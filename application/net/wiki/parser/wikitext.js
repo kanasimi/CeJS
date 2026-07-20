@@ -2745,7 +2745,7 @@ function module_code(library_namespace) {
 			parameters = parse_wikitext(parameters, Object.assign(Object
 					.clone(options), {
 				// inside_transclusion: 尚未切分 "|"
-				inside_transclusion : true,
+				inside_transclusion : all,
 				no_resolve : true
 			}), queue);
 
@@ -2815,7 +2815,7 @@ function module_code(library_namespace) {
 					token = parse_wikitext(token, Object.assign(Object
 							.clone(options), {
 						// 不處理 pre /\n +/。
-						inside_transclusion : true
+						inside_transclusion : all
 					}), queue);
 					// console.log(token);
 					if (tail_spaces) {
@@ -2869,7 +2869,7 @@ function module_code(library_namespace) {
 						return;
 					subtoken = parse_wikitext(subtoken, Object.assign(Object
 							.clone(options), {
-						inside_transclusion : true
+						inside_transclusion : all
 					}), queue);
 					token[index] = subtoken;
 				});
@@ -4637,11 +4637,7 @@ function module_code(library_namespace) {
 			// 因此不直接傳入 parsed，而是 .toString() 另外再傳一次。
 			parameters.link = wiki_API.section_link(parameters.toString(),
 			// options: pass session. for options.language
-			options.target_array
-			// 重新造一個 options 以避免污染。
-			? Object.assign(Object.clone(options), {
-				target_array : null
-			}) : options);
+			options);
 			/** {String}section title in wikitext */
 			parameters.title = parameters.link.id;
 
@@ -5019,7 +5015,7 @@ function module_code(library_namespace) {
 				}
 				to_parse = parse_wikitext(to_parse, Object.assign(Object
 						.clone(options), {
-					inside_transclusion : true,
+					inside_transclusion : wikitext,
 					no_resolve : true
 				}), queue);
 
