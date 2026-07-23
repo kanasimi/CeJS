@@ -566,7 +566,7 @@ function module_code(library_namespace) {
 	 *      https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
 	 */
 	function section_link(section_title, options) {
-		if (typeof options === 'string') {
+		if (options && typeof options === 'string') {
 			options = {
 				page_title : options
 			};
@@ -578,12 +578,13 @@ function module_code(library_namespace) {
 		} else {
 			// 不使用 library_namespace.new_options()，確保造出新的 options，避免汙染。
 			// e.g., `CeL.wiki.wikitext_to_plain_text('==t ==\n[[Category:c]]')`
-			options = Object.clone(options) || Object.create(null);
-			options.use_element_placeholder = true;
+			options = options ? Object.clone(options) : Object.create(null);
+			// @see function parse_section_title()
+			delete options.inside_transclusion;
+			delete options.target_array;
 		}
-		// @see function parse_section_title()
-		delete options.inside_transclusion;
-		delete options.target_array;
+
+		options.use_element_placeholder = true;
 
 		// console.trace(wiki_API.parse(section_title, null, []));
 		// TODO: "==''==text==''==\n"
