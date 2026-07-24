@@ -150,6 +150,7 @@
 	"panel_label__summary": "Resümmee",
 	"file": "Fichier",
 	"files": "Fichieren",
+	"cannot-parse-$1": "%1 kann net geparst ginn",
 	"function": "Funktioun",
 	"number": "Zuel",
 	"«$1»": "«%1»:&#32;",
