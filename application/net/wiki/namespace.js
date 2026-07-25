@@ -88,12 +88,13 @@ function module_code(library_namespace) {
 		&& session.language;
 	}
 
-	// https://meta.wikimedia.org/wiki/Help:Page_name#Special_characters
+	// https://www.mediawiki.org/wiki/Manual:Page_naming#Special_characters
 	// https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	// @see $wgLegalTitleChars
+	// for search: {}\[\]\|<>\t\n
 	var PATTERN_invalid_page_name_characters = /[{}\[\]\|<>\t\n#�]/,
 	// https://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_(technical_restrictions)#Forbidden_characters
-	PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\t\n#�])+)/,
+	PATTERN_page_name = /((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\t\n#�]){1,512})/,
 	/**
 	 * {RegExp}wikilink內部連結的匹配模式v2 [ all_link, page_and_anchor, page_name,
 	 * anchor / section_title, pipe_separator, displayed_text ]
@@ -102,8 +103,11 @@ function module_code(library_namespace) {
 	 * 經測試 anchor 亦不可包含[\n\[\]{}]，但 display text 表達文字可以包含 [\n]
 	 * 
 	 * @see PATTERN_link
+	 * @see https://www.mediawiki.org/wiki/Manual%3APage_title_size_limitations
+	 *      特殊頁（Special pages） 因為需要攜帶額外參數，其標題上限是 512 bytes。
+	 *      命名空間名稱上限：NS_MAX_CHARACTERS = 100 個字元（characters）。
 	 */
-	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\t\n#�])+)(#(?:-{[^\[\]{}\t\n\|]+}-|[^\[\]{}\t\n\|]+)?)?|#[^\[\]{}\t\n\|]*)(?:(\||{{\s*!\s*}})((?:\]?[^\[\]])*\[(?:\]?[^\]])*\]|[\s\S]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(((?:&#(?:\d{1,8}|x[\da-fA-F]{1,8});|[^{}\[\]\|<>\t\n#�]){1,512})(#(?:-{[^\[\]{}\t\n\|]+}-|[^\[\]{}\t\n\|]+)?)?|#[^\[\]{}\t\n\|]*)(?:(\||{{\s*!\s*}})((?:\]?[^\[\]])*\[(?:\]?[^\]])*\]|[\s\S]+?))?\]\]/,
 	//
 	PATTERN_wikilink_global = new RegExp(PATTERN_wikilink.source, 'g');
 
@@ -147,7 +151,7 @@ function module_code(library_namespace) {
 	 */
 	PATTERN_URL_WITH_PROTOCOL_GLOBAL
 	// 警告: PATTERN_external_link_global 會用到 '):)'
-	= /(^|[^a-z\d_])(((?:https?|ssh|telnet|ftps?|sftp|gopher|ircs?|news|nntp|worldwind|svn|git|mms):?\/\/|(?:mailto|urn):)((?:\[[a-f\d:]+\]|[^\s\|<>\]\/])[^\s\|<>\]]*))/ig;
+	= /(^|[^a-z\d_])(((?:https?|ssh|telnet|ftps?|sftp|gopher|ircs?|news|nntp|worldwind|svn|git|mms):?\/\/|(?:mailto|urn):)((?:\[[a-f\d:]+\]|[^\s\|<>\]\/])[^\s\|<>\]]{0,4096}))/ig;
 	var PATTERN_IPv6_prefix = /^\[[a-f\d:]+\]/i;
 
 	/**
@@ -1102,6 +1106,7 @@ function module_code(library_namespace) {
 			}
 
 			var project = session && session.latest_site_configurations
+					&& session.latest_site_configurations.general
 					&& session.latest_site_configurations.general.wikiid;
 			if (project) {
 				site.wikiid = project;
@@ -3028,6 +3033,7 @@ function module_code(library_namespace) {
 	function adapt_site_configurations(session, configurations) {
 		// console.trace(configurations);
 		var site_configurations = session.configurations;
+		/** {Object}最新的任務設定。設定頁面所獲得之手動設定。 */
 		session.latest_site_configurations = configurations;
 		if (site_configurations === wiki_API.prototype.configurations) {
 			session.configurations = site_configurations
@@ -3043,6 +3049,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		/** {Object}一般性設定。 general settings. */
 		var general = configurations.general;
 		// Using `session.latest_site_configurations.general.variants`
 		// to test if langconversion is configured in the site.
@@ -3127,7 +3134,7 @@ function module_code(library_namespace) {
 		// e.g., wikidata
 		|| 'en';
 		var family_with_language = Object.create(null);
-		var wiki_index_url_tail = (configurations.general.script || '/w/index.php')
+		var wiki_index_url_tail = (general && general.script || '/w/index.php')
 				+ '?$1';
 		function check_family_with_language(interwikimap_data) {
 			var url = interwikimap_data.url;
@@ -3164,11 +3171,11 @@ function module_code(library_namespace) {
 
 			var variants = interwikimap_data.extract_url_data
 			//
-			=== extract_data_from_variant_url && '('
+			=== extract_data_from_variant_url && '(' + (general
 			//
-			+ configurations.general.variants.map(function(variant) {
+			&& general.variants && general.variants.map(function(variant) {
 				return variant.code;
-			}).join('|') + ')';
+			}).join('|')) + ')';
 
 			var url_pattern = url.replace(PATTERN_language_of_wiki_url,
 					'//__language_code__.');
@@ -3255,8 +3262,7 @@ function module_code(library_namespace) {
 					check_family_with_language(interwikimap_data);
 				}
 
-				var articlepath = configurations.general.articlepath
-						|| '/wiki/$1';
+				var articlepath = general && general.articlepath || '/wiki/$1';
 				if (!url.endsWith(articlepath)) {
 					return;
 				}
@@ -3268,12 +3274,11 @@ function module_code(library_namespace) {
 				_interwikimap_data.extract_url_data = extract_wiki_title_from_search;
 				register_family_with_language(_interwikimap_data);
 
-				if (!Array.isArray(configurations.general.variants)
-						|| configurations.general.variants.length === 0) {
+				if (!general || !Array.isArray(general.variants)
+						|| general.variants.length === 0) {
 					return;
 				}
-				var variantarticlepath = configurations.general.variantarticlepath
-						|| '/$2/$1';
+				var variantarticlepath = general.variantarticlepath || '/$2/$1';
 				_interwikimap_data = Object.clone(interwikimap_data);
 				_interwikimap_data.url = url.replace(articlepath,
 						variantarticlepath);
@@ -3671,7 +3676,10 @@ function module_code(library_namespace) {
 					}
 				})) {
 					library_namespace.warn('adapt_task_configurations: '
-							+ 'General configurations are not set.');
+					// No general configurations
+					+ 'No general settings have been configured. '
+							+ 'Automatically set it to an empty object.');
+					configurations.general = Object.create(null);
 				}
 			}
 

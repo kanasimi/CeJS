@@ -50,7 +50,8 @@ function module_code(library_namespace) {
 
 	// CeL.wiki.HTML_to_wikitext(HTML)
 	// Please use CeL.wiki.wikitext_to_plain_text() instead!
-	// TODO: 應該 parse HTML。
+	// TODO: regex 無法正確解析 HTML，可被繞過導致 XSS。應該替換為安全的 HTML 解析器。
+	// TODO: use HTML_to_Unicode()
 	// @see [[Module:Plain text]],
 	// https://www.mediawiki.org/w/api.php?action=help&modules=flow-parsoid-utils
 	// https://www.mediawiki.org/w/api.php?action=help&modules=parse
@@ -71,7 +72,15 @@ function module_code(library_namespace) {
 		//
 		function(all, attributes, innerHTML) {
 			var href = attributes.match(/href="([^"]+)"/);
-			return '[' + (href ? href[1] : '#') + ' ' + innerHTML + ']';
+			var external_link
+			//
+			= '[' + (href ? href[1] : '#') + ' ' + innerHTML + ']';
+			external_link = wiki_API.parse(external_link, options);
+			if (external_link && external_link.type === 'external_link') {
+				// incase javascript:, data:, vbscript: 等危險 scheme
+				return external_link.toString();
+			}
+			return all;
 		})
 		//
 		.replace(/\s*<br(?:[^\w<>][^<>]*)?>[\r\n]*/ig, '\n').replace(
@@ -83,9 +92,29 @@ function module_code(library_namespace) {
 		.replace(/\r?\n/g, '\n').replace(/\n{3,}/g, '\n\n');
 	}
 
-	// decode page title / section title
-	// @see [[mw:Manual:PAGENAMEE encoding#Encodings compared]]
+	/**
+	 * decode page title / section title
+	 * 
+	 * @param {String}title
+	 *            頁面標題。
+	 * @param {String}original_title
+	 *            原始頁面標題。
+	 * @returns {String}decoded page title / section title
+	 * 
+	 * @see [[mw:Manual:PAGENAMEE encoding#Encodings compared]]
+	 * @see https://www.mediawiki.org/wiki/Manual%3APage_title_size_limitations
+	 *      特殊頁（Special pages） 因為需要攜帶額外參數，其標題上限是 512 bytes。
+	 *      命名空間名稱上限：NS_MAX_CHARACTERS = 100 個字元（characters）。
+	 */
 	function decode_title(title, original_title) {
+		if (typeof title !== 'string'
+				|| title.length > 512 * /* '%00'.length */3
+		// TODO: 拒絕控制字元
+		// || PATTERN_invalid_page_name_characters.test(title)
+		) {
+			return original_title;
+		}
+
 		if (!/%[\dA-F]{2}/i.test(title)) {
 			return original_title;
 		}
@@ -372,6 +401,8 @@ function module_code(library_namespace) {
 	 * 
 	 * 2016/2/23: 經測試，若為結尾 /$/ 不會 parse 成 external link。<br />
 	 * 2016/2/23: "[ http...]" 中間有空白不會被判別成 external link。
+	 * 
+	 * TODO: ReDoS 測試和輸入長度限制
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -3358,6 +3389,7 @@ function module_code(library_namespace) {
 		// 而不是像以前那樣的 <pages from="" to="" section="1">。
 		// 請改用 <pages from="" to="" section=1> or <pages section=1>。
 
+		// TODO: ReDoS 測試和輸入長度限制
 		// [ all attributes, name, value, unquoted value, text without "=" ]
 		var PATTERN_tag_attribute = /\s*(\w+)(?:=|{{\s*=\s*(?:\|[\s\S]*?)?}})("[^"]*"?|'[^']*'?|([^\s"'{}\|]*))|\s*([^\s"'{}\|]*)/g;
 
