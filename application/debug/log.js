@@ -1818,6 +1818,8 @@ function finish(name_space) {
 		 * 
 		 * @returns {Integer}有錯誤發生的數量。
 		 * 
+		 * @see https://nodejs.org/api/test.html#describe-and-it-aliases
+		 * 
 		 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
 		 */
 		function log_front_end_test(test_group_name, conditions, options) {

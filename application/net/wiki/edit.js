@@ -657,6 +657,10 @@ function module_code(library_namespace) {
 				} else if (data.error.code === 'missingtitle') {
 					// "The page you specified doesn't exist."
 					// console.log(options);
+
+					// options.nocreate: 頁面不存在時不創建頁面，屬預期中的情況。
+					library_namespace.debug('Skip the non-existent page '
+							+ CeL.wiki.title_link_of(page_title) + '.', 1);
 				}
 				/**
 				 * <del>遇到過長/超過限度的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />

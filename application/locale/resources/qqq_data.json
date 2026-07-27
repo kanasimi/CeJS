@@ -14,7 +14,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L440}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L733}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4450}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L440}}\n: {{GitHub|kanasimi/CeJS/blob/master/_build/build.nodejs.js#L733}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4453}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"untranslated-message-count": {
@@ -197,7 +197,7 @@
 		"scope": "data.date.era: system",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L191}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4098}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4194}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4283}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4419}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L191}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4101}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4197}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4286}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4422}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"common-era": {
@@ -223,7 +223,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1961}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L268}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5416}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2904}}\n: {{GitHub|kanasimi/wikibot/blob/master/wikitech/era_note.js#L37}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1961}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L268}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5419}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L2904}}\n: {{GitHub|kanasimi/wikibot/blob/master/wikitech/era_note.js#L37}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"unpin": {
@@ -412,7 +412,7 @@
 		"scope": "data.date.era: 設定/資料圖層",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1639}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3026}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5299}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1639}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3029}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5302}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"navigation": {
@@ -439,7 +439,7 @@
 		"scope": "data.date.era: 輸出格式+可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1777}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1910}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1994}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2157}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2458}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2473}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3475}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8078}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1777}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1910}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1994}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2160}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2461}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2476}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3478}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8080}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"example": {
@@ -476,7 +476,7 @@
 		"scope": "data.date.era: note_botton_layer",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1851}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2364}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1851}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2367}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"configuration": {
@@ -540,7 +540,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1918}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3342}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L1918}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3345}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"france": {
@@ -549,7 +549,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2124}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2455}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4684}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2127}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2455}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L4684}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"great-britain": {
@@ -558,7 +558,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2126}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2480}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2129}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2480}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"spain": {
@@ -567,7 +567,7 @@
 		"scope": "data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2128}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2453}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2131}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2453}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"calendar-used": {
@@ -576,7 +576,7 @@
 		"scope": "data.date.era: 文字式年曆注解",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2198}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2201}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"data-source": {
@@ -585,7 +585,7 @@
 		"scope": "data.date.era: 文字式年曆注解",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2210}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2213}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"personal-name": {
@@ -595,7 +595,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2219}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2222}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2222}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2225}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"courtesy-name": {
@@ -604,7 +604,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2228}}\n: {{GitHub|kanasimi/Chinese_converter/blob/master/_test%20suite/wiki%20pages/%E5%BC%B5%E9%A8%AB.zh-cn.html}}\n: {{GitHub|kanasimi/Chinese_converter/blob/master/_test%20suite/wiki%20pages/%E5%BC%B5%E9%A8%AB.zh-tw.html}}\n: {{GitHub|kanasimi/Chinese_converter/blob/master/_test%20suite/wiki%20pages/backup/%E5%BC%B5%E9%A8%AB.zh-cn.html}}\n: {{GitHub|kanasimi/Chinese_converter/blob/master/_test%20suite/wiki%20pages/backup/%E5%BC%B5%E9%A8%AB.zh-tw.html}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2231}}\n: {{GitHub|kanasimi/Chinese_converter/blob/master/_test%20suite/wiki%20pages/%E5%BC%B5%E9%A8%AB.zh-cn.html}}\n: {{GitHub|kanasimi/Chinese_converter/blob/master/_test%20suite/wiki%20pages/%E5%BC%B5%E9%A8%AB.zh-tw.html}}\n: {{GitHub|kanasimi/Chinese_converter/blob/master/_test%20suite/wiki%20pages/backup/%E5%BC%B5%E9%A8%AB.zh-cn.html}}\n: {{GitHub|kanasimi/Chinese_converter/blob/master/_test%20suite/wiki%20pages/backup/%E5%BC%B5%E9%A8%AB.zh-tw.html}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/Chinese_converter|Chinese_converter|link=hidden}}"
 	},
 	"art-name": {
@@ -613,7 +613,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2230}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2233}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"true-name": {
@@ -623,7 +623,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2232}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2235}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"posthumous-name": {
@@ -632,7 +632,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2247}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2251}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2250}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2254}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"temple-name": {
@@ -641,7 +641,7 @@
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"scope": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L518}}",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2256}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2259}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2259}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2262}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"born": {
@@ -650,7 +650,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2269}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2272}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"died": {
@@ -659,7 +659,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2281}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2284}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"reign": {
@@ -668,7 +668,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2294}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2296}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2297}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2299}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"coronation": {
@@ -678,7 +678,7 @@
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
 		"mark_type": "part_of_string",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2307}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3214}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2310}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L3214}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"predecessor": {
@@ -687,7 +687,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2313}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2318}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2316}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2321}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"successor": {
@@ -696,7 +696,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2329}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2334}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2332}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2337}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"father": {
@@ -705,7 +705,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2345}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2348}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"mother": {
@@ -714,7 +714,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2349}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2352}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"spouse": {
@@ -723,7 +723,7 @@
 		"scope": "data.date.era: 文字式年曆注解/君主資料",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2354}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2357}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"showing-timeline": {
@@ -732,7 +732,7 @@
 		"scope": "data.date.era: 文字式年曆注解",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2367}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2370}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"era-$1": {
@@ -741,7 +741,7 @@
 		"scope": "data.date.era: title",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2540}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2575}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2543}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2578}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"initializing": {
@@ -750,7 +750,7 @@
 		"scope": "system",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2802}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2805}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"6-luminaries": {
@@ -759,7 +759,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2852}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4880}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4440}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2855}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4883}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4440}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"options-of-timeline": {
@@ -768,7 +768,7 @@
 		"scope": "data.date.era: 紀年線圖選項",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2983}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2986}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"markup-current-era": {
@@ -777,7 +777,7 @@
 		"scope": "data.date.era: 紀年線圖選項",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2987}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L2990}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"combine-historical-periods": {
@@ -786,7 +786,7 @@
 		"scope": "data.date.era: 紀年線圖選項",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3005}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3008}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"adapt-lifetime-of-rulers": {
@@ -795,7 +795,7 @@
 		"scope": "data.date.era: 紀年線圖選項",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3014}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3017}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"please-select-the-layer-you-want-to-load": {
@@ -804,7 +804,7 @@
 		"scope": "data.date.era: 設定/資料圖層",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3030}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3033}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"function-(domain_name-arg)-{-return-$1-+-(1-<-arg-1-?-entries-entry-)-+-loaded.-}": {
@@ -813,7 +813,7 @@
 		"scope": "data.date.era: system",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3056}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1025}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1028}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3059}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1025}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1028}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"data-will-be-presented-at-next-calculation": {
@@ -822,7 +822,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3123}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3126}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"aries": {
@@ -831,7 +831,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3159}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3162}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"taurus": {
@@ -840,7 +840,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3161}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3164}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"gemini": {
@@ -849,7 +849,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3163}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3166}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cancer": {
@@ -858,7 +858,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3165}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3168}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"leo": {
@@ -867,7 +867,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3167}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3170}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"virgo": {
@@ -876,7 +876,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3169}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3172}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"libra": {
@@ -885,7 +885,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3171}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3174}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"scorpio": {
@@ -894,7 +894,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3173}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3176}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"sagittarius": {
@@ -903,7 +903,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3175}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3178}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"capricorn": {
@@ -912,7 +912,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3177}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3180}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"aquarius": {
@@ -921,7 +921,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3179}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3182}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"pisces": {
@@ -930,7 +930,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3181}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3184}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"lunar-phase": {
@@ -939,7 +939,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3217}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3660}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4482}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4486}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4608}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3220}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3663}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4485}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4489}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4611}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"week-day": {
@@ -948,7 +948,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3317}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2155}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3320}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2155}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"jdn": {
@@ -957,7 +957,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3339}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3342}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"jd": {
@@ -966,7 +966,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3356}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3359}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"julian-date": {
@@ -975,7 +975,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3359}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3362}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"ordinal-date": {
@@ -984,7 +984,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3389}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3392}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"week-date": {
@@ -993,7 +993,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3403}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3406}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"unix-time": {
@@ -1002,7 +1002,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3416}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3419}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"age-of-ruler": {
@@ -1011,7 +1011,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3451}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3454}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"contemporary-period-(same-country)": {
@@ -1020,7 +1020,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3483}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3486}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"general-precession": {
@@ -1029,7 +1029,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3500}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3503}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"solar-term-(astronomical)": {
@@ -1038,7 +1038,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3526}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4479}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3529}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4482}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"solar-term-ages": {
@@ -1047,7 +1047,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3554}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3557}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"sun-s-apparent-longitude": {
@@ -1056,7 +1056,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3576}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3579}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"moon-longitude": {
@@ -1065,7 +1065,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3595}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3598}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"moon-latitude": {
@@ -1074,7 +1074,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3617}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3698}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3620}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3701}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"apparent-longitude-moon-sun": {
@@ -1083,7 +1083,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3640}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3643}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"new-moon-eve": {
@@ -1092,7 +1092,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3675}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3678}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"new-moon": {
@@ -1101,7 +1101,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3679}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L238}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L3723}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3682}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/astronomy.js#L238}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L3723}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"saros-$1": {
@@ -1110,7 +1110,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3716}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3719}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"sunrise-sunset": {
@@ -1119,7 +1119,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3775}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3778}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"twilight": {
@@ -1128,7 +1128,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3810}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3813}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"moonrise-moonset": {
@@ -1137,7 +1137,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3846}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3849}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"calendar": {
@@ -1146,7 +1146,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3914}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3917}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"gregorian-calendar": {
@@ -1155,7 +1155,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3919}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3922}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"julian-calendar": {
@@ -1164,7 +1164,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3935}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3938}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"revised-julian-calendar": {
@@ -1173,7 +1173,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3952}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3955}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"islamic-calendar": {
@@ -1182,7 +1182,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3968}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3971}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"modern-iranian-calendar": {
@@ -1191,7 +1191,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "arb-Arab",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3987}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L3990}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"bangla-calendar": {
@@ -1200,7 +1200,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4006}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4009}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"hebrew-calendar": {
@@ -1209,7 +1209,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4023}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4026}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"long-count": {
@@ -1218,7 +1218,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4040}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4043}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"maya-tzolk-in": {
@@ -1227,7 +1227,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4058}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4061}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"maya-haab": {
@@ -1236,7 +1236,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4072}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4075}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"dai-calendar": {
@@ -1245,7 +1245,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4084}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4087}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"myanmar-calendar": {
@@ -1253,7 +1253,7 @@
 		"notes": "Label for calendar: [[:en:Burmese calendar]]",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4109}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4112}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"yi-calendar": {
@@ -1262,7 +1262,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4177}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4180}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"hindu-calendar": {
@@ -1270,7 +1270,7 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4207}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4210}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"indian-national-calendar": {
@@ -1278,7 +1278,7 @@
 		"notes": "Label for calendar.",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4251}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4254}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"chinese-buddhist": {
@@ -1287,7 +1287,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4269}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4272}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"nanakshahi-calendar": {
@@ -1295,7 +1295,7 @@
 		"notes": "Label for calendar: [[:en:Nanakshahi calendar]], ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4305}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4308}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"bahá-í-calendar": {
@@ -1304,7 +1304,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "arb-Arab",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4322}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4325}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"coptic-calendar": {
@@ -1313,7 +1313,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4338}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4341}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"ethiopian-calendar": {
@@ -1322,7 +1322,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4355}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4358}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"armenian-calendar": {
@@ -1331,7 +1331,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4370}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4373}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"byzantine-calendar": {
@@ -1340,7 +1340,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4389}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4392}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"egyptian-calendar": {
@@ -1349,7 +1349,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4405}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4408}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"east-asian-calendar": {
@@ -1358,7 +1358,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4472}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4475}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"astronomical-chinese-lunisolar": {
@@ -1367,7 +1367,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4492}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4495}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"calendar-note": {
@@ -1376,7 +1376,7 @@
 		"scope": "data.date.era: 文字式年曆欄位",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4563}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4566}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"month-of-the-sexagenary-cycle": {
@@ -1385,7 +1385,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4580}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4583}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8581}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8586}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4583}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4586}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8583}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8588}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"day-of-the-sexagenary-cycle": {
@@ -1394,7 +1394,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4595}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4599}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2058}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2063}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4598}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4602}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2058}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2063}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"solar-term-(chinese)": {
@@ -1403,7 +1403,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4620}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4623}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"jianchu": {
@@ -1412,7 +1412,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4701}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4704}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"china": {
@@ -1421,7 +1421,7 @@
 		"scope": "data.date.era_data: 國家 country",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4799}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L6157}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L6201}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7132}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L77}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L143}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4802}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L6159}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L6203}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7134}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L77}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era_data.js#L143}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"japanese-month-name": {
@@ -1430,7 +1430,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4863}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4866}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4433}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4866}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4869}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4433}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"7-luminaries": {
@@ -1439,7 +1439,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4894}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4438}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4897}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4438}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"week-day-(japanese)": {
@@ -1448,7 +1448,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4907}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4915}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2159}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4910}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4918}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/locale.js#L2159}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"28-mansions": {
@@ -1457,7 +1457,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4951}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4954}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4443}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4954}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4957}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4443}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"27-mansions": {
@@ -1466,7 +1466,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4967}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4970}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4445}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4970}}\n: {{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L4973}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4445}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"zodiac-sign": {
@@ -1475,7 +1475,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5066}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5069}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"year-naming": {
@@ -1484,7 +1484,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5089}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5092}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"year-of-the-sexagenary-cycle": {
@@ -1493,7 +1493,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5094}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2047}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2050}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2052}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8572}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8574}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5097}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2047}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2050}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date.js#L2052}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8574}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L8576}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"chinese-zodiac": {
@@ -1502,7 +1502,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法",
 		"original_message_language_code": "cmn-Hans-CN",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5107}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4420}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5110}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4420}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"year-numbering": {
@@ -1511,7 +1511,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5130}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5133}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"minguo": {
@@ -1520,7 +1520,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5135}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5138}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"huangdi": {
@@ -1529,7 +1529,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5146}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5149}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"japanese-imperial-year": {
@@ -1538,7 +1538,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "ja-JP",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5165}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5168}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"dangi": {
@@ -1547,7 +1547,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "ko-KR",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5196}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5199}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"thai-buddhist": {
@@ -1556,7 +1556,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5212}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5215}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"ab-urbe-condita": {
@@ -1565,7 +1565,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5248}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5251}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"seleucid-era": {
@@ -1574,7 +1574,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類: 編年法",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5258}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5261}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"before-present": {
@@ -1583,7 +1583,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5268}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5271}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"holocene-calendar": {
@@ -1592,7 +1592,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5277}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5280}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"gregorian-reform": {
@@ -1601,7 +1601,7 @@
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5307}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5310}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"famous-places": {
@@ -1610,7 +1610,7 @@
 		"scope": "data.date.era: 設定/地理座標",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5388}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/era.js#L5391}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"loading-$1$": {
@@ -1625,7 +1625,7 @@
 		"message": "The bot operation is completed %1% in total",
 		"original_message_language_code": "en-US",
 		"notes": "Overall progress. 整體作業進度。用在編輯摘要時通常放在最後面，預防擠掉更重要的內容。; Repositories: {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1064}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4005}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L718}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1099}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L216}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1064}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4005}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L718}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1094}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L209}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"finished": {
@@ -1649,7 +1649,7 @@
 		"notes": "Used as log message at report.",
 		"scope": "application.net.wiki.task",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1154}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4035}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L518}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L1154}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4035}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L511}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-word(s)-in-this-chapter": {
@@ -1680,7 +1680,7 @@
 		"notes": "Label for astronomical calculations",
 		"scope": "data.date.era: 可選用的文字式年曆欄位: 分類",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L2905}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/_test%20suite/test.js#L2915}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"first-quarter": {
@@ -2101,7 +2101,7 @@
 		"scope": "CeL.application.net: parse_search()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: parameters",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L818}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L831}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"set-$1-to-a-non-string-$2": {
@@ -2110,7 +2110,7 @@
 		"scope": "CeL.application.net: parameters_toString()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: key, %2: value",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L1003}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L1016}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"a-total-of-$1-parameters": {
@@ -2119,7 +2119,7 @@
 		"scope": "CeL.application.net: parameters_toString()",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: length of parameters",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L1049}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net.js#L1062}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"error-connect-econnrefused-$1": {
@@ -2657,7 +2657,7 @@
 		"message": "Comma-separator",
 		"original_message_language_code": "en-US",
 		"notes": "Used for separating lists of items. Should the same as <bdi><code>{{int:Comma-separator}}</code></bdi> ([[translatewiki:MediaWiki:Comma-separator]]).\nBe careful to the presence of a trailing space when appropriate for your language (if it is needed, you can input it as <code>&amp;#32;</code> to avoid its trimming when editing this message.\nSee also [[MediaWiki:Comma-separator]], [https://st.unicode.org/cldr-apps/v#/zh/Displaying_Lists/ Displaying Lists]; [[MediaWiki:Word-separator]], [[MediaWiki:Pipe-separator]], [[MediaWiki:And]].",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3166}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5244}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1526}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L169}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1923}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L701}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L713}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3602}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3609}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3616}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L639}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L212}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L455}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L460}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L266}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L3166}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/data.js#L5244}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1530}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L169}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1947}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L701}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L713}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3602}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3609}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L3616}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L636}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L205}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L448}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L453}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L260}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"check-the-emergency-stop-page-$1": {
@@ -2718,7 +2718,7 @@
 		"message": "Failed to edit the page %1: %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link, %2: the error",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L675}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L679}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-changes-to-page-content-$1": {
@@ -2726,7 +2726,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "Nothing to update. The contents are the same. Nothing changed.",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L683}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L687}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"content-is-empty": {
@@ -2734,7 +2734,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L774}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L778}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"content-is-not-settled": {
@@ -2742,7 +2742,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L776}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L780}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"abandon-change": {
@@ -2750,7 +2750,7 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L785}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L789}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-reason-provided": {
@@ -2758,13 +2758,13 @@
 		"notes": "Used as log message.",
 		"scope": "application.net.wiki",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L802}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L806}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-text-between-update-comments-will-be-automatically-overwritten-by-the-bot": {
 		"message": "The text between update comments will be automatically overwritten by the bot.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1736}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1740}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"no-content": {
@@ -2772,14 +2772,14 @@
 		"notes": "沒有頁面內容。; Repositories: {{GitHub|kanasimi/CeJS|CeJS|link=hidden}}",
 		"scope": "work_crawler.js: check_next_chapter()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1866}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L4069}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L4088}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L884}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1497}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/edit.js#L1870}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L4066}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L4085}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L884}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler/ebook.js#L1497}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"get-$1-pages-from-$2": {
 		"message": "Get %1 {{PLURAL:%1|page|pages}} from %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page count, %2: list label",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L926}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L966}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1942}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L2029}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L926}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/list.js#L966}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1966}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L2059}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-results": {
@@ -2800,20 +2800,20 @@
 		"message": "Invalid title: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L354}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1569}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L420}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L425}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L429}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L878}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L1011}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L972}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1061}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1068}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L360}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L1569}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L420}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L425}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L429}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L878}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L1011}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L972}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1061}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L1068}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"get-configurations-from-page-$1": {
 		"message": "Get configurations from page %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3566}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3649}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"load-$2-$1-messages-for-$3": {
 		"message": "Load %2 %1 messages for %3.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: language, %2: message count, %3: wiki project name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3615}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3701}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"continue-key": {
@@ -2821,14 +2821,14 @@
 		"notes": "Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]",
 		"scope": "application.net.wiki.list",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3815}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L3901}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cache-information-about-the-api-modules-of-$1-module-path=$2": {
 		"message": "Cache information about the API modules of %1: module path=%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: site name, %2: path of [https://www.mediawiki.org/w/api.php?action=help&modules=paraminfo paraminfo]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L4448}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/namespace.js#L4534}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"found-$2-query-modules-$1": {
@@ -2883,49 +2883,49 @@
 		"message": "Wikimedia wikis 最多可回溯約 %1。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: time (e.g., \"3 days\")",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2290}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2287}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-period-you-specified-$1-($2)-may-be-too-long": {
 		"message": "您所指定的時間 [%1]（%2）恐怕過長。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "%1, %2: time (e.g., \"5 months\")",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2299}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2296}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"start-monitoring-and-scanning-$2-pages-changed-since-$3-using-$1": {
 		"message": "開始以 %1 監視、掃描 %2 自 %3 起更改的頁面。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: API / SQL, %2: site name, %3: time (e.g., \"3 days ago\")",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2316}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2313}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"start-monitoring-and-scanning-the-recently-changed-pages-of-$2-using-$1": {
 		"message": "開始以 %1 監視、掃描 %2 最近更改的頁面。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: API / SQL, %2: site name",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2318}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2315}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"configuration-page-$1": {
 		"message": "Configuration page: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2330}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2327}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"the-configuration-page-$1-has-been-modified.-re-parse": {
 		"message": "設定頁面 %1 已變更。重新解析……",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2558}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2555}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"wait-$1-to-apply-the-settings": {
 		"message": "等待 %1 以應用設定。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: time. e.g., \"5 min\"",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2574}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L2571}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"wikitext-parser-checking-$1": {
@@ -2933,49 +2933,57 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L4098}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1052}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1114}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3069}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3110}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3122}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L476}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L695}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L891}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L950}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1031}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1196}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1776}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L422}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L140}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L116}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L245}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L284}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260620.convert_interwiki_links.js#L105}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/page.js#L4095}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/20221103.%E5%8D%8F%E5%8A%A9%E5%88%86%E7%A6%BB%7B%7Btl%E5%AD%A6%E5%90%8D%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D%E8%87%AA%7B%7Btl%E9%9D%9E%E4%B8%AD%E6%96%87%E9%87%8D%E5%AE%9A%E5%90%91%7D%7D.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1070}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1132}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3109}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3150}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3162}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L476}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L703}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L909}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L968}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1024}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1189}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1769}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L415}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L134}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L111}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L240}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260422.auto_subst_templates.js#L279}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20260620.convert_interwiki_links.js#L141}}\n: {{GitHub|kanasimi/wikibot/blob/master/task/undo_edit.v2.js#L158}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"there-are-more-than-one-$1-in-$2": {
 		"message": "There are more than one %1 in %2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: layout type, %2: page link",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1889}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser.js#L1892}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"expression-error-unrecognized-word-$1": {
 		"message": "Expression error: Unrecognized word \"%1\".",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr unrecognised word}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1068}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1115}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"expression-error-unrecognized-punctuation-character-$1": {
 		"message": "Expression error: Unrecognized punctuation character \"%1\".",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr unrecognised punctuation}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1073}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1120}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"division-by-zero": {
 		"message": "Division by zero.",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr division by zero}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1120}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1167}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"in-$1-result-is-not-a-number": {
 		"message": "In %1: Result is not a number.",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc expr not a number}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1209}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L1256}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"error-invalid-depth-in-path-$1-(tried-to-access-a-node-above-the-root-node)": {
 		"message": "Error: Invalid depth in path: \"%1\" (tried to access a node above the root node).",
 		"original_message_language_code": "en-US",
 		"notes": "Synchronized with {{msg-mw|Pfunc rel2abs invalid depth}}",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L2273}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/evaluate.js#L2338}}",
+		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
+	},
+	"invalid-url-$1": {
+		"message": "網址無效：%1",
+		"notes": "CeL.application.storage.EPUB: add_chapter()",
+		"scope": "執行時 console 訊息 work_crawler.js: full_URL_of_path()",
+		"original_message_language_code": "cmn-Hant-TW",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/parser/wikitext.js#L1880}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L286}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L727}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1671}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1706}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"it-seems-that-the-token-is-lost": {
@@ -3019,14 +3027,6 @@
 		"message": "嘗試重新取得令牌。",
 		"original_message_language_code": "cmn-Hant-TW",
 		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L190}}",
-		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
-	},
-	"invalid-url-$1": {
-		"message": "網址無效：%1",
-		"notes": "CeL.application.storage.EPUB: add_chapter()",
-		"scope": "執行時 console 訊息 work_crawler.js: full_URL_of_path()",
-		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/query.js#L286}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/net/work_crawler.js#L727}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1671}}\n: {{GitHub|kanasimi/CeJS/blob/master/application/storage/EPUB.js#L1706}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"will-set-$1-automatically": {
@@ -3092,7 +3092,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "%1 個頁面處理完畢。",
 		"parameters": "%1: count of pages",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3744}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1906}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L3744}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1930}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"page-handling-function-error-$1": {
@@ -3190,7 +3190,7 @@
 		"message": "Total %1 {{PLURAL:%1|article|articles}}.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number of articles",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L480}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L502}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2345}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2394}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L480}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20150916.Multiple_issues.v4.js#L502}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2343}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2392}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"number-of-templates": {
@@ -3262,7 +3262,7 @@
 	"archiving-operation": {
 		"message": "Archiving operation",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160323.archive_bot_logs.js#L288}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L283}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160323.archive_bot_logs.js#L288}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L281}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"archive-$1-chars": {
@@ -3304,7 +3304,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: generation date, 報告產生時間",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L462}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L506}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20160517.interlanguage_link_to_wikilinks.js#L462}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20251126.Move_exposed_template_Collapsible_option_to_Navbox_documentation.js#L500}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"cleanup-report-for-interlanguage-link-templates": {
@@ -3439,138 +3439,138 @@
 	"only-inserted-or-modified-templates-section-titles-non-specific-meaning-text": {
 		"message": "Only inserted or modified templates / section titles / non-specific-meaning-text",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L760}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L767}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"pre-existing-text": {
 		"message": "Pre-existing text",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L993}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1000}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"only-inserted-punctuation-symbols": {
 		"message": "Only inserted punctuation / symbols",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1000}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1007}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"skip-the-edit-for-including-wp-trans-transclusion-<code>&lt-$1&gt-<-code>": {
 		"message": "Skip the edit for including [[WP:TRANS|transclusion]] <code>&lt;%1&gt;</code>",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: tag name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1025}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1032}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"maybe-user-$1-edit-text-signed-by-$2-or-$1-help-correcting-the-text": {
 		"message": "Maybe user %1 edit text signed by %2, or %1 help correcting the text",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: user name, %2: user name list",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1130}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1137}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"it-seems-the-user-$1-did-not-signed-with-link": {
 		"message": "It seems the user %1 did not signed with link.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: user name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1155}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1162}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-user-may-have-appended-date-and-signature-but-it-is-not-clear.-still-need-to-append-signature-for-$1-$2": {
 		"message": "The user may have appended date and signature, but it is not clear. Still '''need to append signature for %1 %2'''",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: \"IP user\" or \"user\", %2: user name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1180}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1187}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"need-to-append-signature-for-$1-$2": {
 		"message": "'''Need to append signature for %1 %2'''",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: \"IP user\" or \"user\", %2: user name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1182}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1189}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"ip-user": {
 		"message": "IP user",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1185}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1192}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"user": {
 		"message": "user",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1187}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1194}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"($1-characters-modified)": {
 		"message": "(%1 {{PLURAL:%1|character|characters}} modified)",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: number of characters",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1259}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1266}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"(new-page)": {
 		"message": "(new page)",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1280}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1287}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"pages-that-are-not-linked-to-the-signature-such-as-$1.-thank-you-for-your-participation": {
 		"message": "Pages that are not linked to the signature, such as %1. Thank you for your participation.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page list",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1341}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1348}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-remind-you-to-add-a-link-when-signing-such-as-the-$2-pages-listed-in-the-notification": {
 		"message": "[[%1|Remind you to add a link when signing]], such as the %2 {{PLURAL:%2|page|pages}} listed in the notification.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: log to page, %2: number of pages",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1345}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1352}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"if-you-have-updated-your-past-messages-please-add-a-signature-at-the-end": {
 		"message": "If you have updated your past messages, please add a signature at the end.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1348}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1355}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$3-signing-special-diff-$1-comment-by-$2": {
 		"message": "[[%3|Signing]] [[Special:Diff/%1|comment by %2]].",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: revid, %2: user name, %3: log to page",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1384}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1391}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"this-tool-is-only-for-recording": {
 		"message": "This tool is only for recording.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1388}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1395}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"you-may-re-edit-the-text-whatever-you-want": {
 		"message": "You may re-edit the text whatever you want.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1390}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1397}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"pages-that-may-require-a-signature-such-as-$1.-thank-you-for-your-participation": {
 		"message": "Pages that may require a signature, such as %1. Thank you for your participation.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: page list",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1402}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1409}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-remind-to-sign-such-as-the-$2-pages-listed-in-the-notification": {
 		"message": "[[%1|Remind to sign]], such as the %2 pages listed in the notification.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: log to page, %2: number of pages",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1406}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1413}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"please-remember-to-sign-when-you-leave-messages": {
 		"message": "Please remember to sign when you leave messages",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1417}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1424}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"generate-topic-list-$1-topics": {
@@ -3578,19 +3578,19 @@
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。",
 		"parameters": "%1: topic counts",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170915.topic_list.js#L1607}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170915.topic_list.js#L1603}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-section-counters-and-article-assessment-icons": {
 		"message": "Update section counters and article assessment icons",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L705}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L703}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-list-of-vital-articles": {
 		"message": "Update list of vital articles",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2343}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2361}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2392}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2341}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2359}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20200122.update_vital_articles.js#L2390}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"keep-different-ratings-in-$2": {
@@ -3620,19 +3620,19 @@
 	"$1-pages-modified": {
 		"message": "%1 {{PLURAL:%1|page|pages}} modified",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L516}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L509}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"fixing-broken-anchor": {
 		"message": "Fixing broken anchor",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1147}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1140}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-$1-notifications": {
 		"message": "Remove %1 {{PLURAL:%1|notification|notifications}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1277}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1867}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1270}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1860}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-$1-non-defunct-anchors": {
@@ -3641,7 +3641,7 @@
 		"parameters": "%1: count of anchors",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
 		"fIXME": "https://github.com/kanasimi/CeJS/issues/33",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1279}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1272}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"anchor-$1-links-to-a-specific-web-page-$2": {
@@ -3649,7 +3649,7 @@
 		"original_message_language_code": "en-US",
 		"notes": "As a note phrase in talk pages.",
 		"parameters": "%1: link to a web anchor, %2: link to the target page",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1371}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1623}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1718}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1364}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1616}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1711}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-anchor-($2)-has-been-deleted-by-other-users-before": {
@@ -3657,14 +3657,14 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: revid, %2: anchor name",
 		"notes": "{{tl|Broken anchors}}の内で表示。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1378}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1728}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1371}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1721}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"reminder-of-an-inactive-anchor": {
 		"message": "Reminder of an inactive anchor",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1386}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1395}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1738}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1741}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1379}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1388}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1731}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1734}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"update-links-to-archived-section-$1-$2": {
@@ -3672,35 +3672,35 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: percentage 百分比 e.g., \"42%\"; %2: links being processed 正在處理的連結",
 		"notes": "Use in edit summaries. 用於編輯註解。[[w:ja:Wikipedia:井戸端/subj/議論の過去ログのリンク修正はいかがでしょうか|過去ログリンク修正]]の編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1542}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1535}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"incorrect-capitalization-spaced-section-title": {
 		"message": "Incorrect capitalization/spaced section title",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。 Too different to be considered as the same meaning.",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1584}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1577}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"inconsistency-between-traditional-and-simplified-chinese": {
 		"message": "繁簡不符匹配而失效的網頁錨點",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1587}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1580}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"very-different": {
 		"message": "VERY DIFFERENT",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries to mark edits that need special attention. Too different to be regarded as the same meaning. 用於編輯註解以標註特別需要注意的編輯。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1604}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1597}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"please-help-to-check-this-edit": {
 		"message": "Please help to check this edit.",
 		"original_message_language_code": "en-US",
 		"notes": "Use in edit summaries. 用於編輯註解。應採用不存在的頁面名稱，將用紅色連結顯示以突顯警告效果。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1658}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1651}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1→most-alike-anchor-$2": {
@@ -3708,21 +3708,21 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: original anchor, %2: target anchor",
 		"notes": "Use in edit summaries. 用於編輯註解。編集の要約。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1666}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20201008.fix_anchor.js#L1659}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"append-$1-topics": {
 		"message": "Append %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L294}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L292}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"remove-$1-topics": {
 		"message": "Remove %1 {{PLURAL:%1|topic|topics}}",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: count of topics",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L308}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210429.Auto-archiver.js#L306}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"updating-$1": {
@@ -3730,7 +3730,7 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "e.g., \"Updating Featured articles\", \"秀逸な記事の更新\"",
 		"parameters": "%1: Things to update",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L311}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L308}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"articles-in-$1": {
@@ -3738,50 +3738,50 @@
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: language_name",
 		"notes": "e.g., \"Articles in Chinese\", \"英語版記事\"",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L669}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L671}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L666}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L668}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"count-of-languages": {
 		"message": "語言數",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "Sitelinks 言語版数",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L675}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L672}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"average": {
 		"message": "平均",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L680}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L830}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L677}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L833}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"sum": {
 		"message": "合計",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L690}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L837}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L687}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L840}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"article-list": {
 		"message": "條目一覽",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L708}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L705}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"see-also": {
 		"message": "See also",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L725}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L722}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-label": {
 		"message": "無標籤",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L823}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20210923.update_foreign_featured_contents_list.js#L826}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"synchronizing-common-pages": {
 		"message": "Synchronizing common pages",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L82}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L81}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"synchronizing-$1": {
@@ -3897,21 +3897,21 @@
 		"original_message_language_code": "en-US",
 		"notes": "edit summary on wikidata.",
 		"parameters": "%1, %2: site names",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L588}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20211203.synchronizing_common_pages.js#L589}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-link-redirects-to-section-$1": {
 		"message": "連結重定向到章節：%1",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: link→its redirects",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L380}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L373}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-link-redirects-to-a-page-that-is-not-embedded-in-this-template-$1": {
 		"message": "連結重定向到未嵌入該模板的頁面：%1",
 		"original_message_language_code": "cmn-Hant-TW",
 		"parameters": "%1: link→its redirects",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L388}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20230418.Fix_redirected_wikilinks_of_templates.js#L381}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"debug-level": {
@@ -3919,7 +3919,7 @@
 		"notes": "Used as debugging message.",
 		"scope": "{{GitHub|kanasimi/CeJS/blob/master/application/debug/log.js}}",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/wiki%20loader.js#L304}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/wiki%20loader.js#L320}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$2-the-target-directory-$1-does-not-exist": {
@@ -5889,7 +5889,7 @@
 	"the-number-of-completed-pages-$1-is-not-less-than-total-$2": {
 		"message": "已完成{{PLURAL:%1|頁面}}數量 %1 未小於總量 %2！",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4012}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1092}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/task.js#L4012}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20191129.check_language_conversion.js#L1087}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-pages-have-not-changed": {
@@ -5942,7 +5942,7 @@
 		"message": "Cannot convert Lua pattern to RegExp pattern: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: Lua pattern",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L657}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/net/wiki/template_functions/general_functions.js#L658}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"cannot-detect-work-id-from-url-$1": {
@@ -8512,7 +8512,7 @@
 		"message": "Move %1 to %2 failed: %3",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: move from, %2: move to, %3: error reason",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L663}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1506}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/application/platform/nodejs.js#L663}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1520}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-file-or-directory-exists-$1": {
@@ -9687,7 +9687,7 @@
 		"notes": "%1>3",
 		"scope": "data.date: indicate_date_time()",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3119}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20190101.featured_content_maintainer.js#L1192}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3119}}\n: {{GitHub|kanasimi/wikibot/blob/master/routine/20190101.featured_content_maintainer.js#L1185}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}, {{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"$1-days-later": {
@@ -9718,7 +9718,7 @@
 		"message": "Invalid date: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: date",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3595}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date.js#L3635}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"era-date": {
@@ -9755,7 +9755,7 @@
 		"scope": "data.date.era: input_panel",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4666}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L4668}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"skip-$1-the-$2-is-for-reference-purpose-only": {
@@ -9764,7 +9764,7 @@
 		"scope": "data.date.era",
 		"original_message_language_code": "cmn-Hant-TW",
 		"demo": "[https://kanasimi.github.io/CeJS/_test%20suite/era.htm Era Calendar Converter]",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7258}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7557}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7260}}\n: {{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7559}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"can-t-find-era-or-regnal-year-named-$1": {
@@ -9773,7 +9773,7 @@
 		"notes": "",
 		"scope": "data.date.era: get_dates()",
 		"original_message_language_code": "cmn-Hant-TW",
-		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7444}}",
+		"references": "{{GitHub|kanasimi/CeJS/blob/master/data/date/era.js#L7446}}",
 		"repositories": "{{GitHub|kanasimi/CeJS|CeJS|link=hidden}}"
 	},
 	"ryukyu": {
@@ -10558,21 +10558,21 @@
 		"message": "Not JSON, try eval(): %1",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L855}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L870}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"not-json-you-may-want-to-set-allow_eval=true-$1": {
 		"message": "Not JSON, you may want to set \"allow_eval=true\": %1",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L862}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L877}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"duplicate-task-name-$1!-will-overwrite-old-task-with-new-task-$2→$3": {
 		"message": "Duplicate task name %1! Will overwrite old task with new task: %2→%3",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: task name, %2: old task configuration, %3, new task configuration",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3461}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L918}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L3500}}\n: {{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L936}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-$1-task(s)-from-$2": {
@@ -10580,93 +10580,93 @@
 		"original_message_language_code": "en-US",
 		"notes": "",
 		"parameters": "%1: count of task(s), %2: page link",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L934}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L952}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-requested-robot-task-begins": {
 		"message": "The requested robot task begins.",
 		"original_message_language_code": "en-US",
 		"notes": "Bot作業を着手します。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L984}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1002}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-section-does-not-set-the-task-configuration-$1": {
 		"message": "本章節未設定任務內容: %1",
 		"original_message_language_code": "cmn-Hant-TW",
 		"notes": "This phrase will be used when processing [[w:WP:BOTREQ|robot request tasks]]. 在處理[[w:WP:BOTREQ|機器人請求任務]]時會用上這個句子。",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1003}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1021}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"already-reminded-that-the-operation-is-in-progress-$1": {
 		"message": "Already reminded that the operation is in progress: %1",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1023}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1041}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"add-warning-messages": {
 		"message": "Add warning messages.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1060}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1078}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"no-title-found-for-$1": {
 		"message": "No title found for %1.",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1072}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1090}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"will-not-automatically-notify-the-task-begins": {
 		"message": "Will not automatically notify the task begins!",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1075}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1093}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"the-requested-robot-task-finished": {
 		"message": "The requested robot task finished.",
 		"original_message_language_code": "en-US",
 		"notes": "",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1085}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1103}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"robot-task-completion-notification": {
 		"message": "{{Done}} Please check the results and let me know if there is something wrong, thank you.",
 		"original_message_language_code": "en-US",
 		"notes": "This message should be tuned for use on each Wikipedia edition, with appropriate templates such as {{Tl|Done}} (which shows \"{{Done}}\" on Translatewikinet, with an autotranslated message).\n\nE.g. in Japanese\n: <code><nowiki>{{</nowiki>利用者の投稿記録リンク|Example|50|20100820121030|4<nowiki>}}</nowiki></code>, {{BOTREQ|済}} こちらのリンクからご確認下さい\n: where\n:* <code><nowiki>{{</nowiki>[[wikipedia:ja:Template:利用者の投稿記録リンク|利用者の投稿記録リンク]]|...<nowiki>}}</nowiki></code> on Japanese Wikipedia is an equivalent of <code><nowiki>{{</nowiki>[[wikipedia:en:Template:User contributions|User contributions]]|...<nowiki>}}</nowiki></code> on English Wikipedia.\n:* The {{Tl|BOTREQ|済}} template shows a status icon and the optional custom message for showing the completion status \"済\" (done).",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1101}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1119}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"already-notified-that-the-task-is-finished-$1": {
 		"message": "Already notified that the task is finished: %1",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: section title",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1106}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1124}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"will-not-automatically-notify-the-task-finished": {
 		"message": "Will not automatically notify the task finished!",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1126}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1144}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"automatically-replace-the-display-text-of-links-$1→$2": {
 		"message": "Automatically replace the display text of links: %1→%2",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: replace from, %2: replace to",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1830}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1854}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"get-list-of-$1-from-$2": {
 		"message": "Get list of %1 from %2.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: section title, or string to search. %2: wiki site name",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1915}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1939}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"list-types-$1": {
 		"message": "List types: %1.",
 		"original_message_language_code": "en-US",
 		"parameters": "%1: list types",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1921}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1945}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"namespaces-$1": {
@@ -10674,7 +10674,7 @@
 		"original_message_language_code": "en-US",
 		"parameters": "%1: list_options.namespace",
 		"notes": "{{Identical|Namespace}}",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1926}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/replace/replace_tool.js#L1950}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	},
 	"convert-$1-to-wikilink": {
@@ -10694,7 +10694,7 @@
 	"hi-maybe-you-can-change-the-format-of-your-signature": {
 		"message": "Hi, maybe you can change the format of your signature",
 		"original_message_language_code": "en-US",
-		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1358}}",
+		"references": "{{GitHub|kanasimi/wikibot/blob/master/routine/20170515.signature_check.js#L1365}}",
 		"repositories": "{{GitHub|kanasimi/wikibot|wikibot|link=hidden}}"
 	}
 }
