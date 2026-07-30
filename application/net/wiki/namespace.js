@@ -3232,7 +3232,10 @@ function module_code(library_namespace) {
 			interwikimap.language = Object.create(null);
 			interwikimap.family = Object.create(null);
 			var url_map = Object.create(null);
-			function register_family_with_language(interwikimap_data) {
+			/** 為本函數自行添加的變體 url。 */
+			var KEY_variant_url = Object.create(null);
+			// @inner
+			function register_family_with_language(interwikimap_data, type) {
 				var url = interwikimap_data.url;
 				if (url_map[url]) {
 					url_map[url].push(interwikimap_data);
@@ -3246,7 +3249,13 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				if ('language' in interwikimap_data) {
+				if (type === KEY_variant_url) {
+					// 跳過本函數自行添加的變體 url。
+				} else if ('language' in interwikimap_data) {
+					if (interwikimap.language[interwikimap_data.prefix]) {
+						library_namespace.warn('已登記過 interwikimap.language['
+								+ interwikimap_data.prefix + ']，將以新的取代舊的！');
+					}
 					interwikimap.language[interwikimap_data.prefix]
 					// 跨語言連結的外部連結。
 					= interwikimap_data;
@@ -3254,6 +3263,10 @@ function module_code(library_namespace) {
 						check_family_with_language(interwikimap_data);
 					}
 				} else {
+					if (interwikimap.family[interwikimap_data.prefix]) {
+						library_namespace.warn('已登記過 interwikimap.family['
+								+ interwikimap_data.prefix + ']，將以新的取代舊的！');
+					}
 					interwikimap.family[interwikimap_data.prefix]
 					// Wikimedia projects 維基基金會計畫
 					// （Wikimedia sister projects、維基姊妹計畫、維基姊妹項目、維基媒體姊妹專案
@@ -3263,28 +3276,35 @@ function module_code(library_namespace) {
 				}
 
 				var articlepath = general && general.articlepath || '/wiki/$1';
-				if (!url.endsWith(articlepath)) {
+				if (!url.endsWith(articlepath) || type === KEY_variant_url) {
 					return;
 				}
 
+				// 登記各種變體 url。
+
+				// 登記 index.php?title 格式的 url。
 				var _interwikimap_data = Object.clone(interwikimap_data);
 				_interwikimap_data.url = url.replace(articlepath,
 						wiki_index_url_tail);
 				// return [, 語言前綴 language_code, title ]
 				_interwikimap_data.extract_url_data = extract_wiki_title_from_search;
-				register_family_with_language(_interwikimap_data);
+				register_family_with_language(_interwikimap_data,
+						KEY_variant_url);
 
 				if (!general || !Array.isArray(general.variants)
 						|| general.variants.length === 0) {
 					return;
 				}
+
+				// 登記 /language-variant/title 格式的 url。
 				var variantarticlepath = general.variantarticlepath || '/$2/$1';
 				_interwikimap_data = Object.clone(interwikimap_data);
 				_interwikimap_data.url = url.replace(articlepath,
 						variantarticlepath);
 				// return [, 語言前綴 language_code, title, variant ]
 				_interwikimap_data.extract_url_data = extract_data_from_variant_url;
-				register_family_with_language(_interwikimap_data);
+				register_family_with_language(_interwikimap_data,
+						KEY_variant_url);
 			}
 			interwikimap.forEach(register_family_with_language);
 			interwikimap.host_end_of_family_with_language = Object.create(null);
