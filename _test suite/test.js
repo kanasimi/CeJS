@@ -3506,6 +3506,12 @@ function test_wiki() {
 	all_error_count += CeL.test('wiki: CeL.wiki.parser()', function (assert) {
 		var wikitext, parsed;
 
+		assert(['[[ABC]]', CeL.wiki.simplify_wikilink('[[ABC]]')], 'simplify_wikilink() #1');
+		assert(['[[ABC#DEF]]', CeL.wiki.simplify_wikilink('[[ABC#DEF]]')], 'simplify_wikilink() #1-1');
+		assert(['[[iPhone]]', CeL.wiki.simplify_wikilink('[[iPhone]]')], 'simplify_wikilink() #2');
+		assert(['[[iPhone]]', CeL.wiki.simplify_wikilink('[[IPhone|iPhone]]')], 'simplify_wikilink() #3');
+		assert(['[[IPhone#ABC|iPhone]]', CeL.wiki.simplify_wikilink('[[IPhone#ABC|iPhone]]')], 'simplify_wikilink() #4');
+
 		assert(['森鷗外', CeL.wiki.wikitext_to_plain_text('森&#40407;外')], 'wikitext_to_plain_text() #2');
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span lang="zh">深圳</span>')], 'wikitext_to_plain_text() #3');
 		assert(['深圳', CeL.wiki.wikitext_to_plain_text('<span xml:lang="zh">深圳</span>')], 'wikitext_to_plain_text() #4');

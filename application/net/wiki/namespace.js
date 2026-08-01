@@ -3249,10 +3249,9 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				if (type === KEY_variant_url) {
-					// 跳過本函數自行添加的變體 url。
-				} else if ('language' in interwikimap_data) {
-					if (interwikimap.language[interwikimap_data.prefix]) {
+				if ('language' in interwikimap_data) {
+					if (interwikimap.language[interwikimap_data.prefix]
+							&& type !== KEY_variant_url) {
 						library_namespace.warn('已登記過 interwikimap.language['
 								+ interwikimap_data.prefix + ']，將以新的取代舊的！');
 					}
@@ -3263,7 +3262,8 @@ function module_code(library_namespace) {
 						check_family_with_language(interwikimap_data);
 					}
 				} else {
-					if (interwikimap.family[interwikimap_data.prefix]) {
+					if (interwikimap.family[interwikimap_data.prefix]
+							&& type !== KEY_variant_url) {
 						library_namespace.warn('已登記過 interwikimap.family['
 								+ interwikimap_data.prefix + ']，將以新的取代舊的！');
 					}
@@ -3297,6 +3297,7 @@ function module_code(library_namespace) {
 				}
 
 				// 登記 /language-variant/title 格式的 url。
+				// 這一項必須擺在最後，以應付 `/zh-tw/title`。
 				var variantarticlepath = general.variantarticlepath || '/$2/$1';
 				_interwikimap_data = Object.clone(interwikimap_data);
 				_interwikimap_data.url = url.replace(articlepath,

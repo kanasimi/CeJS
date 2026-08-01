@@ -150,6 +150,34 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	/**
+	 * 簡化 wikilink。
+	 * 
+	 * @param {String}wikilink
+	 *            wiki 連結 `[[...]]`。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 */
+	function simplify_wikilink(wikilink, options) {
+		options = library_namespace.setup_options(options);
+
+		var token = wiki_API.parse(wikilink, options);
+		if (!token || token.type !== 'link') {
+			return wikilink;
+		}
+
+		if (token[2] && !token[1]
+		// [[IPhone|iPhone]] → [[iPhone]]
+		&& wiki_API.normalize_title(token[0].toString(), options)
+		//
+		=== wiki_API.normalize_title(token[2].toString(), options)) {
+			token[0] = token[2];
+			token.pop();
+		}
+
+		return token.toString();
+	}
+
+	/**
 	 * excluding the disambiguator, and remove diacritics of page_title
 	 * 
 	 * @param {String}page_title
@@ -5680,6 +5708,8 @@ function module_code(library_namespace) {
 		DEFINITION_LIST : DEFINITION_LIST,
 
 		// PATTERN_language_conversion : PATTERN_language_conversion,
+
+		simplify_wikilink : simplify_wikilink,
 
 		page_title_to_sort_key : page_title_to_sort_key,
 

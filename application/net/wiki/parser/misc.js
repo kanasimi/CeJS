@@ -482,20 +482,13 @@ function module_code(library_namespace) {
 					'}}' ].join('');
 
 		} else {
-			interwiki_data.wikilink = [ '[[', interwiki_data.link_title
+			interwiki_data.wikilink = wiki_API.simplify_wikilink('[['
+			//
+			+ interwiki_data.link_title
 			//
 			+ url_hash_to_section_title(_url.hash, {
 				to_hash : true
-			}) ];
-
-			if (interwiki_data.wikilink[1] !== interwiki_data.display_text
-					.toString()) {
-				interwiki_data.wikilink.push('|', interwiki_data.display_text);
-			}
-
-			interwiki_data.wikilink.push(']]');
-
-			interwiki_data.wikilink = interwiki_data.wikilink.join('');
+			}) + '|' + interwiki_data.display_text + ']]', options);
 		}
 
 		return interwiki_data;
