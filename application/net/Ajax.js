@@ -3495,38 +3495,40 @@ function module_code(library_namespace) {
 	 */
 	function fetch__get_URL(input, init) {
 		function executor(resolve, reject) {
-			function callback(XMLHttp, error) {
-				if (error) {
-					reject(error);
-					return;
-				}
-
-				// console.trace(XMLHttp);
-				var result_Object = {
-					// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
-					// https://nodejs.org/api/http.html#http_http_get_options_callback
-					headers : XMLHttp.headers,
-					ok : (XMLHttp.status / 100 | 0) === 2,
-					redirected : XMLHttp.redirected,
+			// 模擬 {Response}
+			function simulate_Response(XMLHttp, error) {
+				var _status = XMLHttp.status / 100 | 0;
+				// new Response()
+				// https://developer.mozilla.org/zh-TW/docs/Web/API/Response
+				// https://nodejs.org/api/http.html#http_http_get_options_callback
+				var response = {
 					status : XMLHttp.status,
 					statusText : XMLHttp.statusText,
+
+					// TODO: new Headers()
+					headers : XMLHttp.headers,
+
+					// methods of
+					// https://developer.mozilla.org/en-US/docs/Web/API/Body
+					// https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+					body : ReadableStream.from(XMLHttp.buffer),
+					bodyUsed : false,
+					ok : _status === 2 || _status === 3,
+					redirected : XMLHttp.redirected,
 
 					// 重定向後獲得的最終 URL。
 					url : XMLHttp.responseURL,
 					useFinalURL : true,
 
-					_buffer : XMLHttp.buffer,
+					// type 會被覆蓋。
+					media_type : XMLHttp.type,
+					type : 'basic',
 
-					// TODO: body : new ReadableStream()
-					// methods of
-					// https://developer.mozilla.org/en-US/docs/Web/API/Body
-					// https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+					_buffer : XMLHttp.buffer,
 
 					text : function text() {
 						try {
-							return Promise.resolve(
-							//
-							this._buffer.toString());
+							return Promise.resolve(this._buffer.toString());
 						} catch (e) {
 							return Promise.reject(e);
 						}
@@ -3539,14 +3541,42 @@ function module_code(library_namespace) {
 					}
 				};
 
-				resolve(result_Object);
+				if (error)
+					response._error = error;
+
+				return response;
+			}
+
+			function callback(XMLHttp, error) {
+				// console.trace(XMLHttp);
+				var response = simulate_Response(XMLHttp, error);
+
+				if (false && error) {
+					reject(response);
+					return;
+				}
+
+				resolve(response);
+			}
+
+			function onfail(error) {
+				var result_Object = this;
+				if (!result_Object) {
+					if (typeof error === 'string')
+						error = new Error(error);
+					reject(error);
+					return;
+				}
+
+				var response = simulate_Response(result_Object, error);
+				resolve(response);
 			}
 
 			// CloudFlare 必須設定好 headers 才能才會才允許回傳資料。
 			// get_URL() 可自動設定 headers。
 			_.get_URL(input, callback, null, init && init.body, Object.assign({
 				// headers : { 'User-Agent' : '' },
-				onfail : reject,
+				onfail : onfail,
 				agent : true
 			}, init));
 		}

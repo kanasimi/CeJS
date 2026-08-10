@@ -665,7 +665,7 @@ function module_code(library_namespace) {
 				if (false) {
 					// set User-Agent to use:
 					// Special:ApiFeatureUsage&wpagent=CeJS script_name
-					wiki.get_URL_options.headers['User-Agent'] = library_namespace.get_URL.default_user_agent;
+					session.get_URL_options.headers['User-Agent'] = library_namespace.get_URL.default_user_agent;
 				}
 			} else {
 				// e.g., 老舊版本 or using XMLHttpRequest @ WWW

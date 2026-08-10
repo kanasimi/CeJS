@@ -54,7 +54,7 @@ function module_code(library_namespace) {
 	var API_URL_of_options = wiki_API.API_URL_of_options, is_api_and_title = wiki_API.is_api_and_title, is_wikidata_site_nomenclature = wiki_API.is_wikidata_site_nomenclature, language_code_to_site_alias = wiki_API.language_code_to_site_alias;
 	var KEY_CORRESPOND_PAGE = wiki_API.KEY_CORRESPOND_PAGE, PATTERN_PROJECT_CODE_i = wiki_API.PATTERN_PROJECT_CODE_i;
 
-	var get_URL = this.r('get_URL');
+	// var get_URL = this.r('get_URL');
 
 	var
 	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
@@ -6522,7 +6522,7 @@ function module_code(library_namespace) {
 			// &callback=
 		}
 
-		get_URL(action.join(''), function(data) {
+		library_namespace.get_URL(action.join(''), function(data) {
 			var items;
 			// error handling
 			try {
@@ -6690,7 +6690,15 @@ function module_code(library_namespace) {
 		: wikidata_SPARQL_host) + wikidata_SPARQL_API_URL_postfix, '?query=',
 				encodeURIComponent(query), '&format=json' ];
 
-		get_URL(action.join(''), function(data, error) {
+		action = action.join('');
+
+		// including .error_retry
+		var get_URL_options = Object.assign(
+		// 防止汙染，重新造一個 options。不汙染 wiki_API_query.get_URL_options
+		Object.clone(library_namespace.wiki.query.get_URL_options),
+				options.get_URL_options);
+
+		function XMLHttp_handler(data, error) {
 			if (error) {
 				callback(undefined, error);
 				return;
@@ -6741,7 +6749,10 @@ function module_code(library_namespace) {
 			// .get_item_ids()
 			items.id_list = get_SPARQL_id_list;
 			callback(items);
-		});
+		}
+
+		library_namespace.get_URL(action, XMLHttp_handler, null, null,
+				get_URL_options);
 	}
 
 	var default_item_name = 'item';
@@ -6853,7 +6864,7 @@ function module_code(library_namespace) {
 				|| wikidata_PetScan_API_URL);
 		url.search_params.set_parameters(parameters);
 
-		get_URL(url.to_String(), function(data, error) {
+		library_namespace.get_URL(url.to_String(), function(data, error) {
 			if (error) {
 				callback(undefined, error);
 				return;

@@ -43,7 +43,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var get_URL = this.r('get_URL');
+	// var get_URL = this.r('get_URL');
 
 	var wiki_API = library_namespace.application.net.wiki, KEY_SESSION = wiki_API.KEY_SESSION;
 	// @inner
@@ -411,7 +411,7 @@ function module_code(library_namespace) {
 					'wiki_API_query');
 			library_namespace.debug('callback : (' + (typeof callback) + ') ['
 					+ callback + ']', 3, 'wiki_API_query');
-			get_URL(action, {
+			library_namespace.get_URL(action, {
 				callback : callback
 			});
 			return;
@@ -746,8 +746,8 @@ function module_code(library_namespace) {
 				// console.trace(response);
 
 				// reget next data
-				get_URL(action, XMLHttp_handler, null, POST_data,
-						get_URL_options);
+				library_namespace.get_URL(action, XMLHttp_handler, null,
+						POST_data, get_URL_options);
 				return;
 			}
 
@@ -779,7 +779,8 @@ function module_code(library_namespace) {
 		}
 
 		// console.trace(POST_data);
-		get_URL(action, XMLHttp_handler, null, POST_data, get_URL_options);
+		library_namespace.get_URL(action, XMLHttp_handler, null, POST_data,
+				get_URL_options);
 	}
 
 	wiki_API_query.get_URL_options = {
@@ -797,7 +798,7 @@ function module_code(library_namespace) {
 			 * 
 			 * @see https://meta.wikimedia.org/wiki/User-Agent_policy
 			 */
-			'User-Agent' : CeL.net.Ajax.get_URL.default_user_agent
+			'User-Agent' : library_namespace.net.Ajax.get_URL.default_user_agent
 		},
 		// default error retry 連線逾期/失敗時再重新取得頁面之重試次數。
 		error_retry : 4,
