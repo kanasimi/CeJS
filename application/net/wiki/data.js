@@ -545,6 +545,10 @@ function module_code(library_namespace) {
 		wikidata_search.use_cache.default_options.type ? wikidata_search_cache_entity
 				: wikidata_search_cache;
 		// console.trace([ key, language, options ]);
+		if (language === 'multilingual') {
+			// e.g., session is wikidata
+			language = 'en';
+		}
 
 		key = normalize_value_of_properties(key, language);
 		var entity_type = key && key.type;

@@ -138,7 +138,7 @@ function module_code(library_namespace) {
 			// console.trace(session);
 			// library_namespace.set_debug(3);
 			if (typeof options.rollback_action === 'function') {
-				// rollback action
+				// rollback action 必須自行更新 token。
 				options.rollback_action();
 			} else if (options.requery) {
 				// hack: 登入後重新執行
@@ -263,6 +263,15 @@ function module_code(library_namespace) {
 		}
 		// console.trace(POST_data);
 
+		var session = wiki_API.session_of_options(options);
+		if (options === session) {
+			// 避免污染 session。
+			options = {
+				// [KEY_SESSION]
+				session : session
+			};
+		}
+
 		// 處理 action
 		// console.trace([action, POST_data]);
 		library_namespace.debug('action: ' + action, 2, 'wiki_API_query');
@@ -337,7 +346,6 @@ function module_code(library_namespace) {
 		}
 		// console.trace([ action, options ]);
 
-		var session = wiki_API.session_of_options(options);
 		var maxlag = !isNaN(options.maxlag) ? options.maxlag : session
 				&& !isNaN(session.maxlag) ? session.maxlag
 				: wiki_API_query.default_maxlag;
@@ -766,9 +774,27 @@ function module_code(library_namespace) {
 					//
 					'wiki_API_query: Edit without options.rollback_action!');
 				}
+				// assert: !need_check_edit_time_interval || (POST_data &&
+				// POST_data.token)
+				if (POST_data && POST_data.token
+						&& POST_data.token !== BLANK_TOKEN) {
+					// assert: session.token.csrftoken === POST_data.token
+					for ( var key in session.token) {
+						if (session.token[key] === POST_data.token) {
+							options.POST_data_token_key = key;
+							break;
+						}
+					}
+				}
 				// Re-run wiki_API.query() after get new token.
-				options.requery = wiki_API_query.bind(null, original_action,
-						callback, POST_data, options);
+				options.requery = function requery() {
+					// 採用新的 token。
+					if (POST_data && options.POST_data_token_key) {
+						POST_data.token = session.token[options.POST_data_token_key];
+					}
+					wiki_API_query(original_action, callback, POST_data,
+							options);
+				};
 			}
 
 			// console.trace(action);
