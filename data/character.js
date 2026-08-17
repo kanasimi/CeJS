@@ -537,7 +537,7 @@ function module_code(library_namespace) {
 	 * @returns
 	 */
 	function encode_URI_component(string, encoding) {
-		if (!encoding || /^UTF-?8$/i.test(encoding)) {
+		if (!encoding || /^UTF-?8$|^en(?:$|-)/i.test(encoding)) {
 			// fallback: native methods are faster
 			return encodeURIComponent(string);
 		}

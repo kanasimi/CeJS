@@ -4113,10 +4113,14 @@ function module_code(library_namespace) {
 
 		// var page_title_template_token;
 		if (Array.isArray(page_title)) {
-			if (page_title.type !== 'transclusion') {
+			if (!page_title.type) {
 				return page_title.map(function(title) {
 					return this.redirect_target_of(title, options);
 				}, this);
+			}
+
+			if(!page_title.type !== 'transclusion'){
+				return page_title;
 			}
 
 			// console.trace(page_title);
