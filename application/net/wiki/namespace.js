@@ -3124,10 +3124,19 @@ function module_code(library_namespace) {
 			return url_pattern;
 		}
 
-		function set_url_pattern(interwikimap_data) {
-			var url_pattern = convert_url_parameters(interwikimap_data.url);
+		function set_url_pattern(interwikimap_data_list) {
+			var main_interwikimap_data = interwikimap_data_list[0];
+			if (interwikimap_data_list.language_code) {
+				// assert:
+				// 'language_code' in main_interwikimap_data === false
+				if (interwikimap_data_list.language_code !== session.language)
+					main_interwikimap_data.language_code = interwikimap_data_list.language_code;
+				// delete interwikimap_data_list.language_code;
+			}
 
-			interwikimap_data.url_pattern = new RegExp(url_pattern);
+			var url_pattern = convert_url_parameters(main_interwikimap_data.url);
+
+			main_interwikimap_data.url_pattern = new RegExp(url_pattern);
 		}
 
 		var session_language = session.language
@@ -3397,7 +3406,7 @@ function module_code(library_namespace) {
 				// 兩個以上才登記 alias。
 				if (interwikimap_data_list.length < 2) {
 					// assert: interwikimap_data_list.length === 1
-					set_url_pattern(interwikimap_data_list[0]);
+					set_url_pattern(interwikimap_data_list);
 					continue;
 				}
 
@@ -3431,7 +3440,7 @@ function module_code(library_namespace) {
 					// 長 → 短
 					return _2.prefix.length - _1.prefix.length;
 				});
-				set_url_pattern(interwikimap_data_list[0]);
+				set_url_pattern(interwikimap_data_list);
 
 				interwikimap_data_list.forEach(function(interwikimap_data) {
 					interwikimap.alias[interwikimap_data.prefix]

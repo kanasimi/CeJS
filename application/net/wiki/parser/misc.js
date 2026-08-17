@@ -121,6 +121,10 @@ function module_code(library_namespace) {
 			interwiki_data.wiki_family = {
 				family : interwikimap.family[family].prefix
 			};
+			if (interwikimap.family[family].language_code) {
+				// e.g., [[w:title]] @ zhwiki
+				interwiki_data.wiki_family.language_code = interwikimap.family[family].language_code;
+			}
 		} else if (family in wiki_API.api_URL.wikimedia) {
 			interwiki_data.wiki_family = {
 				family : family
@@ -174,7 +178,16 @@ function module_code(library_namespace) {
 		// e.g., [[w:zh:title]]
 		&& interwiki_name.match(PATTERN_language_startup)
 		// e.g., [[:zh:w:title]], [[s:w:title]]
-		|| page_title.match(PATTERN_language_startup);
+		|| page_title.match(PATTERN_language_startup)
+		//
+		// e.g., [[w:title]] @ zhwiki
+		|| interwiki_data.wiki_family
+		//
+		&& interwiki_data.wiki_family.language_code
+		//
+		&& (interwiki_data.wiki_family.language_code
+		//
+		+ ':' + interwiki_name).match(PATTERN_language_startup);
 
 		if (matched && matched[2]) {
 			// https://en.wikipedia.org/wiki/Help:Interlanguage_links#Inline_links_(links_in_the_text_of_the_article)

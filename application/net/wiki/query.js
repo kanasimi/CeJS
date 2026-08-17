@@ -774,6 +774,7 @@ function module_code(library_namespace) {
 					//
 					'wiki_API_query: Edit without options.rollback_action!');
 				}
+				delete options.POST_data_token_key;
 				// assert: !need_check_edit_time_interval || (POST_data &&
 				// POST_data.token)
 				if (POST_data && POST_data.token
@@ -791,6 +792,14 @@ function module_code(library_namespace) {
 					// 採用新的 token。
 					if (POST_data && options.POST_data_token_key) {
 						POST_data.token = session.token[options.POST_data_token_key];
+					} else {
+						library_namespace.warn('wiki_API_query.requery: '
+						//
+						+ 'No token found in POST_data for '
+						//
+						+ (library_namespace.is_Object(POST_data)
+						//
+						? JSON.stringify(POST_data) : POST_data));
 					}
 					wiki_API_query(original_action, callback, POST_data,
 							options);

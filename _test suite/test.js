@@ -6457,6 +6457,10 @@ function test_wiki() {
 			assert(['w', interwiki_data && interwiki_data.interwiki && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #1-1');
 			assert(['en', interwiki_data && interwiki_data.interlanguage && interwiki_data.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #1-2');
 
+			wikitext = '[[w:title]]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
+			assert(['w', interwiki_data && interwiki_data.interwiki && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #1-3');
+			assert(['en', interwiki_data && interwiki_data.interlanguage && interwiki_data.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #1-4');
+
 			wikitext = '[[:en:w:title]]'; parsed = CeL.wiki.parse(wikitext, options); interwiki_data = CeL.wiki.parse.interwiki_link(parsed, options);
 			assert(['en', interwiki_data && interwiki_data.interwiki && interwiki_data.interwiki.prefix], 'zhwiki: parse.interwiki_link() #2-1');
 			assert(['en', interwiki_data && interwiki_data.interlanguage && interwiki_data.interlanguage.prefix], 'zhwiki: parse.interwiki_link() #2-2');
