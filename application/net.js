@@ -938,6 +938,14 @@ function module_code(library_namespace) {
 		}
 	}
 
+	function get_charset(_this) {
+		// 警告: search_parameters.charset 可能是參數所附的編碼，也許非正規。
+		var charset = (!library_namespace.character || library_namespace.character
+				.is_loaded(_this.charset))
+				&& _this.charset || _this[KEY_URL] && _this[KEY_URL].charset;
+		return charset;
+	}
+
 	/**
 	 * set / append these parameters
 	 * 
@@ -946,7 +954,7 @@ function module_code(library_namespace) {
 	function search_set_parameters(parameters, options) {
 		// console.trace([ this, parameters, options ]);
 		options = Object.assign({
-			charset : this.charset || this[KEY_URL] && this[KEY_URL].charset
+			charset : get_charset(this)
 		}, options);
 		if (!library_namespace.is_Object(parameters))
 			parameters = Search_parameters(parameters, options);
@@ -1002,7 +1010,7 @@ function module_code(library_namespace) {
 		}
 		if (charset === undefined) {
 			// console.trace([ this, this[KEY_URL] ]);
-			charset = this.charset || this[KEY_URL] && this[KEY_URL].charset;
+			charset = get_charset(this);
 		}
 
 		var search = [], key;
@@ -1012,12 +1020,14 @@ function module_code(library_namespace) {
 				try {
 					library_namespace.debug({
 						T : [
-								// gettext_config:{"id":"set-$1-to-a-non-string-$2"}
-								'設定 %1 成非字串之參數：%2',
-								typeof JSON === 'object' ? JSON.stringify(key)
-										: String(key),
-								typeof JSON === 'object' ? JSON
-										.stringify(value) : String(value) ]
+						// gettext_config:{"id":"set-$1-to-a-non-string-$2"}
+						'設定 %1 成非字串之參數：%2',
+						//
+						typeof JSON === 'object' ? JSON.stringify(key)
+						//
+						: String(key), typeof JSON === 'object'
+						//
+						? JSON.stringify(value) : String(value) ]
 					}, 1, 'parameters_toString.append');
 				} catch (e) {
 					// TypeError: Converting circular structure to JSON
