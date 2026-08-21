@@ -2158,7 +2158,7 @@ function module_code(library_namespace) {
 					+ 'No session specified!');
 		}
 		var template_order_of_layout = get_template_order_of_layout(session);
-		// console.trace(template_order_of_layout);
+		// console.trace(token, template_order_of_layout);
 		if (!template_order_of_layout)
 			return;
 
@@ -2288,7 +2288,7 @@ function module_code(library_namespace) {
 			if (!location && token) {
 				location = get_location_of_template_element(token, options);
 			}
-			if (!location) {
+			if (!location && token && !token.had_redirected) {
 				if (!token || token.type !== 'transclusion') {
 					if (callback)
 						callback(location, 'No location');
@@ -2299,10 +2299,18 @@ function module_code(library_namespace) {
 						1, 'setup_layout_element_to_insert');
 				session.register_redirects(token.name, function(root_page_data,
 						error) {
-					// console.trace(root_page_data);
+					if (!root_page_data) {
+						library_namespace.error(
+						//
+						'setup_layout_element_to_insert: '
+						//
+						+ 'Cannot get redirect of {{' + token.name + '}}!');
+					}
+					// console.trace(token, error, root_page_data);
 					token = wiki_API.parse(token.toString(), options);
-					token[0] = session.remove_namespace(root_page_data.title);
+					token[0] = session.remove_namespace(root_page_data);
 					token = wiki_API.parse(token.toString(), options);
+					token.had_redirected = true;
 					// console.trace(token);
 					check_template_list();
 				}, options);

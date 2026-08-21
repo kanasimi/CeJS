@@ -1049,8 +1049,9 @@ function module_code(library_namespace) {
 			}
 
 			// next[1]: page_title
-			if (next[3].namespace)
+			if (next[3].namespace) {
 				next[1] = this.to_namespace(next[1], next[3].namespace);
+			}
 			// console.trace(next[1]);
 			next[1] = this.normalize_title(next[1]);
 			if (!next[1]) {
@@ -1087,7 +1088,7 @@ function module_code(library_namespace) {
 				}).unique();
 				if (next[1].length === 0) {
 					// next[2] : callback(root_page_data, error)
-					this.next(next[2]);
+					this.next(next[2], next[1]);
 					break;
 				}
 
@@ -1097,12 +1098,12 @@ function module_code(library_namespace) {
 							+ '→' + redirects_data[next[1]]);
 				}
 				// next[2] : callback(root_page_data, error)
-				this.next(next[2]);
+				this.next(next[2], redirects_data[next[1]]);
 				break;
 
 			} else if (next[1] in this.nonexistent_pages) {
 				// next[2] : callback(root_page_data, error)
-				this.next(next[2]);
+				this.next(next[2], next[1]);
 				break;
 			}
 

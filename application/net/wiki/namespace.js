@@ -1929,6 +1929,7 @@ function module_code(library_namespace) {
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	 */
 	function normalize_page_name(page_name, options) {
+		// @see get_page_title(page_data, options)
 		if (Array.isArray(page_name)) {
 			if (!page_name.type) {
 				return page_name.map(function(_page_name) {
@@ -4119,8 +4120,21 @@ function module_code(library_namespace) {
 				}, this);
 			}
 
-			if(!page_title.type !== 'transclusion'){
-				return page_title;
+			if (page_title.type in {
+				page_title : true,
+				namespaced_title : true
+			}) {
+				return this.redirect_target_of(page_title.toString(), options);
+			}
+
+			if (!(page_title.type in {
+				link : true,
+				file : true,
+				category : true,
+				transclusion : true
+			})) {
+				// console.trace(page_title);
+				return page_title.toString();
 			}
 
 			// console.trace(page_title);
