@@ -5,7 +5,7 @@
 	"Calendrier r\u00e9publicain": "Franse Republikeinse Kalender",
 	"untranslated message count": "0",
 	"\u6e05\u9664\u8a0a\u606f": "Logboek wissen",
-	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Log weergeven/verbergen",
+	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Logboek weergeven/verbergen",
 	"Load failed": "Laden mislukt",
 	"\u8a0a\u606f\u63d0\u793a\u8207\u7d00\u9304\u6b04": "Logboekconsole",
 	"\u516c\u5143\u5e74/\u4e2d\u66c6\u6708\u65e5": "CE-jaar en Chinese kalendermaanddag",
