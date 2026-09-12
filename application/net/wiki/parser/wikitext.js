@@ -2703,19 +2703,71 @@ function module_code(library_namespace) {
 			library_namespace.debug(previous + ' + ' + parameters, 4,
 					'parse_wikitext.parameter');
 
-			parameters = parameters.split('|');
-			parameters = parameters.map(function(token, index) {
-				return index === 0
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				&& !token.includes(include_mark)
-				// parameter name passed
-				// https://www.mediawiki.org/wiki/Help:Templates
-				? normalize ? token.trim() : token
-				// 經過改變，需再進一步處理。
-				: parse_wikitext(token, options, queue);
-			});
-			_set_wiki_type(parameters, 'parameter');
-			queue.push(parameters);
+			parameters = parse_wikitext(parameters, options, queue);
+
+			var parameter_values;
+			function append_parameter_now(force) {
+				if (parameter_now.length === 0) {
+					if (force)
+						parameter_values.push('');
+					return;
+				}
+
+				if (parameter_now.length === 1) {
+					parameter_values.push(parameter_now[0]);
+				} else {
+					// assert: parameter_now.length > 1
+					_set_wiki_type(parameter_now, 'plain');
+					parameter_values.push(parameter_now);
+				}
+			}
+
+			if (Array.isArray(parameters) ? parameters.type === 'plain'
+			//
+			: typeof parameters === 'string'
+			//
+			&& parameters.includes('|') && (parameters = [ parameters ])) {
+				var parameter_now = [];
+				parameter_values = [];
+				parameters.forEach(function(token) {
+					var matched = typeof token === 'string'
+					//
+					&& token.split('|');
+					if (matched && matched.length > 1) {
+						var value = matched.shift();
+						if (value)
+							parameter_now.push(value);
+						append_parameter_now();
+
+						value = matched.pop();
+						parameter_now = value ? [ value ] : [];
+
+						if (matched.length > 0)
+							parameter_values.append(matched);
+					} else {
+						parameter_now.push(token);
+					}
+				});
+				append_parameter_now(true);
+
+			} else {
+				parameter_values = Array.isArray(parameters) ? parameters
+						: [ parameters ];
+			}
+
+			if (typeof parameter_values === 'string') {
+				if (normalize)
+					parameter_values = parameter_values.trim();
+			} else if (Array.isArray(parameter_values)
+			// [0]: parameter name passed
+			// https://www.mediawiki.org/wiki/Help:Templates
+			&& typeof parameter_values[0] === 'string') {
+				if (normalize)
+					parameter_values[0] = parameter_values[0].trim();
+			}
+
+			_set_wiki_type(parameter_values, 'parameter');
+			queue.push(parameter_values);
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
