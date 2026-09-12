@@ -5183,6 +5183,10 @@ function test_wiki() {
 		wikitext = '{{{q|{{w|{{{t|{{u}}}}}}}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{{parameter}}} #2');
 		assert(['parameter', parsed.type], 'wiki.parse: {{{parameter}}} #2-1');
+		wikitext = '{{{icon|[[File:Information.svg|25px|link=]] }}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: {{{parameter}}} #3');
+		assert(['parameter', parsed.type], 'wiki.parse: {{{parameter}}} #3-1');
+		assert(['file', parsed[1][0].type], 'wiki.parse: {{{parameter}}} #3-2');
 
 		wikitext = '{{{t|{{u}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()], 'wiki.parse: {{{invalid}} #1');

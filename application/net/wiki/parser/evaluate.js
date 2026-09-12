@@ -202,20 +202,27 @@ function module_code(library_namespace) {
 
 		// console.trace(token);
 
-		if (!token.need_subst && options.mode === 'PST'
-		// 這些魔術字在 PST 模式下，就算超過 options.max_template_depth 也仍然會被解析。
-		&& !(token.name in {
+		if (!token.need_subst && options.mode === 'PST' && !(token.name in {
 			'#expr' : true,
 			'#switch' : true,
 			'#time' : true,
+			// 計算性質的 magic words。
 			LC : true,
 			UC : true,
-			REVISIONUSER : true,
 
+			// [[User:Cewbot/log/20260422/subst_allowlist]] but should use
+			// token.need_subst
+			// e.g., [[Template:Uw-ai1]] of 20260422
+			// REVISIONUSER : true,
+			// e.g., [[Template:Uw-disruptive1]] of 20260422
+			// BASEPAGENAME : true,
+
+			// 這些魔術字在 PST 模式下，就算超過 options.max_template_depth 也仍然會被解析。
 			'#invoke' : true,
 			SUBST : true,
 			SAFESUBST : true
-		}) && !token.name.startsWith('#if')) {
+		}) && !token.name.startsWith('REVISION')
+				&& !token.name.startsWith('#if')) {
 			return;
 		}
 
@@ -533,7 +540,9 @@ function module_code(library_namespace) {
 				return page_data ? token : _parsed;
 			}
 
-			// _parsed.need_subst = true;
+			// e.g., [[Template:Uw-disruptive1]]
+			// of [[User:Cewbot/log/20260422/subst allowlist]]
+			_parsed.need_subst = true;
 			// expand template
 			_parsed = expand_transclusion(_parsed,
 			//
@@ -1721,7 +1730,9 @@ function module_code(library_namespace) {
 		function get_page_title(remove_namespace) {
 			var title = wiki_API.normalize_title(get_parameter_String(1)
 			// [[mw:Help:Magic words#Page names]]
-			|| options && options[KEY_on_page_title_option], options) || '';
+			|| options && (options[KEY_on_page_title_option]
+			//
+			|| options.transclusion_from_page), options) || '';
 			return remove_namespace ? wiki_API.remove_namespace(title, options)
 					: title;
 		}
