@@ -1206,7 +1206,11 @@ function module_code(library_namespace) {
 		if (typeof token === 'string')
 			return token.trim();
 
-		if (Array.isArray(token)) {
+		if (Array.isArray(token) && !(token.type in {
+			comment : true,
+			tag : true,
+			tag_single : true
+		})) {
 			var _token = token;
 			while (Array.isArray(_token[0])) {
 				// assert: Array.isArray(_token)

@@ -5385,6 +5385,7 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:1e23|.1e24|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #4');
 		assert(['0', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456789|9034567890123456788|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #5');
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:9034567890123456700.0|9034567890123456800|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #6');
+		assert(['<div b="1">', CeL.wiki.expand_transclusion('{{#ifeq:a|b|<div a="1">|<div b="1">}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #7');
 
 		// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
 		assert(['error', CeL.wiki.expand_transclusion('{{#iferror: <strong class="error">a</strong> | error | correct }}').toString()], 'wiki.expand_transclusion: {{#iferror:}} #1');
@@ -6581,6 +6582,13 @@ function test_wiki() {
 			var promise = Promise.resolve();
 
 			promise = promise.then(function () {
+				return CeL.wiki.expand_transclusion('{{subst:Uw-ai1}}', options);
+			}).then(function (parsed) {
+				//console.trace(parsed.toString());
+				assert([false, parsed.toString().includes('noinclude')], 'CeL.wiki.expand_transclusion() {{sub<noinclude></noinclude>st:REVISIONUSER}}');
+			});
+
+			promise = promise.then(function () {
 				return Promise.all([
 					'{{Ifsubst|yes|no}}',
 					'{{issubst}}'
@@ -6651,7 +6659,7 @@ function test_wiki() {
 			}).then(function (parsed) {
 				// [[Special:ExpandTemplates]]
 				//console.trace(JSON.stringify(parsed.toString()));
-				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\">[[User:user_name|user_name]]（[[User talk:user_name|討論]] <b>·</b>  [[Special:Contributions/user_name|貢獻]] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:Log&page=User:user_name 日誌]<small>［[//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:AbuseLog&wpSearchUser=user_name 過濾器]］</small> <b>·</b> [[Sulutil:user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]）</span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }} using [[Template:Userblock]]');
+				assert(["{{#uic:user_name}}<span id=\"user_name\" class=\"plainlinks template-Userblock\">[[User:user_name|user_name]]（[[User talk:user_name|討論]] <b>·</b>  [[Special:Contributions/user_name|貢獻]] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:Log&page=User:user_name 日誌]<small>［[//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:AbuseLog&wpSearchUser=user_name 過濾器]］</small> <b>·</b> [[Sulutil:user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]）</span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }} using [[Template:Userblock]]');
 			});
 
 			promise = promise.then(function () {

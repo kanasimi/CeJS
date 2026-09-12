@@ -208,8 +208,9 @@ function module_code(library_namespace) {
 			'#expr' : true,
 			'#switch' : true,
 			'#time' : true,
-			'LC' : true,
-			'UC' : true,
+			LC : true,
+			UC : true,
+			REVISIONUSER : true,
 
 			'#invoke' : true,
 			SUBST : true,
@@ -330,7 +331,7 @@ function module_code(library_namespace) {
 			if (token.tag === 'noinclude')
 				return '';
 			if (token.tag === 'includeonly')
-				return token.join('');
+				return wiki_API.parse(token.join(''), options);
 		}, {
 			modify : true
 		});
@@ -347,9 +348,16 @@ function module_code(library_namespace) {
 			transclusion_config.usage_times++;
 			var wikitext = transclusion_config.simplified_template_wikitext;
 			// console.trace(transclusion_config);
-			return transclusion_config.need_evaluate ? simplify_transclusion(
+			if (!transclusion_config.need_evaluate)
+				return wikitext;
+
+			// Keep transclusion_config.page_data for
+			// options.detect_REVISIONUSER_using_template
+			options = Object.assign(Object.clone(options), transclusion_config);
+
+			return simplify_transclusion(wikitext, this, options,
 			// template_depth_now + 1: 在執行本函數時，實際上已多 expand 一次。
-			wikitext, this, options, template_depth_now + 1) : wikitext;
+			template_depth_now + 1);
 		};
 	}
 
@@ -388,6 +396,8 @@ function module_code(library_namespace) {
 		if (wiki_API.is_page_data(wikitext)) {
 			page_data = wikitext;
 			wikitext = wiki_API.content_of(page_data);
+		} else if (options.page_data) {
+			// page_data = options.page_data;
 		}
 		wikitext = template_preprocessor(wikitext, options);
 		if (!wikitext)
@@ -421,7 +431,8 @@ function module_code(library_namespace) {
 				// console.trace(page_data);
 				transclusion_config = {
 					title : page_data.title,
-					// page_data : page_data,
+					// page_data : options.detect_REVISIONUSER_via_content &&
+					// page_data,
 					need_evaluate : parsed.have_template_parameters,
 					// cache simplified wikitext
 					simplified_template_wikitext : wikitext,
@@ -473,6 +484,10 @@ function module_code(library_namespace) {
 		}
 
 		if (options.template_token_called !== template_token_called) {
+			// 多次嵌套時，template_token_called 可能已被 convert_parameter()過，
+			// 必須更新 template_token_called.parameters。
+			// e.g., [[Template:Uw-blockindef]] 嵌套 [[Template:Uw-block]]
+			wiki_API.inplace_reparse_element(template_token_called, options);
 			options = library_namespace.new_options(options);
 			// 紀錄正呼叫的 template token。
 			options.template_token_called = template_token_called;
@@ -524,8 +539,14 @@ function module_code(library_namespace) {
 			//
 			_parsed.type === 'transclusion' ? Object.assign(Object
 					.clone(options), {
+				// 在原模板中的錨點。 for options.detect_REVISIONUSER_via_content
+				// page_anchor : detect_REVISIONUSER_via_content && _parsed.name
+				// === 'REVISIONUSER' && token,
+
 				// caller
-				template_token_called : _parsed
+				template_token_called :
+				// convert_parameter(_parsed.toString(), parameters, options)
+				template_token_called
 			}) : options
 			// , template_depth_now
 			);
@@ -709,6 +730,36 @@ function module_code(library_namespace) {
 
 		if (template_depth_now >= 0)
 			return template_depth_now;
+	}
+
+	function get_REVISIONUSER(token) {
+		for (var index = token.index + 1, parent = token.parent; parent; index++) {
+			while (index === parent.length) {
+				parent = parent.parent;
+				if (!parent)
+					break;
+				index = 0;
+			}
+
+			var node = parent[index];
+			if (typeof node === 'string') {
+				if (node.includes('\n\n'))
+					break;
+				continue;
+			}
+
+			if (node.type in {
+				pre : true,
+				section_title : true
+			}) {
+				break;
+			}
+
+			var user_name = wiki_API.parse.user(node.toString());
+			if (user_name) {
+				return user_name;
+			}
+		}
 	}
 
 	/**
@@ -927,9 +978,11 @@ function module_code(library_namespace) {
 								+ wiki_API.title_link_of(page_title) + '。');
 					}
 					var parsed = simplify_transclusion(page_data, token,
+					//
+					options,
 					// 當前迭代呼叫層數 = template_depth_now + 1: 已經 `session.page()`
 					// 展開過一次。
-					options, template_depth_now + 1);
+					template_depth_now + 1);
 
 					var eligible = !options.filter_template_to_be_expanded
 							|| options.filter_template_to_be_expanded(parsed,
@@ -2402,6 +2455,10 @@ function module_code(library_namespace) {
 			return revision.revid;
 
 		case 'REVISIONUSER':
+			var user_name = options.detect_REVISIONUSER_using_template
+					&& get_REVISIONUSER(options.detect_REVISIONUSER_using_template);
+			if (user_name)
+				return user_name;
 			var revision = get_page_revision();
 			if (!revision || !revision.user)
 				return NYI();

@@ -3008,6 +3008,7 @@ function module_code(library_namespace) {
 							}
 						}
 						if (row_processor) {
+							// row_processor(row, options)
 							cells = row_processor(cells, options);
 						}
 						array.push(cells);
