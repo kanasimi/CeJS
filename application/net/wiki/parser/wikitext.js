@@ -2699,6 +2699,11 @@ function module_code(library_namespace) {
 				// e.g., `{{{T}}{{t|{{u}}}}`
 				return all;
 			}
+			index = parameters.indexOf('}}');
+			if (index > 0) {
+				// e.g., '{{#if:||{{{{t}}t}}}}'
+				return all;
+			}
 
 			library_namespace.debug(previous + ' + ' + parameters, 4,
 					'parse_wikitext.parameter');

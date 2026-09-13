@@ -4102,6 +4102,15 @@ function test_wiki() {
 		wikitext = '{{ns:{{subst:#expr:2*3}}}}'; parsed = CeL.wiki.parse(wikitext);
 		assert([wikitext, parsed.toString()]);
 		assert(['magic_word_function', parsed.type]);
+		wikitext = '{{#if:||{{{{uc:t}}l|t}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: magic_word_function #10');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: magic_word_function #10-1 from [[w:zh:Template:Uw-softerblock]]');
+		wikitext = '{{#if:||{{{{t}}t}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: magic_word_function #11');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: magic_word_function #11-1 from [[w:zh:Template:Uw-softerblock]]');
+		wikitext = '{{#ifeq:|||{{{{#switch:|}}T}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()], 'wiki.parse: magic_word_function #12');
+		assert(['magic_word_function', parsed.type], 'wiki.parse: magic_word_function #12-1 from [[w:zh:Template:Uw-softerblock]]');
 
 		// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##titleparts
 		assert(['Talk:Foo/bar/baz/quok', CeL.wiki.parse('{{#titleparts: Talk:Foo/bar/baz/quok }}').evaluate()], '{{#titleparts}} #1');
@@ -5381,6 +5390,7 @@ function test_wiki() {
 		assert(['1', CeL.wiki.expand_transclusion('{{#switch: {{#expr: x  }} | <strong class{{=}}"error">Expression error: Unrecognized word "x".</strong> = 1 | default result }}').toString()], 'wiki.expand_transclusion: {{#switch:}} #29');
 		assert(['other', CeL.wiki.expand_transclusion('{{#switch: 6 |#default = other |1=one |2=two |3|4|5=range 3–5}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #30');
 		assert(['4', CeL.wiki.expand_transclusion('{{#switch: 6 |#default = other |1=one |2=two |3|4}}').toString()], 'wiki.expand_transclusion: {{#switch:}} #31');
+		assert(['[]', CeL.wiki.expand_transclusion('[{{#switch:|}}]').toString()], 'wiki.expand_transclusion: {{#switch:}} #32');
 
 		// https://meta.wikimedia.org/wiki/Help:Calculation#Comparisons
 		assert(['1', CeL.wiki.expand_transclusion('{{#ifeq:3|3.0|1|0}}').toString()], 'wiki.expand_transclusion: {{#ifeq:}} #1');
