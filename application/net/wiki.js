@@ -369,6 +369,10 @@ function module_code(library_namespace) {
 		// assert: typeof message === 'string'
 		: library_namespace.gettext(message);
 
+		if (options && options.tag && options.tag in wiki_error.tag_name_hash) {
+			this.tag = options.tag;
+		}
+
 		if (false) {
 			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/Error
 			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause
@@ -380,6 +384,20 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// https://en.wikipedia.org/wiki/Module:Error
+	// `<strong class="error">message</strong>`
+	wiki_error.tag_name_hash = {
+		p : true,
+		span : true,
+		div : true,
+		// default tag name
+		strong : true
+
+	// 以下無效:
+	// <b class="error">message</b>
+	// <i>, <s>, <del>, <li>, ...
+	};
+
 	// 繼承 Error 物件
 	// @see https://pjchender.blogspot.com/2017/12/js-error-handling.html
 	wiki_error.prototype = Object.assign(
@@ -390,7 +408,13 @@ function module_code(library_namespace) {
 		constructor : wiki_error,
 		// https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##iferror
 		toString : function wiki_error_toString() {
-			return '<strong class="error">' + this.message + '</strong>';
+			var tag = this.tag;
+			if (!tag || !(tag in wiki_error.tag_name_hash)) {
+				// default tag name
+				tag = 'strong';
+			}
+			return '<' + tag + ' class="error">' + this.message + '</' + tag
+					+ '>';
 		}
 	});
 
@@ -405,17 +429,8 @@ function module_code(library_namespace) {
 		var has_error;
 		wiki_API.parser.parser_prototype.each.call([ object ], 'tag', function(
 				tag_token) {
-			// `<strong class="error">message</strong>`
-			if (has_error || !tag_token.attributes || !(tag_token.tag in {
-				p : true,
-				span : true,
-				div : true,
-				strong : true
-
-			// 以下無效:
-			// <b class="error">message</b>
-			// <i>, <s>, <del>, <li>, ...
-			})) {
+			if (has_error || !tag_token.attributes
+					|| !(tag_token.tag in wiki_error.tag_name_hash)) {
 				return;
 			}
 

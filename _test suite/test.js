@@ -6220,15 +6220,18 @@ function test_wiki() {
 			promise = promise.then(function () {
 				return Promise.all([
 					'{{Ifsubst|yes|no}}',
-					'{{issubst}}'
+					'{{issubst}}',
+					//'<includeonly>{{safesubst:#ifeq:{{subst:</includeonly><includeonly>substcheck}}|SUBST||{{error|错误：{{tlx|YGA}}必须被替换引用。}}}}</includeonly>'
 				].map(function (wikitext) {
 					return CeL.wiki.expand_transclusion(wikitext, options);
 				}));
 			}).then(function (results) {
 				//console.trace(results);
-				var i = 0;
-				assert(['no', results[i++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{Ifsubst}} )');
-				assert(['', results[i++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{issubst}} )');
+				var index = 0;
+				assert(['no', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{Ifsubst}} )');
+				assert(['', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{issubst}} )');
+				// TODO
+				//assert(['', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{substcheck}} ) from [[w:zh:Template:YGA]]');
 
 
 				// https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=expandtemplates&format=json&text=%7B%7BIfsubst%7Cyes%7Cno%7D%7D&formatversion=2

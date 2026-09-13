@@ -741,6 +741,23 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+
+	function expand_module_Error(options) {
+		// 可能已經改動，必須重新解析。
+		/* const */var token = wiki_API.parse(this.toString(), options);
+		var parameters = token.parameters;
+
+		var error_message = parameters.error || parameters[1]
+		// '没有指定的-{zh-cn:信息; zh-tw:資訊}-'
+		|| 'no message specified';
+		error_message = error_message.toString();
+
+		return new wiki_API.wiki_error(error_message, {
+			tag : parameters.tag
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// String-handling templates, e.g., [[Template:Str left]]
 
 	function get_parameter_of_token(NO, token, options) {
@@ -1061,6 +1078,13 @@ function module_code(library_namespace) {
 		},
 
 		'Module:Check for unknown parameters' : parse_module_Check_for_unknown_parameters,
+
+		// https://en.wikipedia.org/wiki/Module:Error
+		'Module:Error' : {
+			properties : {
+				expand : expand_module_Error
+			}
+		},
 
 		'Module:Ustring' : {
 			properties : {

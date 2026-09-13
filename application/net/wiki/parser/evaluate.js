@@ -2593,6 +2593,8 @@ function module_code(library_namespace) {
 			// console.trace(token);
 			if (typeof token.expand === 'function') {
 				var promise;
+				// 可能已經改動，必須重新解析。
+				// token = wiki_API.parse(token.toString(), options);
 				try {
 					// function expand_module_*
 					promise = token.expand(options, template_depth_now);
