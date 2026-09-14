@@ -2061,15 +2061,30 @@ function module_code(library_namespace) {
 			break;
 
 		case '#ifeq':
-			var argument_1 = get_parameter_String(1);
-			var argument_2 = get_parameter_String(2);
-			token = token.parameters[argument_1 === argument_2
-					|| (!/^\d+$/.test(argument_1) || argument_1 < Number.MAX_SAFE_INTEGER)
-					&& +argument_1 === +argument_2 ? 3 : 4]
-					|| '';
-			token = wiki_API.trim_token(token);
+			var argument_1 = get_parameter_String(1, true);
+			var argument_2 = get_parameter_String(2, true);
+			var eval_ifeq = function() {
+				token = token.parameters[argument_1 === argument_2
+						|| (!/^\d+$/.test(argument_1) || argument_1 < Number.MAX_SAFE_INTEGER)
+						&& +argument_1 === +argument_2 ? 3 : 4]
+						|| '';
+				token = wiki_API.trim_token(token);
+				return token;
+			};
+			if (library_namespace.is_thenable(argument_1)
+					|| library_namespace.is_thenable(argument_2)) {
+				// e.g., [[w:zh:Template:YGA]]
+				if (!allow_promise) {
+					return NYI();
+				}
+				return Promise.all([ argument_1, argument_2 ]).then(
+						function(result) {
+							argument_1 = result[0];
+							argument_2 = result[1];
+						}).then(eval_ifeq);
+			}
 			// console.trace(token);
-			break;
+			return eval_ifeq();
 
 		case '#ifexist':
 			var page_title = get_parameter_String(1, true);
