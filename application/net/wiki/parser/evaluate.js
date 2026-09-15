@@ -553,9 +553,11 @@ function module_code(library_namespace) {
 				// === 'REVISIONUSER' && token,
 
 				// caller
-				template_token_called :
-				// convert_parameter(_parsed.toString(), parameters, options)
 				template_token_called
+				// _parsed 會被展開。
+				: _parsed.type === 'transclusion' ? _parsed
+				// convert_parameter(_parsed.toString(), parameters, options)
+				: template_token_called
 			}) : options
 			// , template_depth_now
 			);
@@ -2055,10 +2057,20 @@ function module_code(library_namespace) {
 			if (false) {
 				console.trace([ '#if%', token, get_parameter_String(1) ]);
 			}
-			token = token.parameters[get_parameter_String(1) ? 2 : 3] || '';
-			token = wiki_API.trim_token(token);
-			// console.trace(token);
-			break;
+			var eval_if = function(argument_1) {
+				token = token.parameters[argument_1 ? 2 : 3] || '';
+				token = wiki_API.trim_token(token);
+				// console.trace(token);
+				return token;
+			};
+			var argument_1 = get_parameter_String(1, true);
+			if (library_namespace.is_thenable(argument_1)) {
+				if (!allow_promise) {
+					return NYI();
+				}
+				return Promise.resolve(argument_1).then(eval_if);
+			}
+			return eval_if(argument_1);
 
 		case '#ifeq':
 			var argument_1 = get_parameter_String(1, true);
