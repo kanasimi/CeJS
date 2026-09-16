@@ -947,7 +947,7 @@ function module_code(library_namespace) {
 		? Symbol('EXIT_for_each_subelement')
 				: [ 'for_each_subelement.exit: abort the operation' ],
 		// CeL.wiki.parser.parser_prototype.each.skip_inner
-		// .skip_children
+		// .skip_children .skip_inner_traversal
 		// for_each_subelement.skip_inner: Skip inner tokens, skip children.
 		skip_inner : typeof Symbol === 'function' ? Symbol('SKIP_CHILDREN')
 				: [ 'for_each_subelement.skip_inner: skip children' ],

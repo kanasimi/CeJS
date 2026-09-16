@@ -359,7 +359,7 @@ function module_code(library_namespace) {
 				return wikitext;
 
 			// Keep transclusion_config.page_data for
-			// options.detect_REVISIONUSER_using_template
+			// options.detect_user_and_date_using_template
 			options = Object.assign(Object.clone(options), transclusion_config);
 
 			return simplify_transclusion(wikitext, this, options,
@@ -438,7 +438,7 @@ function module_code(library_namespace) {
 				// console.trace(page_data);
 				transclusion_config = {
 					title : page_data.title,
-					// page_data : options.detect_REVISIONUSER_via_content &&
+					// page_data : options.detect_user_and_date_via_content &&
 					// page_data,
 					need_evaluate : parsed.have_template_parameters,
 					// cache simplified wikitext
@@ -548,9 +548,9 @@ function module_code(library_namespace) {
 			//
 			_parsed.type === 'transclusion' ? Object.assign(Object
 					.clone(options), {
-				// 在原模板中的錨點。 for options.detect_REVISIONUSER_via_content
-				// page_anchor : detect_REVISIONUSER_via_content && _parsed.name
-				// === 'REVISIONUSER' && token,
+				// 在原模板中的錨點。 for options.detect_user_and_date_via_content
+				// page_anchor : detect_user_and_date_via_content &&
+				// _parsed.name === 'REVISIONUSER' && token,
 
 				// caller
 				template_token_called
@@ -743,33 +743,49 @@ function module_code(library_namespace) {
 			return template_depth_now;
 	}
 
-	function get_REVISIONUSER(token) {
+	function get_user_and_date(token, options) {
+		var first_user_name, user_name, date;
+		// 偵測簽名。
+		// @see routine/20170515.signature_check.js
 		for (var index = token.index + 1, parent = token.parent; parent; index++) {
-			while (index === parent.length) {
+			while (parent && index >= parent.length) {
+				index = parent.index + 1;
 				parent = parent.parent;
-				if (!parent)
-					break;
-				index = 0;
 			}
+			if (!parent)
+				break;
 
 			var node = parent[index];
 			if (typeof node === 'string') {
-				if (node.includes('\n\n'))
+				if (node.includes('\n\n')) {
+					// 進入下個段落。
 					break;
-				continue;
-			}
-
-			if (node.type in {
+				}
+			} else if (node.type in {
 				pre : true,
 				section_title : true
 			}) {
 				break;
 			}
 
-			var user_name = wiki_API.parse.user(node.toString());
-			if (user_name) {
-				return user_name;
+			node = node.toString();
+			user_name = wiki_API.parse.user(node) || user_name;
+			first_user_name = first_user_name || user_name;
+			date = date || wiki_API.parse.date(node, options);
+			if (user_name && date) {
+				break;
 			}
+		}
+
+		if (!date) {
+			user_name = first_user_name;
+		}
+
+		if (user_name || date) {
+			return {
+				user_name : user_name,
+				date : date
+			};
 		}
 	}
 
@@ -1129,6 +1145,31 @@ function module_code(library_namespace) {
 			if (parsed.has_shell)
 				parsed = parsed[0];
 			parsed = evaluate_parsed(parsed, options, template_depth_now);
+			if (options.detect_user_and_date_using_template && parsed.toString().includes('~~~')) {
+				var user_and_date = get_user_and_date(options.detect_user_and_date_using_template, options);
+				user_and_date.user_name = user_and_date.user_name && '[[User:' + user_and_date.user_name + '|' + user_and_date.user_name + ']] ([[User talk:' + user_and_date.user_name + '|talk]])';
+				user_and_date.date = user_and_date.date && wiki_API.parse.date.to_String(user_and_date.date, options);
+
+				// 修正波浪簽名。
+				for_each_subelement.call(parsed, function(token) {
+					if (typeof token !== 'string') {
+						if (token.type === 'comment')
+							return for_each_subelement.skip_inner;
+						return;
+					}
+
+					return token.replace(/~{3,5}/g, function(all) {
+						if (all.length === 4)
+							return user_and_date.user_name && user_and_date.date ? user_and_date.user_name + ' ' + user_and_date.date : '<!-- ' + all + ' -->';
+						if (all.length === 5)
+							return user_and_date.date || '<!-- ' + all + ' -->';
+						// assert: all.length === 3
+						return user_and_date?.user_name || '<!-- ' + all + ' -->';
+					});
+				}, {
+					modify : true
+				});
+			}
 			if (Array.isArray(parsed)) {
 				// 已在 evaluate_parsed() 中設定好 .template_depth_now 。
 				// parsed.template_depth_now = template_depth_now;
@@ -2493,10 +2534,10 @@ function module_code(library_namespace) {
 			return revision.revid;
 
 		case 'REVISIONUSER':
-			var user_name = options.detect_REVISIONUSER_using_template
-					&& get_REVISIONUSER(options.detect_REVISIONUSER_using_template);
-			if (user_name)
-				return user_name;
+			var user_and_date = options.detect_user_and_date_using_template
+					&& get_user_and_date(options.detect_user_and_date_using_template, options);
+			if (user_and_date && user_and_date.user_name)
+				return user_and_date.user_name;
 			var revision = get_page_revision();
 			if (!revision || !revision.user)
 				return NYI();

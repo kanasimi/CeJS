@@ -2035,7 +2035,10 @@ function module_code(library_namespace) {
 			via_contributions = true;
 		}
 
-		if (typeof user_name === 'boolean') {
+		if (library_namespace.is_Object(user_name)) {
+			to_full_link = user_name.to_full_link;
+			user_name = user_name.user_name;
+		} else if (typeof user_name === 'boolean') {
 			to_full_link = user_name;
 			user_name = undefined;
 		}

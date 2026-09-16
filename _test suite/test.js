@@ -1925,7 +1925,7 @@ function test_math() {
 		var n = new CeL.data.math.integer('1.456346078907302748950623'), ln = new CeL.data.math.integer(2), i = 1, term = ln.clone(), d, b;
 		// d=((n+1)/(n-1))^2
 		d = n.clone().add(1).divide(n.clone().add(-1), 20).square();
-		// TODO:簡化d，去掉末尾的 0。
+		// TODO: 簡化d，去掉末尾的 0。
 		b = ln.clone();
 		while (!term.is_0())
 			ln.add(term = b.divide(d, 20).clone().divide(i += 2));
@@ -6221,7 +6221,7 @@ function test_wiki() {
 				return Promise.all([
 					'{{Ifsubst|yes|no}}',
 					'{{issubst}}',
-					//'<includeonly>{{safesubst:#ifeq:{{subst:</includeonly><includeonly>substcheck}}|SUBST||{{error|错误：{{tlx|YGA}}必须被替换引用。}}}}</includeonly>'
+					'{{safesubst:#ifeq:{{subst:substcheck}}|SUBST||{{error|错误：{{tlx|YGA}}必须被替换引用。}}}}'
 				].map(function (wikitext) {
 					return CeL.wiki.expand_transclusion(wikitext, options);
 				}));
@@ -6231,7 +6231,7 @@ function test_wiki() {
 				assert(['no', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{Ifsubst}} )');
 				assert(['', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{issubst}} )');
 				// TODO
-				//assert(['', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{substcheck}} ) from [[w:zh:Template:YGA]]');
+				assert(['', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{substcheck}} ) from [[w:zh:Template:YGA]]');
 
 
 				// https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=expandtemplates&format=json&text=%7B%7BIfsubst%7Cyes%7Cno%7D%7D&formatversion=2
