@@ -336,7 +336,7 @@ function module_code(library_namespace) {
 			};
 		}
 
-		if (dbname.includes('`'))
+		if (!/^[A-Za-z0-9_$]+$/.test(dbname))
 			throw new Error('Invalid database name: [' + dbname + ']');
 
 		run_SQL('CREATE DATABASE IF NOT EXISTS `' + dbname + '`', function(
