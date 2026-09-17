@@ -262,7 +262,7 @@
 	"\u2191Back to TOC": "\u2191Zer\u00e9ck op d'Inhaltsverzeechnes",
 	"Contents of [%1]": "Inhalter vu(n) [%1]",
 	"expand": "opklappen",
-	"collapse": "zesummeklappen",
+	"collapse": "zouklappen",
 	"revision id": "Versiouns-ID",
 	"No title found for %1.": "Keen Titel fonnt fir %1.",
 	"Namespaces: %1.": "Nummr\u00e4im: %1."

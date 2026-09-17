@@ -1145,10 +1145,20 @@ function module_code(library_namespace) {
 			if (parsed.has_shell)
 				parsed = parsed[0];
 			parsed = evaluate_parsed(parsed, options, template_depth_now);
-			if (options.detect_user_and_date_using_template && parsed.toString().includes('~~~')) {
-				var user_and_date = get_user_and_date(options.detect_user_and_date_using_template, options);
-				user_and_date.user_name = user_and_date.user_name && '[[User:' + user_and_date.user_name + '|' + user_and_date.user_name + ']] ([[User talk:' + user_and_date.user_name + '|talk]])';
-				user_and_date.date = user_and_date.date && wiki_API.parse.date.to_String(user_and_date.date, options);
+			if (options.detect_user_and_date_using_template
+					&& parsed.toString().includes('~~~')) {
+				var user_and_date = get_user_and_date(
+						options.detect_user_and_date_using_template, options);
+				if (user_and_date.user_name) {
+					user_and_date.user_name = '[[User:'
+							+ user_and_date.user_name + '|'
+							+ user_and_date.user_name + ']] ([[User talk:'
+							+ user_and_date.user_name + '|talk]])';
+				}
+				if (user_and_date.date) {
+					user_and_date.date = wiki_API.parse.date.to_String(
+							user_and_date.date, options);
+				}
 
 				// 修正波浪簽名。
 				for_each_subelement.call(parsed, function(token) {
@@ -1159,12 +1169,24 @@ function module_code(library_namespace) {
 					}
 
 					return token.replace(/~{3,5}/g, function(all) {
-						if (all.length === 4)
-							return user_and_date.user_name && user_and_date.date ? user_and_date.user_name + ' ' + user_and_date.date : '<!-- ' + all + ' -->';
-						if (all.length === 5)
-							return user_and_date.date || '<!-- ' + all + ' -->';
+						if (all.length === 4) {
+							return user_and_date.user_name
+									&& user_and_date.date
+							//
+							? user_and_date.user_name + ' '
+									+ user_and_date.date
+							//
+							: '<!-- ' + all + ' -->';
+						}
+						if (all.length === 5) {
+							return user_and_date.date
+							//
+							|| '<!-- ' + all + ' -->';
+						}
 						// assert: all.length === 3
-						return user_and_date?.user_name || '<!-- ' + all + ' -->';
+						return user_and_date.user_name
+						//
+						|| '<!-- ' + all + ' -->';
 					});
 				}, {
 					modify : true
@@ -2534,8 +2556,9 @@ function module_code(library_namespace) {
 			return revision.revid;
 
 		case 'REVISIONUSER':
-			var user_and_date = options.detect_user_and_date_using_template
-					&& get_user_and_date(options.detect_user_and_date_using_template, options);
+			var user_and_date = options.detect_user_and_date_using_template;
+			user_and_date = user_and_date
+					&& get_user_and_date(user_and_date, options);
 			if (user_and_date && user_and_date.user_name)
 				return user_and_date.user_name;
 			var revision = get_page_revision();
