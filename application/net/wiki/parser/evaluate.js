@@ -202,7 +202,7 @@ function module_code(library_namespace) {
 
 		// console.trace(token);
 
-		if (!token.need_subst && options.mode === 'PST' && !(token.name in {
+		if (options.mode === 'PST' && !token.need_subst && !(token.name in {
 			'#expr' : true,
 			'#switch' : true,
 			'#time' : true,
@@ -1163,8 +1163,13 @@ function module_code(library_namespace) {
 				// 修正波浪簽名。
 				for_each_subelement.call(parsed, function(token) {
 					if (typeof token !== 'string') {
-						if (token.type === 'comment')
+						if (token.type === 'comment'
+						//
+						|| token.tag === 'nowiki') {
 							return for_each_subelement.skip_inner;
+						}
+						if (token.skip_inner_traversal)
+							delete token.skip_inner_traversal;
 						return;
 					}
 
@@ -2549,6 +2554,9 @@ function module_code(library_namespace) {
 			return get_page_length(page_title);
 
 		case 'REVISIONID':
+			if (!token.need_subst) {
+				return token;
+			}
 			return /* NYI() */'-';
 			var revision = get_page_revision();
 			if (!revision || !revision.revid)
@@ -2556,6 +2564,9 @@ function module_code(library_namespace) {
 			return revision.revid;
 
 		case 'REVISIONUSER':
+			if (!token.need_subst) {
+				return token;
+			}
 			var user_and_date = options.detect_user_and_date_using_template;
 			user_and_date = user_and_date
 					&& get_user_and_date(user_and_date, options);

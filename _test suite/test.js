@@ -6753,6 +6753,17 @@ function test_wiki() {
 				assert(['* {{if empty}}{{if empty|1}}{{if empty||2}}\n* 12\n* 12', parsed.toString()], 'CeL.wiki.expand_transclusion(): {{subst:subst test 1}}');
 			});
 
+			promise = promise.then(function () {
+				var wikitext = '{{Test-Uw}} --[[User:Kanashimi|Kanashimi]] ([[User talk:Kanashimi|talk]]) 09:57, 20 September 2026 (UTC)';
+				var parsed = CeL.wiki.parser(wikitext, options).parse();
+				parsed.each(function (token) { }, { add_index: 'all' });
+				var _options = Object.assign({ mode: 'PST', max_template_depth: 1, detect_user_and_date_using_template: parsed[0] }, options);
+				return CeL.wiki.expand_transclusion(wikitext, _options);
+			}).then(function (parsed) {
+				//console.trace(parsed);
+				assert(['Kanashimi\n{{REVISIONUSER}}\n<nowiki>~~~</nowiki>\n[[User:Kanashimi|Kanashimi]] ([[User talk:Kanashimi|talk]]) 09:57, 20 September 2026 (UTC) --[[User:Kanashimi|Kanashimi]] ([[User talk:Kanashimi|talk]]) 09:57, 20 September 2026 (UTC)', parsed.toString()], 'CeL.wiki.expand_transclusion({{REVISIONUSER}} ~~~~)');
+			});
+
 			return promise.then(function (parsed) {
 				_finish_test(test_name);
 			});
