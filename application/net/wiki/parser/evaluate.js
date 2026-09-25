@@ -2578,6 +2578,9 @@ function module_code(library_namespace) {
 			return revision.user;
 
 		case 'REVISIONTIMESTAMP':
+			if (!token.need_subst) {
+				return token;
+			}
 			var revision = get_page_revision();
 			if (!revision || !revision.timestamp)
 				return NYI();
@@ -2588,6 +2591,9 @@ function module_code(library_namespace) {
 		case 'REVISIONDAY2':
 		case 'REVISIONMONTH':
 		case 'REVISIONYEAR':
+			if (!token.need_subst) {
+				return token;
+			}
 			var revision = get_page_revision();
 			if (!revision || !revision.timestamp)
 				return NYI();

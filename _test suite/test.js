@@ -6676,7 +6676,7 @@ function test_wiki() {
 			}).then(function (parsed) {
 				// [[Special:ExpandTemplates]]
 				//console.trace(JSON.stringify(parsed.toString()));
-				assert(["{{#uic:user_name}}<span id=\"user_name\" class=\"plainlinks template-Userblock\">[[User:user_name|user_name]]（[[User talk:user_name|討論]] <b>·</b>  [[Special:Contributions/user_name|貢獻]] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:Log&page=User:user_name 日誌]<small>［[//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:AbuseLog&wpSearchUser=user_name 過濾器]］</small> <b>·</b> [[Sulutil:user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]）</span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }} using [[Template:Userblock]]');
+				assert(["<span id=\"user_name\" class=\"plainlinks template-Userblock\">[[User:user_name|user_name]]（[[User talk:user_name|討論]] <b>·</b>  [[Special:Contributions/user_name|貢獻]] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:Log&page=User:user_name 日誌]<small>［[//zh.wikipedia.org/w/index.php?title=Special:Log/block&page=User:user_name 封禁] <b>·</b>  [//zh.wikipedia.org/w/index.php?title=Special:AbuseLog&wpSearchUser=user_name 過濾器]］</small> <b>·</b> [[Sulutil:user_name|全域-{zh-hans:账号信息;zh-hant:帳號資訊}-]]）</span>", parsed.toString()], 'CeL.wiki.expand_transclusion() {{ {{ifIP}} }} using [[Template:Userblock]]');
 			});
 
 			promise = promise.then(function () {

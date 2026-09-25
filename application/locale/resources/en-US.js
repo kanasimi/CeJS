@@ -372,6 +372,7 @@
 	"Invalid page title": "Invalid page title",
 	"Page edit function error: %1": "Page edit function error: %1",
 	"%1 {{PLURAL:%2|page|pages}} processed": "%1 {{PLURAL:%2|page|pages}} processed",
+	"Invalid move configuration: %1": "Invalid move configuration: %1",
 	"Normalize {{%1}}": "Normalize {{%1}}",
 	"Maintenance template list": "Maintenance template list",
 	"Maintenance template list to be excluded": "Maintenance template list to be excluded",

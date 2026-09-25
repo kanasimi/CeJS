@@ -3,7 +3,7 @@
 */'use strict';typeof CeL==='function'&&CeL.application.locale.gettext.set_text({
 	"Espa\u00f1a": "Spanje",
 	"Calendrier r\u00e9publicain": "Franse Republikeinse Kalender",
-	"untranslated message count": "0",
+	"untranslated message count": "1",
 	"\u6e05\u9664\u8a0a\u606f": "Logboek wissen",
 	"\u986f\u793a/\u96b1\u85cf\u8a0a\u606f": "Logboek weergeven/verbergen",
 	"Load failed": "Laden mislukt",

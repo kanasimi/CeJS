@@ -2567,6 +2567,10 @@ function module_code(library_namespace) {
 		options_language = wiki_API.site_name(options, {
 			get_all_properties : true
 		}).language;
+		if (options_language === 'multilingual') {
+			// e.g., session is wikidata
+			options_language = 'en';
+		}
 
 		// console.trace(options);
 		// console.log(options_language);

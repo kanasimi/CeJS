@@ -370,6 +370,7 @@
 	"invalid-page-title": "Invalid page title",
 	"page-edit-function-error-$1": "Page edit function error: %1",
 	"$1-pages-processed": "%1 {{PLURAL:%2|page|pages}} processed",
+	"invalid-move-configuration-$1": "Invalid move configuration: %1",
 	"normalize-template-$1": "Normalize {{%1}}",
 	"maintenance-template-list": "Maintenance template list",
 	"maintenance-template-list-to-be-excluded": "Maintenance template list to be excluded",
