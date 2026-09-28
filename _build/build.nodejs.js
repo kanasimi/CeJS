@@ -195,8 +195,9 @@ const PATTERN_has_invalid_en_message_char = /[^\x20-\xfe\s–←↑→↔≠🆔
 
 
 const gettext_plural_rules__file_name = 'gettext_plural_rules.js';
+const gettext_plural_rules_source_URL = 'https://raw.githubusercontent.com/wikimedia/mediawiki-extensions-Translate/master/data/plural-gettext.txt';
 async function get_gettext_plural_rules(resources_path) {
-	let rule_contents = await fetch('https://raw.githubusercontent.com/wikimedia/mediawiki-extensions-Translate/master/data/plural-gettext.txt');
+	let rule_contents = await fetch(gettext_plural_rules_source_URL);
 	rule_contents = await rule_contents.text();
 	rule_contents = rule_contents.trim().split('\n');
 	//console.trace(rule_contents);
