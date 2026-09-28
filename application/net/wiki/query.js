@@ -200,7 +200,9 @@ function module_code(library_namespace) {
 			});
 
 		} else {
-			if (result && result.edit) {
+			if (result && (result.POST_data && result.POST_data.token
+			//
+			|| result.edit)) {
 				if ('retry_login' in session) {
 					console.trace('已成功 edit，去除 retry flag。');
 					delete session.retry_login;
@@ -809,6 +811,9 @@ function module_code(library_namespace) {
 			// console.trace(action);
 			// callback(response);
 			// options.action = action;
+			if (POST_data) {
+				response.POST_data = POST_data;
+			}
 			check_session_badtoken(response, callback, options);
 			// console.trace(session && session.running);
 		}
