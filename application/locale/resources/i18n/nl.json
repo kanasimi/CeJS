@@ -380,6 +380,7 @@
 	"invalid-page-title": "Incorrecte paginatitel",
 	"page-edit-function-error-$1": "Fout in paginabewerkingsfunctie: %1",
 	"$1-pages-processed": "%1 {{PLURAL:%2|pagina|pagina's}} verwerkt",
+	"invalid-move-configuration-$1": "Onjuiste verplaatsingsconfiguratie: %1",
 	"normalize-template-$1": "{{%1}} normaliseren",
 	"maintenance-template-list": "Lijst met onderhoudssjablonen",
 	"maintenance-template-list-to-be-excluded": "Lijst met uit te sluiten onderhoudssjablonen",
