@@ -4607,7 +4607,7 @@ function module_code(library_namespace) {
 	// {zhwikiSession,centralauth_User,centralauth_Token,centralauth_Session,wikidatawikiSession,wikidatawikiUserID,wikidatawikiUserName}
 	//
 	// TODO: https://www.mediawiki.org/w/api.php?action=help&modules=clientlogin
-	wiki_API.login = function(user_name, password, login_options) {
+	function login_wiki_session(user_name, password, login_options) {
 		// 注意: new wiki_API() 後之操作，應該採 wiki_session.run()
 		// 的方式，確保此時已經執行過 pre-loading functions @ function wiki_API():
 		// wiki_session.siteinfo(), wiki_session.adapt_task_configurations()
@@ -4901,7 +4901,9 @@ function module_code(library_namespace) {
 		}, null, session);
 
 		return session;
-	};
+	}
+
+	wiki_API.login = login_wiki_session;
 
 	/** {Natural}登入失敗時最多重新嘗試下載的次數。 */
 	wiki_API.login.MAX_ERROR_RETRY = 2;
