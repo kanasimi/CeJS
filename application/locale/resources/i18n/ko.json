@@ -379,6 +379,7 @@
 	"invalid-page-title": "잘못된 문서 제목",
 	"page-edit-function-error-$1": "페이지 편집 함수 오류: %1",
 	"$1-pages-processed": "%1개 {{PLURAL:%2|페이지}} 처리됨",
+	"invalid-move-configuration-$1": "잘못된 이동 구성: %1",
 	"normalize-template-$1": "{{%1}} 정규화",
 	"maintenance-template-list": "유지보수 틀 목록",
 	"maintenance-template-list-to-be-excluded": "제외할 유지보수 틀 목록",
