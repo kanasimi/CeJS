@@ -1853,7 +1853,7 @@ var last_selected, select_panels = {
 	// gettext_config:{"id":"calendar-table"}
 	calendar : '曆譜',
 	// gettext_config:{"id":"configuration"}
-	configuration : '設定',
+	configuration : '組態',
 	// 整批轉換
 	// gettext_config:{"id":"batch"}
 	batch_processing : '批次轉換',

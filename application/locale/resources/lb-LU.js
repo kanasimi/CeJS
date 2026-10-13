@@ -24,7 +24,7 @@
 	"\u6240\u6709\u570b\u5bb6": "All L\u00e4nner",
 	"\u6e2c\u8a66\u7bc4\u4f8b": "BEISPILL",
 	"\u4f7f\u7528\u8aaa\u660e": "KONZEPT",
-	"\u8a2d\u5b9a": "KONFIGURATIOUN",
+	"\u7d44\u614b": "KONFIGURATIOUN",
 	"\u554f\u984c\u56de\u5831": "FEEDBACK",
 	"France": "Frankr\u00e4ich",
 	"Great Britain": "Groussbritannien",

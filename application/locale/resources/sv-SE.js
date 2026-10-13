@@ -43,7 +43,7 @@
 	"\u8f38\u5165\u7d00\u9304": "REGISTRERING",
 	"\u4f7f\u7528\u8aaa\u660e": "KONCEPT",
 	"\u7d00\u5e74\u7dda\u5716": "TIDSLINJE",
-	"\u8a2d\u5b9a": "KONFIGURERING",
+	"\u7d44\u614b": "KONFIGURERING",
 	"\u6a19\u6ce8\u6587\u672c": "TAGGNING",
 	"\u66c6\u6578\u8655\u7406": "UTVECKLING",
 	"\u554f\u984c\u56de\u5831": "\u00c5TERKOPPLING",

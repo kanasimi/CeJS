@@ -2552,7 +2552,7 @@ function module_code(library_namespace) {
 						delete session.adapt_task_configurations_timer;
 						library_namespace.info([ 'add_listener: ', {
 							// gettext_config:{"id":"the-configuration-page-$1-has-been-modified.-re-parse"}
-							T : [ '設定頁面 %1 已變更。重新解析……',
+							T : [ '組態頁面 %1 已變更。重新解析……',
 							//
 							wiki_API.title_link_of(configuration_page_title) ]
 						} ]);
