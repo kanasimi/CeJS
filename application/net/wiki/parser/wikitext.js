@@ -1048,7 +1048,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Array|String}token
 	 *            wiki element token
-	 * @returns {String|Array} key
+	 * @returns {String|Array|Undefined} key
 	 * 
 	 * @see remove_non_functional_wikitext(wikitext)
 	 */

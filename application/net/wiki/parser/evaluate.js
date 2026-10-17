@@ -1867,9 +1867,10 @@ function module_code(library_namespace) {
 				if (Array.isArray(key)) {
 					// 避免循環設定。
 					key.evaluated = true;
+				} else if (typeof key === 'string') {
+					key = key.trim();
 				}
-				// assert: key is String
-				token[attribute_name] = key.trim();
+				token[attribute_name] = key;
 			}
 
 			var promise = wiki_API.parse

@@ -774,6 +774,7 @@ function module_code(library_namespace) {
 			if (library_namespace.is_thenable(_value) || /{{/.test(_value)) {
 				throw new Error('get_parameter_of_token: 無法處理特殊參數 ' + _value);
 			}
+			// String(_value) for undefined
 			value = _value.toString();
 		}
 		// 使用未命名參數時，參數前後的空格會保留。
