@@ -765,20 +765,33 @@ function module_code(library_namespace) {
 		if (!(NO in parameters))
 			return;
 
-		var value = parameters[NO].toString();
-		if (/{{/.test(value)) {
-			var _value = wiki_API.expand_transclusion(value, options);
-			if (!library_namespace.is_thenable(_value)) {
-				_value = wiki_API.parse.wiki_element_to_key(_value);
+		function check_and_return_value(value) {
+			if (/{{/.test(value)) {
+				var _value = wiki_API.expand_transclusion(value, options);
+				if (library_namespace.is_thenable(_value)) {
+					if (options.allow_promise) {
+						return _value.then(check_and_return_value);
+					}
+					library_namespace
+							.error('get_parameter_of_token: 需要非同步處理特殊參數 '
+									+ _value);
+				} else {
+					_value = wiki_API.parse.wiki_element_to_key(_value);
+					if (/{{/.test(_value)) {
+						library_namespace
+								.error('get_parameter_of_token: 無法處理特殊參數 '
+										+ _value);
+					}
+					// String(_value) for undefined
+					value = _value.toString();
+				}
 			}
-			if (library_namespace.is_thenable(_value) || /{{/.test(_value)) {
-				throw new Error('get_parameter_of_token: 無法處理特殊參數 ' + _value);
-			}
-			// String(_value) for undefined
-			value = _value.toString();
+			// 使用未命名參數時，參數前後的空格會保留。
+			return NO > 0 ? value : value.trim();
 		}
-		// 使用未命名參數時，參數前後的空格會保留。
-		return NO > 0 ? value : value.trim();
+
+		var value = parameters[NO].toString();
+		return check_and_return_value(value);
 	}
 
 	// [[w:en:Module:String]]

@@ -412,6 +412,8 @@ function module_code(library_namespace) {
 			if (!tag || !(tag in wiki_error.tag_name_hash)) {
 				// default tag name
 				tag = 'strong';
+			} else {
+				tag = String(tag);
 			}
 			return '<' + tag + ' class="error">' + this.message + '</' + tag
 					+ '>';

@@ -5619,6 +5619,8 @@ function module_code(library_namespace) {
 		parsed = parse_wikitext(parsed.toString(), options);
 
 		if (token.type !== parsed.type) {
+			library_namespace.warn('inplace_reparse_element: [' + token.type
+					+ '] ' + token + ' ⭢ [' + parsed.type + '] ' + parsed);
 			throw new Error('inplace_reparse_element: token.type: '
 					+ token.type + '⭢' + parsed.type);
 		}
