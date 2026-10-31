@@ -437,6 +437,7 @@ function module_code(library_namespace) {
 	// extract_plain_text_of_wikitext(), get_plain_display_text()
 	// @see [[w:en:Module:Delink]]
 	// 可考慮是否採用 CeL.wiki.expand_transclusion()
+	// @see function wiki_element_to_key(token)
 	function wikitext_to_plain_text(wikitext, options) {
 		options = library_namespace.new_options(options);
 

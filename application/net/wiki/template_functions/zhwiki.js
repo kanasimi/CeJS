@@ -364,7 +364,7 @@ function module_code(library_namespace) {
 			value = token.parameters[parameter_name];
 			if (!value)
 				continue;
-			value = wiki_API.parse.wiki_element_to_key(value);
+			value = wiki_API.parse.wiki_element_to_key(value, options);
 			var group_name_String;
 			if (typeof value === 'string') {
 				group_name_String = value = value.replace(/_/g, ' ').trim()

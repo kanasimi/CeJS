@@ -1052,30 +1052,44 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Array|String}token
 	 *            wiki element token
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * 
 	 * @returns {String|Array|Undefined} key
 	 * 
-	 * @see remove_non_functional_wikitext(wikitext)
+	 * @see remove_non_functional_wikitext(wikitext)<br />
+	 *      wikitext_to_plain_text(wikitext, options)
 	 */
-	function wiki_element_to_key(token) {
+	function wiki_element_to_key(token, options) {
 		if (!Array.isArray(token)) {
 			if (typeof token === 'string') {
 				token = token
 				// 去除註解。 Remove comments. "<!-- comment -->"
 				.replace(/<\!--[\s\S]*?-->/g, '').trim();
+				if (/{{/.test(token)) {
+					token = wiki_API.expand_transclusion(token, options);
+				} else {
+					// token = parse_wikitext(token, options);
+				}
+				if (!Array.isArray(token)) {
+					return token;
+				}
+
+			} else {
+				return token;
 			}
-			return token;
 		}
 
 		var has_element;
 		// key token must accept '\n'. e.g., "key_ \n _key = value"
 		var filtered_token = token.filter(function(_token) {
 			if (_token.type === 'plain') {
-				_token = wiki_element_to_key(_token);
+				_token = wiki_element_to_key(_token, options);
 			}
 
 			if (_token.type === 'tag') {
 				// e.g., <nowiki></nowiki>
-				_token = wiki_element_to_key(_token[1]);
+				_token = wiki_element_to_key(_token[1], options);
 			}
 
 			if (!Array.isArray(_token)) {
@@ -1934,7 +1948,7 @@ function module_code(library_namespace) {
 
 			if (Array.isArray(URL[0])) {
 				URL[0].parent = URL;
-				URL[0].url = wiki_element_to_key(URL[0]);
+				URL[0].url = wiki_element_to_key(URL[0], options);
 				if (Array.isArray(URL[0].url))
 					URL[0].url = URL[0].url.join('');
 			}
@@ -2857,7 +2871,7 @@ function module_code(library_namespace) {
 				// parse function name
 				matched.pfn = wiki_element_to_key(
 				//
-				parse_wikitext(matched[2], options, queue));
+				parse_wikitext(matched[2], options, queue), options);
 				if (/^[ *\n]*#/.test(matched.pfn)) {
 					if (typeof matched.pfn === 'string')
 						matched.pfn = matched.pfn.trim().toLowerCase();
@@ -5629,7 +5643,8 @@ function module_code(library_namespace) {
 
 		if (token.type !== parsed.type) {
 			library_namespace.warn('inplace_reparse_element: [' + token.type
-					+ '] ' + token + ' ⭢ [' + parsed.type + '] ' + parsed);
+					+ '] ' + token.toString().slice(0, 400) + ' ⭢ ['
+					+ parsed.type + '] ' + parsed.toString().slice(0, 400));
 			throw new Error('inplace_reparse_element: token.type: '
 					+ token.type + '⭢' + parsed.type);
 		}

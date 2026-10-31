@@ -72,7 +72,7 @@ function module_code(library_namespace) {
 		// e.g., {Array}link token
 		= link_title.page_title
 		// e.g., {String}page title
-		|| String(wiki_API.parse.wiki_element_to_key(link_title));
+		|| String(wiki_API.parse.wiki_element_to_key(link_title, options));
 
 		var matched = interwikimap.mapper
 				&& page_title.match(PATTERN_interwiki_title);

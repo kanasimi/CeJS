@@ -124,8 +124,10 @@ function module_code(library_namespace) {
 				return wikitext;
 		} else {
 			// console.trace(wikitext);
-			throw new Error('page_parser: ' + 'Invalid wikitext type: {'
-					+ typeof wikitext + '} ' + JSON.stringify(wikitext) + '.');
+			library_namespace.error('page_parser: '
+					+ 'Invalid wikitext type: {' + typeof wikitext + '} '
+					+ JSON.stringify(wikitext) + '.');
+			wikitext = [ wikitext ];
 		}
 
 		if (typeof options === 'string') {

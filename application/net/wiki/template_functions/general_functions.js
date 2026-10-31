@@ -684,7 +684,7 @@ function module_code(library_namespace) {
 	 *          RegExp object if flags are provided. 轉換後的 JavaScript RegExp
 	 *          模式字串，或者如果提供了 flags，則返回一個 RegExp 對象。
 	 * 
-	 * @see https://www.lua.org/manual/5.4/manual.html#6.4.1
+	 * @see https://www.lua.org/manual/5.5/manual.html#6.5.1
 	 *      https://www.lua.org/pil/20.2.html
 	 */
 	function Lua_pattern_to_RegExp_pattern(pattern, flags) {
@@ -729,7 +729,7 @@ function module_code(library_namespace) {
 		//
 		.replace(/%b/g, NYI)
 		//
-		.replace(/([^\\])-/g, '$1*?')
+		.replace(/([^\\^]|.^)-/g, '$1*?')
 		//
 		.replace(/\x01s__(\d+)\x01e__/g, function(all, index) {
 			return buffer[index];
@@ -776,15 +776,18 @@ function module_code(library_namespace) {
 							.error('get_parameter_of_token: 需要非同步處理特殊參數 '
 									+ _value);
 				} else {
-					_value = wiki_API.parse.wiki_element_to_key(_value);
+					_value = wiki_API.parse
+							.wiki_element_to_key(_value, options);
 					if (/{{/.test(_value)) {
-						library_namespace.error(
+						library_namespace.warn(
 						// 可能有無法解析的 module。
 						'get_parameter_of_token: 無法處理特殊參數 ' + _value);
 					}
 					// String(_value) for undefined
 					value = (_value ? _value : value).toString();
 				}
+			} else {
+				value = value.toString();
 			}
 			// 使用未命名參數時，參數前後的空格會保留。
 			return NO > 0 ? value : value.trim();

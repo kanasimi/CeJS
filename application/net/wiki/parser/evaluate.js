@@ -798,6 +798,9 @@ function module_code(library_namespace) {
 	 * 
 	 * 使用上注意: 應設定 options[KEY_on_page_title_option]
 	 * 
+	 * TODO: expand_transclusion( {{Infobox character}} @ [[w:en:Count Dracula]] )
+	 * 會造成 inplace_reparse_element: token.type: transclusion⭢plain
+	 * 
 	 * @param {String}wikitext
 	 *            模板 wikitext。
 	 * @param {Object}[options]
@@ -1696,10 +1699,13 @@ function module_code(library_namespace) {
 					}
 				}
 				if (message_name) {
+					var token_string = token.toString();
 					library_namespace.warn('evaluate_parser_function_token: '
 							+ '尚未加入演算 {{' + message_name + '}} 的功能'
 							+ transclusion_message + ': '
-							+ (reason ? reason + ': ' : '') + token);
+							+ (reason ? reason + ': ' : '')
+							+ token_string.slice(0, 200)
+							+ (token_string.length > 200 ? '...' : ''));
 				}
 				// Error.stackTraceLimit = Infinity;
 				// console.trace(options);
@@ -1875,7 +1881,7 @@ function module_code(library_namespace) {
 
 			var promise = wiki_API.parse
 					.wiki_element_to_key(expand_transclusion(token_key,
-							options, template_depth_now));
+							options, template_depth_now), options);
 			if (library_namespace.is_thenable(promise)) {
 				if (setter)
 					return promise.then(setter);
