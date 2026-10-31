@@ -276,7 +276,7 @@ function module_code(library_namespace) {
 		if (typeof token === 'string') {
 			token = [ token ];
 		} else if (!Array.isArray(token)) {
-			library_namespace.warn('set_wiki_type: The token is not Array!');
+			library_namespace.error('set_wiki_type: The token is not Array!');
 		} else if (token.type && token.type !== 'plain') {
 			// 就算 token.type !== type，可能是 <span> 中嵌套 <span> 的形式，
 			// 不該直接 `return token` 。
@@ -298,6 +298,10 @@ function module_code(library_namespace) {
 		if (false) {
 			Object.defineProperty(token, 'toString',
 					wiki_element_toString[type]);
+		}
+		if (!token.toString) {
+			library_namespace.error('set_wiki_type: Set invalid type [' + type
+					+ '] to [' + token + ']');
 		}
 
 		if (false) {
@@ -1090,8 +1094,13 @@ function module_code(library_namespace) {
 		// console.trace([ has_element, _token ]);
 		if (token.type === 'plain' && !has_element)
 			return filtered_token.join('');
+
+		var type = token.type
+		// e.g., from function set_shell()
+		// @ CeL.application.net.wiki.parser.evaluate
+		|| token.has_shell && token.length === 1 && token[0].type;
 		// 注意: 這時 不會回傳 {String}!
-		return set_wiki_type(filtered_token, token.type);
+		return set_wiki_type(filtered_token, type);
 	}
 
 	// for_each_subelement() 的超簡化版

@@ -778,12 +778,12 @@ function module_code(library_namespace) {
 				} else {
 					_value = wiki_API.parse.wiki_element_to_key(_value);
 					if (/{{/.test(_value)) {
-						library_namespace
-								.error('get_parameter_of_token: 無法處理特殊參數 '
-										+ _value);
+						library_namespace.error(
+						// 可能有無法解析的 module。
+						'get_parameter_of_token: 無法處理特殊參數 ' + _value);
 					}
 					// String(_value) for undefined
-					value = _value.toString();
+					value = (_value ? _value : value).toString();
 				}
 			}
 			// 使用未命名參數時，參數前後的空格會保留。
@@ -794,57 +794,97 @@ function module_code(library_namespace) {
 		return check_and_return_value(value);
 	}
 
-	// [[w:en:Module:String]]
-	function expand_module_String(options) {
-		/* const */var token = this;
-		var index = 1;
-		// 警告: 本函數中取用 get_parameter(NO) 必須嚴格按照 [[Module:String]]
-		// 的順序，且每一參數僅能取用一次。
-		function get_parameter(NO) {
-			var parameter_value = get_parameter_of_token(NO, token, options);
+	function handle_thenable_parameters(parameters_to_send, main_function,
+			token, options) {
+		var index = 1, has_thenable;
+		parameters_to_send = parameters_to_send.map(function(parameter_name) {
+			var parameter_value = get_parameter_of_token(parameter_name, token,
+					options);
 			if (parameter_value === undefined) {
 				// @see function str._getParameters @ [[Module:String]]
 				parameter_value = get_parameter_of_token(index++, token,
 						options);
 			}
+
+			has_thenable = has_thenable
+					|| library_namespace.is_thenable(parameter_value);
 			return parameter_value;
+		});
+
+		if (!has_thenable) {
+			return main_function.apply(null, parameters_to_send);
 		}
+		return Promise.all(parameters_to_send)
+		//
+		.then(function(parameters_to_send) {
+			return main_function.apply(null, parameters_to_send);
+		});
+	}
+
+	// [[w:en:Module:String]]
+	function expand_module_String(options) {
+		/* const */var token = this;
+
+		// 警告: 本函數中取用 handle_thenable_parameters(parameters_to_send) 必須嚴格按照
+		// [[Module:String]] 子函式的順序，且每一參數僅能取用一次。
 
 		switch (token.function_name) {
 		case 'len':
-			return get_parameter('s').length;
+			return handle_thenable_parameters([ 's' ], function(target_string) {
+				return target_string.length;
+			}, token, options);
 
 		case 'endswith':
-			var source = get_parameter('source');
-			var pattern = get_parameter('pattern');
-			return source.endsWith(pattern) ? 'yes' : '';
+			return handle_thenable_parameters(
+			//
+			[ 'source', 'pattern' ], function(source, pattern) {
+				return source.endsWith(pattern) ? 'yes' : '';
+			}, token, options);
 
 		case 'replace':
-			var source = get_parameter('source');
-			var pattern = get_parameter('pattern');
-			pattern = Lua_pattern_to_RegExp_pattern(pattern, 'g');
-			return source.replace(pattern, get_parameter('replace'));
+			return handle_thenable_parameters(
+			//
+			[ 'source', 'pattern', 'replace', 'count', 'plain' ], function(
+					source, pattern, replacement, count, plain) {
+				// if (plain || plain === undefined)
+				pattern = Lua_pattern_to_RegExp_pattern(pattern, 'g');
+
+				if (/{{/.test(source) || /{{/.test(pattern)) {
+					return token;
+				}
+				if (+count) {
+					library_namespace.error(
+					//
+					'expand_module_String: NYI: str.replace( count )');
+					return token;
+				}
+				return source.replace(pattern, replacement);
+			}, token, options);
 
 		case 'sub':
+			return handle_thenable_parameters(
 			// function str.sub( frame )
-			var target_string = get_parameter('s');
-			var start_index = (get_parameter('i') || 1) - 1;
-			if (start_index < 0)
-				start_index += target_string.length + 1;
-			var end_index = +get_parameter('j') || -1;
-			if (end_index < 0)
-				end_index += target_string.length + 1;
-			if (start_index < 0 || end_index < 0
-					|| start_index > target_string.length
-					|| end_index > target_string.length) {
-				return new wiki_API.wiki_error(
-						'String Module Error: String subset index out of range');
-			}
-			if (start_index > end_index) {
-				return new wiki_API.wiki_error(
-						'String Module Error: String subset indices out of order');
-			}
-			return target_string.substring(start_index, end_index);
+			[ 's', 'i', 'j' ], function(target_string, start_index, end_index) {
+				var start_index = (start_index || 1) - 1;
+				var end_index = +end_index || -1;
+				if (start_index < 0)
+					start_index += target_string.length + 1;
+				if (end_index < 0)
+					end_index += target_string.length + 1;
+				if (start_index < 0 || end_index < 0
+						|| start_index > target_string.length
+						|| end_index > target_string.length) {
+					return new wiki_API.wiki_error(
+					//
+					'String Module Error: String subset index out of range');
+				}
+				if (start_index > end_index) {
+					return new wiki_API.wiki_error(
+					//
+					'String Module Error: String subset indices out of order');
+				}
+				return target_string.substring(start_index, end_index);
+			}, token, options);
 
 		case 'count':
 		case 'escapePattern':
@@ -865,17 +905,19 @@ function module_code(library_namespace) {
 	// [[w:en:Module:Ustring]]
 	function expand_module_Ustring(options) {
 		/* const */var token = this;
-		function get_parameter(NO) {
-			return get_parameter_of_token(NO, token, options);
-		}
 
 		// https://www.mediawiki.org/wiki/Extension:Scribunto/Lua_reference_manual#Ustring_library
 		switch (token.function_name) {
 		case 'sub':
 			// e.g., [[Template:Str rightc]] @ [[Template:Infobox 越南省市]]
-			return get_parameter(2) ? get_parameter('s1').slice(
-					+get_parameter(1), +get_parameter(2)) : get_parameter('s1')
-					.slice(+get_parameter(1));
+			return handle_thenable_parameters(
+			// https://www.mediawiki.org/wiki/Extension:Scribunto/Lua_reference_manual#mw.ustring.sub
+			[ 's1', 1, 2 ], function(target_string, start_index, end_index) {
+				if (end_index) {
+					return target_string.slice(+start_index, +end_index);
+				}
+				return target_string.slice(+start_index);
+			}, token, options);
 
 		case 'byte':
 		case 'byteoffset':
