@@ -4481,7 +4481,7 @@ function module_code(library_namespace) {
 		if (false)
 			library_namespace.debug('pattern: ' + pattern, 6,
 					'replace_till_stable');
-		for (var original; original !== text;) {
+		for (var original, count = 0; original !== text;) {
 			original = text;
 			if (has_replacement_offset) {
 				// new browsers
@@ -4502,6 +4502,11 @@ function module_code(library_namespace) {
 				library_namespace.debug('[' + original + '] '
 						+ (original === text ? 'done.' : '→ [' + text + ']'),
 						6, 'replace_till_stable');
+			}
+			if (count++ > 1e3) {
+				library_namespace.error('replace_till_stable: 替換過多次，直接跳出！\n'
+						+ pattern + '\n' + text);
+				break;
 			}
 		}
 		return text;

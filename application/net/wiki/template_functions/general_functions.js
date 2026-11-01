@@ -730,6 +730,8 @@ function module_code(library_namespace) {
 		.replace(/%b/g, NYI)
 		//
 		.replace(/([^\\^]|.^)-/g, '$1*?')
+		// e.g., "+"
+		.replace(/^\+/, '\\+')
 		//
 		.replace(/\x01s__(\d+)\x01e__/g, function(all, index) {
 			return buffer[index];
