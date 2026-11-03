@@ -4503,7 +4503,7 @@ function module_code(library_namespace) {
 						+ (original === text ? 'done.' : '→ [' + text + ']'),
 						6, 'replace_till_stable');
 			}
-			if (count++ > 1e3) {
+			if (count++ > 50) {
 				library_namespace.error('replace_till_stable: 替換過多次，直接跳出！\n'
 						+ pattern + '\n' + text);
 				break;

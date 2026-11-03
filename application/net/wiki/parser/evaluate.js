@@ -892,8 +892,17 @@ function module_code(library_namespace) {
 
 			// console.trace(expanded_token);
 			// Error.stackTraceLimit = 10;
-			if (!expanded_token || expanded_token.type !== 'transclusion')
+			if (!expanded_token)
 				return expanded_token;
+
+			if (expanded_token.type !== 'transclusion') {
+				if (expanded_token.type === 'magic_word_function') {
+					// e.g., {{safesubst:delink}}
+					// {{#invoke:}}
+					expanded_token.template_token_called = token;
+				}
+				return expanded_token;
+			}
 
 			expanded_token = expand_template_name(expanded_token);
 			if (library_namespace.is_thenable(expanded_token)) {
@@ -2671,6 +2680,11 @@ function module_code(library_namespace) {
 			var parsed = wiki_API.parse(wikitext, options);
 			// TODO: SAFESUBST:在模板包含對其他模板或解析器函數的呼叫時，允許遞歸替換。
 			parsed.need_subst = true;
+			if (token.template_token_called) {
+				// from expand_transclusion():
+				// expanded_token.template_token_called = token;
+				parsed.template_token_called = token.template_token_called;
+			}
 			// expand template
 			if (parsed.type === 'magic_word_function') {
 				parsed = evaluate_parsed(parsed, options, template_depth_now);

@@ -435,7 +435,7 @@ function module_code(library_namespace) {
 
 	// TODO: The method now is NOT a good way!
 	// extract_plain_text_of_wikitext(), get_plain_display_text()
-	// @see [[w:en:Module:Delink]]
+	// @see function expand_module_Delink(options)
 	// 可考慮是否採用 CeL.wiki.expand_transclusion()
 	// @see function wiki_element_to_key(token)
 	function wikitext_to_plain_text(wikitext, options) {
@@ -1784,6 +1784,10 @@ function module_code(library_namespace) {
 
 				_options[wikitext_had_expanded] = wikitext;
 				return get_all_anchors(wikitext, _options);
+			}, function(error) {
+				library_namespace.error('get_all_anchors: '
+						+ wiki_API.title_link_of(options) + ': '
+						+ error.message);
 			});
 		}
 
@@ -1818,6 +1822,11 @@ function module_code(library_namespace) {
 			}
 			anchor_hash[anchor] = token;
 			return anchor;
+		}
+		function register_anchor_list(anchors, token, preserve_spaces) {
+			anchors.forEach(function(anchor) {
+				register_anchor(anchor, token, preserve_spaces);
+			});
 		}
 
 		// options: pass session. for options.language
@@ -2079,7 +2088,7 @@ function module_code(library_namespace) {
 						var anchors = get_all_anchors(wikitext, _options);
 						if (library_namespace.is_thenable(anchors)) {
 							anchors.then(set_transclusion_page_anchors,
-
+							//
 							reject);
 						} else {
 							set_transclusion_page_anchors(anchors);
@@ -2112,12 +2121,13 @@ function module_code(library_namespace) {
 
 				var anchors = wiki_API.repeatedly_expand_template_token(
 						template_token, options);
+				var _promise;
 				// console.trace(template_token, anchors);
 				if (template_token !== anchors) {
 					// 處理包括 {{Anchor}}, {{Anchors}}, {{Visible anchor}},
 					// {{term}}
 					if (!anchors || typeof anchors.toString !== 'function') {
-						return;
+						return _promise;
 					}
 
 					template_token = anchors;
@@ -2134,11 +2144,17 @@ function module_code(library_namespace) {
 
 					anchors = get_all_anchors(anchors, _options);
 					// console.trace(anchors);
-					anchors.forEach(function(anchor) {
-						register_anchor(anchor, template_token);
-					});
+					if (library_namespace.is_thenable(anchors)) {
+						_promise = Promise.resolve(_promise).then(function() {
+							return anchors.then(function(anchors) {
+								register_anchor_list(anchors, template_token);
+							});
+						});
+					} else {
+						register_anchor_list(anchors, template_token);
+					}
 					if (template_token.type !== 'transclusion')
-						return;
+						return _promise;
 				}
 
 				// e.g., {{Cite book|...|ref=anchor}} @ [[日本の原子爆弾開発]]
@@ -2159,7 +2175,7 @@ function module_code(library_namespace) {
 							anchor = wiki_API.wikitext_to_plain_text(anchor);
 							register_anchor(anchor, template_token);
 						}
-						return;
+						return _promise;
 					}
 
 					// https://en.wikipedia.org/wiki/Template:Citation/doc#Anchors_for_Harvard_referencing_templates
@@ -2187,7 +2203,7 @@ function module_code(library_namespace) {
 
 					if (anchor)
 						register_anchor('CITEREF' + anchor, template_token);
-					return;
+					return _promise;
 				}
 
 				if (false && options && options.print_anchors) {
@@ -2195,15 +2211,14 @@ function module_code(library_namespace) {
 							.warn('get_all_anchors: Cannot expand template: '
 									+ template_token);
 				}
+				return _promise;
 			});
 
 			// e.g., [[w:en:Law & Order: Special Victims Unit (season 1)]]
 			var _promise = parsed.each('magic_word_function', function(
 					module_token, index, parent_token) {
 				function handle_anchors(anchors) {
-					anchors.forEach(function(anchor) {
-						register_anchor(anchor, module_token);
-					});
+					register_anchor_list(anchors, module_token);
 				}
 
 				if (module_token.module_name === 'Episode list') {

@@ -481,6 +481,32 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// [[w:en:Module:Delink]]
+	function expand_module_Delink(options) {
+		if (this.function_name !== 'delink') {
+			return function_does_not_exist_error(token);
+		}
+
+		/* const */var token =
+		// from expand_transclusion():
+		// expanded_token.template_token_called = token;
+		this.template_token_called || options && options.template_token_called
+				|| this;
+
+		var parameters = token.parameters;
+		var wikitext = parameters[1];
+
+		if (!wikitext || parameters.wikilinks || parameters.urls
+				|| parameters.comments || parameters.whitespace
+				|| parameters.refs) {
+			return this;
+		}
+
+		return wiki_API.wikitext_to_plain_text(wikitext, options);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// @see [[w:en:Module:Template wrapper]]
 	// [[w:en:Wikipedia:Wrapper templates]]
 	// https://zh.wikipedia.org/wiki/Special:WhatLinksHere?target=Module%3ATemplate+wrapper&namespace=10&hidelinks=1&hideredirs=1&limit=50
@@ -1131,6 +1157,12 @@ function module_code(library_namespace) {
 
 		// wiki/routine/20210429.Auto-archiver.js: avoid being archived
 		'Pin message' : parse_template_Pin_message,
+
+		'Module:Delink' : {
+			properties : {
+				expand : expand_module_Delink
+			}
+		},
 
 		'Module:Template wrapper' : {
 			properties : {

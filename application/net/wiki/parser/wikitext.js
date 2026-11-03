@@ -3825,6 +3825,11 @@ function module_code(library_namespace) {
 		function parse_comments_or_extensiontags(all, tag, attributes, inner,
 				ending, end_tag, parameters, offset, original_string) {
 			if (tag) {
+				if (attributes && attributes.endsWith('/')
+						&& (tag.toLowerCase() in extensiontag_hash)) {
+					// TODO: 處理 '<ref />'.repeat(20000)+'<ref></ref>' 的情況。
+					;
+				}
 				// assert: is extensiontag
 				return parse_HTML_tag(all, tag, attributes, inner, ending,
 						end_tag, offset, original_string);
