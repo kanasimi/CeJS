@@ -106,9 +106,15 @@ function module_code(library_namespace) {
 		}) {
 			for_each_subelement.call(token, function(sub_token, index, parent) {
 				// console.trace(sub_token);
-				sub_token = preprocess_section_link_token(sub_token, options);
-				// console.trace(sub_token);
-				return sub_token;
+				var _sub_token = preprocess_section_link_token(sub_token,
+						options);
+				// console.trace(_sub_token);
+				if (sub_token.not_evaluated
+						&& sub_token.toString() === _sub_token.toString()
+						&& sub_token.name === '#invoke') {
+					return for_each_subelement.skip_inner;
+				}
+				return _sub_token;
 			}, options);
 			return token;
 		}
@@ -1786,8 +1792,8 @@ function module_code(library_namespace) {
 				return get_all_anchors(wikitext, _options);
 			}, function(error) {
 				library_namespace.error('get_all_anchors: '
-						+ wiki_API.title_link_of(options) + ': '
-						+ error.message);
+				//
+				+ wiki_API.title_link_of(options) + ': ' + error.message);
 			});
 		}
 

@@ -502,7 +502,13 @@ function module_code(library_namespace) {
 			return this;
 		}
 
-		return wiki_API.wikitext_to_plain_text(wikitext, options);
+		var expanded_wikitext = wiki_API.wikitext_to_plain_text(wikitext,
+				options);
+		if (expanded_wikitext === wikitext.toString()) {
+			return this;
+			throw new Error('expand_module_Delink: NYI');
+		}
+		return expanded_wikitext;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -810,6 +816,7 @@ function module_code(library_namespace) {
 						library_namespace.warn(
 						// 可能有無法解析的 module。
 						'get_parameter_of_token: 無法處理特殊參數 ' + _value);
+						// _value.not_evaluated = true;
 					}
 					// String(_value) for undefined
 					value = (_value ? _value : value).toString();

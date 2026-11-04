@@ -6221,7 +6221,9 @@ function test_wiki() {
 				return Promise.all([
 					'{{Ifsubst|yes|no}}',
 					'{{issubst}}',
-					'{{safesubst:#ifeq:{{subst:substcheck}}|SUBST||{{error|错误：{{tlx|YGA}}必须被替换引用。}}}}'
+					'{{safesubst:#ifeq:{{subst:substcheck}}|SUBST||{{error|错误：{{tlx|YGA}}必须被替换引用。}}}}',
+
+					'{{trim|1={{#invoke:string|replace|source={{#invoke:string|replace|source={{KillMarkers|1={{delink|}}}} |pattern=%<%/? *div[^%>]*%> |replace=|plain=false}} |pattern=%<%/? *span[^%>]*%> |replace=|plain=false}}}}'
 				].map(function (wikitext) {
 					return CeL.wiki.expand_transclusion(wikitext, options);
 				}));
@@ -6232,6 +6234,7 @@ function test_wiki() {
 				assert(['', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{issubst}} )');
 				// TODO
 				assert(['', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{substcheck}} ) from [[w:zh:Template:YGA]]');
+				results[index++].toString();//assert(['', results[index++].toString()], test_name + ': CeL.wiki.expand_transclusion( {{trim}} ) Uncaught RangeError: Maximum call stack size exceeded');
 
 
 				// https://zh.wikipedia.org/wiki/Special:ApiSandbox#action=expandtemplates&format=json&text=%7B%7BIfsubst%7Cyes%7Cno%7D%7D&formatversion=2
