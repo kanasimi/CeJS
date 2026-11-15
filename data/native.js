@@ -4478,10 +4478,12 @@ function module_code(library_namespace) {
 	 * @returns {String}replaced text. 變更/取代後的結果。
 	 */
 	function replace_till_stable(text, pattern, replace_to) {
-		if (false)
+		if (false) {
 			library_namespace.debug('pattern: ' + pattern, 6,
 					'replace_till_stable');
-		for (var original, count = 0; original !== text;) {
+		}
+
+		for (var original/* , count = 0 */; original !== text;) {
 			original = text;
 			if (has_replacement_offset) {
 				// new browsers
@@ -4503,12 +4505,14 @@ function module_code(library_namespace) {
 						+ (original === text ? 'done.' : '→ [' + text + ']'),
 						6, 'replace_till_stable');
 			}
-			if (count++ > 50) {
+			if (false && count++ > 500) {
 				library_namespace.error('replace_till_stable: 替換過多次，直接跳出！\n'
-						+ pattern + '\n' + text);
-				break;
+						+ pattern + '\n' + (replace_to.name || replace_to)
+						+ '\n' + text);
+				// break;
 			}
 		}
+
 		return text;
 	}
 

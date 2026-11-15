@@ -462,6 +462,30 @@ function module_code(library_namespace) {
 
 	expand_template_Football_box.incomplete = 'Only for get_all_anchors()';
 
+	function expand_template_Routelist_row(options) {
+		var parameters = this.parameters;
+		// function sortkey(args) @ [[Module:Routelist row]]
+		var anchor = parameters.anchor;
+
+		if (!anchor) {
+			var type = parameters.type || '';
+			if (parameters.sortkey) {
+				anchor = parameters.sortkey;
+			} else if (+parameters.route >= 1) {
+				anchor = (+parameters.route).pad(4);
+			} else {
+				anchor = parameters.route.toString().match(/(\d*)(.+)/);
+				anchor = (anchor[1] ? anchor[1].pad(4) : '') + anchor[2];
+			}
+			anchor = type + anchor;
+		}
+
+		if (anchor)
+			return '<div id="' + anchor + '">' + '</div>';
+	}
+
+	expand_template_Routelist_row.incomplete = 'Only for get_all_anchors()';
+
 	// --------------------------------------------------------------------------------------------
 
 	function parse_template_Pin_message(template_token, index, parent, options) {
@@ -762,8 +786,8 @@ function module_code(library_namespace) {
 		.replace(/%b/g, NYI)
 		//
 		.replace(/([^\\^]|.^)-/g, '$1*?')
-		// e.g., "+"
-		.replace(/^\+/, '\\+')
+		// e.g., "+"、"*" 會被當作 RegExp 特殊字元，必須轉義。
+		.replace(/^([+*])/g, '\\$1')
 		//
 		.replace(/\x01s__(\d+)\x01e__/g, function(all, index) {
 			return buffer[index];
@@ -1145,6 +1169,14 @@ function module_code(library_namespace) {
 				expand : expand_template_Football_box
 			}
 		},
+
+		'Routelist row' : {
+			properties : {
+				expand : expand_template_Routelist_row
+			}
+		},
+
+		// ----------------------------------------------------------
 
 		'Module:IPAddress' : {
 			properties : {

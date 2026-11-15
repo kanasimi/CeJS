@@ -793,6 +793,12 @@ function module_code(library_namespace) {
 					}
 				}
 
+				if (false && options.allow_promise) {
+					// assert: library_namespace.is_thenable(result) === false
+					return Promise.resolve(traversal_children.bind(null, token,
+							result));
+				}
+
 				return traversal_children(token, result);
 			}
 

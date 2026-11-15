@@ -96,6 +96,7 @@ function module_code(library_namespace) {
 				// Skip this parameter token
 				return;
 			}
+			// console.log(parsed && token.toString());
 			// 取決於參數的定義性
 			// https://en.wikipedia.org/wiki/Help:Conditional_expressions
 			if (value in parameters) {
@@ -419,6 +420,8 @@ function module_code(library_namespace) {
 			// 不先處理 {{|safesubst:}}}
 			parsed = wiki_API.parse(wikitext, options);
 		} else {
+			// 當 parser 有問題時，可能造成 inplace_reparse_element: token.type:
+			// transclusion⭢plain
 			parsed = convert_parameter(wikitext, parameters, options);
 		}
 		var need_convert_parameter_again = parsed.need_convert_parameter_again;
@@ -494,6 +497,10 @@ function module_code(library_namespace) {
 			// 多次嵌套時，template_token_called 可能已被 convert_parameter()過，
 			// 必須更新 template_token_called.parameters。
 			// e.g., [[Template:Uw-blockindef]] 嵌套 [[Template:Uw-block]]
+			if (false && options.template_token_called) {
+				console.trace([ '' + options.template_token_called,
+						'' + template_token_called ]);
+			}
 			wiki_API.inplace_reparse_element(template_token_called, options);
 			options = library_namespace.new_options(options);
 			// 紀錄正呼叫的 template token。
@@ -797,9 +804,6 @@ function module_code(library_namespace) {
 	 * 使用上注意: 可能設定過 .skip_inner_traversal，之後執行 .each() 必須重新 parse。
 	 * 
 	 * 使用上注意: 應設定 options[KEY_on_page_title_option]
-	 * 
-	 * TODO: expand_transclusion( {{Infobox character}} @ [[w:en:Count Dracula]] )
-	 * 會造成 inplace_reparse_element: token.type: transclusion⭢plain
 	 * 
 	 * @param {String}wikitext
 	 *            模板 wikitext。
@@ -1797,6 +1801,55 @@ function module_code(library_namespace) {
 			return value_to_String(get_parameter(NO), allow_thenable, as_key);
 		}
 
+		// 只檢查 token.parameters[1] 有非空即可，不必解開所有內容。
+		function check_non_empty_parameter(NO, allow_thenable, as_key) {
+			var has_content, need_full_test;
+			function test_content(token) {
+				if (!token) {
+					return;
+				}
+
+				if (typeof token === 'string') {
+					if (!has_content)
+						has_content = !!token.trim();
+					return has_content;
+				}
+
+				switch (token.type) {
+				case 'plain':
+					return token.some(test_content);
+
+				case 'magic_word_function':
+				case 'transclusion':
+					need_full_test = true;
+					return;
+
+				case 'link':
+					if (!has_content) {
+						var content = test_content(token[2] || token[0]
+								|| token[1]);
+						if (!has_content && content)
+							has_content = content;
+					}
+					return has_content;
+
+				case 'namespaced_title':
+					return test_content(token[0]);
+
+				}
+
+				need_full_test = true;
+			}
+
+			var parameter = get_parameter(NO);
+			parameter.some(test_content);
+			if (has_content)
+				return has_content;
+
+			if (need_full_test)
+				return value_to_String(parameter, allow_thenable, as_key);
+		}
+
 		function get_page_data() {
 			if (options
 					&& wiki_API.is_page_data(options[KEY_on_page_title_option])) {
@@ -2141,13 +2194,13 @@ function module_code(library_namespace) {
 			if (false) {
 				console.trace([ '#if%', token, get_parameter_String(1) ]);
 			}
-			var eval_if = function(argument_1) {
-				token = token.parameters[argument_1 ? 2 : 3] || '';
+			var eval_if = function(is_true) {
+				token = token.parameters[is_true ? 2 : 3] || '';
 				token = wiki_API.trim_token(token);
 				// console.trace(token);
 				return token;
 			};
-			var argument_1 = get_parameter_String(1, true);
+			var argument_1 = check_non_empty_parameter(1);
 			if (library_namespace.is_thenable(argument_1)) {
 				if (!allow_promise) {
 					return NYI();
@@ -2737,9 +2790,8 @@ function module_code(library_namespace) {
 					return NYI();
 				}
 				if (library_namespace.is_thenable(promise)) {
-					library_namespace
-							.error('evaluate_parser_function_token: Using async function to evaluate: '
-									+ token);
+					library_namespace.error('evaluate_parser_function_token: '
+							+ 'Need use async function to evaluate: ' + token);
 					token.not_evaluated = true;
 					return token;
 				}

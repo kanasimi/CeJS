@@ -4061,27 +4061,39 @@ function test_wiki() {
 		assert(['file', CeL.wiki.parse('[[FiLe:a]]').type]);
 		assert(['Ab', CeL.wiki.parse('[[FiLe:ab]]').name]);
 		wikitext = '[[File:]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, CeL.wiki.parse(wikitext)]);
+		assert([wikitext, parsed.toString()]);
 		wikitext = '[[檔案:]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, CeL.wiki.parse(wikitext)]);
+		assert([wikitext, parsed.toString()]);
 		assert(['link', CeL.wiki.parse('[[File]]').type]);
 		assert(['category', CeL.wiki.parse('[[Category:a]]').type]);
 		assert(['Ab', CeL.wiki.parse('[[Category:ab]]').name]);
 		wikitext = '[[Category:]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, CeL.wiki.parse(wikitext)]);
+		assert([wikitext, parsed.toString()]);
 		wikitext = '[[ category:#a]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, CeL.wiki.parse(wikitext)]);
+		assert([wikitext, parsed.toString()]);
 		wikitext = '[[分類:]]'; parsed = CeL.wiki.parse(wikitext);
-		assert([wikitext, CeL.wiki.parse(wikitext)]);
+		assert([wikitext, parsed.toString()]);
 		assert(['link', CeL.wiki.parse('[[Category]]').type]);
 		// CeL.wiki.parser('[[Category:a]]').each('category', function(token) {console.log(token);});0;
 		wikitext = '{{ {{tl|t}} | p }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
 		assert(['transclusion', parsed.type], 'template in template name #1-1');
 		assert([' p ', parsed[1][2].toString()], 'template in template name #1-2');
 		assert([' p ', parsed.parameters[1].toString()], 'template in template name #1-3');
 		wikitext = '{{Wikipedia:削除依頼/ログ/{{今日}}}}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
 		assert(['transclusion', parsed.type], 'template in template name #2-1');
 		assert(['transclusion', parsed[0][1].type], 'template in template name #2-2');
+
+		wikitext = '{{t| {{#if: <ref></ref> | }} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['transclusion', parsed.type], 'template in parameter #1-1');
+		wikitext = '{{t| {{ucfirst: <ref></ref> }} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['transclusion', parsed.type], 'template in parameter #2-1');
+		wikitext = '{{t| p = {{#if: {{t}}[[t]]t<ref>{{t}}</ref>{{{p|}}} | {{ucfirst: {{if empty|{{{p|}}}|a }} }} }} }}'; parsed = CeL.wiki.parse(wikitext);
+		assert([wikitext, parsed.toString()]);
+		assert(['transclusion', parsed.type], 'template in parameter #3-1');
 
 		// [[mw:Help:Substitution]]
 		wikitext = '{{subst:msgnw:foo}}'; parsed = CeL.wiki.parse(wikitext);

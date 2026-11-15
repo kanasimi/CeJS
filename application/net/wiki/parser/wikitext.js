@@ -2796,6 +2796,11 @@ function module_code(library_namespace) {
 		// allow {{|=...}}, e.g., [[w:zh:Template:Policy]]
 		// PATTERN_template
 		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
+		var PATTERN_parser_function_start = /^[ \n]*#\w/;
+		// whitespace between the opening braces and the "subst:"
+		// [^...]: incase `{{ {{UCFIRST:T}} | tl }}`
+		// @see PATTERN_invalid_page_name_characters
+		var PATTERN_MAGIC_WORD = /^([^{}\[\]\|<>\t\n#�:]+):([\s\S]*)$/;
 		function parse_transclusion(all, parameters, offset, original_string) {
 			if (!(offset >= 0)) {
 				offset = original_string.indexOf(all,
@@ -2808,12 +2813,26 @@ function module_code(library_namespace) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{');
 			while (index > 0) {
+				// 最後一個合規的 {{*
 				var matched = parameters.slice(index + '{{'.length);
-				if (has_invalid_token(matched.replace(/\|[\s\S]*/, ''),
+				// template_name
+				var _parameters = matched.replace(/\|[\s\S]*/, '');
+				var namespace;
+				if (!PATTERN_parser_function_start.test(_parameters)
+				//
+				&& !((namespace = _parameters.match(PATTERN_MAGIC_WORD))
+				//
+				&& (namespace[1].trim()
+				// 'Defaultsort' → 'DEFAULTSORT'
+				.toUpperCase() in magic_words_hash))
+				//
+				&& has_invalid_token(_parameters,
 				//
 				function(token, previous_text) {
 					return token && token.type in invalid_template_name_types;
 				})) {
+					// 這個部分不能當 magic word 或 template name，
+					// 再測試前一個 "{{"。
 					index = parameters.lastIndexOf('{{', index - 1);
 					continue;
 				}
@@ -2872,12 +2891,12 @@ function module_code(library_namespace) {
 				matched.pfn = wiki_element_to_key(
 				//
 				parse_wikitext(matched[2], options, queue), options);
-				if (/^[ *\n]*#/.test(matched.pfn)) {
+				if (PATTERN_parser_function_start.test(matched.pfn)) {
 					if (typeof matched.pfn === 'string')
 						matched.pfn = matched.pfn.trim().toLowerCase();
 
 					// allow {{#in<!-- -->voke:...}}
-					invoke_properties = /^[ *\n]*#invoke[ *\n]*$/
+					invoke_properties = /^[ \n]*#invoke[ \n]*$/
 							.test(matched.pfn)
 							&& Object.create(null);
 					// will set later
@@ -3220,10 +3239,6 @@ function module_code(library_namespace) {
 							+ end_mark;
 				}
 
-				// whitespace between the opening braces and the "subst:"
-				// [^...]: incase `{{ {{UCFIRST:T}} | tl }}`
-				// @see PATTERN_invalid_page_name_characters
-				var PATTERN_MAGIC_WORD = /^([^{}\[\]\|<>\t\n#�:]+):([\s\S]*)$/;
 				var namespace = parameters.name.match(PATTERN_MAGIC_WORD);
 				// console.trace([ parameters.name, namespace ]);
 				if (!namespace)
@@ -5648,8 +5663,9 @@ function module_code(library_namespace) {
 
 		if (token.type !== parsed.type) {
 			library_namespace.warn('inplace_reparse_element: [' + token.type
-					+ '] ' + token.toString().slice(0, 400) + ' ⭢ ['
+					+ '] ' + token.toString().slice(0, 400) + '\n⭢ ['
 					+ parsed.type + '] ' + parsed.toString().slice(0, 400));
+			// Error.stackTraceLimit = Infinity;
 			throw new Error('inplace_reparse_element: token.type: '
 					+ token.type + '⭢' + parsed.type);
 		}
