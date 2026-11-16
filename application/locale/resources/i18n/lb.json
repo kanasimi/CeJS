@@ -6,7 +6,6 @@
 		]
 	},
 	"españa": "Spuenien",
-	"untranslated-message-count": "1000+",
 	"load-failed": "Lueden huet net funktionéiert",
 	"coordinates": "Koordinaten:&#32;",
 	"customize-output-format": "Outputformat upassen",
@@ -147,6 +146,7 @@
 	"revision-id-$1": "Versiouns-ID %1",
 	"invalid-catalog-$1": "Ongültege Katalog: %1",
 	"search-results": "Sichresultater",
+	"start-downloading": "Ufänke mat Eroflueden",
 	"japanese-webcomics": "Japanesch Web-Comics",
 	"local-language-name": "Lëtzebuergesch",
 	"work_crawler-search_result_columns-title": "Titel",
