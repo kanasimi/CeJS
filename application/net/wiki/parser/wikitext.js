@@ -5662,9 +5662,15 @@ function module_code(library_namespace) {
 		parsed = parse_wikitext(parsed.toString(), options);
 
 		if (token.type !== parsed.type) {
-			library_namespace.warn('inplace_reparse_element: [' + token.type
-					+ '] ' + token.toString().slice(0, 400) + '\n⭢ ['
-					+ parsed.type + '] ' + parsed.toString().slice(0, 400));
+			library_namespace.warn('inplace_reparse_element: ['
+			//
+			+ token.type + '] ' + token.toString().slice(0, 400)
+			//
+			+ '\n⭢ [' + parsed.type + '] '
+			//
+			+ (token.toString() === parsed.toString() ? '(the same wikitext)'
+			//
+			: parsed.toString().slice(0, 400)));
 			// Error.stackTraceLimit = Infinity;
 			throw new Error('inplace_reparse_element: token.type: '
 					+ token.type + '⭢' + parsed.type);

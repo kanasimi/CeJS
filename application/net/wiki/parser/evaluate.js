@@ -274,13 +274,21 @@ function module_code(library_namespace) {
 		var promise = for_each_subelement.call(parsed, 'magic_word_function',
 		//
 		function(token) {
-			token = evaluate_magic_word_function(token, options,
+			var _token = evaluate_magic_word_function(token, options,
 					template_depth_now);
-			if (false && typeof token === 'string') {
-				token = wiki_API.parse(token, options);
+			if (false && typeof _token === 'string') {
+				_token = wiki_API.parse(_token, options);
 			}
 
-			return token;
+			if (token.toString().replace(/{{/g, '').length
+					- token.toString().replace(/}}/g, '').length !== _token
+					.toString().replace(/{{/g, '').length
+					- _token.toString().replace(/}}/g, '').length) {
+				library_namespace.error('evaluate_parsed: '
+						+ 'Perhaps bad converting:\n' + token.toString()
+						+ '\n→\n' + _token.toString());
+			}
+			return _token;
 		}, {
 			modify : true
 		});
@@ -1866,11 +1874,18 @@ function module_code(library_namespace) {
 		}
 
 		function get_page_title(remove_namespace) {
-			var title = wiki_API.normalize_title(get_parameter_String(1)
-			// [[mw:Help:Magic words#Page names]]
-			|| options && (options[KEY_on_page_title_option]
-			//
-			|| options.transclusion_from_page), options) || '';
+			var title = get_parameter_String(1);
+			if (!title && options) {
+				// [[mw:Help:Magic words#Page names]]
+				title = options[KEY_on_page_title_option]
+				//
+				|| options.transclusion_from_page;
+			}
+			if (wiki_API.PATTERN_invalid_page_name_characters.test(title)) {
+				// e.g., `{{PAGENAME:{{safesubst:#if:|{{{}}}|t}}}}`
+				return title;
+			}
+			title = wiki_API.normalize_title(title, options) || '';
 			return remove_namespace ? wiki_API.remove_namespace(title, options)
 					: title;
 		}

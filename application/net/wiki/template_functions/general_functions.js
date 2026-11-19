@@ -110,15 +110,11 @@ function module_code(library_namespace) {
 	}
 
 	function expand_module_If_empty(options) {
-		// options.template_token_called: See simplify_transclusion(
 		/* const */var token = options && options.template_token_called
 				|| this;
-		/* const */var parameters = token.parameters;
 		// Error.stackTraceLimit = Infinity;
-		// console.trace([ this, parameters, options ]);
-		// console.trace(options && options.template_token_called);
 		for (/* let */var index = 1; index < token.length; index++) {
-			var value = parameters[index];
+			var value = get_parameter(index, this, options);
 			if (value) {
 				value = value.toString().trim();
 				if (value)
@@ -511,18 +507,13 @@ function module_code(library_namespace) {
 			return function_does_not_exist_error(token);
 		}
 
-		/* const */var token =
-		// from expand_transclusion():
-		// expanded_token.template_token_called = token;
-		this.template_token_called || options && options.template_token_called
-				|| this;
+		var wikitext = get_parameter(1, this, options);
 
-		var parameters = token.parameters;
-		var wikitext = parameters[1];
-
-		if (!wikitext || parameters.wikilinks || parameters.urls
-				|| parameters.comments || parameters.whitespace
-				|| parameters.refs) {
+		if (!wikitext || get_parameter('wikilinks', this, options)
+				|| get_parameter('urls', this, options)
+				|| get_parameter('comments', this, options)
+				|| get_parameter('whitespace', this, options)
+				|| get_parameter('refs', this, options)) {
 			return this;
 		}
 
@@ -536,6 +527,27 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+
+	// [[w:en:Module:Arguments]]
+	function get_parameter(parameter_name, _this, options) {
+		function test_token(/* const */token) {
+			/* const */
+			var parameters = token && token.parameters;
+			if (parameters && (parameter_name in parameters)) {
+				value = parameters[parameter_name];
+				return value;
+			}
+		}
+
+		var value;
+		test_token(_this) === undefined
+		// from expand_transclusion():
+		// expanded_token.template_token_called = token;
+		&& test_token(_this.template_token_called) === undefined
+		// options.template_token_called: See simplify_transclusion()
+		&& test_token(options && options.template_token_called);
+		return value;
+	}
 
 	// @see [[w:en:Module:Template wrapper]]
 	// [[w:en:Wikipedia:Wrapper templates]]
