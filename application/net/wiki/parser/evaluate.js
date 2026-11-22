@@ -280,10 +280,13 @@ function module_code(library_namespace) {
 				_token = wiki_API.parse(_token, options);
 			}
 
-			if (token.toString().replace(/{{/g, '').length
-					- token.toString().replace(/}}/g, '').length !== _token
-					.toString().replace(/{{/g, '').length
-					- _token.toString().replace(/}}/g, '').length) {
+			var braces_diff = _token.toString().replace(/{{/g, '').length
+					- _token.toString().replace(/}}/g, '').length;
+			if (braces_diff
+			//
+			&& braces_diff !== token.toString().replace(/{{/g, '').length
+			//
+			- token.toString().replace(/}}/g, '').length) {
 				library_namespace.error('evaluate_parsed: '
 						+ 'Perhaps bad converting:\n' + token.toString()
 						+ '\n→\n' + _token.toString());
@@ -677,7 +680,7 @@ function module_code(library_namespace) {
 								+ 'Using async function + options.allow_promise to expand: '
 								+ token);
 				// Error.stackTraceLimit = Infinity;
-				console.trace(token);
+				// console.trace(token);
 				// delete token.expand;
 				break;
 			}
