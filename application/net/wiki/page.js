@@ -432,6 +432,15 @@ function module_code(library_namespace) {
 		// console.trace(action);
 		// console.trace(options);
 
+		var get_content = options.abnormal_page_cache && action[1]
+		/** {Object}異常頁面快取[page_title]=page_data */
+		&& options.abnormal_page_cache[action[1].titles];
+		if (get_content) {
+			// console.trace(get_content);
+			callback(get_content);
+			return;
+		}
+
 		if (!wiki_API_page.query_modules
 		//
 		|| !wiki_API_page.query_modules.some(function(module) {
@@ -863,6 +872,14 @@ function module_code(library_namespace) {
 						page_list.OK_length = page_list.length;
 						// 當過了 continue_id 之後，表示已經被截斷，則不再警告。
 						need_warn = false;
+					}
+
+					if (options.abnormal_page_cache
+					//
+					&& ('invalid' in page_data || 'missing' in page_data)) {
+						options.abnormal_page_cache
+						/** {Object}異常頁面快取[page_title]=page_data */
+						[page_data.title] = page_data;
 					}
 
 					if (need_warn) {

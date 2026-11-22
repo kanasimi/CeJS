@@ -860,7 +860,6 @@ function module_code(library_namespace) {
 					&& wiki_API.is_page_data(wikitext)) {
 				options[KEY_on_page_title_option] = wikitext;
 			}
-
 		}
 
 		// console.trace(parsed, options);
@@ -1156,10 +1155,10 @@ function module_code(library_namespace) {
 							check_template_data(page_data, error);
 						});
 					}, page_options);
-				}, {
+				}, Object.assign({
 					// namespace : 'Template',
 					no_message : true
-				});
+				}, options));
 				// Error.stackTraceLimit = 10;
 			});
 		}

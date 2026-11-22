@@ -3836,6 +3836,13 @@ function module_code(library_namespace) {
 				// 避免 session.page().edit() 被插斷。
 				Object.clone(single_page_options);
 
+				if (false && options.abnormal_page_cache
+				/** {Object}異常頁面快取[page_title]=page_data */
+				&& (page in options.abnormal_page_cache)) {
+					page = options.abnormal_page_cache[page];
+					console.trace(page);
+				}
+
 				// console.trace([ page ]);
 				// console.trace('session.running = ' + session.running);
 				// 設定頁面內容。
